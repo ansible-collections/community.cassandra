@@ -1,4 +1,4 @@
-.github 
+.github
 
 # Repo maintainers, and goverance team (like Anisble's @ansible-commit-external)
 * @rrey @seuf @gundalow-collections/community-goverance-team
@@ -10,4 +10,4 @@
 #grafana/plugins/modules/grafana_plugin.py @someone-else
 
 
-.github/ @gundalow
+.github/ @rhysmeister
