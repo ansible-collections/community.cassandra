@@ -177,9 +177,9 @@ try:
     from cassandra.auth import PlainTextAuthProvider
     from cassandra import AuthenticationFailed
     from cassandra.query import dict_factory
-    from cassandra import  InvalidRequest
+    from cassandra import InvalidRequest
     HAS_CASSANDRA_DRIVER = True
-except:
+except Exception:
     HAS_CASSANDRA_DRIVER = False
 
 from ansible.module_utils.basic import AnsibleModule
@@ -191,9 +191,9 @@ from ansible.module_utils._text import to_native
 # Cassandra module specific support methods
 # =========================================
 
+
 # Does the role exist on the cluster?
-def role_exists(session,
-                role):
+def role_exists(session, role):
     cql = "SELECT role FROM system_auth.roles WHERE role = '{0}'".format(role)
     roles = session.execute(cql)
     s = False
@@ -202,19 +202,15 @@ def role_exists(session,
     return s
 
 
-def get_role_properties(session,
-                        role):
+def get_role_properties(session, role):
     cql = "SELECT role, can_login, is_superuser, member_of, salted_hash FROM system_auth.roles WHERE role = '{0}'".format(role)
     session.row_factory = dict_factory
     role_properties = session.execute(cql)
     return role_properties[0]
 
-def is_role_changed(role_properties,
-                    super_user,
-                    login,
-                    password,
-                    options,
-                    data_centers):
+
+def is_role_changed(role_properties, super_user, login, password,\
+                    options, data_centers):
      '''
      Determines whether a role has changed and therefore needs /
      to be changed with an ALTER ROLE statement.
@@ -225,7 +221,7 @@ def is_role_changed(role_properties,
      options - User provided value. Not currently dealt with.
      data_centers - User provided dictionary value. Not currently dealt with.
      '''
-     changed = False;
+     changed = False
      if role_properties['is_superuser'] != super_user:
          changed = True
      elif role_properties['can_login'] != login:
@@ -233,15 +229,8 @@ def is_role_changed(role_properties,
      return changed
 
 
-def create_alter_role(module,
-                      session,
-                      role,
-                      super_user,
-                      login,
-                      password,
-                      options,
-                      data_centers,
-                      alter_role):
+def create_alter_role(module, session, role, super_user, login, password,\
+                      options, data_centers, alter_role):
     if alter_role == False:
         cql = "CREATE ROLE {0} ".format(role)
     else:
@@ -267,34 +256,28 @@ def create_alter_role(module,
     return cql
 
 
-def create_role(session,
-                role):
+def create_role(session, role):
     ''' Used for creating roles that are assigned to other users
     '''
     cql = "CREATE ROLE {0}".format(role)
     return cql
 
 
-def grant_role(session,
-               role,
-               grantee):
+def grant_role(session, role, grantee):
     ''' Assign roles to other roles
     '''
     cql = "GRANT {0} TO {1}".format(role,
                                     grantee)
     return cql
 
-def revoke_role(session,
-                role,
-                grantee):
+def revoke_role(session, role, grantee):
     ''' Revoke a role
     '''
     cql = "REVOKE {0} FROM {1}".format(role,
                                        grantee)
     return cql
 
-def drop_role(session,
-              role):
+def drop_role(session, role):
     cql = "DROP ROLE {0}".format(role)
     return cql
 
@@ -321,10 +304,7 @@ def validate_keyspace_permissions(keyspace_permissions):
     return True
 
 
-def grant_permission(session,
-                     permission,
-                     role,
-                     keyspace):
+def grant_permission(session, permission, role, keyspace):
     if keyspace == "all_keyspaces":
         cql = "GRANT {0} ON ALL KEYSPACES TO {1}".format(permission,
                                                          role)
@@ -335,18 +315,14 @@ def grant_permission(session,
     return cql
 
 
-def revoke_permission(session,
-                      permission,
-                      role,
-                      keyspace):
+def revoke_permission(session, permission, role, keyspace):
     cql = "REVOKE {0} ON KEYSPACE {1} FROM {2}".format(permission,
                                                        keyspace,
                                                        role)
     return cql
 
 
-def list_role_permissions(session,
-                          role):
+def list_role_permissions(session, role):
     '''
     Returned by LIST ALL OF cassandra;
 
@@ -371,8 +347,8 @@ def list_role_permissions(session,
     try:
         role_permissions = session.execute(cql)
     except InvalidRequest as excep:
-        #excep_code = type(excep).__name__
-        #if excep_code == 2200: # User does not exist
+        # excep_code = type(excep).__name__
+        # if excep_code == 2200: # User does not exist
         role_permissions = []
     return role_permissions
 
@@ -383,7 +359,7 @@ def does_role_have_permission(role_permissions,
     Returns true if the permission is already assigned to the role.
     ALTER DROP SELECT MODIFY AUTHORIZE CREATE - The result from "ALL PERMISSIONS"
     '''
-    match_count = 0 # When 6 then the permission is matched
+    match_count = 0  # When 6 then the permission is matched
     matched = False
     all_permissions = [
         "ALTER",
@@ -398,12 +374,12 @@ def does_role_have_permission(role_permissions,
     else:
         resource = "<keyspace {0}>".format(keyspace)
     for row in role_permissions:
-        if permission == "ALL PERMISSIONS": # we need to check for CREATE ALTER DROP SELECT MODIFY AUTHORIZE
+        if permission == "ALL PERMISSIONS":  # we need to check for CREATE ALTER DROP SELECT MODIFY AUTHORIZE
             if row['permission'].strip() in all_permissions and row['resource'].strip() == resource:
                 match_count += 1
-        else: # specific permission check
+        else:  # specific permission check
             if row['permission'].strip() == permission and row['resource'].strip() == resource:
-                match_count = len(all_permissions) # specific permission match straight away
+                match_count = len(all_permissions)  # specific permission match straight away
     if match_count == len(all_permissions):
         matched = True
     return matched
@@ -433,7 +409,7 @@ def build_role_grants(session,
         if permission['role'] != role:
             current_roles.add(permission['role'])
         else:
-            pass # We don't touch other perms here
+            pass  # We don't touch other perms here
     # Revokes first
     if current_roles is not None:
         for r in current_roles:
@@ -492,7 +468,7 @@ def build_role_permissions(session,
                 perms_dict['temp'].add("{0} {1} {2}".format(permission, keyspace, bool))
 
                 if bool:
-                    pass # permission is alreay
+                    pass  # permission is alreay
                 else:
                     cql = grant_permission(session,
                                            permission,
@@ -508,7 +484,7 @@ def build_role_permissions(session,
             for keyspace in keyspace_permissions.keys():
                 if permission['resource'] == "<all keyspaces>" and "all_keyspaces" not in keyspace_permissions.keys() and permission['role'] == role:
                     cql = "REVOKE ALL PERMISSIONS ON ALL KEYSPACES FROM {0}".format(role)
-                    if cql not in perms_dict['revoke']: # only do this the once
+                    if cql not in perms_dict['revoke']:  # only do this the once
                         perms_dict['revoke'].add(cql)
                 elif permission['resource'] == "<all keyspaces>" and "ALL PERMISSIONS" in keyspace_permissions[keyspace] and permission['role'] == role:
                     # No revokes needed
@@ -574,7 +550,9 @@ def main():
     )
 
     if not HAS_CASSANDRA_DRIVER:
-        module.fail_json(msg="This module requires the cassandra-driver python driver. You can probably install it with pip install cassandra-driver.")
+        module.fail_json(msg="This module requires the cassandra-driver python \
+                         driver. You can probably install it with \
+                         pip install cassandra-driver.")
 
     login_user = module.params['login_user']
     login_password = module.params['login_password']
@@ -593,8 +571,8 @@ def main():
     debug = module.params['debug']
 
     result = dict(
-        changed=False,
-        role=name,
+        changed = False,
+        role = name,
     )
 
     cql = None
@@ -607,7 +585,8 @@ def main():
     try:
         if keyspace_permissions is not None:
             if not validate_keyspace_permissions(keyspace_permissions):
-                module.fail_json(msg="Invalid permission provided in the keyspace_permission parameter.")
+                module.fail_json(msg = "Invalid permission provided in the \
+                                 keyspace_permission parameter.")
         auth_provider = None
         if login_user is not None:
             auth_provider = PlainTextAuthProvider(
@@ -615,8 +594,8 @@ def main():
                 password = login_password
             )
         cluster = Cluster(login_host,
-                          port=login_port,
-                          auth_provider=auth_provider)
+                          port = login_port,
+                          auth_provider = auth_provider)
         session = cluster.connect()
     except AuthenticationFailed as auth_failed:
         module.fail_json(msg="Authentication failed: {0}".format(excep))

@@ -127,7 +127,7 @@ try:
     from cassandra.query import dict_factory
     from cassandra import InvalidRequest
     HAS_CASSANDRA_DRIVER = True
-except:
+except Exception:
     HAS_CASSANDRA_DRIVER = False
 
 from ansible.module_utils.basic import AnsibleModule
@@ -138,6 +138,7 @@ from ansible.module_utils._text import to_native
 # =========================================
 # Cassandra module specific support methods
 # =========================================
+
 
 # Does the role exist on the cluster?
 def table_exists(session,
@@ -156,10 +157,10 @@ def findnth(haystack, needle, n):
     '''
     Helper function used in create_primary_key_with_partition_key
     '''
-    parts= haystack.split(needle, n+1)
-    if len(parts)<=n+1:
+    parts = haystack.split(needle, n+1)
+    if len(parts) <= n+1:
         return -1
-    return len(haystack)-len(parts[-1])-len(needle)
+    return len(haystack) - len(parts[-1]) - len(needle)
 
 
 def create_primary_key_with_partition_key(primary_key, partition_key):
@@ -172,8 +173,8 @@ def create_primary_key_with_partition_key(primary_key, partition_key):
         if not partition_key[i] == primary_key[i]:
             raise ValueException("partition_key list elements do not match primary_key elements")
     pk_cql = "PRIMARY KEY ({0}))".format(", ".join(primary_key))
-    if p_key_count > 0: # Need to insert the brackets for pk
-        pos = findnth(pk_cql, ",", p_key_count -1)
+    if p_key_count > 0:  # Need to insert the brackets for pk
+        pos = findnth(pk_cql, ",", p_key_count - 1)
         pk_cql = pk_cql[:13] + "(" + pk_cql[13:pos] + ")" + pk_cql[pos:]
     return pk_cql
 
@@ -196,7 +197,7 @@ def create_table(keyspace_name,
     cql += " ( "
     for column in columns:
         cql += "{0} {1}, ".format(column.keys()[0], column.values()[0])
-    #cql += "PRIMARY KEY ({0}))".format(str(primary_key.keys()).replace('[', '').replace(']', '').replace("'", '')) # TODO Partition
+    # cql += "PRIMARY KEY ({0}))".format(str(primary_key.keys()).replace('[', '').replace(']', '').replace("'", '')) # TODO Partition
     if primary_key is not None:
         pk_cql = create_primary_key_with_partition_key(primary_key,
                                                        partition_key)
@@ -228,8 +229,6 @@ def drop_table(keyspace_name,
     return cql
 
 
-
-
 ############################################
 
 def main():
@@ -253,10 +252,12 @@ def main():
     )
 
     if not HAS_CASSANDRA_DRIVER:
-        module.fail_json(msg="This module requires the cassandra-driver python driver. You can probably install it with pip install cassandra-driver.")
+        module.fail_json(msg="This module requires the cassandra-driver \
+                         python driver. You can probably install it with\
+                          pip install cassandra-driver.")
 
-    required_if=[
-      [ "state", "present", [ "columns", "primary_key" ] ]
+    required_if = [
+      ["state", "present", ["columns", "primary_key"]]
     ]
 
     login_user = module.params['login_user']
@@ -275,8 +276,8 @@ def main():
     debug = module.params['debug']
 
     result = dict(
-        changed=False,
-        cql=None,
+        changed = False,
+        cql = None,
     )
 
     cql = None
@@ -290,13 +291,13 @@ def main():
                 password = login_password
             )
         cluster = Cluster(login_host,
-                          port=login_port,
-                          auth_provider=auth_provider)
+                          port = login_port,
+                          auth_provider = auth_provider)
         session = cluster.connect()
     except AuthenticationFailed as auth_failed:
-        module.fail_json(msg="Authentication failed: {0}".format(excep))
+        module.fail_json(msg = "Authentication failed: {0}".format(excep))
     except Exception as excep:
-        module.fail_json(msg="Error connecting to cluster: {0}".format(excep))
+        module.fail_json(msg = "Error connecting to cluster: {0}".format(excep))
 
     try:
         if table_exists(session, keyspace_name, table_name):

@@ -12,9 +12,9 @@ import time
 __metaclass__ = type
 
 ANSIBLE_METADATA =\
-            {"metadata_version": "1.1",
-             "status": "['preview']",
-             "supported_by": "community"}
+    {"metadata_version": "1.1",
+     "status": "['preview']",
+     "supported_by": "community"}
 
 DOCUMENTATION = '''
 ---
@@ -116,7 +116,7 @@ class NodeToolCmd(object):
         self.nodetool_path = module.params['nodetool_path']
         self.debug = module.params['debug']
         if self.host is None:
-                self.host = socket.getfqdn()
+            self.host = socket.getfqdn()
 
     def execute_command(self, cmd):
         return self.module.run_command(cmd)
@@ -126,7 +126,7 @@ class NodeToolCmd(object):
                 not self.nodetool_path.endswith('/'):
             self.nodetool_path += '/'
         else:
-                self.nodetool_path = ""
+            self.nodetool_path = ""
         cmd = "{0}nodetool --host {1} --port {2}".format(self.nodetool_path,
                                                          self.host,
                                                          self.port)
@@ -152,11 +152,9 @@ class NodeToolStatusCommand(NodeToolCmd):
 
     """
 
-
     def __init__(self, module):
         NodeToolCmd.__init__(self, module)
         self.status_cmd = "status"
-
 
     def status_command(self):
         return self.nodetool_cmd(self.status_cmd)
@@ -168,7 +166,7 @@ def nodetool_status_poll(module):
     with the indicated interval. Returns as soon all nodes are up or the
     previous limits are reached.
     '''
-    cluster_status = None # Last cluster status
+    cluster_status = None  # Last cluster status
     cluster_status_list = []
     iterations = 0
     return_codes = []
@@ -179,7 +177,7 @@ def nodetool_status_poll(module):
     interval = module.params['interval']
 
     while iterations < poll:
-        down_running_total = 0 # reset between iterations
+        down_running_total = 0  # reset between iterations
         iterations += 1
         n = NodeToolStatusCommand(module)
         (rc, out, err) = n.status_command()
@@ -192,9 +190,9 @@ def nodetool_status_poll(module):
             for dc in cluster_status.keys():
                 down_running_total += len(cluster_status[dc]['down'])
             if down_running_total == 0:
-                break # No down nodes, we're good
+                break  # No down nodes, we're good
             else:
-                time.sleep(interval) # Something is wrong, check again in a bit but
+                time.sleep(interval)  # Something is wrong, check again in a bit but
         else:
             if iterations == poll:
                 break
@@ -239,6 +237,7 @@ def cluster_up_down(stdout):
             cluster_up_down[data_center]["down"].append(line.split()[1])
     return cluster_up_down
 
+
 def main():
     module = AnsibleModule(
         argument_spec=dict(
@@ -276,7 +275,7 @@ def main():
             result['stdout_list'] = stdout_list
 
     # Needs rethink
-    if return_codes[-1] == 0: # Last execution successful
+    if return_codes[-1] == 0:  # Last execution successful
         if down_running_total == 0:
             result['msg'] = "All nodes are in an UP/NORMAL state"
         else:

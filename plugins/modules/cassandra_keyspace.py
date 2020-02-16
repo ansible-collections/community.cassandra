@@ -5,7 +5,8 @@
 
 from __future__ import absolute_import, division, print_function
 __metaclass__ = type
-import re, socket
+import re
+import socket
 
 ANSIBLE_METADATA = {'metadata_version': '1.1',
                     'status': ['preview'],
@@ -123,7 +124,7 @@ try:
     from cassandra.cluster import Cluster, AuthenticationFailed
     from cassandra.auth import PlainTextAuthProvider
     HAS_CASSANDRA_DRIVER = True
-except:
+except Exception:
     HAS_CASSANDRA_DRIVER = False
 
 from ansible.module_utils.basic import AnsibleModule
@@ -135,6 +136,7 @@ from ansible.module_utils._text import to_native
 # Cassandra module specific support methods
 # =========================================
 
+
 # Does the keyspace exists on the cluster?
 def keyspace_exists(session, keyspace):
     keyspaces = session.execute("SELECT keyspace_name FROM system_schema.keyspaces")
@@ -144,8 +146,10 @@ def keyspace_exists(session, keyspace):
             keyspace_exists = True
     return keyspace_exists
 
+
 def get_keyspace(cluster, keyspace):
     return cluster.metadata.keyspaces[keyspace].export_as_string()
+
 
 def create_alter_keyspace(module, session, keyspace, replication_factor, durable_writes, data_centres, is_alter):
     if is_alter == False:
@@ -163,10 +167,12 @@ def create_alter_keyspace(module, session, keyspace, replication_factor, durable
     session.execute(cql)
     return cql
 
+
 def drop_keyspace(session, keyspace):
     cql = "DROP KEYSPACE %s" % keyspace
     session.execute(cql)
     return True
+
 
 def get_keyspace_config(module, cluster, keyspace):
     cql = get_keyspace(cluster, keyspace)
@@ -176,10 +182,11 @@ def get_keyspace_config(module, cluster, keyspace):
     try:
         dw = re.search(durable_writes_regexp, cql).group(0)
     except AttributeError as excep:
-        dw = "true" # default to true
+        dw = "true"  # default to true
     keyspace_config = eval(repl_settings)
     keyspace_config['durable_writes'] = bool(dw.lower())
     return keyspace_config
+
 
 def keyspace_is_changed(module, cluster, keyspace, replication_factor, durable_writes, data_centres):
     cfg = get_keyspace_config(module, cluster, keyspace)
@@ -187,13 +194,13 @@ def keyspace_is_changed(module, cluster, keyspace, replication_factor, durable_w
     if cfg['class'] == "SimpleStrategy":
         if int(cfg['replication_factor']) != replication_factor or\
             cfg['durable_writes'] != durable_writes:
-            keyspace_definition_changed = True
+                keyspace_definition_changed = True
     elif cfg['class'] == "NetworkTopologyStrategy":
-        #ls = [cfg, keyspace, replication_factor, durable_writes, data_centres]
-        #module.fail_json(msg=str(ls))
+        # ls = [cfg, keyspace, replication_factor, durable_writes, data_centres]
+        # module.fail_json(msg=str(ls))
         if cfg['durable_writes'] != durable_writes:
             keyspace_definition_changed = True
-        else: # check each dc here
+        else:  # check each dc here
             for dc in data_centres:
                 if dc in cfg.keys():
                     if int(data_centres[dc]) != int(cfg[dc]):
@@ -226,8 +233,10 @@ def main():
     supports_check_mode=True
     )
 
-    if not HAS_CASSANDRA_DRIVER:
-        module.fail_json(msg="This module requires the cassandra-driver python driver. You can probably install it with pip install cassandra-driver.")
+    if HAS_CASSANDRA_DRIVER == False:
+        module.fail_json(msg="This module requires the cassandra-driver python \
+                         driver. You can probably install it with pip\
+                          install cassandra-driver.")
 
     login_user = module.params['login_user']
     login_password = module.params['login_password']
@@ -244,8 +253,8 @@ def main():
     data_centres = module.params['data_centres']
 
     result = dict(
-        changed=False,
-        keyspace=name,
+        changed = False,
+        keyspace = name,
     )
 
     # For now we won't change the replication strategy & options if the keyspace already exists
@@ -259,8 +268,8 @@ def main():
                 password = login_password
             )
         cluster = Cluster(login_host,
-                          port=login_port,
-                          auth_provider=auth_provider)
+                          port = login_port,
+                          auth_provider = auth_provider)
         session = cluster.connect()
     except AuthenticationFailed as excep:
         module.fail_json(msg="Authentication failed: {0}".format(excep))

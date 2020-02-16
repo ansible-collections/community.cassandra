@@ -10,9 +10,9 @@ import socket
 __metaclass__ = type
 
 ANSIBLE_METADATA =\
-            {"metadata_version": "1.1",
-             "status": "['preview']",
-             "supported_by": "community"}
+    {"metadata_version": "1.1",
+     "status": "['preview']",
+     "supported_by": "community"}
 
 DOCUMENTATION = '''
 ---
@@ -97,7 +97,7 @@ class NodeToolCmd(object):
         self.nodetool_path = module.params['nodetool_path']
         self.debug = module.params['debug']
         if self.host is None:
-                self.host = socket.getfqdn()
+            self.host = socket.getfqdn()
 
     def execute_command(self, cmd):
         return self.module.run_command(cmd)
