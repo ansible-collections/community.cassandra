@@ -5,7 +5,7 @@
 [![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
-This collection called `community.cassandra` aims at providing all Ansible modules allowing to interact with Apache Cassandra.
+This collection called `cassandra` aims at providing all Ansible modules allowing to interact with Apache Cassandra.
 
 As this is an independent Collection, it can be released on it's own release cadance.
 
