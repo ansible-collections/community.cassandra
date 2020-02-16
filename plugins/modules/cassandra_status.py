@@ -25,7 +25,7 @@ short_description: Validates the status of the cluster as seen from the node.
 requirements: [ nodetool ]
 description:
     - Validates the status of the cluster as seen from the node.
-    - Ensure that all nodes are in a UP/NORMAL state or tolerate a few down nodes.
+    - Ensure that all nodes are in a UP / NORMAL state or tolerate a few down nodes.
     - Optionally poll multiple times to allow the cluster state to stablise.
     - Cluster status is obtained thtough the useage of the nodetool status command.
 options:
