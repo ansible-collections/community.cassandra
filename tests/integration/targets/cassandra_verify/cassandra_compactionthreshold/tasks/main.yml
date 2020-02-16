@@ -1,0 +1,183 @@
+# test code for the cassandra_compactionthreshold module
+# (c) 2019,  Rhys Campbell <rhys.james.campbell@googlemail.com>
+
+# This file is part of Ansible
+#
+# Ansible is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Ansible is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
+
+# ===========================================================
+
+# Sometimes the system/local table takes a little longer to be created, so we pause
+- pause:
+    seconds: 1
+
+- name: Get incremental backup status 1
+  shell: nodetool -h $(hostname) getcompactionthreshold system local
+  register: compactionthreshold
+
+- name: Assert starting status of compactionthreshold
+  assert:
+    that: "'Current compaction thresholds for system/local: \n min = 4,  max = 32' == compactionthreshold.stdout"
+
+- name: Adjust compactionthreshold with module
+  cassandra_compactionthreshold:
+    keyspace: system
+    table: local
+    min: 8
+    max: 64
+
+- name: Get compactionthreshold
+  shell: nodetool -h $(hostname) getcompactionthreshold system local
+  register: compactionthreshold
+
+- name: Assert compactionthreshold 8 / 64 MB
+  assert:
+    that: "'Current compaction thresholds for system/local: \n min = 8,  max = 64' == compactionthreshold.stdout"
+
+- name: Set throughput back to 4 / 32
+  cassandra_compactionthreshold:
+    keyspace: system
+    table: local
+    min: 4
+    max: 32
+
+- name: Get compactionthreshold
+  shell: nodetool -h $(hostname) getcompactionthreshold system local
+  register: compactionthreshold
+
+- name: Assert compactionthreshold is 4 / 32 MB
+  assert:
+    that: "'Current compaction thresholds for system/local: \n min = 4,  max = 32' == compactionthreshold.stdout"
+
+- name: Test module with check_mode = true
+  cassandra_compactionthreshold:
+    keyspace: system
+    table: local
+    min: 8
+    max: 64
+  check_mode: true
+  register: compactionthreshold
+
+- name: Assert compactionthreshold has changed (check_mode)
+  assert:
+    that: compactionthreshold.changed == True
+
+- name: Get compactionthreshold
+  shell: nodetool -h $(hostname) getcompactionthreshold system local
+  register: compactionthreshold
+
+- name: Assert compactionthreshold is still 4 / 32 MB
+  assert:
+    that: "'Current compaction thresholds for system/local: \n min = 4,  max = 32' == compactionthreshold.stdout"
+
+- name: Set compactionthreshold 4 / 32 should not change
+  cassandra_compactionthreshold:
+    keyspace: system
+    table: local
+    min: 4
+    max: 32
+  register: module_nochange
+
+- name: Get compactionthreshold
+  shell: nodetool -h $(hostname) getcompactionthreshold system local
+  register: compactionthreshold
+
+- name: Assert compactionthreshold is still 4 / 32 MB and module reports no change
+  assert:
+    that:
+      - "'Current compaction thresholds for system/local: \n min = 4,  max = 32' == compactionthreshold.stdout"
+      - module_nochange.changed == False
+
+- include_tasks: ../../setup_cassandra/tasks/cassandra_auth.yml
+  when: cassandra_auth_tests == True
+
+- name: Set compactionthreshold 8 / 64 MB when auth is enabled
+  cassandra_compactionthreshold:
+    keyspace: system
+    table: local
+    min: 8
+    max: 64
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+  register: compactionthreshold
+  when: cassandra_auth_tests == True
+
+- name: Get compactionthreshold auth 1
+  shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h $(hostname) getcompactionthreshold system local
+  register: compactionthreshold
+  when: cassandra_auth_tests == True
+
+- name: Assert compactionthreshold is again 8 / 64 MB
+  assert:
+    that:
+      - "'Current compaction thresholds for system/local: \n min = 8,  max = 64' == compactionthreshold.stdout"
+      - compactionthreshold.changed == True
+
+- name: Set back to 4 / 32 MB using the pw file option
+  cassandra_compactionthreshold:
+    keyspace: system
+    table: local
+    min: 4
+    max: 32
+    username: "{{ cassandra_admin_user }}"
+    password_file: /etc/cassandra/jmxremote.password
+  register: compactionthreshold
+  when: cassandra_auth_tests == True
+
+- name: Get compactionthreshold auth 2
+  shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h $(hostname) getcompactionthreshold system local
+  register: compactionthreshold
+  when: cassandra_auth_tests == True
+
+- name: Assert compactionthreshold is again 4 / 32 MB
+  assert:
+    that:
+      - "'Current compaction thresholds for system/local: \n min = 4,  max = 32' == compactionthreshold.stdout"
+      - compactionthreshold.changed == True
+  when: cassandra_auth_tests == True
+
+- name: Test login failure handling
+  cassandra_compactionthreshold:
+    keyspace: system
+    table: local
+    min: 4
+    max: 32
+    username: "{{ cassandra_admin_user }}"
+    password: XXXXXXXXXXXXXXXXXXXXX
+  register: login_status
+  ignore_errors: true
+  when: cassandra_auth_tests == True
+
+- name: Assert failed login
+  assert:
+    that:
+      - login_status.failed == True
+      - "'Invalid username or password' in login_status.stderr"
+  when: cassandra_auth_tests == True
+
+- name: Test incorrect nodetool_path handling
+  cassandra_compactionthreshold:
+    keyspace: system
+    table: local
+    min: 4
+    max: 32
+    nodetool_path: /tmp
+  register: nodetool_path_error
+  ignore_errors: true
+  when: cassandra_auth_tests == True
+
+- name: Assert no such file
+  assert:
+    that:
+      - "'No such file or directory' in nodetool_path_error.msg"

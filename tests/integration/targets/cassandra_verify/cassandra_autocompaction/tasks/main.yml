@@ -1,0 +1,202 @@
+# test code for the cassandra_autocompaction module
+# (c) 2019,  Rhys Campbell <rhys.james.campbell@googlemail.com>
+
+# This file is part of Ansible
+#
+# Ansible is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Ansible is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
+
+# ===========================================================
+
+- name: Turn on autocompaction with module
+  cassandra_autocompaction:
+    keyspace: system
+    table: local
+    state: "enabled"
+  register: autocompaction
+
+- assert:
+    that: autocompaction.changed == True
+
+- name: Turn off autocompaction with module
+  cassandra_autocompaction:
+    keyspace: system
+    table: local
+    state: "disabled"
+  register: autocompaction
+
+- assert:
+    that: autocompaction.changed == True
+
+- name: Turn on autocompaction with module
+  cassandra_autocompaction:
+    keyspace: system
+    table:
+      - local
+      - peers
+      - peer_events
+    state: "enabled"
+  register: autocompaction
+
+- assert:
+    that: autocompaction.changed == True
+
+- name: Turn off autocompaction with module
+  cassandra_autocompaction:
+    keyspace: system
+    table:
+      - local
+      - peers
+      - peer_events
+    state: "enabled"
+  register: autocompaction
+
+- assert:
+    that: autocompaction.changed == True
+
+- name: Turn on autocompaction with module
+  cassandra_autocompaction:
+    keyspace: system
+    table:
+      - local
+      - peers
+      - peer_events
+      - size_estimates
+      - sstable_activity
+    state: "enabled"
+  register: autocompaction
+
+- assert:
+    that: autocompaction.changed == True
+
+- name: Turn off autocompaction with module
+  cassandra_autocompaction:
+    keyspace: system
+    table:
+      - local
+      - peers
+      - peer_events
+      - size_estimates
+      - sstable_activity
+    state: "enabled"
+  register: autocompaction
+
+- assert:
+    that: autocompaction.changed == True
+
+- name: Non-existent keyspace
+  cassandra_autocompaction:
+    keyspace: systemXXXXX
+    table:
+      - local
+      - peers
+      - peer_events
+      - size_estimates
+      - sstable_activity
+    state: "enabled"
+  register: autocompaction
+  ignore_errors: true
+
+- debug:
+    var: autocompaction
+
+- assert:
+    that:
+      - autocompaction.failed == True
+      - "'nodetool: Keyspace [systemXXXXX] does not exist.' == autocompaction.stdout_lines[0]"
+      - "\"See 'nodetool help' or 'nodetool help <command>'.\" == autocompaction.stdout_lines[1]"
+
+- name: Non-existent table
+  cassandra_autocompaction:
+    keyspace: system
+    table:
+      - localXXXXX
+      - peers
+      - peer_events
+      - size_estimates
+      - sstable_activity
+    state: "enabled"
+  register: autocompaction
+  ignore_errors: true
+
+- assert:
+    that:
+      - autocompaction.failed == True
+      - "'nodetool: Unknown keyspace/cf pair (system.localXXXXX)' == autocompaction.stdout_lines[0]"
+      - "\"See 'nodetool help' or 'nodetool help <command>'.\" == autocompaction.stdout_lines[1]"
+
+- include_tasks: ../../setup_cassandra/tasks/cassandra_auth.yml
+  when: cassandra_auth_tests == True
+
+- name: Turn on autocompaction with module
+  cassandra_autocompaction:
+    keyspace: system
+    table: local
+    state: "enabled"
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+  register: autocompaction
+  when: cassandra_auth_tests == True
+
+- assert:
+    that: autocompaction.changed == True
+  when: cassandra_auth_tests == True
+
+- name: Turn off autocompaction with module using pwd file
+  cassandra_autocompaction:
+    keyspace: system
+    table: local
+    state: "disabled"
+    username: "{{ cassandra_admin_user }}"
+    password_file: /etc/cassandra/jmxremote.password
+  register: autocompaction
+  when: cassandra_auth_tests == True
+
+- assert:
+    that: autocompaction.changed == True
+  when: cassandra_auth_tests == True
+
+- name: Test login failure handling
+  cassandra_autocompaction:
+    keyspace: system
+    table: local
+    state: "enabled"
+    username: "{{ cassandra_admin_user }}"
+    password: XXXXXXXXXXXXXXXXXXXXX
+  register: login_status
+  ignore_errors: true
+  when: cassandra_auth_tests == True
+
+- assert:
+    that:
+      - login_status.failed == True
+      - "\"nodetool: Failed to connect to 'localhost:7199' - FailedLoginException: 'Invalid username or password'.\" == login_status.stderr_lines[0]"
+  when: cassandra_auth_tests == True
+
+- name: Test incorrect nodetool_path handling
+  cassandra_autocompaction:
+    keyspace: system
+    table: local
+    state: "enabled"
+    username: "{{ cassandra_admin_user }}"
+    password: XXXXXXXXXXXXXXXXXXXXX
+    nodetool_path: /tmp
+  register: nodetool_path_error
+  ignore_errors: true
+  when: cassandra_auth_tests == True
+
+- name: Assert no such file
+  assert:
+    that:
+      - nodetool_path_error.failed == True
+      - "'No such file or directory' in nodetool_path_error.msg"

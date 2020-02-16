@@ -1,0 +1,121 @@
+# (c) 2019,  Rhys Campbell <rhys.james.campbell@googlemail.com>
+
+# This file is part of Ansible
+#
+# Ansible is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Ansible is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
+
+# ============================================================
+
+- meta: end_play
+  when: ansible_os_family not in  ['RedHat', 'Debian' ]
+
+- command: hostname localhost
+
+- name: Install OpenJDK package
+  yum:
+    name: "{{ openjdk }}"
+    state: present
+  when: ansible_os_family == 'RedHat'
+
+- name: Run the equivalent of "apt-get update"
+  apt:
+    update_cache: yes
+  when: ansible_os_family == 'Debian'
+
+- name: Install required pip packages
+  pip:
+    name: "{{ pip_packages }}"
+    state: present
+
+- name: Download ant package and unarchive
+  unarchive:
+    src: "{{ ant_download }}"
+    dest: /usr/local
+    remote_src: yes
+
+- name: Create a symbolic link for ant
+  file:
+    state: link
+    src: "/usr/local/apache-ant-{{ ant_version }}/"
+    dest: /usr/local/ant
+
+- name:
+  blockinfile:
+    path: /etc/profile.d/ant.sh
+    marker: "#<!-- {mark} ANSIBLE MANAGED BLOCK -->"
+    block: |
+      export ANT_HOME=/usr/local/ant
+      export PATH=${PATH}:${ANT_HOME}/bin
+    create: yes
+
+- name: Check ant setup
+  shell: source /etc/profile.d/ant.sh && echo $ANT_HOME
+  register: ant_setup
+
+- name: Validate ant setup
+  assert:
+    that:
+      - "'/usr/local/ant' in ant_setup.stdout"
+
+- name: Check ant setup
+  shell: source /etc/profile.d/ant.sh && echo $PATH
+  register: ant_path_setup
+
+- name: Validate path
+  assert:
+    that:
+      - "'/usr/local/ant' in ant_path_setup.stdout"
+
+- name: Install ccm via pip
+  pip:
+    name: ccm
+    state: present
+
+- name: Create cassandra user
+  user:
+    name: cassandra
+    state: present
+
+- name: Install Cassandra via ccm tool
+  shell: "sudo -u cassandra bash -c \"ccm create test -v {{ cassandra_version }} > /dev/null\""
+  args:
+    warn: false
+
+- name: Add nodes to the Cassandra cluster
+  shell: "sudo -u cassandra bash -c \"ccm populate -n {{ cassandra_nodes }}\""
+  args:
+    warn: false
+
+- name: Start the ccm cluster
+  command: sudo -u cassandra bash -c "ccm start --verbose"
+  args:
+    warn: false
+
+- name: Get cluster status
+  command: sudo -u cassandra bash -c "ccm status"
+  args:
+    warn: false
+
+- name: Get output of node1 status
+  command: sudo -u cassandra bash -c "ccm node1 status"
+  args:
+    warn: false
+
+- name: Set nodetool path
+  copy:
+    dest: /home/cassandra/nodetool_path.sh
+    content: |
+      export PATH="$PATH:/home/cassandra/.ccm/repository/{{ cassandra_version }}/bin/"
+    owner: cassandra
+    group: users

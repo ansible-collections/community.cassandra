@@ -1,0 +1,166 @@
+# test code for the cassandra_compactionthroughput module
+# (c) 2019,  Rhys Campbell <rhys.james.campbell@googlemail.com>
+
+# This file is part of Ansible
+#
+# Ansible is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Ansible is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
+
+# ===========================================================
+- name: Get incremental backup status 1
+  shell: nodetool -h $(hostname) getcompactionthroughput
+  register: compactionthroughput
+
+- name: Assert starting status of compactionthroughput
+  assert:
+    that: "'Current compaction throughput: 16 MB/s' == compactionthroughput.stdout"
+
+- name: Set compactionthroughput with module
+  cassandra_compactionthroughput:
+    value: 32
+
+- name: Get compactionthroughput
+  shell: nodetool -h $(hostname) getcompactionthroughput
+  register: compactionthroughput
+
+- name: Assert compactionthroughput is 32MB
+  assert:
+    that: "'Current compaction throughput: 32 MB/s' == compactionthroughput.stdout"
+
+- name: Set throughput to 64
+  cassandra_compactionthroughput:
+    value: 64
+
+- name: Get compactionthroughput
+  shell: nodetool -h $(hostname) getcompactionthroughput
+  register: compactionthroughput
+
+- name: Assert compactionthroughput is 64MB
+  assert:
+    that: "'Current compaction throughput: 64 MB/s' == compactionthroughput.stdout"
+
+- name: Test module with check_mode = true
+  cassandra_compactionthroughput:
+    value: 128
+  check_mode: true
+  register: compactionthroughput
+
+- name: Assert compactionthroughput has changed (check_mode)
+  assert:
+    that: compactionthroughput.changed == True
+
+- name: Get compactionthroughput
+  shell: nodetool -h $(hostname) getcompactionthroughput
+  register: compactionthroughput
+
+- name: Assert compactionthroughput is still 64MB
+  assert:
+    that: "'Current compaction throughput: 64 MB/s' == compactionthroughput.stdout"
+
+- name: Set compactionthroughput back to 32MB
+  cassandra_compactionthroughput:
+    value: 32
+
+- name: Get compactionthroughput
+  shell: nodetool -h $(hostname) getcompactionthroughput
+  register: compactionthroughput
+
+- name: Assert compactionthroughput is again 32MB
+  assert:
+    that: "'Current compaction throughput: 32 MB/s' == compactionthroughput.stdout"
+
+- name: Set compactionthroughput 32 MB should not change
+  cassandra_compactionthroughput:
+    value: 32
+  register: module_nochange
+
+- name: Get compactionthroughput
+  shell: nodetool -h $(hostname) getcompactionthroughput
+  register: compactionthroughput
+
+- name: Assert compactionthroughput is still 32MB and module reports no change
+  assert:
+    that:
+      - "'Current compaction throughput: 32 MB/s' == compactionthroughput.stdout"
+      - module_nochange.changed == False
+
+- include_tasks: ../../setup_cassandra/tasks/cassandra_auth.yml
+  when: cassandra_auth_tests == True
+
+- name: Set compactionthroughput 64MB when auth is enabled
+  cassandra_compactionthroughput:
+    value: 64
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+  register: compactionthroughput
+  when: cassandra_auth_tests == True
+
+- name: Get compactionthroughput auth 1
+  shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h $(hostname) getcompactionthroughput
+  register: compactionthroughput
+  when: cassandra_auth_tests == True
+
+- name: Assert compactionthroughput is again 64MB
+  assert:
+    that:
+      - "'Current compaction throughput: 64 MB/s' == compactionthroughput.stdout"
+      - compactionthroughput.changed == True
+
+- name: Set back to 32MB using the pw file option
+  cassandra_compactionthroughput:
+    value:  32
+    username: "{{ cassandra_admin_user }}"
+    password_file: /etc/cassandra/jmxremote.password
+  register: compactionthroughput
+  when: cassandra_auth_tests == True
+
+- name: Get compactionthroughput auth 2
+  shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h $(hostname) getcompactionthroughput
+  register: compactionthroughput
+  when: cassandra_auth_tests == True
+
+- name: Assert compactionthroughput is again 32MB
+  assert:
+    that:
+      - "'Current compaction throughput: 32 MB/s' == compactionthroughput.stdout"
+      - compactionthroughput.changed == True
+  when: cassandra_auth_tests == True
+
+- name: Test login failure handling
+  cassandra_compactionthroughput:
+    value: 128
+    username: "{{ cassandra_admin_user }}"
+    password: XXXXXXXXXXXXXXXXXXXXX
+  register: login_status
+  ignore_errors: true
+  when: cassandra_auth_tests == True
+
+- name: Assert failed login
+  assert:
+    that:
+      - login_status.failed == True
+      - "'Invalid username or password' in login_status.stderr"
+  when: cassandra_auth_tests == True
+
+- name: Test incorrect nodetool_path handling
+  cassandra_compactionthroughput:
+    value: 128
+    nodetool_path: /tmp
+  register: nodetool_path_error
+  ignore_errors: true
+  when: cassandra_auth_tests == True
+
+- name: Assert no such file
+  assert:
+    that:
+      - "'No such file or directory' in nodetool_path_error.msg"

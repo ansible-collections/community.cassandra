@@ -1,0 +1,179 @@
+# test code for the cassandra_gossip module
+# (c) 2019,  Rhys Campbell <rhys.james.campbell@googlemail.com>
+
+# This file is part of Ansible
+#
+# Ansible is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Ansible is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
+
+# ===========================================================
+
+- name: Cleanup the node
+  cassandra_cleanup:
+  register: cleanup
+
+#- debug:
+#    var: cleanup
+
+- assert:
+    that:
+      - "cleanup.msg == 'nodetool cleanup executed successfully'"
+      - "cleanup.changed == True"
+
+- include_tasks: ../../setup_cassandra/tasks/cassandra_auth.yml
+  when: cassandra_auth_tests == True
+
+- name: Run cleanup with auth
+  cassandra_cleanup:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+  register: cleanup
+
+- assert:
+    that:
+      - "cleanup.msg == 'nodetool cleanup executed successfully'"
+      - "cleanup.changed == True"
+
+- name: Test login failure handling
+  cassandra_cleanup:
+    username: "{{ cassandra_admin_user }}"
+    password: XXXXXXXXXXXXXXXXXXXXX
+  register: login_status
+  ignore_errors: yes
+  when: cassandra_auth_tests == True
+
+- name: Assert failed login
+  assert:
+    that:
+      - login_status.failed == True
+      - "'Invalid username or password' in login_status.stderr"
+  when: cassandra_auth_tests == True
+
+- name: Test incorrect nodetool_path handling
+  cassandra_cleanup:
+    nodetool_path: /tmp
+  register: nodetool_path_error
+  ignore_errors: true
+  when: cassandra_auth_tests == True
+
+- name: Assert no such file
+  assert:
+    that:
+      - "'No such file or directory' in nodetool_path_error.msg"
+
+- name: Run cleanup against system_auth keyspace
+  cassandra_cleanup:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    keyspace: system_auth
+  register: cleanup
+
+- assert:
+    that:
+      - "cleanup.msg == 'nodetool cleanup executed successfully'"
+      - "cleanup.changed == True"
+
+- name: Run cleanup against system_auth/roles (str)
+  cassandra_cleanup:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    keyspace: system_auth
+    table: roles
+  register: cleanup
+
+- assert:
+    that:
+      - "cleanup.msg == 'nodetool cleanup executed successfully'"
+      - "cleanup.changed == True"
+
+- name: Run cleanup against system_auth/roles (list)
+  cassandra_cleanup:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    keyspace: system_auth
+    table:
+      - roles
+  register: cleanup
+
+- assert:
+    that:
+      - "cleanup.msg == 'nodetool cleanup executed successfully'"
+      - "cleanup.changed == True"
+
+- name: Run cleanup against multiple system_auth table (list)
+  cassandra_cleanup:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    keyspace: system_auth
+    table:
+      - roles
+      - role_permissions
+      - role_members
+  register: cleanup
+
+- assert:
+    that:
+      - "cleanup.msg == 'nodetool cleanup executed successfully'"
+      - "cleanup.changed == True"
+
+- name: Run with num_jobs = 0
+  cassandra_cleanup:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    keyspace: system_auth
+    table:
+      - roles
+      - role_permissions
+      - role_members
+    num_jobs: 0
+  register: cleanup
+
+- assert:
+    that:
+      - "cleanup.msg == 'nodetool cleanup executed successfully'"
+      - "cleanup.changed == True"
+
+- name: Run with num_jobs = 5
+  cassandra_cleanup:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    keyspace: system_auth
+    table:
+      - roles
+      - role_permissions
+      - role_members
+    num_jobs: 5
+  register: cleanup
+
+- assert:
+    that:
+      - "cleanup.msg == 'nodetool cleanup executed successfully'"
+      - "cleanup.stdout == 'jobs (5) is bigger than configured concurrent_compactors (2) on this host, using at most 2 threads'"
+      - "cleanup.changed == True"
+
+- name: Run with num_jobs = 1
+  cassandra_cleanup:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    keyspace: system_auth
+    table:
+      - roles
+      - role_permissions
+      - role_members
+    num_jobs: 1
+  register: cleanup
+
+- assert:
+    that:
+      - "cleanup.msg == 'nodetool cleanup executed successfully'"
+      - "cleanup.changed == True"

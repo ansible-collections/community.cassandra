@@ -1,0 +1,91 @@
+# test code for the cassandra_gossip module
+# (c) 2019,  Rhys Campbell <rhys.james.campbell@googlemail.com>
+
+# This file is part of Ansible
+#
+# Ansible is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Ansible is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
+
+# ===========================================================
+
+- name: Drain the node
+  cassandra_drain:
+  register: drain
+
+- assert:
+    that:
+      - "drain.msg == 'nodetool drain executed successfully'"
+      - "drain.changed == True"
+
+- name: Restart Cassandra
+  service:
+    name: cassandra
+    state: restarted
+
+- name: Wait for Cassandra to become active
+  wait_for:
+    port: 9042
+    host: 0.0.0.0
+    delay: 10
+
+- include_tasks: ../../setup_cassandra/tasks/cassandra_auth.yml
+  when: cassandra_auth_tests == True
+
+- name: Run drain with auth
+  cassandra_drain:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+  register: drain
+
+- assert:
+    that:
+      - "drain.msg == 'nodetool drain executed successfully'"
+      - "drain.changed == True"
+
+- name: Restart Cassandra
+  service:
+    name: cassandra
+    state: restarted
+
+- name: Wait for Cassandra to become active
+  wait_for:
+    port: 9042
+    host: 0.0.0.0
+    delay: 10
+
+- name: Test login failure handling
+  cassandra_drain:
+    username: "{{ cassandra_admin_user }}"
+    password: XXXXXXXXXXXXXXXXXXXXX
+  register: login_status
+  ignore_errors: yes
+  when: cassandra_auth_tests == True
+
+- name: Assert failed login
+  assert:
+    that:
+      - login_status.failed == True
+      - "'Invalid username or password' in login_status.stderr"
+  when: cassandra_auth_tests == True
+
+- name: Test incorrect nodetool_path handling
+  cassandra_drain:
+    nodetool_path: /tmp
+  register: nodetool_path_error
+  ignore_errors: true
+  when: cassandra_auth_tests == True
+
+- name: Assert no such file
+  assert:
+    that:
+      - "'No such file or directory' in nodetool_path_error.msg"

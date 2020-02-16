@@ -1,0 +1,143 @@
+# test code for the cassandra_handoff module
+# (c) 2019,  Rhys Campbell <rhys.james.campbell@googlemail.com>
+
+# This file is part of Ansible
+#
+# Ansible is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Ansible is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
+
+# ===========================================================
+
+# Hinted handoff seems to require a little bit more time to fire up.
+# The status check throws an exception if we don't
+# org.apache.cassandra.db:type=StorageProxy\n-- StackTrace --\njavax.management.InstanceNotFoundException:
+- pause:
+    seconds: 10
+
+- name: Get handoff status 1
+  shell: nodetool -h $(hostname) statushandoff
+  register: handoff_status
+
+- name: Assert handoff is running 1
+  assert:
+    that: "'Hinted handoff is running' == handoff_status.stdout"
+
+- name: Turn off handoff with module
+  cassandra_handoff:
+    state: "disabled"
+
+- name: Get handoff status 2
+  shell: nodetool -h $(hostname) statushandoff
+  register: handoff_status
+
+- name: Assert handoff is not running
+  assert:
+    that: "'Hinted handoff is not running' == handoff_status.stdout"
+
+- name: Turn on handoff with module
+  cassandra_handoff:
+    state: "enabled"
+
+- name: Get handoff status 3
+  shell: nodetool -h $(hostname) statushandoff
+  register: handoff_status
+
+- name: Assert handoff is running 2
+  assert:
+    that: "'Hinted handoff is running' == handoff_status.stdout"
+
+- name: Execute with check_mode = True
+  cassandra_handoff:
+    state: "disabled"
+  check_mode: true
+  register: handoff_staus
+
+- name: Assert handoff status has changed (check_mode)
+  assert:
+    that: handoff_status.changed == True
+
+- name: Get handoff status 3
+  shell: nodetool -h $(hostname) statushandoff
+  register: handoff_status
+
+- name: Assert handoff is still running (after check_mode)
+  assert:
+    that: "'Hinted handoff is running' == handoff_status.stdout"
+
+- include_tasks: ../../setup_cassandra/tasks/cassandra_auth.yml
+  when: cassandra_auth_tests == True
+
+- name: Turn off handoff with auth
+  cassandra_handoff:
+    state: "disabled"
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+  register: handoff_status
+  when: cassandra_auth_tests == True
+
+- name: Get handoff status 5
+  shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h $(hostname) statushandoff
+  register: handoff_status
+  when: cassandra_auth_tests == True
+
+- name: Assert handoff is not running
+  assert:
+    that: "'Hinted handoff is not running' == handoff_status.stdout"
+  when: cassandra_auth_tests == True
+
+- name: Turn on handoff using password file
+  cassandra_handoff:
+    state: "enabled"
+    username: "{{ cassandra_admin_user }}"
+    password_file: /etc/cassandra/jmxremote.password
+  register: handoff_status
+  when: cassandra_auth_tests == True
+
+- name: Get handoff status 6
+  shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h $(hostname) statushandoff
+  register: handoff_status
+  when: cassandra_auth_tests == True
+
+- name: Assert handoff is running
+  assert:
+    that: "'Hinted handoff is running' == handoff_status.stdout"
+  when: cassandra_auth_tests == True
+
+- name: Test login failure handling
+  cassandra_handoff:
+    state: "disabled"
+    username: "{{ cassandra_admin_user }}"
+    password: XXXXXXXXXXXXXXXXXXXXX
+  register: login_status
+  ignore_errors: true
+  when: cassandra_auth_tests == True
+
+- name: Assert failed login
+  assert:
+    that:
+      - login_status.failed == True
+      - "'Invalid username or password' in login_status.stderr"
+  when: cassandra_auth_tests == True
+
+- name: Test incorrect nodetool_path handling
+  cassandra_handoff:
+    state: "disabled"
+    nodetool_path: /tmp
+  register: nodetool_path_error
+  ignore_errors: true
+  when: cassandra_auth_tests == True
+
+- name: Assert no such file
+  assert:
+    that:
+      - "'No such file or directory' in nodetool_path_error.msg"
