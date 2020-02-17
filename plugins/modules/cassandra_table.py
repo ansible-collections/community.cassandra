@@ -258,7 +258,7 @@ def main():
             state=dict(type='str', required=True, choices=['present', 'absent']),
             keyspace=dict(type='str', required=True),
             columns=dict(type='list', elements='dict', required=True),
-            primary_key=dict(type='list', elements='str, required=True),
+            primary_key=dict(type='list', elements='str', required=True),
             clustering=dict(type='list', elements='str'),
             partition_key=dict(type='list', default=[]),
             table_options=dict(type='dict', default=None),
