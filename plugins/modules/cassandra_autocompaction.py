@@ -6,7 +6,6 @@
 # (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 from __future__ import absolute_import, division, print_function
 from ansible.module_utils.basic import AnsibleModule, load_platform_subclass
-import socket
 __metaclass__ = type
 
 ANSIBLE_METADATA =\
@@ -92,6 +91,8 @@ cassandra_autocompaction:
   returned: success
   type: str
 '''
+
+import socket
 
 
 class NodeToolCmd(object):
