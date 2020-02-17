@@ -106,7 +106,7 @@
       - "'Invalid username or password' in bad_login.stderr"
 
 - name: Test nodetool authentication with passwordFile
-  command: nodetool -u {{ cassandra_admin_user }}	-pwf /etc/cassandra/jmxremote.password status
+  command: nodetool -u {{ cassandra_admin_user }} -pwf /etc/cassandra/jmxremote.password status
 
 - name: Test cqlsh access with default admin user
   command: cqlsh localhost -u cassandra -p cassandra --execute "DESC KEYSPACES"

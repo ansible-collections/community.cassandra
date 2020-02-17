@@ -56,6 +56,8 @@ options:
       - Number of job threads.
     type: int
     default: 2
+    aliases:
+      - j
   nodetool_path:
     description:
       - The path to nodetool.
