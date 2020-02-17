@@ -3,11 +3,6 @@
 # Copyright: (c) 2019, Rhys Campbell <rhys.james.campbell@googlemail.com>
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
-from __future__ import absolute_import, division, print_function
-__metaclass__ = type
-import re
-import socket
-
 ANSIBLE_METADATA = {'metadata_version': '1.1',
                     'status': ['preview'],
                     'supported_by': 'community'}
@@ -119,6 +114,12 @@ msg:
   returned: on error
   type: str
 '''
+
+from __future__ import absolute_import, division, print_function
+__metaclass__ = type
+import re
+import socket
+
 
 try:
     from cassandra.cluster import Cluster, AuthenticationFailed
