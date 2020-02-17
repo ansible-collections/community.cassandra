@@ -50,7 +50,7 @@ options:
   table:
     description:
       - Optional table name or list of table names.
-    type: raw (string or list)
+    type: raw
   nodetool_path:
     description:
       - The path to nodetool.

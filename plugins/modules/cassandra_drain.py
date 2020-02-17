@@ -13,7 +13,7 @@ ANSIBLE_METADATA =\
 
 DOCUMENTATION = '''
 ---
-module: cassandra_cleanup
+module: cassandra_drain
 author: Rhys Campbell (@rhysmeister)
 version_added: 2.8
 short_description: Drains a Cassandra node.

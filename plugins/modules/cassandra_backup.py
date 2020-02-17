@@ -47,7 +47,7 @@ options:
     description:
       - The required status
     type: str
-    choices
+    choices:
       - "enabled"
       - "disabled"
   nodetool_path:
