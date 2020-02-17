@@ -87,8 +87,6 @@ EXAMPLES = '''
 '''
 
 RETURN = '''
-cassandra_status:
-  TODO
 '''
 
 from ansible.module_utils.basic import AnsibleModule, load_platform_subclass
