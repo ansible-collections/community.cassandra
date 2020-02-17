@@ -79,6 +79,7 @@ EXAMPLES = r'''
     state: absent
 
 - name: Create a keyspace with RF 3
+  cassandra_keyspace:
     name: mykeyspace
     state: present
     replication_factor: 3

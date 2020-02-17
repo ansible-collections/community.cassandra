@@ -13,86 +13,88 @@ DOCUMENTATION = r'''
 module: cassandra_role
 short_description: Manage roles on your Cassandra cluster
 description: Manage roles on your Cassandra Cluster.
- version_added: 2.9
- author: Rhys Campbell (@rhysmeister)
- options:
-   login_user:
-     description: The Cassandra user to login with.
-     type: str
-   login_password:
-     description: The Cassandra password to login with.
-     type: str
-   login_host:
-     description: The Cassandra hostname.
-     type: str
-   login_port:
-     description: The Cassandra poret.
-     type: int
-     default: 9042
-   name:
-     description: The name of the role to create or manage.
-     type: str
-     required: true
-   state:
-     description: The desired state of the role.
-     type: str
-     choices: [ "present", "absent" ]
-     required: true
-   super_user:
-     description:
-       - If the user is a super user or not.
+  version_added: 2.9
+  author: Rhys Campbell (@rhysmeister)
+  options:
+    login_user:
+      description: The Cassandra user to login with.
+      type: str
+    login_password:
+      description: The Cassandra password to login with.
+      type: str
+    login_host:
+      description: The Cassandra hostname.
+      type: str
+    login_port:
+      description: The Cassandra poret.
+      type: int
+      default: 9042
+    name:
+      description: The name of the role to create or manage.
+      type: str
+      required: true
+    state:
+      description: The desired state of the role.
+      type: str
+      choices:
+       - "present"
+       - "absent"
+      required: true
+    super_user:
+      description:
+        - If the user is a super user or not.
+       type: boolean
+       default: false
+    login:
+      description:
+        - True allows the role to log in.
+        - Use true to create login accounts for internal authentication, PasswordAuthenticator or DSE Unified Authenticator.
       type: boolean
       default: false
-   login:
-     description:
-       - True allows the role to log in.
-       - Use true to create login accounts for internal authentication, PasswordAuthenticator or DSE Unified Authenticator.
-     type: boolean
-     default: false
-   password:
-     description:
-       - The password for the role.
-     type: str
-   options:
-     description:
-       - Reserved for use with authentication plug-ins. Refer to the authenticator documentation for details.
-     type: dict
-   data_centers:
-     description:
-       - Only relevant if a network_authorizer has been configured.
-       - Specify data centres as keys of this dict.
-       - Can specify a key as 'all' although this implicity assumed by Cassandra if not supplied.
-     type: dict
-   keyspace_permissions:
-     description:
-       - Grant privileges on keyspace objects.
-       - Specify keyspaces as keys of this dict.
-       - Permissions supplied as a list to the keyspace keys.
-       - Valid permissions at keyspace level are as follows:
-         - ALL PERMISSIONS
-         - CREATE
-         - ALTER
-         - AUTHORIZE
-         - DROP
-         - MODIFY
-         - SELECT
-       - A special key 'all_keyspaces' can be supplied to assign permissions to all keyspaces.
-     type: dict
-   roles:
-     description:
-       - One or more roles to grant to this user or role.
-     type: list
-   force:
-     description:
-       - By default we do not modify roles set this to true to force modifications.
-       - Not yet implemented
-     type: boolean
-     default: false
-   debug:
-     description:
-       - Additional debug output.
+    password:
+      description:
+        - The password for the role.
+      type: str
+    options:
+      description:
+        - Reserved for use with authentication plug-ins. Refer to the authenticator documentation for details.
+      type: dict
+    data_centers:
+      description:
+        - Only relevant if a network_authorizer has been configured.
+        - Specify data centres as keys of this dict.
+        - Can specify a key as 'all' although this implicity assumed by Cassandra if not supplied.
+      type: dict
+    keyspace_permissions:
+      description:
+        - Grant privileges on keyspace objects.
+        - Specify keyspaces as keys of this dict.
+        - Permissions supplied as a list to the keyspace keys.
+        - Valid permissions at keyspace level are as follows:
+          - ALL PERMISSIONS
+          - CREATE
+          - ALTER
+          - AUTHORIZE
+          - DROP
+          - MODIFY
+          - SELECT
+        - A special key 'all_keyspaces' can be supplied to assign permissions to all keyspaces.
+      type: dict
+    roles:
+      description:
+        - One or more roles to grant to this user or role.
+      type: list
+    force:
+      description:
+        - By default we do not modify roles set this to true to force modifications.
+        - Not yet implemented
       type: boolean
       default: false
+    debug:
+      description:
+        - Additional debug output.
+       type: boolean
+       default: false
 '''
 
 EXAMPLES = r'''
