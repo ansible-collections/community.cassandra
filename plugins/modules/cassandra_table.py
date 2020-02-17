@@ -51,7 +51,7 @@ options:
   columns:
     description:
       - The columns for the table.
-      - Specifiy pairs as <column name>: <data type>
+      - "Specifiy pairs as <column name>: <data type>"
     type: list
     elements: dict
     required: true
