@@ -168,7 +168,7 @@ def main():
             password_file=dict(type='str', no_log=True),
             username=dict(type='str', no_log=True),
             keyspace=dict(type='str', required=True),
-            table=dict(type='list', required=True),
+            table=dict(type='list', elements='str', required=True),
             state=dict(required=True, choices=['enabled', 'disabled']),
             nodetool_path=dict(type='str', default=None, required=False),
             debug=dict(type='bool', default=False, required=False),
