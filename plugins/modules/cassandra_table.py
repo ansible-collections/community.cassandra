@@ -260,7 +260,7 @@ def main():
             columns=dict(type='list', elements='dict', required=True),
             primary_key=dict(type='list', elements='str', required=True),
             clustering=dict(type='list', elements='str'),
-            partition_key=dict(type='list', default=[]),
+            partition_key=dict(type='list', elements='str', default=[]),
             table_options=dict(type='dict', default=None),
             is_type=dict(type='bool', default=False),
             debug=dict(type='bool', default=False)),

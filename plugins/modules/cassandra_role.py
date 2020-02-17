@@ -532,7 +532,7 @@ def main():
         argument_spec=dict(
             login_user=dict(type='str'),
             login_password=dict(type='str', no_log=True),
-            login_host=dict(type='list'),
+            login_host=dict(type='list', elements='str'),
             login_port=dict(type='int', default=9042),
             name=dict(type='str', required=True),
             password=dict(type='str', required=False, no_log=True),
@@ -542,7 +542,7 @@ def main():
             options=dict(type='dict'),
             data_centers=dict(type='dict', aliases=['data_centres']),
             keyspace_permissions=dict(type='dict'),
-            roles=dict(type='list'),
+            roles=dict(type='list', elements='str'),
             debug=dict(type='bool', default=False)),
         supports_check_mode=True
     )
