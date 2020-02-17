@@ -72,14 +72,7 @@ options:
       - Grant privileges on keyspace objects.
       - Specify keyspaces as keys of this dict.
       - Permissions supplied as a list to the keyspace keys.
-      - > Valid permissions at keyspace level are as follows:
-        - ALL PERMISSIONS
-        - CREATE
-        - ALTER
-        - AUTHORIZE
-        - DROP
-        - MODIFY
-        - SELECT
+      - Valid permissions at keyspace level are as follows; ALL PERMISSIONS, CREATE, ALTER, AUTHORIZE, DROP, MODIFY, SELECT
       - A special key 'all_keyspaces' can be supplied to assign permissions to all keyspaces.
     type: dict
   roles:
