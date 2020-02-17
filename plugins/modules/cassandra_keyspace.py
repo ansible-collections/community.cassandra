@@ -15,7 +15,10 @@ short_description: Manage keyspaces on your Cassandra cluster
 description:
    - Manage keyspaces on your Cassandra Cluster.
    - Keyspace can be created to use SimpleStrategy or NetworkTopologyStrategy.
-   - Keyspace modifications are supported, for example duratable writes, replication factor or data centre changes but it is not supported to migrate between replication strategies i.e. NetworkTopologyStrategy -> SimpleStrategy.
+   - "Keyspace modifications are supported, for example duratable \
+   writes, replication factor or data centre changes but it is not \
+   supported to migrate between replication strategies \
+   i.e. NetworkTopologyStrategy -> SimpleStrategy."
 version_added: 2.9
 author: Rhys Campbell (@rhysmeister)
 options:
@@ -190,13 +193,14 @@ def get_keyspace_config(module, cluster, keyspace):
     return keyspace_config
 
 
-def keyspace_is_changed(module, cluster, keyspace, replication_factor, durable_writes, data_centres):
+def keyspace_is_changed(module, cluster, keyspace, replication_factor,
+                        durable_writes, data_centres):
     cfg = get_keyspace_config(module, cluster, keyspace)
     keyspace_definition_changed = False
     if cfg['class'] == "SimpleStrategy":
         if int(cfg['replication_factor']) != replication_factor or\
-            cfg['durable_writes'] != durable_writes:
-                keyspace_definition_changed = True
+        cfg['durable_writes'] != durable_writes:
+            keyspace_definition_changed = True
     elif cfg['class'] == "NetworkTopologyStrategy":
         # ls = [cfg, keyspace, replication_factor, durable_writes, data_centres]
         # module.fail_json(msg=str(ls))

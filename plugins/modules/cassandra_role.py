@@ -490,20 +490,20 @@ def build_role_permissions(session,
                 elif permission['resource'].startswith('<keyspace') and permission['role'] == role:
                     ks = permission['resource'].split(' ')[1].replace('>', '').strip()
                     if ks in keyspace_permissions.keys() \
-                        and permission['permission'] not in keyspace_permissions[ks]:
-                            cql = revoke_permission(session,
-                                                    permission['permission'],
-                                                    role,
-                                                    ks)
-                            perms_dict['revoke'].add(cql)
+                    and permission['permission'] not in keyspace_permissions[ks]:
+                        cql = revoke_permission(session,
+                                                permission['permission'],
+                                                role,
+                                                ks)
+                        perms_dict['revoke'].add(cql)
             if permission['resource'].startswith('<keyspace') and \
-                permission['role'] == role and \
-                permission['resource'].split(' ')[1].replace('>', '') not in keyspace_permissions.keys():
-                    cql = revoke_permission(session,
-                                            permission['permission'],
-                                            role,
-                                            ks)
-                    perms_dict['revoke'].add(cql)
+            permission['role'] == role and \
+            permission['resource'].split(' ')[1].replace('>', '') not in keyspace_permissions.keys():
+                cql = revoke_permission(session,
+                                        permission['permission'],
+                                        role,
+                                        ks)
+                perms_dict['revoke'].add(cql)
         else:
             current_roles = set()
             if permission['resource'].startswith('<keyspace') and permission['role'] == role:  # We don't touch other permissions
