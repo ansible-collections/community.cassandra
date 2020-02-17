@@ -25,6 +25,7 @@ options:
   login_host:
     description: The Cassandra hostname.
     type: list
+    elements: str
   login_port:
     description: The Cassandra poret.
     type: int
@@ -79,6 +80,7 @@ options:
     description:
       - One or more roles to grant to this user or role.
     type: list
+    elements: str
   debug:
     description:
       - Additional debug output.

@@ -30,6 +30,7 @@ options:
       - The Cassandra hostname.
       - Set to the value returned by socket.getfqdn() if left unset.
     type: list
+    elements: str
   login_port:
     description: The Cassandra poret.
     type: int

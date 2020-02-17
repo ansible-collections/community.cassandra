@@ -26,7 +26,8 @@ options:
     type: str
   login_host:
     description: The Cassandra hostname.
-    type: str
+    type: list
+    elements: str
   login_port:
     description: The Cassandra poret.
     type: int
@@ -52,21 +53,25 @@ options:
       - The columns for the table.
       - Specifiy pairs as <column name>: <data type>
     type: list
+    elements: dict
     required: true
   primary_key:
     description:
       - The Primary key speicfication for the table
     type: list
+    elements: str
     required: true
   partition_key:
     description:
       - The partition key columns.
     type: list
+    elements: str
     required: false
   clustering:
     description:
       - The clustering specification.
     type: list
+    elements: str
   table_options:
     description:
       - Options for the table
@@ -247,14 +252,14 @@ def main():
         argument_spec=dict(
             login_user=dict(type='str'),
             login_password=dict(type='str', no_log=True),
-            login_host=dict(type='list'),
+            login_host=dict(type='list', elements='str'),
             login_port=dict(type='int', default=9042),
             name=dict(type='str', required=True),
             state=dict(type='str', required=True, choices=['present', 'absent']),
             keyspace=dict(type='str', required=True),
-            columns=dict(type='list', required=True),
-            primary_key=dict(type='list', required=True),
-            clustering=dict(type='list', default=None),
+            columns=dict(type='list', elements='dict', required=True),
+            primary_key=dict(type='list', elements='str, required=True),
+            clustering=dict(type='list', elements='str'),
             partition_key=dict(type='list', default=[]),
             table_options=dict(type='dict', default=None),
             is_type=dict(type='bool', default=False),
