@@ -28,7 +28,6 @@ options:
     description:
       - The hostname.
     type: str
-    default: "localhost"
   port:
     description:
       - The Cassandra TCP port.

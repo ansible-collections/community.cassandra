@@ -16,7 +16,7 @@ DOCUMENTATION = '''
 module: cassandra_flush
 author: Rhys Campbell (@rhysmeister)
 version_added: 2.8
-short_description:Flushes one or more tables from the memtable to SSTables on disk.
+short_description: Flushes one or more tables from the memtable to SSTables on disk.
 requirements: [ nodetool ]
 description:
     - Flushes one or more tables from the memtable to SSTables on disk.
@@ -25,7 +25,6 @@ options:
     description:
       - The hostname.
     type: str
-    default: "localhost"
   port:
     description:
       - The Cassandra TCP port.

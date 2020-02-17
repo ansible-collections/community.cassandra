@@ -30,7 +30,6 @@ options:
       - The Cassandra TCP port.
     type: int
     default: 7199
-    required: true
   password:
     description:
       - The password to authenticate with.
@@ -47,6 +46,7 @@ options:
     description:
       - The required status
     type: str
+    required: true
     choices:
       - "enabled"
       - "disabled"
