@@ -50,7 +50,7 @@ options:
       - True allows the role to log in.
       - Use true to create login accounts for internal authentication, PasswordAuthenticator or DSE Unified Authenticator.
     type: boolean
-    default: false
+    default: true
   password:
     description:
       - The password for the role.
@@ -65,12 +65,14 @@ options:
       - Specify data centres as keys of this dict.
       - Can specify a key as 'all' although this implicity assumed by Cassandra if not supplied.
     type: dict
+    aliases:
+      - data_centres
   keyspace_permissions:
     description:
       - Grant privileges on keyspace objects.
       - Specify keyspaces as keys of this dict.
       - Permissions supplied as a list to the keyspace keys.
-      - Valid permissions at keyspace level are as follows:
+      - > Valid permissions at keyspace level are as follows:
         - ALL PERMISSIONS
         - CREATE
         - ALTER
@@ -84,16 +86,10 @@ options:
     description:
       - One or more roles to grant to this user or role.
     type: list
-  force:
-    description:
-      - By default we do not modify roles set this to true to force modifications.
-      - Not yet implemented
-    type: boolean
-    default: false
   debug:
     description:
       - Additional debug output.
-    type: boolean
+    type: bool
     default: false
 '''
 

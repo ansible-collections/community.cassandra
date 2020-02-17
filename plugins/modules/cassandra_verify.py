@@ -25,7 +25,6 @@ options:
     description:
       - The hostname.
     type: str
-    default: "localhost"
   port:
     description:
       - The Cassandra TCP port.
@@ -56,6 +55,8 @@ options:
       - Extended verify.
       - Each cell data, beyond simply checking SSTable checksums.
     type: bool
+    aliases:
+      - e
   nodetool_path:
     description:
       - The path to nodetool.

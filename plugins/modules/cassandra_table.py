@@ -15,61 +15,62 @@ short_description: Create or drop tables on a Cassandra database.
 description:
    - Create or drop tables on a Cassandra database.
    - No alter functionality.
- version_added: 2.9
- author: Rhys Campbell (@rhysmeister)
- options:
-   login_user:
-     description: The Cassandra user to login with.
-     type: str
-   login_password:
-     description: The Cassandra password to login with.
-     type: str
-   login_host:
-     description: The Cassandra hostname.
-     type: str
-   login_port:
-     description: The Cassandra poret.
-     type: int
-     default: 9042
-   name:
-     description: The name of the table to create or drop.
-     type: str
-     required: true
-   state:
-     description: The desired state of the table.
-     type: str
-     choices: [ "present", "absent" ]
-     required: true
-   keyspace:
-     description:
-       - The keyspace in which to create the table.
-      type: boolean
-      required: true
-      default: false
-   columns:
-     description:
-       - The columns for the table.
-       - Specifiy dict as <column name>: <data type>
-     type: dict
-     required: false
-   primary_key:
-     description:
-       - The Primary key speicfication for the table
-       - TODO - How to specify the partition key?
-     type: list
-     required: true
-   clustering:
-     description:
-       - The clustering specification.
-     type: list
-   table_options:
-     description:
-       - Options for the table
-     type: dict
-   is_type:
-     description:
-       - Create a type instead of a table
-     type: bool
+version_added: 2.9
+author: Rhys Campbell (@rhysmeister)
+options:
+  login_user:
+    description: The Cassandra user to login with.
+    type: str
+  login_password:
+    description: The Cassandra password to login with.
+    type: str
+  login_host:
+    description: The Cassandra hostname.
+    type: str
+  login_port:
+    description: The Cassandra poret.
+    type: int
+    default: 9042
+  name:
+    description: The name of the table to create or drop.
+    type: str
+    required: true
+  state:
+    description: The desired state of the table.
+    type: str
+    choices:
+      - "present"
+      - "absent"
+    required: true
+  keyspace:
+    description:
+      - The keyspace in which to create the table.
+    type: boolean
+    required: true
+    default: false
+  columns:
+    description:
+      - The columns for the table.
+      - Specifiy dict as <column name>: <data type>
+    type: dict
+    required: false
+  primary_key:
+    description:
+      - The Primary key speicfication for the table
+    type: list
+    required: true
+  clustering:
+    description:
+      - The clustering specification.
+    type: list
+  table_options:
+    description:
+      - Options for the table
+    type: dict
+  is_type:
+    description:
+      - Create a type instead of a table
+    type: bool
 '''
 
 EXAMPLES = r'''

@@ -46,7 +46,11 @@ options:
   state:
     description:
       - The required status
-    type: choices [ "enabled", "disabled" ]
+    type: str
+    choices:
+      - "enabled"
+      - "disabled"
+    required: true
   nodetool_path:
     description:
       - The path to nodetool.

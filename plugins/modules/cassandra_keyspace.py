@@ -29,8 +29,7 @@ options:
     description:
       - The Cassandra hostname.
       - Set to the value returned by socket.getfqdn() if left unset.
-    type: str
-    default: None
+    type: list
   login_port:
     description: The Cassandra poret.
     type: int

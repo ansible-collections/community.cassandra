@@ -28,7 +28,6 @@ options:
     description:
       - The hostname.
     type: str
-    default: "localhost"
   port:
     description:
       - The Cassandra TCP port.
@@ -51,6 +50,8 @@ options:
       - The maximum number of nodes that can be tolerated as down.
     type: int
     default: 0
+    aliases:
+      - d
   poll:
     description:
       - The maximum number of times to call nodetool status to get cluster status.
@@ -87,12 +88,7 @@ EXAMPLES = '''
 
 RETURN = '''
 cassandra_status:
-  cluster: The name of the Cassandra Cluster
-  nodes: [ { "node01":  { "UN": 32, "UL": 0, "UJ": 0, "UM": 0, "D": 0 } } .. ]
-  polled: 3
-  polling_duration: 90
-  returned: success/failure
-  type: str
+  TODO
 '''
 
 from ansible.module_utils.basic import AnsibleModule, load_platform_subclass
@@ -247,7 +243,7 @@ def main():
             password=dict(type='str', no_log=True),
             password_file=dict(type='str', no_log=True),
             username=dict(type='str', no_log=True),
-            down=dict(type='int', default=0, alias="d"),
+            down=dict(type='int', default=0, aliases=["d"]),
             poll=dict(type='int', default=1),
             interval=dict(type='int', default=30),
             nodetool_path=dict(type='str', default=None, required=False),

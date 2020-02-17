@@ -49,6 +49,7 @@ options:
     choices:
       - "enabled"
       - "disabled"
+    required: true
   nodetool_path:
     description:
       - The path to nodetool.

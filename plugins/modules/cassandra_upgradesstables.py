@@ -26,7 +26,6 @@ options:
     description:
       - The hostname.
     type: str
-    default: "localhost"
   port:
     description:
       - The Cassandra TCP port.
@@ -51,11 +50,12 @@ options:
   table:
     description:
       - Optional table name or list of table names.
-    type: raw (string or list)
+    type: raw
   num_jobs:
     description:
       - Number of job threads.
     type: int
+    default: 2
   nodetool_path:
     description:
       - The path to nodetool.
