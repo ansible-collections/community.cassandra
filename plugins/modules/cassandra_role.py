@@ -43,8 +43,8 @@ options:
   super_user:
     description:
       - If the user is a super user or not.
-     type: boolean
-     default: false
+    type: boolean
+    default: false
   login:
     description:
       - True allows the role to log in.
@@ -93,8 +93,8 @@ options:
   debug:
     description:
       - Additional debug output.
-     type: boolean
-     default: false
+    type: boolean
+    default: false
 '''
 
 EXAMPLES = r'''
