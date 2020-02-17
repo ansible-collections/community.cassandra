@@ -17,7 +17,7 @@ ANSIBLE_METADATA =\
 DOCUMENTATION = '''
 ---
 module: cassandra_handoff
-author: "Rhys Campbell (rhys.james.campbell@googlemail.com)"
+author: "Rhys Campbell"
 version_added: 2.8
 short_description: Enables or disables the storing of future hints on the current node.
 requirements: [ nodetool ]

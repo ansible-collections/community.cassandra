@@ -24,7 +24,7 @@ description:
      but it is not supported to migrate between replication strategies\
      i.e. NetworkTopologyStrategy -> SimpleStrategy.
  version_added: 2.9
- author: Rhys Campbell (@rhysmeister)
+ author: Rhys Campbell
  options:
    login_user:
      description: The Cassandra user to login with.

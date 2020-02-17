@@ -17,7 +17,7 @@ ANSIBLE_METADATA =\
 DOCUMENTATION = '''
 ---
 module: cassandra_flush
-author: "Rhys Campbell (rhys.james.campbell@googlemail.com)"
+author: "Rhys Campbell"
 version_added: 2.8
 short_description:Flushes one or more tables from the memtable to SSTables on disk.
 requirements: [ nodetool ]

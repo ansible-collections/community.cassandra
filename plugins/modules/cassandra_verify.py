@@ -17,7 +17,7 @@ ANSIBLE_METADATA =\
 DOCUMENTATION = '''
 ---
 module: cassandra_verify
-author: "Rhys Campbell (rhys.james.campbell@googlemail.com)"
+author: "Rhys Campbell"
 version_added: 2.8
 short_description: Checks the data checksum for one or more specified tables.
 requirements: [ nodetool ]

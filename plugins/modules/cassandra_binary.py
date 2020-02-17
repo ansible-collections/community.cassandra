@@ -17,7 +17,7 @@ ANSIBLE_METADATA =\
 DOCUMENTATION = '''
 ---
 module: cassandra_binary
-author: "Rhys Campbell (rhys.james.campbell@googlemail.com)"
+author: "Rhys Campbell"
 version_added: 2.8
 short_description: Enable/disable the binary protocol
 requirements: [ nodetool ]

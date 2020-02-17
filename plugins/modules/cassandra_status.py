@@ -19,7 +19,7 @@ ANSIBLE_METADATA =\
 DOCUMENTATION = '''
 ---
 module: cassandra_status
-author: "Rhys Campbell (rhys.james.campbell@googlemail.com)"
+author: "Rhys Campbell"
 version_added: 2.9
 short_description: Validates the status of the cluster as seen from the node.
 requirements: [ nodetool ]
