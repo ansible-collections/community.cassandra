@@ -193,7 +193,7 @@ def keyspace_is_changed(module, cluster, keyspace, replication_factor, durable_w
     keyspace_definition_changed = False
     if cfg['class'] == "SimpleStrategy":
         if int(cfg['replication_factor']) != replication_factor or\
-            cfg['durable_writes'] != durable_writes:
+        cfg['durable_writes'] != durable_writes:
             keyspace_definition_changed = True
     elif cfg['class'] == "NetworkTopologyStrategy":
         # ls = [cfg, keyspace, replication_factor, durable_writes, data_centres]
@@ -231,7 +231,7 @@ def main():
             replication_factor=dict(type='int', default=1),
             durable_writes=dict(type='bool', default=True),
             data_centres=dict(type='dict')),
-            supports_check_mode=True
+        supports_check_mode=True
     )
 
     if HAS_CASSANDRA_DRIVER is False:

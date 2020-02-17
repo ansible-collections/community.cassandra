@@ -28,7 +28,6 @@ options:
     description:
       - The hostname.
     type: str
-    default: "localhost"
   port:
     description:
       - The Cassandra TCP port.
@@ -46,12 +45,23 @@ options:
     description:
       - The username to authenticate with.
     type: str
+  keyspace:
+    description:
+      - The keyspace to operate on.
+    type: str
+    required: true
+  table:
+    description:
+      - The table to operate on.
+    type: list
+    required: true
   state:
     description:
       - The required status
     choices:
       - "enabled"
       - "disabled"
+    required: true
   nodetool_path:
     description:
       - The path to nodetool.

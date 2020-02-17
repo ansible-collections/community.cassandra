@@ -307,21 +307,21 @@ def main():
                 result['changed'] = True
                 result['cql'] = cql
         else:  # Table does not exist
-                if state == "present":
-                    cql = create_table(keyspace_name,
-                                       table_name,
-                                       columns,
-                                       primary_key,
-                                       clustering,
-                                       partition_key,
-                                       table_options,
-                                       is_type)
-                    if not module.check_mode:
-                        session.execute(cql)
-                    result['changed'] = True
-                    result['cql'] = cql
-                else:
-                    result['changed'] = False
+            if state == "present":
+                cql = create_table(keyspace_name,
+                                   table_name,
+                                   columns,
+                                   primary_key,
+                                   clustering,
+                                   partition_key,
+                                   table_options,
+                                   is_type)
+                if not module.check_mode:
+                    session.execute(cql)
+                result['changed'] = True
+                result['cql'] = cql
+            else:
+                result['changed'] = False
 
         module.exit_json(**result)
 

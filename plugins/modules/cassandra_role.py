@@ -240,7 +240,7 @@ def create_alter_role(module, session, role, super_user, login, password,
     if password is not None:
         cql += "AND PASSWORD = '{0}' ".format(password)
     if options is not None:
-        cql +=  "AND OPTIONS = {0}".format(str(options))
+        cql += "AND OPTIONS = {0}".format(str(options))
     if data_centers is not None:
         for dc in data_centers:
             if str(dc.upper()) == "ALL" and len(data_centers) == 1:
@@ -483,7 +483,7 @@ def build_role_permissions(session,
     # If the all_keyspaces key does not exist and there are "<all keyspaces>"
     # resources present we can revoke all
     # Permissions to revoke from specific keyspaces
-    role_permissions = list_role_permissions(session, role) # need to reset resultset
+    role_permissions = list_role_permissions(session, role)  # need to reset resultset
     for permission in role_permissions:
         if keyspace_permissions is not None:
             for keyspace in keyspace_permissions.keys():
@@ -497,15 +497,15 @@ def build_role_permissions(session,
                 elif permission['resource'].startswith('<keyspace') and permission['role'] == role:
                     ks = permission['resource'].split(' ')[1].replace('>', '').strip()
                     if ks in keyspace_permissions.keys() \
-                        and permission['permission'] not in keyspace_permissions[ks]:
+                    and permission['permission'] not in keyspace_permissions[ks]:
                         cql = revoke_permission(session,
                                                 permission['permission'],
                                                 role,
                                                 ks)
                         perms_dict['revoke'].add(cql)
             if permission['resource'].startswith('<keyspace') and \
-                permission['role'] == role and \
-                permission['resource'].split(' ')[1].replace('>', '') not in keyspace_permissions.keys():
+            permission['role'] == role and \
+            permission['resource'].split(' ')[1].replace('>', '') not in keyspace_permissions.keys():
                 cql = revoke_permission(session,
                                         permission['permission'],
                                         role,
@@ -551,7 +551,7 @@ def main():
             keyspace_permissions=dict(type='dict'),
             roles=dict(type='list'),
             debug=dict(type='bool', default=False)),
-    supports_check_mode=True
+        supports_check_mode=True
     )
 
     if HAS_CASSANDRA_DRIVER is False:
@@ -586,11 +586,10 @@ def main():
     # Need to figure out password hashing
     # https://shiro.apache.org/configuration.html#Configuration-EncryptingPasswords
 
-
     try:
         if keyspace_permissions is not None:
             if not validate_keyspace_permissions(keyspace_permissions):
-                module.fail_json(msg = "Invalid permission provided in the \
+                module.fail_json(msg="Invalid permission provided in the \
                                  keyspace_permission parameter.")
         auth_provider = None
         if login_user is not None:
@@ -671,7 +670,7 @@ def main():
                         result['cql'] = cql
                     elif state == "absent":
                         result['changed'] = False
-        else: # This is a role
+        else:  # This is a role
             if role_exists(session, role):
                 if module.check_mode:
                     if state == "present":
