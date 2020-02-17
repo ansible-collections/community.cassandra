@@ -17,7 +17,7 @@ ANSIBLE_METADATA =\
 DOCUMENTATION = '''
 ---
 module: cassandra_upgradesstables
-author: "Rhys Campbell"
+author: Rhys Campbell (@rhysmeister)
 version_added: 2.8
 short_description: Upgrade SSTables which are not on the current Cassandra version.
 requirements: [ nodetool ]

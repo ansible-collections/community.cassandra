@@ -22,7 +22,7 @@ description:
    - Create or drop tables on a Cassandra database.
    - No alter functionality.
  version_added: 2.9
- author: Rhys Campbell
+ author: Rhys Campbell (@rhysmeister)
  options:
    login_user:
      description: The Cassandra user to login with.

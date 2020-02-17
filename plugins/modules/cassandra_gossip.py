@@ -17,7 +17,7 @@ ANSIBLE_METADATA =\
 DOCUMENTATION = '''
 ---
 module: cassandra_gossip
-author: "Rhys Campbell"
+author: Rhys Campbell (@rhysmeister)
 version_added: 2.8
 short_description: Enable or disable gossip.
 requirements: [ nodetool ]

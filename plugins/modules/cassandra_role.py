@@ -20,7 +20,7 @@ short_description: Manage roles on your Cassandra cluster
 description:
    - Manage roles on your Cassandra Cluster.
  version_added: 2.9
- author: Rhys Campbell
+ author: Rhys Campbell (@rhysmeister)
  options:
    login_user:
      description: The Cassandra user to login with.
