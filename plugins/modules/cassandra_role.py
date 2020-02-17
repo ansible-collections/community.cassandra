@@ -480,25 +480,32 @@ def build_role_permissions(session,
     for permission in role_permissions:
         if keyspace_permissions is not None:
             for keyspace in keyspace_permissions.keys():
-                if permission['resource'] == "<all keyspaces>" and "all_keyspaces" not in keyspace_permissions.keys() and permission['role'] == role:
+                if permission['resource'] == "<all keyspaces>"\
+                        and "all_keyspaces" not in keyspace_permissions.keys()\
+                        and permission['role'] == role:
                     cql = "REVOKE ALL PERMISSIONS ON ALL KEYSPACES FROM {0}".format(role)
                     if cql not in perms_dict['revoke']:  # only do this the once
                         perms_dict['revoke'].add(cql)
-                elif permission['resource'] == "<all keyspaces>" and "ALL PERMISSIONS" in keyspace_permissions[keyspace] and permission['role'] == role:
+                elif permission['resource'] == "<all keyspaces>" \
+                        and "ALL PERMISSIONS" in keyspace_permissions[keyspace]\
+                        and permission['role'] == role:
                     # No revokes needed
                     pass
-                elif permission['resource'].startswith('<keyspace') and permission['role'] == role:
+                elif permission['resource'].startswith('<keyspace') \
+                        and permission['role'] == role:
                     ks = permission['resource'].split(' ')[1].replace('>', '').strip()
                     if ks in keyspace_permissions.keys() \
-                    and permission['permission'] not in keyspace_permissions[ks]:
+                            and permission['permission'] \
+                            not in keyspace_permissions[ks]:
                         cql = revoke_permission(session,
                                                 permission['permission'],
                                                 role,
                                                 ks)
                         perms_dict['revoke'].add(cql)
-            if permission['resource'].startswith('<keyspace') and \
-            permission['role'] == role and \
-            permission['resource'].split(' ')[1].replace('>', '') not in keyspace_permissions.keys():
+            if permission['resource'].startswith('<keyspace') \
+                    and permission['role'] == role \
+                    and permission['resource'].split(' ')[1].replace('>', '') \
+                    not in keyspace_permissions.keys():
                 cql = revoke_permission(session,
                                         permission['permission'],
                                         role,
@@ -506,13 +513,14 @@ def build_role_permissions(session,
                 perms_dict['revoke'].add(cql)
         else:
             current_roles = set()
-            if permission['resource'].startswith('<keyspace') and permission['role'] == role:  # We don't touch other permissions
-                ks = permission['resource'].split(' ')[1].replace('>', '')
-                cql = revoke_permission(session,
-                                        permission['permission'],
-                                        role,
-                                        ks)
-                perms_dict['revoke'].add(cql)
+            if permission['resource'].startswith('<keyspace') \
+                        and permission['role'] == role:  # We don't touch other permissions
+                    ks = permission['resource'].split(' ')[1].replace('>', '')
+                    cql = revoke_permission(session,
+                                            permission['permission'],
+                                            role,
+                                            ks)
+                    perms_dict['revoke'].add(cql)
     return perms_dict
 
 
