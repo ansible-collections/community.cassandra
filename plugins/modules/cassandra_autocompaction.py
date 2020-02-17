@@ -51,6 +51,7 @@ options:
     description:
       - The table to operate on.
     type: list
+    elements: str
     required: true
   state:
     description:
