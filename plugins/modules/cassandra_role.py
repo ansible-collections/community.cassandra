@@ -211,22 +211,22 @@ def get_role_properties(session, role):
 
 def is_role_changed(role_properties, super_user, login, password,
                     options, data_centers):
-     '''
-     Determines whether a role has changed and therefore needs /
-     to be changed with an ALTER ROLE statement.
-     role_properties - Dictionary created from the system_auth.roles keyspace?
-     super_user - User provided boolean value.
-     login - User provided boolean value.
-     password - User provided string value. Not currently dealt with.
-     options - User provided value. Not currently dealt with.
-     data_centers - User provided dictionary value. Not currently dealt with.
-     '''
-     changed = False
-     if role_properties['is_superuser'] != super_user:
-         changed = True
-     elif role_properties['can_login'] != login:
-         changed = True
-     return changed
+    '''
+    Determines whether a role has changed and therefore needs /
+    to be changed with an ALTER ROLE statement.
+    role_properties - Dictionary created from the system_auth.roles keyspace?
+    super_user - User provided boolean value.
+    login - User provided boolean value.
+    password - User provided string value. Not currently dealt with.
+    options - User provided value. Not currently dealt with.
+    data_centers - User provided dictionary value. Not currently dealt with.
+    '''
+    changed = False
+    if role_properties['is_superuser'] != super_user:
+        changed = True
+    elif role_properties['can_login'] != login:
+        changed = True
+    return changed
 
 
 def create_alter_role(module, session, role, super_user, login, password,
@@ -235,8 +235,8 @@ def create_alter_role(module, session, role, super_user, login, password,
         cql = "CREATE ROLE {0} ".format(role)
     else:
         cql = "ALTER ROLE {0} ".format(role)
-    cql += "WITH SUPERUSER = {0} ".format(super_user)
-    cql += "AND LOGIN = {0} ".format(login)
+        cql += "WITH SUPERUSER = {0} ".format(super_user)
+        cql += "AND LOGIN = {0} ".format(login)
     if password is not None:
         cql += "AND PASSWORD = '{0}' ".format(password)
     if options is not None:
@@ -355,6 +355,7 @@ def list_role_permissions(session, role):
         role_permissions = []
     return role_permissions
 
+
 def does_role_have_permission(role_permissions,
                               permission,
                               keyspace):
@@ -431,6 +432,7 @@ def build_role_grants(session,
                 roles_dict['grant'].add(cql)
     return roles_dict
 
+
 def build_role_permissions(session,
                            keyspace_permissions,
                            role):
@@ -496,11 +498,11 @@ def build_role_permissions(session,
                     ks = permission['resource'].split(' ')[1].replace('>', '').strip()
                     if ks in keyspace_permissions.keys() \
                         and permission['permission'] not in keyspace_permissions[ks]:
-                            cql = revoke_permission(session,
-                                                    permission['permission'],
-                                                    role,
-                                                    ks)
-                            perms_dict['revoke'].add(cql)
+                        cql = revoke_permission(session,
+                                                permission['permission'],
+                                                role,
+                                                ks)
+                        perms_dict['revoke'].add(cql)
             if permission['resource'].startswith('<keyspace') and \
                 permission['role'] == role and \
                 permission['resource'].split(' ')[1].replace('>', '') not in keyspace_permissions.keys():
@@ -511,7 +513,7 @@ def build_role_permissions(session,
                 perms_dict['revoke'].add(cql)
         else:
             current_roles = set()
-            if permission['resource'].startswith('<keyspace') and permission['role'] == role: #   We don't touch other permissions
+            if permission['resource'].startswith('<keyspace') and permission['role'] == role:  # We don't touch other permissions
                 ks = permission['resource'].split(' ')[1].replace('>', '')
                 cql = revoke_permission(session,
                                         permission['permission'],
@@ -552,7 +554,7 @@ def main():
     supports_check_mode=True
     )
 
-    if not HAS_CASSANDRA_DRIVER:
+    if HAS_CASSANDRA_DRIVER is False:
         module.fail_json(msg="This module requires the cassandra-driver python \
                          driver. You can probably install it with \
                          pip install cassandra-driver.")
@@ -573,7 +575,7 @@ def main():
     roles = module.params['roles']
     debug = module.params['debug']
 
-    result=dict(
+    result = dict(
         changed=False,
         role=name,
     )
@@ -592,7 +594,7 @@ def main():
                                  keyspace_permission parameter.")
         auth_provider = None
         if login_user is not None:
-            auth_provider=PlainTextAuthProvider(
+            auth_provider = PlainTextAuthProvider(
                 username=login_user,
                 password=login_password
             )
@@ -701,7 +703,7 @@ def main():
                                                 has_role_changed)
                         session .execute(cql)
                         result['changed'] = True
-                        esult['cql'] = cql
+                        result['cql'] = cql
                     elif state == "absent":
                         result['changed'] = False
                 else:
@@ -748,12 +750,12 @@ def main():
     except Exception as excep:
         exType, ex, tb = sys.exc_info()
         msg = "An error occured on line {0}: {1} | {2} | {3} | {4}".format(traceback.tb_lineno(tb),
-                                                                     excep,
-                                                                     exType,
-                                                                     ex,
-                                                                     traceback.print_exc())
+                                                                           excep,
+                                                                           exType,
+                                                                           ex,
+                                                                           traceback.print_exc())
         if cql is not None:
-            msg+= " | {0}".format(cql)
+            msg += " | {0}".format(cql)
         if debug:
             module.fail_json(msg=msg, **result)
         else:

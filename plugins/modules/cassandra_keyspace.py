@@ -176,7 +176,7 @@ def drop_keyspace(session, keyspace):
 
 def get_keyspace_config(module, cluster, keyspace):
     cql = get_keyspace(cluster, keyspace)
-    dict_regexp = re.compile('{([\S\s]*)}')
+    dict_regexp = re.compile(r'{([\S\s]*)}')
     durable_writes_regexp = re.compile('DURABLE_WRITES = (True|False);')
     repl_settings = re.search(dict_regexp, cql).group(0)
     try:
@@ -193,7 +193,7 @@ def keyspace_is_changed(module, cluster, keyspace, replication_factor, durable_w
     keyspace_definition_changed = False
     if cfg['class'] == "SimpleStrategy":
         if int(cfg['replication_factor']) != replication_factor or\
-        cfg['durable_writes'] != durable_writes:
+            cfg['durable_writes'] != durable_writes:
             keyspace_definition_changed = True
     elif cfg['class'] == "NetworkTopologyStrategy":
         # ls = [cfg, keyspace, replication_factor, durable_writes, data_centres]
@@ -231,7 +231,7 @@ def main():
             replication_factor=dict(type='int', default=1),
             durable_writes=dict(type='bool', default=True),
             data_centres=dict(type='dict')),
-    supports_check_mode=True
+            supports_check_mode=True
     )
 
     if HAS_CASSANDRA_DRIVER is False:
@@ -253,7 +253,7 @@ def main():
     durable_writes = module.params['durable_writes']
     data_centres = module.params['data_centres']
 
-    result=dict(
+    result = dict(
         changed=False,
         keyspace=name,
     )
@@ -264,13 +264,13 @@ def main():
     try:
         auth_provider = None
         if login_user is not None:
-            auth_provider=PlainTextAuthProvider(
+            auth_provider = PlainTextAuthProvider(
                 username=login_user,
                 password=login_password
             )
-        cluster=Cluster(login_host,
-                        port=login_port,
-                        auth_provider=auth_provider)
+        cluster = Cluster(login_host,
+                          port=login_port,
+                          auth_provider=auth_provider)
         session = cluster.connect()
     except AuthenticationFailed as excep:
         module.fail_json(msg="Authentication failed: {0}".format(excep))

@@ -27,7 +27,7 @@ options:
   host:
     description:
       - The hostname.
-    type: string
+    type: str
     default: "localhost"
   port:
     description:
@@ -37,23 +37,25 @@ options:
   password:
     description:
       - The password to authenticate with.
-    type: string
+    type: str
   password_file:
     description:
       - Path to a file containing the password.
-    type: string
+    type: str
   username:
     description:
       - The username to authenticate with.
-    type: string
+    type: str
   state:
     description:
       - The required status
-    type: choices [ "enabled", "disabled" ]
+    choices:
+      - "enabled"
+      - "disabled"
   nodetool_path:
     description:
       - The path to nodetool.
-    type: string
+    type: str
   debug:
     description:
       - Enable additional debug output.
@@ -120,7 +122,7 @@ class NodeToolCmd(object):
         # The thing we want nodetool to execute
         cmd += " {0}".format(sub_command)
         if self.debug:
-            print(cmd)
+            self.module.debug(cmd)
         return self.execute_command(cmd)
 
 

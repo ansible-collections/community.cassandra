@@ -171,7 +171,7 @@ def create_primary_key_with_partition_key(primary_key, partition_key):
     p_key_count = len(partition_key)
     for i, val in enumerate(partition_key):
         if not partition_key[i] == primary_key[i]:
-            raise ValueException("partition_key list elements do not match primary_key elements")
+            raise ValueError("partition_key list elements do not match primary_key elements")
     pk_cql = "PRIMARY KEY ({0}))".format(", ".join(primary_key))
     if p_key_count > 0:  # Need to insert the brackets for pk
         pos = findnth(pk_cql, ",", p_key_count - 1)
@@ -248,7 +248,7 @@ def main():
             table_options=dict(type='dict', default=None),
             is_type=dict(type='bool', default=False),
             debug=dict(type='bool', default=False)),
-            supports_check_mode=True
+        supports_check_mode=True
     )
 
     if not HAS_CASSANDRA_DRIVER:
@@ -256,9 +256,7 @@ def main():
                          python driver. You can probably install it with\
                           pip install cassandra-driver.")
 
-    required_if = [
-      ["state", "present", ["columns", "primary_key"]]
-    ]
+    required_if = [["state", "present", ["columns", "primary_key"]]]
 
     login_user = module.params['login_user']
     login_password = module.params['login_password']
@@ -294,9 +292,9 @@ def main():
                           auth_provider=auth_provider)
         session = cluster.connect()
     except AuthenticationFailed as auth_failed:
-        module.fail_json(msg = "Authentication failed: {0}".format(excep))
+        module.fail_json(msg="Authentication failed: {0}".format(excep))
     except Exception as excep:
-        module.fail_json(msg = "Error connecting to cluster: {0}".format(excep))
+        module.fail_json(msg="Error connecting to cluster: {0}".format(excep))
 
     try:
         if table_exists(session, keyspace_name, table_name):
@@ -330,10 +328,10 @@ def main():
     except Exception as excep:
         exType, ex, tb = sys.exc_info()
         msg = "An error occured on line {0}: {1} | {2} | {3} | {4}".format(traceback.tb_lineno(tb),
-                                                                             excep,
-                                                                             exType,
-                                                                             ex,
-                                                                             traceback.print_exc())
+                                                                           excep,
+                                                                           exType,
+                                                                           ex,
+                                                                           traceback.print_exc())
         if cql is not None:
             msg += " | {0}".format(cql)
         if debug:

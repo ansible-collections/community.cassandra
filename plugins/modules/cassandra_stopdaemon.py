@@ -27,7 +27,7 @@ options:
   host:
     description:
       - The hostname.
-    type: string
+    type: str
     default: "localhost"
   port:
     description:
@@ -37,19 +37,19 @@ options:
   password:
     description:
       - The password to authenticate with.
-    type: string
+    type: str
   password_file:
     description:
       - Path to a file containing the password.
-    type: string
+    type: str
   username:
     description:
       - The username to authenticate with.
-    type: string
+    type: str
   nodetool_path:
     description:
       - The path to nodetool.
-    type: string
+    type: str
 '''
 
 EXAMPLES = '''
