@@ -16,55 +16,55 @@ description:
    - Manage keyspaces on your Cassandra Cluster.
    - Keyspace can be created to use SimpleStrategy or NetworkTopologyStrategy.
    - Keyspace modifications are supported, for example duratable writes, replication factor or data centre changes but it is not supported to migrate between replication strategies i.e. NetworkTopologyStrategy -> SimpleStrategy.
- version_added: 2.9
- author: Rhys Campbell (@rhysmeister)
- options:
-   login_user:
-     description: The Cassandra user to login with.
-     type: str
-   login_password:
-     description: The Cassandra password to login with.
-     type: str
-   login_host:
-     description:
-       - The Cassandra hostname.
-       - Set to the value returned by socket.getfqdn() if left unset.
-     type: str
-     default: None
-   login_port:
-     description: The Cassandra poret.
+version_added: 2.9
+author: Rhys Campbell (@rhysmeister)
+options:
+  login_user:
+    description: The Cassandra user to login with.
+    type: str
+  login_password:
+    description: The Cassandra password to login with.
+    type: str
+  login_host:
+    description:
+      - The Cassandra hostname.
+      - Set to the value returned by socket.getfqdn() if left unset.
+    type: str
+    default: None
+  login_port:
+    description: The Cassandra poret.
+    type: int
+    default: 9042
+  name:
+    description: The name of the keyspace to create or manage.
+    type: str
+    required: true
+  state:
+    description: The desired state of the keyspace.
+    type: str
+    choices:
+      - "present"
+      -  "absent"
+    required: true
+  replication_factor:
+    description:
+      - The total number of copies of your keyspace data.
+      - The keyspace is created with SimpleStrategy.
+      - If data_centres is set this parameter is ignored.
+      - If not supplied the default value will be used.
      type: int
-     default: 9042
-   name:
-     description: The name of the keyspace to create or manage.
-     type: str
-     required: true
-   state:
-     description: The desired state of the keyspace.
-     type: str
-     choices:
-       - "present"
-       -  "absent"
-     required: true
-   replication_factor:
-     description:
-       - The total number of copies of your keyspace data.
-       - The keyspace is created with SimpleStrategy.
-       - If data_centres is set this parameter is ignored.
-       - If not supplied the default value will be used.
-      type: int
-      default: 1
-   durable_writes:
-     description:
-       - Enable durable writes for the keyspace.
-       - If not supplied the default value will be used.
-     type: bool
-     default: true
-   data_centres:
-     description:
-       - The keyspace will be created with NetworkTopologyStrategy.
-       - Specify your data centres, along with replication_factor, as key-value pairs.
-     type: dict
+     default: 1
+  durable_writes:
+    description:
+      - Enable durable writes for the keyspace.
+      - If not supplied the default value will be used.
+    type: bool
+    default: true
+  data_centres:
+    description:
+      - The keyspace will be created with NetworkTopologyStrategy.
+      - Specify your data centres, along with replication_factor, as key-value pairs.
+    type: dict
 '''
 
 EXAMPLES = r'''
