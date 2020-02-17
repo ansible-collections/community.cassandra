@@ -107,7 +107,7 @@ class NodeToolCmd(object):
                 not self.nodetool_path.endswith('/'):
             self.nodetool_path += '/'
         else:
-                self.nodetool_path = ""
+            self.nodetool_path = ""
         cmd = "{0}nodetool --host {1} --port {2}".format(self.nodetool_path,
                                                          self.host,
                                                          self.port)

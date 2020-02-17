@@ -199,7 +199,7 @@ def nodetool_status_poll(module):
             else:
                 time.sleep(interval)
     return cluster_status, cluster_status_list, iterations, \
-            return_codes, stdout_list, stderr_list, down_running_total
+        return_codes, stdout_list, stderr_list, down_running_total
 
 
 def cluster_up_down(stdout):
@@ -231,9 +231,9 @@ def cluster_up_down(stdout):
             cluster_up_down[data_center] = dict()
             cluster_up_down[data_center]["up"] = list()
             cluster_up_down[data_center]["down"] = list()
-        if line.startswith("UN") and bool(re.findall( r'[0-9]+(?:\.[0-9]+){3}', line)):
+        if line.startswith("UN") and bool(re.findall(r'[0-9]+(?:\.[0-9]+){3}', line)):
             cluster_up_down[data_center]["up"].append(line.split()[1])
-        if line.startswith("D") and bool(re.findall( r'[0-9]+(?:\.[0-9]+){3}', line)):
+        if line.startswith("D") and bool(re.findall(r'[0-9]+(?:\.[0-9]+){3}', line)):
             cluster_up_down[data_center]["down"].append(line.split()[1])
     return cluster_up_down
 
@@ -258,7 +258,7 @@ def main():
 
     cluster_status, cluster_status_list, iterations, \
         return_codes, stdout_list, stderr_list, down_running_total \
-            = nodetool_status_poll(module)
+        = nodetool_status_poll(module)
 
     result = {}
 

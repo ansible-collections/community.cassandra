@@ -152,7 +152,7 @@ def get_keyspace(cluster, keyspace):
 
 
 def create_alter_keyspace(module, session, keyspace, replication_factor, durable_writes, data_centres, is_alter):
-    if is_alter == False:
+    if is_alter is False:
         cql = "CREATE KEYSPACE {0} ".format(keyspace)
     else:
         cql = "ALTER KEYSPACE {0} ".format(keyspace)
@@ -193,8 +193,8 @@ def keyspace_is_changed(module, cluster, keyspace, replication_factor, durable_w
     keyspace_definition_changed = False
     if cfg['class'] == "SimpleStrategy":
         if int(cfg['replication_factor']) != replication_factor or\
-            cfg['durable_writes'] != durable_writes:
-                keyspace_definition_changed = True
+        cfg['durable_writes'] != durable_writes:
+            keyspace_definition_changed = True
     elif cfg['class'] == "NetworkTopologyStrategy":
         # ls = [cfg, keyspace, replication_factor, durable_writes, data_centres]
         # module.fail_json(msg=str(ls))
@@ -208,7 +208,7 @@ def keyspace_is_changed(module, cluster, keyspace, replication_factor, durable_w
                 else:
                     keyspace_definition_changed = True
             # If still false check for removed dc's
-            if keyspace_definition_changed == False:
+            if keyspace_definition_changed is False:
                 for dc in cfg.keys():
                     if dc not in data_centres and dc not in ["class", "durable_writes"]:
                         keyspace_definition_changed = True
@@ -217,6 +217,7 @@ def keyspace_is_changed(module, cluster, keyspace, replication_factor, durable_w
     return keyspace_definition_changed
 
 ############################################
+
 
 def main():
     module = AnsibleModule(
@@ -233,7 +234,7 @@ def main():
     supports_check_mode=True
     )
 
-    if HAS_CASSANDRA_DRIVER == False:
+    if HAS_CASSANDRA_DRIVER is False:
         module.fail_json(msg="This module requires the cassandra-driver python \
                          driver. You can probably install it with pip\
                           install cassandra-driver.")
@@ -252,9 +253,9 @@ def main():
     durable_writes = module.params['durable_writes']
     data_centres = module.params['data_centres']
 
-    result = dict(
-        changed = False,
-        keyspace = name,
+    result=dict(
+        changed=False,
+        keyspace=name,
     )
 
     # For now we won't change the replication strategy & options if the keyspace already exists
@@ -263,13 +264,13 @@ def main():
     try:
         auth_provider = None
         if login_user is not None:
-            auth_provider = PlainTextAuthProvider(
-                username = login_user,
-                password = login_password
+            auth_provider=PlainTextAuthProvider(
+                username=login_user,
+                password=login_password
             )
-        cluster = Cluster(login_host,
-                          port = login_port,
-                          auth_provider = auth_provider)
+        cluster=Cluster(login_host,
+                        port=login_port,
+                        auth_provider=auth_provider)
         session = cluster.connect()
     except AuthenticationFailed as excep:
         module.fail_json(msg="Authentication failed: {0}".format(excep))

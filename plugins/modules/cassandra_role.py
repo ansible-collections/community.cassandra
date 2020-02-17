@@ -209,7 +209,7 @@ def get_role_properties(session, role):
     return role_properties[0]
 
 
-def is_role_changed(role_properties, super_user, login, password,\
+def is_role_changed(role_properties, super_user, login, password,
                     options, data_centers):
      '''
      Determines whether a role has changed and therefore needs /
@@ -229,9 +229,9 @@ def is_role_changed(role_properties, super_user, login, password,\
      return changed
 
 
-def create_alter_role(module, session, role, super_user, login, password,\
+def create_alter_role(module, session, role, super_user, login, password,
                       options, data_centers, alter_role):
-    if alter_role == False:
+    if alter_role is False:
         cql = "CREATE ROLE {0} ".format(role)
     else:
         cql = "ALTER ROLE {0} ".format(role)
@@ -270,6 +270,7 @@ def grant_role(session, role, grantee):
                                     grantee)
     return cql
 
+
 def revoke_role(session, role, grantee):
     ''' Revoke a role
     '''
@@ -277,9 +278,11 @@ def revoke_role(session, role, grantee):
                                        grantee)
     return cql
 
+
 def drop_role(session, role):
     cql = "DROP ROLE {0}".format(role)
     return cql
+
 
 def validate_keyspace_permissions(keyspace_permissions):
     '''
@@ -508,7 +511,7 @@ def build_role_permissions(session,
                 perms_dict['revoke'].add(cql)
         else:
             current_roles = set()
-            if permission['resource'].startswith('<keyspace') and permission['role'] == role: # We don't touch other permissions
+            if permission['resource'].startswith('<keyspace') and permission['role'] == role: #   We don't touch other permissions
                 ks = permission['resource'].split(' ')[1].replace('>', '')
                 cql = revoke_permission(session,
                                         permission['permission'],
@@ -570,9 +573,9 @@ def main():
     roles = module.params['roles']
     debug = module.params['debug']
 
-    result = dict(
-        changed = False,
-        role = name,
+    result=dict(
+        changed=False,
+        role=name,
     )
 
     cql = None
@@ -589,13 +592,13 @@ def main():
                                  keyspace_permission parameter.")
         auth_provider = None
         if login_user is not None:
-            auth_provider = PlainTextAuthProvider(
-                username = login_user,
-                password = login_password
+            auth_provider=PlainTextAuthProvider(
+                username=login_user,
+                password=login_password
             )
         cluster = Cluster(login_host,
-                          port = login_port,
-                          auth_provider = auth_provider)
+                          port=login_port,
+                          auth_provider=auth_provider)
         session = cluster.connect()
     except AuthenticationFailed as auth_failed:
         module.fail_json(msg="Authentication failed: {0}".format(excep))
@@ -605,7 +608,7 @@ def main():
     try:
         if debug:
             result['role_exists'] = role_exists(session, role)
-        if login: # Standard user
+        if login:  # Standard user
             if role_exists(session, role):
                 # Has the role changed?
                 role_properties = get_role_properties(session,

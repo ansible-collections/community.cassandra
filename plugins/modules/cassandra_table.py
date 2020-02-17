@@ -157,8 +157,8 @@ def findnth(haystack, needle, n):
     '''
     Helper function used in create_primary_key_with_partition_key
     '''
-    parts = haystack.split(needle, n+1)
-    if len(parts) <= n+1:
+    parts = haystack.split(needle, n + 1)
+    if len(parts) <= n + 1:
         return -1
     return len(haystack) - len(parts[-1]) - len(needle)
 
@@ -248,7 +248,7 @@ def main():
             table_options=dict(type='dict', default=None),
             is_type=dict(type='bool', default=False),
             debug=dict(type='bool', default=False)),
-    supports_check_mode=True
+            supports_check_mode=True
     )
 
     if not HAS_CASSANDRA_DRIVER:
@@ -276,23 +276,22 @@ def main():
     debug = module.params['debug']
 
     result = dict(
-        changed = False,
-        cql = None,
+        changed=False,
+        cql=None,
     )
 
     cql = None
-
 
     try:
         auth_provider = None
         if login_user is not None:
             auth_provider = PlainTextAuthProvider(
-                username = login_user,
-                password = login_password
+                username=login_user,
+                password=login_password
             )
         cluster = Cluster(login_host,
-                          port = login_port,
-                          auth_provider = auth_provider)
+                          port=login_port,
+                          auth_provider=auth_provider)
         session = cluster.connect()
     except AuthenticationFailed as auth_failed:
         module.fail_json(msg = "Authentication failed: {0}".format(excep))
@@ -309,7 +308,7 @@ def main():
                     session.execute(cql)
                 result['changed'] = True
                 result['cql'] = cql
-        else: # Table does not exist
+        else:  # Table does not exist
                 if state == "present":
                     cql = create_table(keyspace_name,
                                        table_name,
@@ -331,12 +330,12 @@ def main():
     except Exception as excep:
         exType, ex, tb = sys.exc_info()
         msg = "An error occured on line {0}: {1} | {2} | {3} | {4}".format(traceback.tb_lineno(tb),
-                                                                     excep,
-                                                                     exType,
-                                                                     ex,
-                                                                     traceback.print_exc())
+                                                                             excep,
+                                                                             exType,
+                                                                             ex,
+                                                                             traceback.print_exc())
         if cql is not None:
-            msg+= " | {0}".format(cql)
+            msg += " | {0}".format(cql)
         if debug:
             module.fail_json(msg=msg, **result)
         else:
