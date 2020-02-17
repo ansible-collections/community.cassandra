@@ -52,8 +52,8 @@ options:
       - The keyspace is created with SimpleStrategy.
       - If data_centres is set this parameter is ignored.
       - If not supplied the default value will be used.
-     type: int
-     default: 1
+    type: int
+    default: 1
   durable_writes:
     description:
       - Enable durable writes for the keyspace.
