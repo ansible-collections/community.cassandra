@@ -12,8 +12,7 @@ DOCUMENTATION = r'''
 ---
 module: cassandra_role
 short_description: Manage roles on your Cassandra cluster
-description:
-   - Manage roles on your Cassandra Cluster.
+description: Manage roles on your Cassandra Cluster.
  version_added: 2.9
  author: Rhys Campbell (@rhysmeister)
  options:

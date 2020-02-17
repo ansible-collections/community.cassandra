@@ -15,10 +15,7 @@ short_description: Manage keyspaces on your Cassandra cluster
 description:
    - Manage keyspaces on your Cassandra Cluster.
    - Keyspace can be created to use SimpleStrategy or NetworkTopologyStrategy.
-   - >- Keyspace modifications are supported, for example
-     duratable writes, replication factor or data centre changes
-     but it is not supported to migrate between replication strategies
-     i.e. NetworkTopologyStrategy -> SimpleStrategy.
+   - Keyspace modifications are supported, for example duratable writes, replication factor or data centre changes but it is not supported to migrate between replication strategies i.e. NetworkTopologyStrategy -> SimpleStrategy.
  version_added: 2.9
  author: Rhys Campbell (@rhysmeister)
  options:
