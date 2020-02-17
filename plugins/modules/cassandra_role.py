@@ -497,20 +497,20 @@ def build_role_permissions(session,
                 elif permission['resource'].startswith('<keyspace') and permission['role'] == role:
                     ks = permission['resource'].split(' ')[1].replace('>', '').strip()
                     if ks in keyspace_permissions.keys() \
-                    and permission['permission'] not in keyspace_permissions[ks]:
-                        cql = revoke_permission(session,
-                                                permission['permission'],
-                                                role,
-                                                ks)
-                        perms_dict['revoke'].add(cql)
+                        and permission['permission'] not in keyspace_permissions[ks]:
+                            cql = revoke_permission(session,
+                                                    permission['permission'],
+                                                    role,
+                                                    ks)
+                            perms_dict['revoke'].add(cql)
             if permission['resource'].startswith('<keyspace') and \
-            permission['role'] == role and \
-            permission['resource'].split(' ')[1].replace('>', '') not in keyspace_permissions.keys():
-                cql = revoke_permission(session,
-                                        permission['permission'],
-                                        role,
-                                        ks)
-                perms_dict['revoke'].add(cql)
+                permission['role'] == role and \
+                permission['resource'].split(' ')[1].replace('>', '') not in keyspace_permissions.keys():
+                    cql = revoke_permission(session,
+                                            permission['permission'],
+                                            role,
+                                            ks)
+                    perms_dict['revoke'].add(cql)
         else:
             current_roles = set()
             if permission['resource'].startswith('<keyspace') and permission['role'] == role:  # We don't touch other permissions
@@ -715,34 +715,34 @@ def main():
                         result['changed'] = False
 
         if state == "present":
-                cql_dict = process_role_permissions(session,
-                                                    keyspace_permissions,
-                                                    role)
-                if len(cql_dict['grant']) > 0 or len(cql_dict['revoke']) > 0:
-                    for r in cql_dict['revoke']:
-                        if not module.check_mode:
-                            session.execute(r)
-                    for g in cql_dict['grant']:
-                        if not module.check_mode:
-                            session.execute(g)
-                    result['permissions'] = cql_dict
-                    result['changed'] = True
+            cql_dict = process_role_permissions(session,
+                                                keyspace_permissions,
+                                                role)
+            if len(cql_dict['grant']) > 0 or len(cql_dict['revoke']) > 0:
+                for r in cql_dict['revoke']:
+                    if not module.check_mode:
+                        session.execute(r)
+                for g in cql_dict['grant']:
+                    if not module.check_mode:
+                        session.execute(g)
+                result['permissions'] = cql_dict
+                result['changed'] = True
 
-                # Process roles
-                roles_dict = build_role_grants(session,
-                                               role,
-                                               roles)
+            # Process roles
+            roles_dict = build_role_grants(session,
+                                           role,
+                                           roles)
 
-                if len(roles_dict['grant']) > 0 or len(roles_dict['revoke']) > 0:
-                    result['roles'] = roles_dict
-                    for r in roles_dict['revoke']:
-                        if not module.check_mode:
-                            session.execute(r)
-                    for g in roles_dict['grant']:
-                        if not module.check_mode:
-                            session.execute(g)
+            if len(roles_dict['grant']) > 0 or len(roles_dict['revoke']) > 0:
+                result['roles'] = roles_dict
+                for r in roles_dict['revoke']:
+                    if not module.check_mode:
+                        session.execute(r)
+                for g in roles_dict['grant']:
+                    if not module.check_mode:
+                        session.execute(g)
 
-                    result['changed'] = True
+                result['changed'] = True
 
         module.exit_json(**result)
 
