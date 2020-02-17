@@ -514,13 +514,13 @@ def build_role_permissions(session,
         else:
             current_roles = set()
             if permission['resource'].startswith('<keyspace') \
-                        and permission['role'] == role:  # We don't touch other permissions
-                    ks = permission['resource'].split(' ')[1].replace('>', '')
-                    cql = revoke_permission(session,
-                                            permission['permission'],
-                                            role,
-                                            ks)
-                    perms_dict['revoke'].add(cql)
+                    and permission['role'] == role:  # We don't touch other permissions
+                ks = permission['resource'].split(' ')[1].replace('>', '')
+                cql = revoke_permission(session,
+                                        permission['permission'],
+                                        role,
+                                        ks)
+                perms_dict['revoke'].add(cql)
     return perms_dict
 
 

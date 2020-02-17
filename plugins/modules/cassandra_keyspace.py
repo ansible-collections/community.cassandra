@@ -199,8 +199,8 @@ def keyspace_is_changed(module, cluster, keyspace, replication_factor,
     keyspace_definition_changed = False
     if cfg['class'] == "SimpleStrategy":
         if int(cfg['replication_factor']) != replication_factor or\
-            cfg['durable_writes'] != durable_writes:
-                keyspace_definition_changed = True
+                cfg['durable_writes'] != durable_writes:
+            keyspace_definition_changed = True
     elif cfg['class'] == "NetworkTopologyStrategy":
         # ls = [cfg, keyspace, replication_factor, durable_writes, data_centres]
         # module.fail_json(msg=str(ls))
