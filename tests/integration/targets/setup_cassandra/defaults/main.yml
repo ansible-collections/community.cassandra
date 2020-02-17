@@ -24,3 +24,5 @@ cassandra_authorizer: "authorizer: CassandraAuthorizer"
 
 cassandra_admin_user: cassandra
 cassandra_admin_pwd: cassandra
+
+become: yes
