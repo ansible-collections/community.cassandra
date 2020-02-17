@@ -24,7 +24,7 @@ options:
     type: str
   login_host:
     description: The Cassandra hostname.
-    type: str
+    type: list
   login_port:
     description: The Cassandra poret.
     type: int
@@ -43,13 +43,13 @@ options:
   super_user:
     description:
       - If the user is a super user or not.
-    type: boolean
+    type: bool
     default: false
   login:
     description:
       - True allows the role to log in.
       - Use true to create login accounts for internal authentication, PasswordAuthenticator or DSE Unified Authenticator.
-    type: boolean
+    type: bool
     default: true
   password:
     description:
@@ -530,7 +530,7 @@ def main():
         argument_spec=dict(
             login_user=dict(type='str'),
             login_password=dict(type='str', no_log=True),
-            login_host=dict(type='list', default="localhost"),
+            login_host=dict(type='list'),
             login_port=dict(type='int', default=9042),
             name=dict(type='str', required=True),
             password=dict(type='str', required=False, no_log=True),

@@ -45,20 +45,24 @@ options:
   keyspace:
     description:
       - The keyspace in which to create the table.
-    type: boolean
+    type: str
     required: true
-    default: false
   columns:
     description:
       - The columns for the table.
-      - Specifiy dict as <column name>: <data type>
-    type: dict
-    required: false
+      - Specifiy pairs as <column name>: <data type>
+    type: list
+    required: true
   primary_key:
     description:
       - The Primary key speicfication for the table
     type: list
     required: true
+  partition_key:
+    description:
+      - The partition key columns.
+    type: list
+    required: false
   clustering:
     description:
       - The clustering specification.
@@ -71,6 +75,11 @@ options:
     description:
       - Create a type instead of a table
     type: bool
+  debug:
+    description:
+      - Debug flag
+    type: bool
+    default: false
 '''
 
 EXAMPLES = r'''
@@ -238,13 +247,13 @@ def main():
         argument_spec=dict(
             login_user=dict(type='str'),
             login_password=dict(type='str', no_log=True),
-            login_host=dict(type='list', default="localhost"),
+            login_host=dict(type='list'),
             login_port=dict(type='int', default=9042),
             name=dict(type='str', required=True),
             state=dict(type='str', required=True, choices=['present', 'absent']),
             keyspace=dict(type='str', required=True),
-            columns=dict(type='list', default=None),
-            primary_key=dict(type='list', default=None),
+            columns=dict(type='list', default=None, required=True),
+            primary_key=dict(type='list', default=None, required=True),
             clustering=dict(type='list', default=None),
             partition_key=dict(type='list', default=[]),
             table_options=dict(type='dict', default=None),

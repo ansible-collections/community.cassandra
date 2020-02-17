@@ -49,7 +49,7 @@ options:
   table:
     description:
       - Optional table name or list of table names.
-    type: raw (string or list)
+    type: raw
   extended:
     description:
       - Extended verify.
