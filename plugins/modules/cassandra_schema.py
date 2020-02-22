@@ -234,7 +234,7 @@ def main():
             password=dict(type='str', no_log=True),
             password_file=dict(type='str', no_log=True),
             username=dict(type='str', no_log=True),
-            uuid=dict(type='str'),
+            uuid=dict(type='str', aliases=['is']),
             poll=dict(type='int', default=1),
             interval=dict(type='int', default=30),
             nodetool_path=dict(type='str', default=None, required=False),
@@ -243,7 +243,6 @@ def main():
 
     uuid = module.params['uuid']
     debug = module.params['debug']
-
 
     schema_status, cluster_schema_list, iterations, \
         return_codes, stdout_list, stderr_list, schema_count_total \
