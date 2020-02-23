@@ -1,0 +1,224 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
+import argparse
+import sys
+from collections import defaultdict
+from collections import namedtuple
+
+import requests
+
+
+RequestArgs = namedtuple(
+    'RequestArgs',
+    ('host', 'port', 'timeout', 'base_path')
+)
+
+
+# Convenience methods for talking to jolokia
+
+def _make_request(args, path):
+    try:
+        uri = 'http://{host}:{port}{base_path}{path}'.format(
+            host=args.host, port=args.port, base_path=args.base_path, path=path
+        )
+        body = requests.get(uri, timeout=args.timeout).json()
+    except Exception, e:
+        msg = ('Had exception while connecting to {0}:{1} -- '
+               '{2}'.format(args.host, args.port, e))
+        raise RuntimeError(msg)
+    return body
+
+
+def _get_mbean(args, domain, bean, op_type='read'):
+    bean_path = '/{0}/{1}:{2}'.format(op_type, domain, bean)
+    return _make_request(args, bean_path)
+
+
+def cassandra_bean_getter(args):
+    ''' Generates a getter method that hits the jolokia HTTP endpoint
+    to retrieve cassandra mbeans exposed via the JMX interface.
+
+    :param: args: An instance of the tuple representing jolokia args
+      :py:obj:`cassandra_tools.cassandra_utils.RequestArgs`
+    :returns: a cassandra mbean getter function
+    '''
+
+    def get_cassandra_bean(bean, op_type='read', bean_attribute='value'):
+        return _get_mbean(
+            args,
+            'org.apache.cassandra.db',
+            bean,
+            op_type
+        )[bean_attribute]
+    return get_cassandra_bean
+
+
+# Methods that actually interpret cassandra replication state
+# The basic call order is
+# run_check -> check_keyspace_replication -> check_keyspace -> check_range
+
+def check_range(responsible_nodes, consistency_level,
+                dc_to_live_nodes, node_to_dc):
+    nodes = set(responsible_nodes)
+
+    alive_in_each_dc = dict(
+        (dc, len(nodes & set(dc_nodes))) for
+        dc, dc_nodes in dc_to_live_nodes.iteritems()
+    )
+    if consistency_level == 'one':
+        return sum(alive_in_each_dc.values()) >= 1
+    elif consistency_level == 'quorum':
+        return sum(alive_in_each_dc.values()) > (len(nodes) / 2)
+    elif consistency_level == 'all':
+        return sum(alive_in_each_dc.values()) >= len(nodes)
+    else:
+        # We're looking at "local" consistency levels
+        expected_in_each_dc = defaultdict(int)
+        for node in nodes:
+            expected_in_each_dc[node_to_dc[node]] += 1
+
+        if consistency_level == 'local_one':
+            return all(
+                alive_in_each_dc.get(dc, 0) >= 1 for dc in expected_in_each_dc
+            )
+        elif consistency_level == 'local_quorum':
+            return all(
+                alive_in_each_dc.get(dc, 0) > (expected / 2) for
+                dc, expected in expected_in_each_dc.iteritems()
+            )
+    raise Exception('Do not understand {0} consistency level'.format(
+        consistency_level
+    ))
+
+
+def check_keyspace(get_cassandra_bean, keyspace,
+                   available_nodes, consistency_level):
+    token_ranges = get_cassandra_bean(
+        'type=StorageService/getRangeToEndpointMap/{0}'.format(keyspace),
+        op_type='exec'
+    )
+    all_responsible_nodes = set()
+    for nodes in token_ranges.values():
+        all_responsible_nodes |= set(nodes)
+
+    dc_to_live_nodes = defaultdict(list)
+    node_to_dc = {}
+    for node in all_responsible_nodes:
+        dc = get_cassandra_bean(
+            'type=EndpointSnitchInfo/getDatacenter/{0}'.format(node),
+            op_type='exec'
+        )
+        node_to_dc[node] = dc
+        if node in available_nodes:
+            dc_to_live_nodes[dc].append(node)
+
+    bad_ranges = 0
+    for token_range, nodes in token_ranges.iteritems():
+        range_is_healthy = check_range(
+            nodes, consistency_level, dc_to_live_nodes, node_to_dc
+        )
+        if not range_is_healthy:
+            bad_ranges += 1
+
+    return bad_ranges
+
+
+def check_keyspace_replication(get_cassandra_bean, consistency_level):
+    keyspaces = get_cassandra_bean('type=StorageService/Keyspaces')
+    live_nodes = get_cassandra_bean('type=StorageService/LiveNodes')
+    system_keyspaces = set(
+        ['system', 'system_traces', 'system_auth', 'system_distributed']
+    )
+    keyspaces = list(set(keyspaces) - system_keyspaces)
+    # Dict of keyspace -> # ranges failing the consistency level
+    result = dict(
+        (keyspace, check_keyspace(
+            get_cassandra_bean, keyspace, live_nodes, consistency_level
+        ))
+        for keyspace in keyspaces
+    )
+    return result
+
+
+def run_check(args):
+    host_args = RequestArgs(
+        host=args.host, port=args.jolokia_port, timeout=args.jolokia_timeout,
+        base_path=args.jolokia_agent_path
+    )
+    get_cassandra_bean = cassandra_bean_getter(host_args)
+
+    result = check_keyspace_replication(
+        get_cassandra_bean, args.consistency_check
+    )
+
+    under_replicated = dict((k, result[k]) for k in result if result[k] > 0)
+    if len(under_replicated) == 0:
+        print('OK: cluster looks fine')
+    else:
+        partitions = '[Underreplicated partitions: {0}]'.format(
+            under_replicated
+        )
+        print(
+            'CRITICAL: cluster cannot complete operations at consistency '
+            'level {0}. {1}'.format(
+                args.consistency_check, partitions
+            )
+        )
+        return 2
+    return 0
+
+
+# Parsing arguments and other Python command line boilerplate.
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description=(
+            'check_cassandra_cluster verifies the availability of all'
+            ' non-system keyspaces against the desired consistency level.'
+        ),
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+
+    parser.add_argument(
+        '--host', dest='host', default='localhost',
+        help='Target cassandra host to bootstrap off of.'
+    )
+    parser.add_argument(
+        '--jolokia-port', dest='jolokia_port', default=8999,
+        help='Cassandra jolokia port'
+    )
+    parser.add_argument(
+        '--jolokia-agent-path', dest='jolokia_agent_path', default='/jolokia',
+        help='Cassandra jolokia agent path'
+    )
+    parser.add_argument(
+        '--jolokia-timeout', dest='jolokia_timeout', default=12.0, type=float,
+        help='Cassandra jolokia timeout in seconds'
+    )
+
+    parser.add_argument(
+        'consistency_check',
+        choices=['one', 'quorum', 'all', 'local_one', 'local_quorum'],
+        default='local_quorum',
+        help='Alert if we lose the ability to do the provided '
+        'consistency level operations'
+    )
+    parser.set_defaults(func=run_check)
+
+    return parser.parse_args()
+
+
+def main():
+    args = parse_args()
+    try:
+        sys.exit(args.func(args))
+    except Exception, e:
+        print('UNKNOWN: Uncaught exception {0}'.format(e))
+        sys.exit(3)
+
+
+if __name__ == '__main__':
+    main()
