@@ -1,0 +1,15 @@
+- name: Add repository key for OpenJDK 1.8 when needed (Debian & Ubuntu)
+  apt_key:
+    url: https://adoptopenjdk.jfrog.io/adoptopenjdk/api/gpg/key/public
+    state: present
+
+- name: Add repo for OpenJDK (Debian & Ubuntu)
+  apt_repository:
+    repo: "deb https://adoptopenjdk.jfrog.io/adoptopenjdk/deb/ {{ ansible_distribution_release }} main"
+    state: present
+    filename: "openjdk-1.8"
+
+- name: Install OpenJDK (Debian & Ubuntu)
+  apt:
+    name: adoptopenjdk-8-hotspot
+    state: present

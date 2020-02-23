@@ -1,0 +1,3 @@
+---
+# defaults file for cassandra_install
+cassandra_packages: cassandra
