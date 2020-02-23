@@ -1,0 +1,1 @@
+roles/*/molecule/default/tests/test_default.py!skip
