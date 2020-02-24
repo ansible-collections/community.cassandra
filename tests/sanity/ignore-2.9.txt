@@ -1,3 +1,6 @@
 roles/cassandra_install/molecule/default/tests/test_default.py future-import-boilerplate!skip
 roles/cassandra_nrpe/molecule/default/tests/test_default.py future-import-boilerplate!skip
 roles/cassandra_repository/molecule/default/tests/test_default.py future-import-boilerplate!skip
+roles/cassandra_install/molecule/default/tests/test_default.py metaclass-boilerplate!skip
+roles/cassandra_nrpe/molecule/default/tests/test_default.py metaclass-boilerplate!skip
+roles/cassandra_repository/molecule/default/tests/test_default.py metaclass-boilerplate!skip
