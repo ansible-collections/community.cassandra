@@ -1,11 +1,10 @@
+#!/bin/bash
 ############################################################
 # Author: Rhys Campbell                                    #
 # Created: 2020.02.09                                      #
 # Description: Runs molecle tests for the roles located in #
 # roles/ when appropriate according to commits.            #
 ############################################################
-
-#!/bin/bash
 
 set -u;
 set -e;

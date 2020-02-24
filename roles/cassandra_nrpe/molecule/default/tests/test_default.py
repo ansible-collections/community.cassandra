@@ -52,7 +52,7 @@ def test_nrpe_check_cassandra_cluster(host):
     cmd = host.run("/usr/local/nagios/libexec/check_cassandra_cluster")
 
     assert cmd.rc == 2
-    #assert "quorum" in cmd.stdout
+    # assert "quorum" in cmd.stdout
 
 
 def test_npre_py_check_jmx(host):
