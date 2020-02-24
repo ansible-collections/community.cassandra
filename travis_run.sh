@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 ############################################################
 # Author: Rhys Campbell                                    #
 # Created: 2020.02.09                                      #
