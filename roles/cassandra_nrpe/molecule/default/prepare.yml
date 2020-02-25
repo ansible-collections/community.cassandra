@@ -18,14 +18,17 @@
       - ansible_os_family == "RedHat"
       - epel.changed == True
 
+  - name: Install debian packages (Debian & Ubuntu)
+    apt:
+     name: ["apt-transport-https", "curl", "gnupg"]
+     state: present
+    when: ansible_os_family == "Debian"
+
   - name: Run the equivalent of "apt-get update" as a separate step
     apt:
       update_cache: yes
       cache_valid_time: 3600
     when: ansible_os_family == "Debian"
-
-  #- name:
-  #  when: ansible_os_family == "Debian"
 
  #- name: Enable universe repository for Ubuntu systems
   #  apt_repository:

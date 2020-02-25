@@ -9,9 +9,9 @@
       gpgkey: "https://www.apache.org/dist/cassandra/KEYS"
   when: ansible_os_family == "RedHat"
 
-- name: Install gnupg package (Debian & Ubuntu)
+- name: Install debian packages (Debian & Ubuntu)
   apt:
-    name: gnupg
+    name: "{{ debian_packages }}"
     state: present
   when: ansible_os_family == "Debian"
 

@@ -1,2 +1,6 @@
 ---
 cassandra_version: "311x"
+debian_packages:
+  - apt-transport-https
+  - curl
+  - gnupg
