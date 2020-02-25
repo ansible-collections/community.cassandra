@@ -5,9 +5,6 @@
 # GNU General Public License v3.0+
 # (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 from __future__ import absolute_import, division, print_function
-from ansible.module_utils.basic import AnsibleModule, load_platform_subclass
-import socket
-__metaclass__ = type
 
 ANSIBLE_METADATA =\
     {"metadata_version": "1.1",
@@ -17,7 +14,7 @@ ANSIBLE_METADATA =\
 DOCUMENTATION = '''
 ---
 module: cassandra_traceprobability
-author: "Rhys Campbell (rhys.james.campbell@googlemail.com)"
+author: Rhys Campbell (@rhysmeister)
 version_added: 2.8
 short_description: Sets the trace probability.
 requirements: [ nodetool ]
@@ -27,8 +24,7 @@ options:
   host:
     description:
       - The hostname.
-    type: string
-    default: "localhost"
+    type: str
   port:
     description:
       - The Cassandra TCP port.
@@ -37,15 +33,15 @@ options:
   password:
     description:
       - The password to authenticate with.
-    type: string
+    type: str
   password_file:
     description:
       - Path to a file containing the password.
-    type: string
+    type: str
   username:
     description:
       - The username to authenticate with.
-    type: string
+    type: str
   value:
     description:
       - Trace probability between 0.0 and 1.0
@@ -54,7 +50,7 @@ options:
   nodetool_path:
     description:
       - The path to nodetool.
-    type: string
+    type: str
   debug:
     description:
       - Enable additional debug output.
@@ -73,6 +69,10 @@ cassandra_traceprobability:
   returned: success
   type: str
 '''
+
+from ansible.module_utils.basic import AnsibleModule, load_platform_subclass
+import socket
+__metaclass__ = type
 
 
 class NodeToolCmd(object):
@@ -113,7 +113,7 @@ class NodeToolCmd(object):
         # The thing we want nodetool to execute
         cmd += " {0}".format(sub_command)
         if self.debug:
-            print(cmd)
+            self.module.debug(cmd)
         return self.execute_command(cmd)
 
 

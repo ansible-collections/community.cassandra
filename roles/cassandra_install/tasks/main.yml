@@ -1,0 +1,13 @@
+---
+# tasks file for cassandra_install
+- name: For Debian Buster we need to make sure openjdk 1.8 is installed
+  include_tasks:
+    file: jdk1.8_Debian_Buster.yml
+  when:
+    - ansible_os_family == "Debian"
+    - ansible_distribution_release == "buster"
+
+- name: Install Cassandra Packages
+  package:
+    name: "{{ cassandra_packages }}"
+    state: present

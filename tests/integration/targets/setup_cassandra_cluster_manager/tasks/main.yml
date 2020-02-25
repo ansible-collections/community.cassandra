@@ -21,6 +21,7 @@
   when: ansible_os_family not in  ['RedHat', 'Debian' ]
 
 - command: hostname localhost
+  become: yes
 
 - name: Install OpenJDK package
   yum:
@@ -43,6 +44,7 @@
     src: "{{ ant_download }}"
     dest: /usr/local
     remote_src: yes
+    validate_certs: False
 
 - name: Create a symbolic link for ant
   file:
@@ -61,6 +63,8 @@
 
 - name: Check ant setup
   shell: source /etc/profile.d/ant.sh && echo $ANT_HOME
+  args:
+    executable: /bin/bash
   register: ant_setup
 
 - name: Validate ant setup
@@ -70,6 +74,8 @@
 
 - name: Check ant setup
   shell: source /etc/profile.d/ant.sh && echo $PATH
+  args:
+    executable: /bin/bash
   register: ant_path_setup
 
 - name: Validate path
@@ -77,14 +83,15 @@
     that:
       - "'/usr/local/ant' in ant_path_setup.stdout"
 
-- name: Install ccm via pip
-  pip:
-    name: ccm
-    state: present
-
 - name: Create cassandra user
   user:
     name: cassandra
+    state: present
+    shell: /bin/bash
+
+- name: Install ccm via pip
+  pip:
+    name: ccm
     state: present
 
 - name: Install Cassandra via ccm tool
@@ -98,7 +105,7 @@
     warn: false
 
 - name: Start the ccm cluster
-  command: sudo -u cassandra bash -c "ccm start --verbose"
+  command: sudo -u cassandra bash -c "ccm start"
   args:
     warn: false
 

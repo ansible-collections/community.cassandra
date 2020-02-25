@@ -5,9 +5,6 @@
 # GNU General Public License v3.0+
 # (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 from __future__ import absolute_import, division, print_function
-from ansible.module_utils.basic import AnsibleModule, load_platform_subclass
-import socket
-__metaclass__ = type
 
 ANSIBLE_METADATA =\
     {"metadata_version": "1.1",
@@ -17,7 +14,7 @@ ANSIBLE_METADATA =\
 DOCUMENTATION = '''
 ---
 module: cassandra_autocompaction
-author: "Rhys Campbell (rhys.james.campbell@googlemail.com)"
+author: Rhys Campbell (@rhysmeister)
 version_added: 2.8
 short_description: Enabled or disables autocompaction.
 requirements: [ nodetool ]
@@ -27,8 +24,7 @@ options:
   host:
     description:
       - The hostname.
-    type: string
-    default: "localhost"
+    type: str
   port:
     description:
       - The Cassandra TCP port.
@@ -37,23 +33,38 @@ options:
   password:
     description:
       - The password to authenticate with.
-    type: string
+    type: str
   password_file:
     description:
       - Path to a file containing the password.
-    type: string
+    type: str
   username:
     description:
       - The username to authenticate with.
-    type: string
+    type: str
+  keyspace:
+    description:
+      - The keyspace to operate on.
+    type: str
+    required: true
+  table:
+    description:
+      - The table to operate on.
+    type: list
+    elements: str
+    required: true
   state:
     description:
       - The required status
-    type: choices [ "enabled", "disabled" ]
+    type: str
+    choices:
+      - "enabled"
+      - "disabled"
+    required: true
   nodetool_path:
     description:
       - The path to nodetool.
-    type: string
+    type: str
   debug:
     description:
       - Enable additional debug output.
@@ -81,6 +92,10 @@ cassandra_autocompaction:
   type: str
 '''
 
+from ansible.module_utils.basic import AnsibleModule, load_platform_subclass
+__metaclass__ = type
+import socket
+
 
 class NodeToolCmd(object):
     """
@@ -107,7 +122,7 @@ class NodeToolCmd(object):
                 not self.nodetool_path.endswith('/'):
             self.nodetool_path += '/'
         else:
-                self.nodetool_path = ""
+            self.nodetool_path = ""
         cmd = "{0}nodetool --host {1} --port {2}".format(self.nodetool_path,
                                                          self.host,
                                                          self.port)
@@ -120,7 +135,7 @@ class NodeToolCmd(object):
         # The thing we want nodetool to execute
         cmd += " {0}".format(sub_command)
         if self.debug:
-            print(cmd)
+            self.module.debug(cmd)
         return self.execute_command(cmd)
 
 
@@ -154,7 +169,7 @@ def main():
             password_file=dict(type='str', no_log=True),
             username=dict(type='str', no_log=True),
             keyspace=dict(type='str', required=True),
-            table=dict(type='list', required=True),
+            table=dict(type='list', elements='str', required=True),
             state=dict(required=True, choices=['enabled', 'disabled']),
             nodetool_path=dict(type='str', default=None, required=False),
             debug=dict(type='bool', default=False, required=False),

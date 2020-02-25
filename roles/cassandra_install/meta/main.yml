@@ -1,0 +1,17 @@
+---
+galaxy_info:
+  author: Rhys Campbell
+  description: A simple role to install Cassandra for RedHat, Debian and Ubuntu platforms.
+  platforms:
+    - name: RedHat
+      versions:
+      - all
+    - name: Debian
+      versions:
+      - all
+    - name: Ubuntu
+      versions:
+      - all
+
+  galaxy_tags:
+    - cassandra

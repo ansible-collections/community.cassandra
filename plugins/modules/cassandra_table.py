@@ -2,13 +2,7 @@
 
 # Copyright: (c) 2019, Rhys Campbell <rhys.james.campbell@googlemail.com>
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
-
 from __future__ import absolute_import, division, print_function
-__metaclass__ = type
-import re
-import sys
-import traceback
-import collections
 
 ANSIBLE_METADATA = {'metadata_version': '1.1',
                     'status': ['preview'],
@@ -21,61 +15,76 @@ short_description: Create or drop tables on a Cassandra database.
 description:
    - Create or drop tables on a Cassandra database.
    - No alter functionality.
- version_added: 2.9
- author: Rhys Campbell (@rhysmeister)
- options:
-   login_user:
-     description: The Cassandra user to login with.
-     type: str
-   login_password:
-     description: The Cassandra password to login with.
-     type: str
-   login_host:
-     description: The Cassandra hostname.
-     type: str
-   login_port:
-     description: The Cassandra poret.
-     type: int
-     default: 9042
-   name:
-     description: The name of the table to create or drop.
-     type: str
-     required: true
-   state:
-     description: The desired state of the table.
-     type: str
-     choices: [ "present", "absent" ]
-     required: true
-   keyspace:
-     description:
-       - The keyspace in which to create the table.
-      type: boolean
-      required: true
-      default: false
-   columns:
-     description:
-       - The columns for the table.
-       - Specifiy dict as <column name>: <data type>
-     type: dict
-     required: false
-   primary_key:
-     description:
-       - The Primary key speicfication for the table
-       - TODO - How to specify the partition key?
-     type: list
-     required: true
-   clustering:
-     description:
-       - The clustering specification.
-     type: list
-   table_options:
-     description:
-       - Options for the table
-     type: dict
-   is_type:
-     description:
-       - Create a type instead of a table
-     type: bool
+version_added: 2.9
+author: Rhys Campbell (@rhysmeister)
+options:
+  login_user:
+    description: The Cassandra user to login with.
+    type: str
+  login_password:
+    description: The Cassandra password to login with.
+    type: str
+  login_host:
+    description: The Cassandra hostname.
+    type: list
+    elements: str
+  login_port:
+    description: The Cassandra poret.
+    type: int
+    default: 9042
+  name:
+    description: The name of the table to create or drop.
+    type: str
+    required: true
+  state:
+    description: The desired state of the table.
+    type: str
+    choices:
+      - "present"
+      - "absent"
+    required: true
+  keyspace:
+    description:
+      - The keyspace in which to create the table.
+    type: str
+    required: true
+  columns:
+    description:
+      - The columns for the table.
+      - "Specifiy pairs as <column name>: <data type>"
+    type: list
+    elements: dict
+    required: true
+  primary_key:
+    description:
+      - The Primary key speicfication for the table
+    type: list
+    elements: str
+    required: true
+  partition_key:
+    description:
+      - The partition key columns.
+    type: list
+    elements: str
+    required: false
+  clustering:
+    description:
+      - The clustering specification.
+    type: list
+    elements: str
+  table_options:
+    description:
+      - Options for the table
+    type: dict
+  is_type:
+    description:
+      - Create a type instead of a table
+    type: bool
+  debug:
+    description:
+      - Debug flag
+    type: bool
+    default: false
 '''
 
 EXAMPLES = r'''
@@ -120,6 +129,13 @@ msg:
   type: str
 '''
 
+__metaclass__ = type
+import re
+import sys
+import traceback
+import collections
+
+
 try:
     from cassandra.cluster import Cluster
     from cassandra.auth import PlainTextAuthProvider
@@ -157,8 +173,8 @@ def findnth(haystack, needle, n):
     '''
     Helper function used in create_primary_key_with_partition_key
     '''
-    parts = haystack.split(needle, n+1)
-    if len(parts) <= n+1:
+    parts = haystack.split(needle, n + 1)
+    if len(parts) <= n + 1:
         return -1
     return len(haystack) - len(parts[-1]) - len(needle)
 
@@ -171,7 +187,7 @@ def create_primary_key_with_partition_key(primary_key, partition_key):
     p_key_count = len(partition_key)
     for i, val in enumerate(partition_key):
         if not partition_key[i] == primary_key[i]:
-            raise ValueException("partition_key list elements do not match primary_key elements")
+            raise ValueError("partition_key list elements do not match primary_key elements")
     pk_cql = "PRIMARY KEY ({0}))".format(", ".join(primary_key))
     if p_key_count > 0:  # Need to insert the brackets for pk
         pos = findnth(pk_cql, ",", p_key_count - 1)
@@ -236,19 +252,19 @@ def main():
         argument_spec=dict(
             login_user=dict(type='str'),
             login_password=dict(type='str', no_log=True),
-            login_host=dict(type='list', default="localhost"),
+            login_host=dict(type='list', elements='str'),
             login_port=dict(type='int', default=9042),
             name=dict(type='str', required=True),
             state=dict(type='str', required=True, choices=['present', 'absent']),
             keyspace=dict(type='str', required=True),
-            columns=dict(type='list', default=None),
-            primary_key=dict(type='list', default=None),
-            clustering=dict(type='list', default=None),
-            partition_key=dict(type='list', default=[]),
+            columns=dict(type='list', elements='dict', required=True),
+            primary_key=dict(type='list', elements='str', required=True),
+            clustering=dict(type='list', elements='str'),
+            partition_key=dict(type='list', elements='str', default=[]),
             table_options=dict(type='dict', default=None),
             is_type=dict(type='bool', default=False),
             debug=dict(type='bool', default=False)),
-    supports_check_mode=True
+        supports_check_mode=True
     )
 
     if not HAS_CASSANDRA_DRIVER:
@@ -256,9 +272,7 @@ def main():
                          python driver. You can probably install it with\
                           pip install cassandra-driver.")
 
-    required_if = [
-      ["state", "present", ["columns", "primary_key"]]
-    ]
+    required_if = [["state", "present", ["columns", "primary_key"]]]
 
     login_user = module.params['login_user']
     login_password = module.params['login_password']
@@ -276,28 +290,27 @@ def main():
     debug = module.params['debug']
 
     result = dict(
-        changed = False,
-        cql = None,
+        changed=False,
+        cql=None,
     )
 
     cql = None
-
 
     try:
         auth_provider = None
         if login_user is not None:
             auth_provider = PlainTextAuthProvider(
-                username = login_user,
-                password = login_password
+                username=login_user,
+                password=login_password
             )
         cluster = Cluster(login_host,
-                          port = login_port,
-                          auth_provider = auth_provider)
+                          port=login_port,
+                          auth_provider=auth_provider)
         session = cluster.connect()
     except AuthenticationFailed as auth_failed:
-        module.fail_json(msg = "Authentication failed: {0}".format(excep))
+        module.fail_json(msg="Authentication failed: {0}".format(excep))
     except Exception as excep:
-        module.fail_json(msg = "Error connecting to cluster: {0}".format(excep))
+        module.fail_json(msg="Error connecting to cluster: {0}".format(excep))
 
     try:
         if table_exists(session, keyspace_name, table_name):
@@ -309,34 +322,34 @@ def main():
                     session.execute(cql)
                 result['changed'] = True
                 result['cql'] = cql
-        else: # Table does not exist
-                if state == "present":
-                    cql = create_table(keyspace_name,
-                                       table_name,
-                                       columns,
-                                       primary_key,
-                                       clustering,
-                                       partition_key,
-                                       table_options,
-                                       is_type)
-                    if not module.check_mode:
-                        session.execute(cql)
-                    result['changed'] = True
-                    result['cql'] = cql
-                else:
-                    result['changed'] = False
+        else:  # Table does not exist
+            if state == "present":
+                cql = create_table(keyspace_name,
+                                   table_name,
+                                   columns,
+                                   primary_key,
+                                   clustering,
+                                   partition_key,
+                                   table_options,
+                                   is_type)
+                if not module.check_mode:
+                    session.execute(cql)
+                result['changed'] = True
+                result['cql'] = cql
+            else:
+                result['changed'] = False
 
         module.exit_json(**result)
 
     except Exception as excep:
         exType, ex, tb = sys.exc_info()
         msg = "An error occured on line {0}: {1} | {2} | {3} | {4}".format(traceback.tb_lineno(tb),
-                                                                     excep,
-                                                                     exType,
-                                                                     ex,
-                                                                     traceback.print_exc())
+                                                                           excep,
+                                                                           exType,
+                                                                           ex,
+                                                                           traceback.print_exc())
         if cql is not None:
-            msg+= " | {0}".format(cql)
+            msg += " | {0}".format(cql)
         if debug:
             module.fail_json(msg=msg, **result)
         else:

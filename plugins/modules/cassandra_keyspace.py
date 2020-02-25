@@ -2,11 +2,7 @@
 
 # Copyright: (c) 2019, Rhys Campbell <rhys.james.campbell@googlemail.com>
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
-
 from __future__ import absolute_import, division, print_function
-__metaclass__ = type
-import re
-import socket
 
 ANSIBLE_METADATA = {'metadata_version': '1.1',
                     'status': ['preview'],
@@ -19,56 +15,59 @@ short_description: Manage keyspaces on your Cassandra cluster
 description:
    - Manage keyspaces on your Cassandra Cluster.
    - Keyspace can be created to use SimpleStrategy or NetworkTopologyStrategy.
-   - Keyspace modifications are supported, for example\
-     duratable writes, replication factor or data centre changes\
-     but it is not supported to migrate between replication strategies\
-     i.e. NetworkTopologyStrategy -> SimpleStrategy.
- version_added: 2.9
- author: Rhys Campbell (@rhysmeister)
- options:
-   login_user:
-     description: The Cassandra user to login with.
-     type: str
-   login_password:
-     description: The Cassandra password to login with.
-     type: str
-   login_host:
-     description:
-       - The Cassandra hostname.
-       - Set to the value returned by socket.getfqdn() if left unset.
-     type: str
-     default: None
-   login_port:
-     description: The Cassandra poret.
-     type: int
-     default: 9042
-   name:
-     description: The name of the keyspace to create or manage.
-     type: str
-     required: true
-   state:
-     description: The desired state of the keyspace.
-     type: str
-     choices: [ "present", "absent" ]
-     required: true
-   replication_factor:
-     description:
-       - The total number of copies of your keyspace data.
-       - The keyspace is created with SimpleStrategy.
-       - If data_centres is set this parameter is ignored.
-       - If not supplied the default value will be used.
-      type: int
-      default: 1
-   durable_writes:
-     description:
-       - Enable durable writes for the keyspace.
-       - If not supplied the default value will be used.
-     type: bool
-   data_centres:
-     description:
-       - The keyspace will be created with NetworkTopologyStrategy.
-       - Specify your data centres, along with replication_factor, as key-value pairs.
-     type: dict
+   - "Keyspace modifications are supported, for example duratable \
+   writes, replication factor or data centre changes but it is not \
+   supported to migrate between replication strategies \
+   i.e. NetworkTopologyStrategy -> SimpleStrategy."
+version_added: 2.9
+author: Rhys Campbell (@rhysmeister)
+options:
+  login_user:
+    description: The Cassandra user to login with.
+    type: str
+  login_password:
+    description: The Cassandra password to login with.
+    type: str
+  login_host:
+    description:
+      - The Cassandra hostname.
+      - Set to the value returned by socket.getfqdn() if left unset.
+    type: list
+    elements: str
+  login_port:
+    description: The Cassandra poret.
+    type: int
+    default: 9042
+  name:
+    description: The name of the keyspace to create or manage.
+    type: str
+    required: true
+  state:
+    description: The desired state of the keyspace.
+    type: str
+    choices:
+      - "present"
+      -  "absent"
+    required: true
+  replication_factor:
+    description:
+      - The total number of copies of your keyspace data.
+      - The keyspace is created with SimpleStrategy.
+      - If data_centres is set this parameter is ignored.
+      - If not supplied the default value will be used.
+    type: int
+    default: 1
+  durable_writes:
+    description:
+      - Enable durable writes for the keyspace.
+      - If not supplied the default value will be used.
+    type: bool
+    default: true
+  data_centres:
+    description:
+      - The keyspace will be created with NetworkTopologyStrategy.
+      - Specify your data centres, along with replication_factor, as key-value pairs.
+    type: dict
 '''
 
 EXAMPLES = r'''
@@ -83,6 +82,7 @@ EXAMPLES = r'''
     state: absent
 
 - name: Create a keyspace with RF 3
+  cassandra_keyspace:
     name: mykeyspace
     state: present
     replication_factor: 3
@@ -120,6 +120,11 @@ msg:
   type: str
 '''
 
+__metaclass__ = type
+import re
+import socket
+
+
 try:
     from cassandra.cluster import Cluster, AuthenticationFailed
     from cassandra.auth import PlainTextAuthProvider
@@ -152,7 +157,7 @@ def get_keyspace(cluster, keyspace):
 
 
 def create_alter_keyspace(module, session, keyspace, replication_factor, durable_writes, data_centres, is_alter):
-    if is_alter == False:
+    if is_alter is False:
         cql = "CREATE KEYSPACE {0} ".format(keyspace)
     else:
         cql = "ALTER KEYSPACE {0} ".format(keyspace)
@@ -176,7 +181,7 @@ def drop_keyspace(session, keyspace):
 
 def get_keyspace_config(module, cluster, keyspace):
     cql = get_keyspace(cluster, keyspace)
-    dict_regexp = re.compile('{([\S\s]*)}')
+    dict_regexp = re.compile(r'{([\S\s]*)}')
     durable_writes_regexp = re.compile('DURABLE_WRITES = (True|False);')
     repl_settings = re.search(dict_regexp, cql).group(0)
     try:
@@ -188,13 +193,14 @@ def get_keyspace_config(module, cluster, keyspace):
     return keyspace_config
 
 
-def keyspace_is_changed(module, cluster, keyspace, replication_factor, durable_writes, data_centres):
+def keyspace_is_changed(module, cluster, keyspace, replication_factor,
+                        durable_writes, data_centres):
     cfg = get_keyspace_config(module, cluster, keyspace)
     keyspace_definition_changed = False
     if cfg['class'] == "SimpleStrategy":
         if int(cfg['replication_factor']) != replication_factor or\
-            cfg['durable_writes'] != durable_writes:
-                keyspace_definition_changed = True
+                cfg['durable_writes'] != durable_writes:
+            keyspace_definition_changed = True
     elif cfg['class'] == "NetworkTopologyStrategy":
         # ls = [cfg, keyspace, replication_factor, durable_writes, data_centres]
         # module.fail_json(msg=str(ls))
@@ -208,7 +214,7 @@ def keyspace_is_changed(module, cluster, keyspace, replication_factor, durable_w
                 else:
                     keyspace_definition_changed = True
             # If still false check for removed dc's
-            if keyspace_definition_changed == False:
+            if keyspace_definition_changed is False:
                 for dc in cfg.keys():
                     if dc not in data_centres and dc not in ["class", "durable_writes"]:
                         keyspace_definition_changed = True
@@ -218,22 +224,23 @@ def keyspace_is_changed(module, cluster, keyspace, replication_factor, durable_w
 
 ############################################
 
+
 def main():
     module = AnsibleModule(
         argument_spec=dict(
             login_user=dict(type='str'),
             login_password=dict(type='str', no_log=True),
-            login_host=dict(type='list', default=None),
+            login_host=dict(type='list', elements='str', default=None),
             login_port=dict(type='int', default=9042),
             name=dict(type='str', required=True),
             state=dict(type='str', required=True, choices=['present', 'absent']),
             replication_factor=dict(type='int', default=1),
             durable_writes=dict(type='bool', default=True),
             data_centres=dict(type='dict')),
-    supports_check_mode=True
+        supports_check_mode=True
     )
 
-    if HAS_CASSANDRA_DRIVER == False:
+    if HAS_CASSANDRA_DRIVER is False:
         module.fail_json(msg="This module requires the cassandra-driver python \
                          driver. You can probably install it with pip\
                           install cassandra-driver.")
@@ -253,8 +260,8 @@ def main():
     data_centres = module.params['data_centres']
 
     result = dict(
-        changed = False,
-        keyspace = name,
+        changed=False,
+        keyspace=name,
     )
 
     # For now we won't change the replication strategy & options if the keyspace already exists
@@ -264,12 +271,12 @@ def main():
         auth_provider = None
         if login_user is not None:
             auth_provider = PlainTextAuthProvider(
-                username = login_user,
-                password = login_password
+                username=login_user,
+                password=login_password
             )
         cluster = Cluster(login_host,
-                          port = login_port,
-                          auth_provider = auth_provider)
+                          port=login_port,
+                          auth_provider=auth_provider)
         session = cluster.connect()
     except AuthenticationFailed as excep:
         module.fail_json(msg="Authentication failed: {0}".format(excep))

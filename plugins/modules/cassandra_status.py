@@ -5,11 +5,6 @@
 # GNU General Public License v3.0+
 # (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 from __future__ import absolute_import, division, print_function
-from ansible.module_utils.basic import AnsibleModule, load_platform_subclass
-import socket
-import re
-import time
-__metaclass__ = type
 
 ANSIBLE_METADATA =\
     {"metadata_version": "1.1",
@@ -19,7 +14,7 @@ ANSIBLE_METADATA =\
 DOCUMENTATION = '''
 ---
 module: cassandra_status
-author: "Rhys Campbell (rhys.james.campbell@googlemail.com)"
+author: Rhys Campbell (@rhysmeister)
 version_added: 2.9
 short_description: Validates the status of the cluster as seen from the node.
 requirements: [ nodetool ]
@@ -32,8 +27,7 @@ options:
   host:
     description:
       - The hostname.
-    type: string
-    default: "localhost"
+    type: str
   port:
     description:
       - The Cassandra TCP port.
@@ -42,20 +36,22 @@ options:
   password:
     description:
       - The password to authenticate with.
-    type: string
+    type: str
   password_file:
     description:
       - Path to a file containing the password.
-    type: string
+    type: str
   username:
     description:
       - The username to authenticate with.
-    type: string
+    type: str
   down:
     description:
       - The maximum number of nodes that can be tolerated as down.
     type: int
     default: 0
+    aliases:
+      - d
   poll:
     description:
       - The maximum number of times to call nodetool status to get cluster status.
@@ -69,7 +65,7 @@ options:
   nodetool_path:
     description:
       - The path to nodetool.
-    type: string
+    type: str
   debug:
     description:
       - Enable additional debug output.
@@ -91,14 +87,13 @@ EXAMPLES = '''
 '''
 
 RETURN = '''
-cassandra_status:
-  cluster: The name of the Cassandra Cluster
-  nodes: [ { "node01":  { "UN": 32, "UL": 0, "UJ": 0, "UM": 0, "D": 0 } } .. ]
-  polled: 3
-  polling_duration: 90
-  returned: success/failure
-  type: str
 '''
+
+from ansible.module_utils.basic import AnsibleModule, load_platform_subclass
+import socket
+import re
+import time
+__metaclass__ = type
 
 
 class NodeToolCmd(object):
@@ -139,7 +134,7 @@ class NodeToolCmd(object):
         # The thing we want nodetool to execute
         cmd += " {0}".format(sub_command)
         if self.debug:
-            print(cmd)
+            self.module.debug(cmd)
         return self.execute_command(cmd)
 
 
@@ -199,7 +194,7 @@ def nodetool_status_poll(module):
             else:
                 time.sleep(interval)
     return cluster_status, cluster_status_list, iterations, \
-            return_codes, stdout_list, stderr_list, down_running_total
+        return_codes, stdout_list, stderr_list, down_running_total
 
 
 def cluster_up_down(stdout):
@@ -231,9 +226,9 @@ def cluster_up_down(stdout):
             cluster_up_down[data_center] = dict()
             cluster_up_down[data_center]["up"] = list()
             cluster_up_down[data_center]["down"] = list()
-        if line.startswith("UN") and bool(re.findall( r'[0-9]+(?:\.[0-9]+){3}', line)):
+        if line.startswith("UN") and bool(re.findall(r'[0-9]+(?:\.[0-9]+){3}', line)):
             cluster_up_down[data_center]["up"].append(line.split()[1])
-        if line.startswith("D") and bool(re.findall( r'[0-9]+(?:\.[0-9]+){3}', line)):
+        if line.startswith("D") and bool(re.findall(r'[0-9]+(?:\.[0-9]+){3}', line)):
             cluster_up_down[data_center]["down"].append(line.split()[1])
     return cluster_up_down
 
@@ -246,7 +241,7 @@ def main():
             password=dict(type='str', no_log=True),
             password_file=dict(type='str', no_log=True),
             username=dict(type='str', no_log=True),
-            down=dict(type='int', default=0, alias="d"),
+            down=dict(type='int', default=0, aliases=["d"]),
             poll=dict(type='int', default=1),
             interval=dict(type='int', default=30),
             nodetool_path=dict(type='str', default=None, required=False),
@@ -258,7 +253,7 @@ def main():
 
     cluster_status, cluster_status_list, iterations, \
         return_codes, stdout_list, stderr_list, down_running_total \
-            = nodetool_status_poll(module)
+        = nodetool_status_poll(module)
 
     result = {}
 

@@ -11,7 +11,7 @@ As this is an independent Collection, it can be released on it's own release cad
 
 ## GitHub workflow
 
-* Maintainers would be members of this GitHub Repo
+* Maintainers would be members of this GitHub Repo.
 * Branch protections could be used to enforce 1 (or 2) reviews from relevant maintainers [CODEOWNERS](.github/CODEOWNERS)
 
 ## Contributing
