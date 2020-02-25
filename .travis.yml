@@ -9,6 +9,7 @@ before_install:
   - pip install -U ansible
   - pip install -U codecov
   - pip install -U molecule docker
+  - pip install pytest=5.3.4
   - ansible --version
   - molecule --version
   - pytest --version

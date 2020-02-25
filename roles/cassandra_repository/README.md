@@ -1,7 +1,7 @@
 cassandra_repository
 ====================
 
-Configures a repository for Cassandra on Debian and RedHat based platforms..
+Configures a repository for Cassandra on Debian and RedHat based platforms.
 
 Requirements
 ------------
