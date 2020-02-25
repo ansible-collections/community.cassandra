@@ -11,6 +11,7 @@ before_install:
   - pip install -U molecule docker
   - ansible --version
   - molecule --version
+  - pytest --version
 script:
   - ./travis_run.sh
 after_success:
