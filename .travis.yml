@@ -9,6 +9,8 @@ before_install:
   - pip install -U ansible
   - pip install -U codecov
   - pip install -U molecule docker
+  - ansible --version
+  - molecule --version
 script:
   - ./travis_run.sh
 after_success:
