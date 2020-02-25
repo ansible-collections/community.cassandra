@@ -24,4 +24,4 @@ verifier:
 lint: |
   set -e
   yamllint .
-  flake8 --ignore=E1
+  flake8 --ignore=E501
