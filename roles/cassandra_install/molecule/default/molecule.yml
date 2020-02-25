@@ -1,10 +1,10 @@
 ---
 dependency:
-  name: galaxy
+  name: "galaxy"
 driver:
-  name: docker
+  name: "docker"
 lint:
-  name: yamllint
+  name: "yamllint"
 platforms:
   - name: centos_7
     image: centos:7
@@ -17,13 +17,13 @@ platforms:
   - name: debian_stretch
     image: debian:stretch
 provisioner:
-  name: ansible
+  name: "ansible"
   lint:
-    name: ansible-lint
-    enabled: false
+    name: "ansible-lint"
+    enabled: False
 verifier:
-  name: testinfra
+  name: "testinfra"
   lint:
-    name: flake8
+    name: "flake8"
     options:
       ignore: 'E501'
