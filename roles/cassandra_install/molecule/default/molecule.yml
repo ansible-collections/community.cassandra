@@ -3,8 +3,6 @@ dependency:
   name: "galaxy"
 driver:
   name: "docker"
-lint:
-  name: "yamllint"
 platforms:
   - name: centos_7
     image: centos:7
@@ -23,7 +21,7 @@ provisioner:
     enabled: False
 verifier:
   name: "testinfra"
-  lint:
-    name: "flake8"
-    options:
-      ignore: 'E501'
+lint: |
+  set -e
+  yamllint .
+  flake8 --ignore=E1
