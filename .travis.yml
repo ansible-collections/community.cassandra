@@ -6,7 +6,7 @@ python:
 before_install:
   - python --version
   - pip install --upgrade pip
-  - pip install --user --requirement requirements.txt
+  - pip install --requirement requirements.txt
   - pip --version
   - ansible --version
   - molecule --version
