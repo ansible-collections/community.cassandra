@@ -21,6 +21,8 @@ provisioner:
     enabled: False
 verifier:
   name: "testinfra"
+  options:
+    n: 1
 lint: |
   set -e
   yamllint .
