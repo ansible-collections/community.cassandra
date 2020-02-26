@@ -6,11 +6,7 @@ python:
 before_install:
   - python --version
   - pip install --upgrade pip
-  - pip install -U flake8
-  - pip install -U ansible
-  - pip install -U codecov
-  - pip install -U molecule docker
-  - pip install pytest==5.3.4
+  - pip install --user --requirement requirements.txt
   - pip --version
   - ansible --version
   - molecule --version
