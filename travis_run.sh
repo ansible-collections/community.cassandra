@@ -30,7 +30,7 @@ for role in "${role_list[@]}"; do
   echo "Executing tests for $role.";
   cd "$role"
   molecule test;
-  cd ../../../ && echo "Back in $(pwd)"; # back to project root
+  cd ../../ && echo "Back in $(pwd)"; # back to project root
   test_count=$(( test_count + 1 ));
 done;
 
