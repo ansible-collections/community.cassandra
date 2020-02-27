@@ -12,8 +12,6 @@
 
   - name: Run yum clean all
     shell: yum clean all
-    args:
-      command_warnings: False
     when:
       - ansible_os_family == "RedHat"
       - epel.changed == True
