@@ -1,0 +1,61 @@
+---
+# tasks file for cassandra_linux
+- name: Include vars for OS family
+  include_vars:
+    file: "{{ ansible_os_family }}.yml"
+
+- name: Disable Swap
+  command: swapoff -a
+  args:
+    creates: is_docker.txt
+  when:
+    - ansible_swaptotal_mb > 0
+
+- name: Remove swap partitions
+  mount:
+    path: swap
+    state: absent
+
+- name: Ensure Swappiness is 1
+  sysctl:
+    name: vm.swappiness
+    value: "1"
+    sysctl_set: yes
+    reload: yes
+
+- name: Ensure max_map_count is 1048575
+  sysctl:
+    name: vm.max_map_count
+    value: "1048575"
+    sysctl_set: yes
+    reload: yes
+
+- name: Install ntp
+  package:
+    name: "{{ ntp_packages }}"
+    state: present
+
+- name: Ensure ntp service starts
+  service:
+    name: "{{ ntp_service }}"
+    enabled: yes
+    state: started
+
+- name: Ensure limits are set
+  blockinfile:
+    path: /etc/security/limits.conf
+    block: |
+      cassandra - memlock unlimited
+      cassandra - nofile 100000
+      cassandra - nproc 32768
+      cassandra - as unlimited
+    marker: "#<!-- {mark} ANSIBLE MANAGED BLOCK -->"
+    state: present
+
+- name: Extra Limit for RH Derived Distros
+  lineinfile:
+    path: /etc/security/limits.d/90-nproc.conf
+    regexp: "^\\* - nproc 32768"
+    line: "* - nproc 32768"
+    create: yes
+  when: ansible_os_family == "RedHat"

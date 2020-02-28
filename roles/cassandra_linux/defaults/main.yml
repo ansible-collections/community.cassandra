@@ -1,0 +1,6 @@
+---
+# defaults file for cassandra_linux
+ntp_packages:
+  - "ntp"
+  - "ntpdate"
+  - "ntp-doc"
