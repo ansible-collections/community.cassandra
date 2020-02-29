@@ -1,0 +1,23 @@
+---
+- name: Prepare
+  hosts: all
+
+  tasks:
+
+  - name: Install epel for RedHat based systems
+    yum:
+      name: epel-release
+    register: epel
+    when: ansible_os_family == "RedHat"
+
+  - name: Run yum clean all
+    shell: yum clean all
+    when:
+      - ansible_os_family == "RedHat"
+      - epel.changed == True
+
+  - name: Run the equivalent of "apt-get update" as a separate step
+    apt:
+      update_cache: yes
+      cache_valid_time: 3600
+    when: ansible_os_family == "Debian"
