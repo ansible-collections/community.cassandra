@@ -53,3 +53,10 @@ __________
 The following sources of information were used extensively for this role:
 
 * https://docs.datastax.com/en/docker/doc/docker/dockerRecommendedSettings.html
+* https://docs.datastax.com/en/cassandra/3.0/cassandra/install/installRecommendSettings.html
+* https://docs.datastax.com/en/dse/5.1/dse-admin/datastax_enterprise/config/configRecommendedSettings.html
+
+TODO
+----
+
+* Need to check the tasked marked with is_docker tests to ensure they function in a non-docker environment.

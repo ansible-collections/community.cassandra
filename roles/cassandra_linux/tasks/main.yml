@@ -4,11 +4,15 @@
   include_vars:
     file: "{{ ansible_os_family }}.yml"
 
+- name: Check is_docker.txt file exists
+  stat:
+    path: is_docker.txt
+  register: is_docker
+
 - name: Disable Swap
   command: swapoff -a
-  args:
-    creates: is_docker.txt
   when:
+    - is_docker.stat.exists == False
     - ansible_swaptotal_mb > 0
 
 - name: Remove swap partitions
@@ -65,7 +69,7 @@
     name: "{{ item.key }}"
     value: "{{ item.value }}"
     state: present
-    sysctl_file: "{{ sysctl_file }}"
+    sysctl_file: /etc/sysctl.conf
     reload: yes
   with_items:
     - { key: net.ipv4.tcp_keepalive_time, value: 60 }
@@ -78,20 +82,23 @@
     - { key: net.core.optmem_max, value: 40960 }
     - { key: net.ipv4.tcp_rmem, value: "4096 87380 16777216" }
     - { key: net.ipv4.tcp_wmem, value: "4096 65536 16777216" }
+  when:
+    - is_docker.stat.exists == False
 
 - name: Disable zone_reclaim_mode
   sysctl:
     name: vm.zone_reclaim_mode
     value: 0
     state: present
-    sysctl_file: "{{ sysctl_file }}"
+    sysctl_file: /etc/sysctl.conf
     reload: yes
+  when:
+    - is_docker.stat.exists == False
 
 - name: Ensure disable-thp service file exists
   copy:
     src: disable-thp.service
     dest: /etc/systemd/system/
-  when: disable_thp
 
 - name: Ensure service to disable THP exists
   systemd:
@@ -99,4 +106,3 @@
     daemon-reload: yes
     state: started
     enabled: yes
-  when: disable_thp

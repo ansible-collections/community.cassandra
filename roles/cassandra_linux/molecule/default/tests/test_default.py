@@ -77,3 +77,11 @@ def test_limit_file(host):
 
         assert f.exists
         assert "nproc" in f.content_string
+
+
+def test_thp_service_worked(host):
+
+    cmd = host.run("cat /sys/kernel/mm/transparent_hugepage/enabled")
+
+    assert cmd.rc == 0
+    assert cmd.stdout.strip() == "always madvise [never]"
