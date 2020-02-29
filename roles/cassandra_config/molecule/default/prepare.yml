@@ -1,0 +1,33 @@
+---
+- name: Prepare
+  hosts: all
+
+  tasks:
+
+    - name: Ensure cassandra group exists
+      group:
+        name: cassandra
+
+    - name: Ensure cassandra user exists
+      user:
+        name: cassandra
+        group: cassandra
+
+    - name: Ensure /etc/cassandra/conf/ exists
+      file:
+        path: /etc/cassandra/conf/
+        owner: cassandra
+        group: cassandra
+        state: directory
+        recurse: yes
+        mode: 0751
+
+    - name: Ensure pip is available
+      package:
+        name: python-pip
+        state: present
+
+    - name: Ensure pyyaml package is available
+      pip:
+        name: pyyaml
+        state: present
