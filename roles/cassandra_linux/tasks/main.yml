@@ -99,6 +99,7 @@
   copy:
     src: disable-thp.service
     dest: /etc/systemd/system/
+  register: thp
 
 - name: Ensure service to disable THP exists
   systemd:
@@ -106,3 +107,4 @@
     daemon-reload: yes
     state: started
     enabled: yes
+  when: thp.changed == True
