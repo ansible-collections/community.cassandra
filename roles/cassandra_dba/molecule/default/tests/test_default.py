@@ -14,6 +14,7 @@ def test_hosts_file(host):
     assert f.user == 'root'
     assert f.group == 'root'
 
+
 def test_packages_installed(host):
     # TODO Include ansible vars from file
 

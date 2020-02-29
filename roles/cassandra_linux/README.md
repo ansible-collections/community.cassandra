@@ -1,7 +1,7 @@
 cassandra_linux
 ===============
 
-Set Cassandra Linux OS customizations
+Set Cassandra Linux OS customizations.
 
 Requirements
 ------------
@@ -46,3 +46,10 @@ Author Information
 
 An optional section for the role authors to include contact information, or a
 website (HTML is not allowed).
+
+References
+__________
+
+The following sources of information were used extensively for this role:
+
+* https://docs.datastax.com/en/docker/doc/docker/dockerRecommendedSettings.html
