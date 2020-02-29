@@ -1,0 +1,10 @@
+---
+# vars file for Debian based systems
+cassandra_dba_packages:
+  - procps  # /proc filesystem utilities
+  - psmisc  # For pstree
+  - strace  # View system calls
+  - net-tools  # Supplies net stats und…
+  - tree  # View fs as a tree
+  - dstat  # cool performance metrics tool
+  - htop  # advanced top
