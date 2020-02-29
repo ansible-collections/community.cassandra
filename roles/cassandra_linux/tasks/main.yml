@@ -59,3 +59,44 @@
     line: "* - nproc 32768"
     create: yes
   when: ansible_os_family == "RedHat"
+
+- name: TCP setting for prevents timeouts and handling many connections
+  sysctl:
+    name: "{{ item.key }}"
+    value: "{{ item.value }}"
+    state: present
+    sysctl_file: "{{ sysctl_file }}"
+    reload: yes
+  with_items:
+    - { key: net.ipv4.tcp_keepalive_time, value: 60 }
+    - { key: net.ipv4.tcp_keepalive_probes, value: 3 }
+    - { key: net.ipv4.tcp_keepalive_intvl, value: 10 }
+    - { key: net.core.rmem_max, value: 16777216 }
+    - { key: net.core.wmem_max, value: 16777216 }
+    - { key: net.core.rmem_default, value: 16777216 }
+    - { key: net.core.wmem_default, value: 16777216 }
+    - { key: net.core.optmem_max, value: 40960 }
+    - { key: net.ipv4.tcp_rmem, value: "4096 87380 16777216" }
+    - { key: net.ipv4.tcp_wmem, value: "4096 65536 16777216" }
+
+- name: Disable zone_reclaim_mode
+  sysctl:
+    name: vm.zone_reclaim_mode
+    value: 0
+    state: present
+    sysctl_file: "{{ sysctl_file }}"
+    reload: yes
+
+- name: Ensure disable-thp service file exists
+  copy:
+    src: disable-thp.service
+    dest: /etc/systemd/system/
+  when: disable_thp
+
+- name: Ensure service to disable THP exists
+  systemd:
+    name: disable-thp
+    daemon-reload: yes
+    state: started
+    enabled: yes
+  when: disable_thp
