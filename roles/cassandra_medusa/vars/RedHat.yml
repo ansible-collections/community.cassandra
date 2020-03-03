@@ -1,0 +1,7 @@
+# Stuff for building Python
+build_packages:
+  - gcc
+  - openssl-devel
+  - bzip2-devel
+  - gcc-c++
+  - make

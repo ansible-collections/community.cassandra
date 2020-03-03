@@ -1,0 +1,9 @@
+---
+- name: Prepare
+  hosts: all
+
+  tasks:
+
+    - name: Run fix firewalld script on RedHat based systems
+      script: ../files/firewalld_fix.sh
+      when: ansible_os_family == "RedHat"

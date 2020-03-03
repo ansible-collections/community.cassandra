@@ -1,0 +1,16 @@
+---
+# defaults file for cassandra_medusa
+medusa_pip_packages:
+  - cassandra-medusa
+  - cassandra-medusa[S3]
+  - cassandra-medusa[GCS]
+
+
+# Stuff for Python
+python_download_url: https://www.python.org/ftp/python/3.6.9/Python-3.6.9.tgz
+python_sha256: sha256:47fc92a1dcb946b9ed0abc311d3767b7215c54e655b17fd1d3f9b538195525aa
+python_archive: "{{ python_download_url | basename }}"
+python_directory: "{{ (python_download_url.split('.tgz'))[0] | basename }}"
+python_build_root: "/opt/src/"
+python_exec_path: "/usr/local/bin/python3.6"
+python_expected_version: "Python 3.6.9"

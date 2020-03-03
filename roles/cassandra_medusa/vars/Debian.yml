@@ -1,0 +1,11 @@
+# Stuff for building Python
+build_packages:
+  - build-essential
+  - bzip2
+  - libssl-dev
+  - libbz2-dev
+  - make
+  - sqlite3
+  - libsqlite3-dev
+  - zlib1g
+  - zlib1g-dev

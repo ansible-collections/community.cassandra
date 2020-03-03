@@ -1,0 +1,33 @@
+---
+# tasks file for cassandra_firewall
+- name: Include vars for os family
+  include_vars:
+    file: "{{ ansible_os_family }}.yml"
+
+- name: Ensure firewalld package is installed
+  package:
+    name: "{{ firewalld_packages }}"
+    state: present
+
+- name: Ensure firewalld service is started
+  service:
+    name: firewalld
+    state: started
+    enabled: yes
+
+- name: Set python3 for Debian based system
+  set_fact:
+    mypy: "/usr/bin/python3"
+  when:
+    - ansible_os_family == "Debian"
+
+- name: Ensure ports for cassandra open
+  firewalld:
+    port: "{{ item }}"
+    permanent: yes
+    immediate: yes
+    state: enabled
+  with_items:
+    - "{{ open_ports }}"
+  vars:
+    ansible_python_interpreter: "{{ mypy | default('python') }}"
