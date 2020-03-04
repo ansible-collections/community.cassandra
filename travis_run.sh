@@ -19,8 +19,12 @@ declare -a role_list=();
 
 for role in $(git diff --name-only HEAD~1 | grep roles/ | cut -d'/' -f -2 | sort | uniq); do
     if [[ -d "$role/molecule" ]]; then
-      echo "Adding $role to test queue"
-      role_list+=( $role );
+      if [[ ! -f "$role/molecule/.travisignore" ]]; then
+        echo "Adding $role to test queue"
+        role_list+=( $role );
+      else
+        echo "The role $role has been specifically excluded from travis with a .travisignore file";
+      fi;
     else
         echo "The role $role does not have a molecule sub-directoy so skipping tests."
     fi;
