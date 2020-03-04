@@ -1,7 +1,7 @@
 cassandra_firewall
 ==================
 
-A simple role to install and configure firewalld with the ports commonly used by Apache Cassandra.
+A simple role to install and configure firewalld with the ports commonly used by Apache Cassandra..
 
 Requirements
 ------------
