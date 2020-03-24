@@ -18,6 +18,10 @@
 
 # ============================================================
 
+- name: Include vars for os family
+  include_vars:
+    file: "{{ ansible_os_family }}.yml"
+
 - name: Set authenticator in cassandra.yml
   lineinfile:
     path: "{{ cassandra_yml_file }}"

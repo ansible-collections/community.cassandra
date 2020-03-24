@@ -19,6 +19,9 @@
 # along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
 
 # ============================================================
+- name: Include vars for os family
+  include_vars:
+    file: "{{ ansible_os_family }}.yml"
 
 - name: Unset authenticator in cassandra.yml
   lineinfile:
