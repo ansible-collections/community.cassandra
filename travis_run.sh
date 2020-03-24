@@ -9,6 +9,8 @@
 set -u;
 set -e;
 
+pwd;
+
 FILES=$(git diff --name-only HEAD~1 | wc -l | xargs);
 
 echo "There are $FILES files in this commit.";
@@ -30,16 +32,20 @@ for role in $(git diff --name-only HEAD~1 | grep roles/ | cut -d'/' -f -2 | sort
     fi;
 done
 
-for role in "${role_list[@]}"; do
-  echo "Executing tests for $role.";
-  cd "$role"
-  molecule test;
-  cd ../../ && echo "Back in $(pwd)"; # back to project root
-  test_count=$(( test_count + 1 ));
-done;
+if [ ${#role_list[@]} -ne 0 ]; then
+  for role in "${role_list[@]}"; do
+    echo "Executing tests for $role.";
+    cd "$role"
+    molecule test;
+    cd ../../ && echo "Back in $(pwd)"; # back to project root
+    test_count=$(( test_count + 1 ));
+  done;
 
-if (( test_count > 0 )); then
-  echo "Executed tests for a total of $test_count roles.";
+  if (( test_count > 0 )); then
+    echo "Executed tests for a total of $test_count roles.";
+  else
+    echo "No role tests executed on this run."
+  fi;
 else
-  echo "No role tests executed on this run."
+  echo "No roles in commit. Bailing without doing anything"
 fi;
