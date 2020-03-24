@@ -21,7 +21,7 @@
   when: ansible_os_family not in  ['RedHat', 'Debian' ]
 
 # CassandraDaemon.java:749 - Local host name unknown: java.net.UnknownHostException: localhost.localdomain: localhost.localdomain: Name or service not known
-- command: hostname localhost
+#- command: hostname localhost
 
 - name: Install OpenJDK package
   yum:
