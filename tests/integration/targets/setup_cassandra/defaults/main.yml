@@ -1,15 +1,18 @@
+# The cassandra_version var should be set to one
+# of the dirs in https://downloads.apache.org/cassandra/redhat/
+cassandra_version: "311x"
 openjdk: java-1.8.0-openjdk
 
 cassandra_yum:
   description: "Apache Cassandra"
   name: cassandra_yum
-  baseurl: "https://www.apache.org/dist/cassandra/redhat/311x/"
+  baseurl: "https://www.apache.org/dist/cassandra/redhat/{{ cassandra_version }}/"
   enabled: yes
   gpgcheck: yes
   gpgkey: "https://www.apache.org/dist/cassandra/KEYS"
 
 cassandra_deb:
-  repo: deb http://www.apache.org/dist/cassandra/debian 311x main
+  repo: deb http://www.apache.org/dist/cassandra/debian {{ cassandra_version }} main
 
 cassandra_yum_pkg: cassandra
 cassandra_deb_pkg: cassandra
