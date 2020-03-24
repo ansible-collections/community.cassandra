@@ -18,7 +18,7 @@
 
 # ===========================================================
 - name: Get incremental backup status 1
-  shell: nodetool -h $(hostname) getcompactionthroughput
+  shell: nodetool -h 127.0.0.1 getcompactionthroughput
   register: compactionthroughput
 
 - name: Assert starting status of compactionthroughput
@@ -30,7 +30,7 @@
     value: 32
 
 - name: Get compactionthroughput
-  shell: nodetool -h $(hostname) getcompactionthroughput
+  shell: nodetool -h 127.0.0.1 getcompactionthroughput
   register: compactionthroughput
 
 - name: Assert compactionthroughput is 32MB
@@ -42,7 +42,7 @@
     value: 64
 
 - name: Get compactionthroughput
-  shell: nodetool -h $(hostname) getcompactionthroughput
+  shell: nodetool -h 127.0.0.1 getcompactionthroughput
   register: compactionthroughput
 
 - name: Assert compactionthroughput is 64MB
@@ -60,7 +60,7 @@
     that: compactionthroughput.changed == True
 
 - name: Get compactionthroughput
-  shell: nodetool -h $(hostname) getcompactionthroughput
+  shell: nodetool -h 127.0.0.1 getcompactionthroughput
   register: compactionthroughput
 
 - name: Assert compactionthroughput is still 64MB
@@ -72,7 +72,7 @@
     value: 32
 
 - name: Get compactionthroughput
-  shell: nodetool -h $(hostname) getcompactionthroughput
+  shell: nodetool -h 127.0.0.1 getcompactionthroughput
   register: compactionthroughput
 
 - name: Assert compactionthroughput is again 32MB
@@ -85,7 +85,7 @@
   register: module_nochange
 
 - name: Get compactionthroughput
-  shell: nodetool -h $(hostname) getcompactionthroughput
+  shell: nodetool -h 127.0.0.1 getcompactionthroughput
   register: compactionthroughput
 
 - name: Assert compactionthroughput is still 32MB and module reports no change
@@ -106,7 +106,7 @@
   when: cassandra_auth_tests == True
 
 - name: Get compactionthroughput auth 1
-  shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h $(hostname) getcompactionthroughput
+  shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 getcompactionthroughput
   register: compactionthroughput
   when: cassandra_auth_tests == True
 
@@ -125,7 +125,7 @@
   when: cassandra_auth_tests == True
 
 - name: Get compactionthroughput auth 2
-  shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h $(hostname) getcompactionthroughput
+  shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 getcompactionthroughput
   register: compactionthroughput
   when: cassandra_auth_tests == True
 
