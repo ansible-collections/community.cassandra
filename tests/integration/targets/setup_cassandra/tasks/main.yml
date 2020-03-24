@@ -74,7 +74,7 @@
 
 - name: Adjust heap size
   lineinfile:
-    path: /etc/cassandra/default.conf/cassandra-env.sh
+    path: "{{ cassandra_env_file }}"
     regexp: "^MAX_HEAP_SIZE="
     line: "MAX_HEAP_SIZE=256M"
 
