@@ -90,8 +90,10 @@
     host: 0.0.0.0
     delay: 10
 
-# nodetool drain tests seem to need this additional wait... perhaps variablise with a boolean?
-- shell: cat /var/log/cassandra/cassandra.log && sleep 10
+# nodetool drain tests seem to need this additional wait... perhaps variablize with a boolean?
+#- shell: cat /var/log/cassandra/cassandra.log && sleep 10
+- pause:
+    seconds: 10
 
 - name: Test nodetool authentication from shell
   command: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} status
