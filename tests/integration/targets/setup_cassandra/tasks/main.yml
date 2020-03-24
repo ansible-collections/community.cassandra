@@ -33,7 +33,7 @@
   when:
     - nt.rc != 0
     - cassandra_auth_tests == True
-    - "No such file or directory" not in nt.msg # TODO Check for auth required msg
+    - "'No such file or directory' not in nt.msg"  # TODO Check for auth required msg
 
 - name: Include vars for os family
   include_vars:
