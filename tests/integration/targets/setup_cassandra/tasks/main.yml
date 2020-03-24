@@ -30,7 +30,9 @@
   block:
     - name: Include tasks to remove auth
       include_tasks: cassandra_deauth.yml
-  when: "'Authentication failed! Credentials required' in nt.stderr"  # TODO Check for auth required msg
+  when:
+    - nt.stderr is defined
+    - "'Authentication failed! Credentials required' in nt.stderr"  # TODO Check for auth required msg
 
 - name: Include vars for os family
   include_vars:
