@@ -20,8 +20,8 @@
 - meta: end_play
   when: ansible_os_family not in  ['RedHat', 'Debian' ]
 
-- command: hostname localhost
-  become: yes
+#- command: hostname localhost
+#  become: yes
 
 - name: Install OpenJDK package
   yum:
