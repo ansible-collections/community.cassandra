@@ -20,6 +20,18 @@
 - meta: end_play # REMOVE?
   when: ansible_os_family not in  ['RedHat', 'Debian' ]
 
+- name: Test nodetool without auth from shell
+  command: nodetool status
+  register: nt
+  ignore_errors: yes
+
+- name: Remove auth from the Cassandra instance if it is configured
+  block:
+    - include_tasks: ../../setup_cassandra/tasks/cassandra_deauth.yml
+  when:
+    - nt.failed == True
+    - cassandra_auth_tests == True
+
 - name: Include vars for os family
   include_vars:
     file: "{{ ansible_os_family }}.yml"

@@ -119,7 +119,7 @@
   assert:
     that:
       - login_status.failed == True
-      - "\"nodetool: Failed to connect to 'localhost:7199' - FailedLoginException: 'Invalid username or password'.\" == login_status.stderr_lines[0]"
+      - "\"nodetool: Failed to connect to '127.0.0.1:7199' - FailedLoginException: 'Invalid username or password'.\" == login_status.stderr_lines[0]"
   when: cassandra_auth_tests == True
 
 - name: Test incorrect nodetool_path handling
