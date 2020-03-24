@@ -17,8 +17,12 @@
 
 # ============================================================
 
-- meta: end_play
+- meta: end_play - REMOVE?
   when: ansible_os_family not in  ['RedHat', 'Debian' ]
+
+- name: Include vars for os family
+  include_vars:
+    file: "{{ ansible_os_family }}.yml"
 
 # CassandraDaemon.java:749 - Local host name unknown: java.net.UnknownHostException: localhost.localdomain: localhost.localdomain: Name or service not known
 #- command: hostname localhost
