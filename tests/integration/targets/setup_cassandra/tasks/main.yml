@@ -48,6 +48,12 @@
     - redhat_remove_cassandra
     - redhat_remove_python3
 
+- name: Add an Apt keys for Cassandra
+  apt_key:
+    url: "{{ cassandra_deb.gpgkey }}"
+    state: present
+  when: ansible_os_family == 'Debian'
+
 - name: Setup Cassandra apt repo
   apt_repository:
     repo: "{{ cassandra_deb.repo }}"
