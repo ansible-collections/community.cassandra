@@ -1,3 +1,4 @@
+---
 # (c) 2019,  Rhys Campbell <rhys.james.campbell@googlemail.com>
 
 # This file is part of Ansible
@@ -27,7 +28,8 @@
 
 - name: Remove auth from the Cassandra instance if it is configured
   block:
-    - include_tasks: ../../setup_cassandra/tasks/cassandra_deauth.yml
+    - name: Include tasks to remove auth
+      include_tasks: cassandra_deauth.yml
   when:
     - nt.rc != 0
     - cassandra_auth_tests == True
