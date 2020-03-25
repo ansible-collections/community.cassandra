@@ -109,4 +109,4 @@
     host: 0.0.0.0
     delay: 10
 
-- shell: cat /var/log/cassandra/system.log /var/log/cassandra.log
+- shell: tail -n 1000 /var/log/cassandra/system.log 
