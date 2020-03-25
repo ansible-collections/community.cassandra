@@ -21,6 +21,11 @@
 - meta: end_play # REMOVE?
   when: ansible_os_family not in  ['RedHat', 'Debian' ]
 
+- name: Install iproute2 package needed for ansible_default_ipv4 facts
+  package:
+    name: iproute2
+    state: present
+
 - name: Test nodetool without auth from shell
   command: nodetool status
   register: nt
