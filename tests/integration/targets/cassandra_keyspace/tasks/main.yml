@@ -49,6 +49,8 @@
   environment:
     CASS_DRIVER_NO_CYTHON: 1
 
+- shell: apt install net-tools -y && netstat -tulpen
+
 - name: Create a keyspace 1
   cassandra_keyspace:
     name: mykeyspace
