@@ -40,3 +40,8 @@
   with_items:
     - py_check_jmx
     - check_cassandra_cluster
+
+- name: Does is_docker file exist?
+  stat:
+    path: is_docker.txt
+  register: is_docker

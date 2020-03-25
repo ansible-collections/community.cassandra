@@ -4,3 +4,4 @@
   service:
     name: nrpe
     state: restarted
+  when: is_docker.stat.exists

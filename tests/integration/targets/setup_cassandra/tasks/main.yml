@@ -97,6 +97,18 @@
     regexp: "^MAX_HEAP_SIZE="
     line: "MAX_HEAP_SIZE=256M"
 
+- name: Set listen address
+  lineinfile:
+    path: "{{ cassandra_yml_file }}"
+    regexp: "^listen_address:"
+    line: "listen_address: {{ ansible_default_ipv4.address }}"
+
+- name: set rpc address
+  lineinfile:
+    path: "{{ cassandra_yml_file }}"
+    regexp: "^rpc_address:"
+    line: "rpc_address: {{ ansible_default_ipv4.address }}"
+
 - name: Start Cassandra service
   service:
     name: "{{ cassandra_service }}"
