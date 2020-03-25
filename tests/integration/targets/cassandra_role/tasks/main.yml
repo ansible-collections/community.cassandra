@@ -29,6 +29,10 @@
 #      - no_driver.changed == False
 #      - "no_driver.msg == 'This module requires the cassandra-driver python driver. You can probably install it with pip install cassandra-driver.'"
 
+- name: Include vars for os family
+  include_vars:
+    file: "{{ ansible_os_family }}.yml"
+
 # This should go into a cassandra_driver dependency
 - name: Ensure epel is available
   yum:
@@ -37,14 +41,7 @@
 
 - name: Packages needed for cassandra-driver
   package:
-    name: "{{ item }}"
-  with_items:
-    - gcc
-    - python-devel
-    - python-requests
-    - libev
-    - libev-devel
-    - pyOpenSSL
+    name: "{{ ipackages_for_cass_driver }}"
 
 - name: Install cassandra-driver
   pip:
