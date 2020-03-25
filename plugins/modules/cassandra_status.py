@@ -111,8 +111,15 @@ class NodeToolCmd(object):
         self.username = module.params['username']
         self.nodetool_path = module.params['nodetool_path']
         self.debug = module.params['debug']
-        if self.host is None:
-            self.host = socket.getfqdn()
+        # TODO these variables need normalizing with the other modules
+        if login_host is None:
+            login_host = []
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            result = s.connect_ex(('127.0.0.1', port))
+            if result == 0:
+                login_host.append('127.0.0.1')
+            else:
+                login_host.append(socket.getfqdn())
 
     def execute_command(self, cmd):
         return self.module.run_command(cmd)

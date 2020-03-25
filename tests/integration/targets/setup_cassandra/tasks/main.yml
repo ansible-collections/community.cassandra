@@ -108,17 +108,17 @@
     regexp: "^listen_address:"
     line: "listen_address: {{ ansible_default_ipv4.address }}"
 
-- name: set rpc address
-  lineinfile:
-    path: "{{ cassandra_yml_file }}"
-    regexp: "^rpc_address:"
-    line: "rpc_address: {{ ansible_default_ipv4.address }}"
+#- name: set rpc address
+#  lineinfile:
+#    path: "{{ cassandra_yml_file }}"
+#    regexp: "^rpc_address:"
+#    line: "rpc_address: {{ ansible_default_ipv4.address }}"
 
-- name: Start Cassandra service
-  service:
-    name: "{{ cassandra_service }}"
-    enabled: "yes"
-    state: "restarted"
+#- name: Start Cassandra service
+#  service:
+#    name: "{{ cassandra_service }}"
+#    enabled: "yes"
+#    state: "restarted"
 
 #- shell: cat /etc/cassandra/cassandra.yaml
 #- shell: sleep 30 && tail -n 1000 /var/log/cassandra/system.log
