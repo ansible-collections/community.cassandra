@@ -108,3 +108,5 @@
     port: 9042
     host: 0.0.0.0
     delay: 10
+
+- shell: cat /var/log/cassandra/cassandra.log /var/log/cassandra.log
