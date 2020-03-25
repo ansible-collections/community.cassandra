@@ -102,7 +102,7 @@
     name: "{{ cassandra_service }}"
     enabled: "yes"
     state: "restarted"
-
+- shell: cat /etc/cassandra/cassandra.yaml 
 - shell: sleep 30 && tail -n 1000 /var/log/cassandra/system.log
 
 - name: Allow a little time for Cassandra to start listening on ports
