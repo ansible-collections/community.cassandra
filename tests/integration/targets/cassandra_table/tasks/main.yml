@@ -18,27 +18,27 @@
 
 # ===========================================================
 
-- name: Test missing driver handling
-  cassandra_table:
-    name: users
-    keyspace: myapp
-    state: present
-    columns:
-      - id: uuid
-      - username: text
-      - encrypted_password: blob
-      - first_name: text
-      - last_name: text
-      - dob: date
-    primary_key:
-      - username
-  register: no_driver
-  ignore_errors: yes
+#- name: Test missing driver handling
+#  cassandra_table:
+#    name: users
+#    keyspace: myapp
+#    state: present
+#    columns:
+#      - id: uuid
+#      - username: text
+#      - encrypted_password: blob
+#      - first_name: text
+#      - last_name: text
+#      - dob: date
+#    primary_key:
+#      - username
+#  register: no_driver
+#  ignore_errors: yes
 
-- assert:
-    that:
-      - no_driver.changed == False
-      - "no_driver.msg == 'This module requires the cassandra-driver python driver. You can probably install it with pip install cassandra-driver.'"
+#- assert:
+#    that:
+#      - no_driver.changed == False
+#      - "no_driver.msg == 'This module requires the cassandra-driver python driver. You can probably install it with pip install cassandra-driver.'"
 
 # This should go into a cassandra_driver dependency
 - name: Ensure epel is available
