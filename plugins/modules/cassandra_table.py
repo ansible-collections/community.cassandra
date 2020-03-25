@@ -267,10 +267,11 @@ def main():
         supports_check_mode=True
     )
 
-    if not HAS_CASSANDRA_DRIVER:
-        module.fail_json(msg="This module requires the cassandra-driver \
-                         python driver. You can probably install it with\
-                          pip install cassandra-driver.")
+    if HAS_CASSANDRA_DRIVER is False:
+        msg = ("This module requires the cassandra-driver python"
+               " driver. You can probably install it with pip"
+               " install cassandra-driver.")
+        module.fail_json(msg=msg)
 
     required_if = [["state", "present", ["columns", "primary_key"]]]
 

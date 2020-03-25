@@ -241,9 +241,10 @@ def main():
     )
 
     if HAS_CASSANDRA_DRIVER is False:
-        module.fail_json(msg="This module requires the cassandra-driver python \
-                         driver. You can probably install it with pip\
-                          install cassandra-driver.")
+        msg = ("This module requires the cassandra-driver python"
+               " driver. You can probably install it with pip"
+               " install cassandra-driver.")
+        module.fail_json(msg=msg)
 
     login_user = module.params['login_user']
     login_password = module.params['login_password']
