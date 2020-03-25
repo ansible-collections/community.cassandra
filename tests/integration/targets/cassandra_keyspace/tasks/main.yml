@@ -17,6 +17,10 @@
 # along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
 
 # ===========================================================
+- name: Include vars for os family
+  include_vars:
+    file: "{{ ansible_os_family }}.yml"
+
 - name: Test missing driver handling
   cassandra_keyspace:
     name: mykeyspace
@@ -37,14 +41,7 @@
 
 - name: Packages needed for cassandra-driver
   package:
-    name: "{{ item }}"
-  with_items:
-    - gcc
-    - python-devel
-    - python-requests
-    - libev
-    - libev-devel
-    - pyOpenSSL
+    name: "{{ packages_for_cass_driver }}"
 
 - name: Install cassandra-driver
   pip:
