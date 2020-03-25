@@ -23,6 +23,11 @@
 #- command: hostname localhost
 #  become: yes
 
+- name: Install sudo
+  package:
+    name: sudo
+    state: present
+
 - name: Install OpenJDK package
   yum:
     name: "{{ openjdk }}"

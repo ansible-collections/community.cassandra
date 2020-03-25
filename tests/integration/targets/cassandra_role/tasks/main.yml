@@ -41,7 +41,7 @@
 
 - name: Packages needed for cassandra-driver
   package:
-    name: "{{ ipackages_for_cass_driver }}"
+    name: "{{ packages_for_cass_driver }}"
 
 - name: Install cassandra-driver
   pip:
