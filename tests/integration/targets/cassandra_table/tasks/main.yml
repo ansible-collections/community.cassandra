@@ -44,9 +44,10 @@
 - name: Ensure epel is available
   yum:
     name: epel-release
+  when: ansible_os_family == "RedHat"
 
 - name: Packages needed for cassandra-driver
-  yum:
+  package:
     name: "{{ item }}"
   with_items:
     - gcc
