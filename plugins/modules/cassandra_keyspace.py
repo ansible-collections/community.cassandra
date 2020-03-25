@@ -31,7 +31,8 @@ options:
   login_host:
     description:
       - The Cassandra hostname.
-      - Set to the value returned by socket.getfqdn() if left unset.
+      - If unset the instance will check 127.0.0.1 for a C* instance.
+      - Otherwise the value returned by socket.getfqdn() is used.
     type: list
     elements: str
   login_port:

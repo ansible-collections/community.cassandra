@@ -115,7 +115,7 @@ class NodeToolCmd(object):
         if login_host is None:
             login_host = []
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            result = s.connect_ex(('127.0.0.1', port))
+            result = s.connect_ex(('127.0.0.1', self.port))
             if result == 0:
                 login_host.append('127.0.0.1')
             else:
