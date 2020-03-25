@@ -33,7 +33,7 @@
   lineinfile:
     path: "{{ cassandra_yml_file }}"
     regexp: "{{ cassandra_regexp_auth }}"
-    line: "authorizer: AllowAllAuthenticator"
+    line: "authorizer: AllowAllAuthorizer"
 
 - name: Remove lines for nodetool auth to cassandra-env.sh
   blockinfile:
