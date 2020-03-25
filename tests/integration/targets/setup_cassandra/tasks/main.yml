@@ -103,10 +103,11 @@
     enabled: "yes"
     state: "restarted"
 
+- shell: sleep 30 && tail -n 1000 /var/log/cassandra/system.log
+
 - name: Allow a little time for Cassandra to start listening on ports
   wait_for:
     port: 9042
     host: 0.0.0.0
     delay: 10
-
-- shell: tail -n 1000 /var/log/cassandra/system.log 
+    timeout: 60
