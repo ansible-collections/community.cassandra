@@ -118,6 +118,7 @@
     chdir: /home/cassandra
   environment:
     CCM_CONFIG_DIR: "/home/cassandra/config"
+    CASSANDRA_HOME: "/home/cassandra"
 
 - name: Add nodes to the Cassandra cluster
   shell: "sudo -u cassandra bash -c \"ccm populate -n {{ cassandra_nodes }}\""
@@ -126,6 +127,7 @@
     chdir: /home/cassandra
   environment:
     CCM_CONFIG_DIR: "/home/cassandra/config"
+    CASSANDRA_HOME: "/home/cassandra"
 
 - name: Start the ccm cluster
   command: sudo -u cassandra bash -c "ccm start"
@@ -134,6 +136,7 @@
     chdir: /home/cassandra
   environment:
     CCM_CONFIG_DIR: "/home/cassandra/config"
+    CASSANDRA_HOME: "/home/cassandra"
 
 - name: Get cluster status
   command: sudo -u cassandra bash -c "ccm status"
@@ -142,6 +145,7 @@
     chdir: /home/cassandra
   environment:
     CCM_CONFIG_DIR: "/home/cassandra/config"
+    CASSANDRA_HOME: "/home/cassandra"
 
 - name: Get output of node1 status
   command: sudo -u cassandra bash -c "ccm node1 status"
@@ -150,6 +154,7 @@
     chdir: /home/cassandra
   environment:
     CCM_CONFIG_DIR: "/home/cassandra/config"
+    CASSANDRA_HOME: "/home/cassandra"
 
 - name: Set nodetool path
   copy:
