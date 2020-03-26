@@ -116,7 +116,7 @@
   args:
     warn: false
     chdir: /home/cassandra
-  env:
+  environment:
     CCM_OPTIONS: "--config-dir /home/cassandra/config"
 
 - name: Add nodes to the Cassandra cluster
@@ -124,7 +124,7 @@
   args:
     warn: false
     chdir: /home/cassandra
-  env:
+  environment:
     CCM_OPTIONS: "--config-dir /home/cassandra/config"
 
 - name: Start the ccm cluster
@@ -132,7 +132,7 @@
   args:
     warn: false
     chdir: /home/cassandra
-  env:
+  environment:
     CCM_OPTIONS: "--config-dir /home/cassandra/config"
 
 - name: Get cluster status
@@ -140,7 +140,7 @@
   args:
     warn: false
     chdir: /home/cassandra
-  env:
+  environment:
     CCM_OPTIONS: "--config-dir /home/cassandra/config"
 
 - name: Get output of node1 status
@@ -148,7 +148,7 @@
   args:
     warn: false
     chdir: /home/cassandra
-  env:
+  environment:
     CCM_OPTIONS: "--config-dir /home/cassandra/config"
 
 - name: Set nodetool path
