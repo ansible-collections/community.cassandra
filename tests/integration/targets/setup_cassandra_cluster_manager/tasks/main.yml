@@ -112,7 +112,9 @@
     state: present
 
 - name: Install Cassandra via ccm tool
-  shell: "sudo -u cassandra bash -c \"ccm create test -v {{ cassandra_version }} > /dev/null\""
+  #shell: "sudo -u cassandra bash -c \"ccm create test -v {{ cassandra_version }} > /dev/null\""
+  shell: ccm create test -v {{ cassandra_version }} > /dev/null
+  become_user: cassandra
   args:
     warn: false
     chdir: /home/cassandra
@@ -121,7 +123,9 @@
     CASSANDRA_HOME: "/home/cassandra"
 
 - name: Add nodes to the Cassandra cluster
-  shell: "sudo -u cassandra bash -c \"ccm populate -n {{ cassandra_nodes }}\""
+  #shell: "sudo -u cassandra bash -c \"ccm populate -n {{ cassandra_nodes }}\""
+  shell: ccm populate -n {{ cassandra_nodes }}
+  become_user: cassandra
   args:
     warn: false
     chdir: /home/cassandra
@@ -130,7 +134,9 @@
     CASSANDRA_HOME: "/home/cassandra"
 
 - name: Start the ccm cluster
-  shell: sudo -u cassandra bash -c "ccm start"
+  #shell: sudo -u cassandra bash -c "ccm start"
+  shell: ccm start
+  become_user: cassandra
   args:
     warn: false
     chdir: /home/cassandra
@@ -139,7 +145,9 @@
     CASSANDRA_HOME: "/home/cassandra"
 
 - name: Get cluster status
-  shell: sudo -u cassandra bash -c "ccm status"
+  #shell: sudo -u cassandra bash -c "ccm status"
+  shell: ccm status
+  become_user: cassandra
   args:
     warn: false
     chdir: /home/cassandra
@@ -148,7 +156,9 @@
     CASSANDRA_HOME: "/home/cassandra"
 
 - name: Get output of node1 status
-  shell: sudo -u cassandra bash -c "ccm node1 status"
+  #shell: sudo -u cassandra bash -c "ccm node1 status"
+  shell: ccm node1 status
+  become_user: cassandra
   args:
     warn: false
     chdir: /home/cassandra
