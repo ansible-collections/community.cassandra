@@ -224,16 +224,16 @@ def is_role_changed(role_properties, super_user, login, password,
 
 def create_alter_role(module, session, role, super_user, login, password,
                       options, data_centers, alter_role):
-    if alter_role is False:
-        cql = "CREATE ROLE {0} WITH LOGIN={1}".format(role, login)
+    if alter_role == False:
+        cql = "CREATE ROLE {0} ".format(role)
     else:
         cql = "ALTER ROLE {0} ".format(role)
-        cql += "WITH SUPERUSER = {0} ".format(super_user)
-        cql += "AND LOGIN = {0} ".format(login)
+    cql += "WITH SUPERUSER = {0} ".format(super_user)
+    cql += "AND LOGIN = {0} ".format(login)
     if password is not None:
         cql += "AND PASSWORD = '{0}' ".format(password)
     if options is not None:
-        cql += "AND OPTIONS = {0}".format(str(options))
+        cql +=  "AND OPTIONS = {0}".format(str(options))
     if data_centers is not None:
         for dc in data_centers:
             if str(dc.upper()) == "ALL" and len(data_centers) == 1:

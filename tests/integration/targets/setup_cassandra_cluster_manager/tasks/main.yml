@@ -95,9 +95,9 @@
     shell: /bin/bash
     create_home: yes
 
-- name: Ensure /home/cassandra exists
+- name: Ensure /root/.ccm exists
   file:
-    path: /home/cassandra
+    path: /root/.ccm
     state: directory
     owner: cassandra
     group: cassandra
