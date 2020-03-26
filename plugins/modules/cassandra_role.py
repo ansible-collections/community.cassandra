@@ -591,8 +591,8 @@ def main():
     try:
         if keyspace_permissions is not None:
             if not validate_keyspace_permissions(keyspace_permissions):
-                module.fail_json(msg="Invalid permission provided in the \
-                                 keyspace_permission parameter.")
+                module.fail_json(msg=("Invalid permission provided in the"
+                                 "keyspace_permission parameter."))
         auth_provider = None
         if login_user is not None:
             auth_provider = PlainTextAuthProvider(
