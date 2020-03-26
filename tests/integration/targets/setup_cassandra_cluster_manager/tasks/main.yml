@@ -95,6 +95,14 @@
     shell: /bin/bash
     create_home: yes
 
+- name: Ensure /home/cassandra exists
+  file:
+    path: /home/cassandra
+    state: directory
+    owner: cassandra
+    group: cassandra
+    mode: 0755
+
 - name: Install ccm via pip
   pip:
     name: ccm
