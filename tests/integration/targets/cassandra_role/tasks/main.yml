@@ -81,7 +81,7 @@
   assert:
     that:
       - 'no_credentials.changed == False'
-      - "'Remote end requires authentication.' in no_credentials.msg"
+      - "'Remote end requires authentication' in no_credentials.msg"
 
 - name: Ensure handling of dodgy credentials
   cassandra_role:
