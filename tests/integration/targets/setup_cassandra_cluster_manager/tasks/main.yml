@@ -93,6 +93,7 @@
     name: cassandra
     state: present
     shell: /bin/bash
+    create_home: yes
 
 - name: Install ccm via pip
   pip:
@@ -103,26 +104,31 @@
   shell: "sudo -u cassandra bash -c \"ccm create test -v {{ cassandra_version }} > /dev/null\""
   args:
     warn: false
+    chdir: /home/cassadra
 
 - name: Add nodes to the Cassandra cluster
   shell: "sudo -u cassandra bash -c \"ccm populate -n {{ cassandra_nodes }}\""
   args:
     warn: false
+    chdir: /home/cassadra
 
 - name: Start the ccm cluster
   command: sudo -u cassandra bash -c "ccm start"
   args:
     warn: false
+    chdir: /home/cassadra
 
 - name: Get cluster status
   command: sudo -u cassandra bash -c "ccm status"
   args:
     warn: false
+    chdir: /home/cassadra
 
 - name: Get output of node1 status
   command: sudo -u cassandra bash -c "ccm node1 status"
   args:
     warn: false
+    chdir: /home/cassadra
 
 - name: Set nodetool path
   copy:
