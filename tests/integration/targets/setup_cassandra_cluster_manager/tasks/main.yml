@@ -104,31 +104,31 @@
   shell: "sudo -u cassandra bash -c \"ccm create test -v {{ cassandra_version }} > /dev/null\""
   args:
     warn: false
-    chdir: /home/cassadra
+    chdir: /home/cassandra
 
 - name: Add nodes to the Cassandra cluster
   shell: "sudo -u cassandra bash -c \"ccm populate -n {{ cassandra_nodes }}\""
   args:
     warn: false
-    chdir: /home/cassadra
+    chdir: /home/cassandra
 
 - name: Start the ccm cluster
   command: sudo -u cassandra bash -c "ccm start"
   args:
     warn: false
-    chdir: /home/cassadra
+    chdir: /home/cassandra
 
 - name: Get cluster status
   command: sudo -u cassandra bash -c "ccm status"
   args:
     warn: false
-    chdir: /home/cassadra
+    chdir: /home/cassandra
 
 - name: Get output of node1 status
   command: sudo -u cassandra bash -c "ccm node1 status"
   args:
     warn: false
-    chdir: /home/cassadra
+    chdir: /home/cassandra
 
 - name: Set nodetool path
   copy:

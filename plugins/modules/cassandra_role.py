@@ -749,7 +749,7 @@ def main():
         module.exit_json(**result)
 
     except Exception as excep:
-        msg = excep
+        msg = str(excep)
         if cql is not None:
             msg += " | {0}".format(cql)
         if debug:
