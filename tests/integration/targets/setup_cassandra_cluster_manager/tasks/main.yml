@@ -112,44 +112,44 @@
     state: present
 
 - name: Install Cassandra via ccm tool
-  shell: "sudo -u cassandra bash -c \"ccm create test -v {{ cassandra_version }} $CCM_OPTIONS > /dev/null\""
+  shell: "sudo -u cassandra bash -c \"ccm create test -v {{ cassandra_version }} > /dev/null\""
   args:
     warn: false
     chdir: /home/cassandra
   environment:
-    CCM_OPTIONS: "--config-dir /home/cassandra/config"
+    CCM_CONFIG_DIR: "/home/cassandra/config"
 
 - name: Add nodes to the Cassandra cluster
-  shell: "sudo -u cassandra bash -c \"ccm populate -n {{ cassandra_nodes }} $CCM_OPTIONS\""
+  shell: "sudo -u cassandra bash -c \"ccm populate -n {{ cassandra_nodes }}\""
   args:
     warn: false
     chdir: /home/cassandra
   environment:
-    CCM_OPTIONS: "--config-dir /home/cassandra/config"
+    CCM_CONFIG_DIR: "/home/cassandra/config"
 
 - name: Start the ccm cluster
-  command: sudo -u cassandra bash -c "ccm start $CCM_OPTIONS"
+  command: sudo -u cassandra bash -c "ccm start"
   args:
     warn: false
     chdir: /home/cassandra
   environment:
-    CCM_OPTIONS: "--config-dir /home/cassandra/config"
+    CCM_CONFIG_DIR: "/home/cassandra/config"
 
 - name: Get cluster status
-  command: sudo -u cassandra bash -c "ccm status $CCM_OPTIONS"
+  command: sudo -u cassandra bash -c "ccm status"
   args:
     warn: false
     chdir: /home/cassandra
   environment:
-    CCM_OPTIONS: "--config-dir /home/cassandra/config"
+    CCM_CONFIG_DIR: "/home/cassandra/config"
 
 - name: Get output of node1 status
-  command: sudo -u cassandra bash -c "ccm node1 status $CCM_OPTIONS"
+  command: sudo -u cassandra bash -c "ccm node1 status"
   args:
     warn: false
     chdir: /home/cassandra
   environment:
-    CCM_OPTIONS: "--config-dir /home/cassandra/config"
+    CCM_CONFIG_DIR: "/home/cassandra/config"
 
 - name: Set nodetool path
   copy:
