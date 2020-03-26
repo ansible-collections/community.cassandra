@@ -130,7 +130,7 @@
     CASSANDRA_HOME: "/home/cassandra"
 
 - name: Start the ccm cluster
-  command: sudo -u cassandra bash -c "ccm start"
+  shell: sudo -u cassandra bash -c "ccm start"
   args:
     warn: false
     chdir: /home/cassandra
@@ -139,7 +139,7 @@
     CASSANDRA_HOME: "/home/cassandra"
 
 - name: Get cluster status
-  command: sudo -u cassandra bash -c "ccm status"
+  shell: sudo -u cassandra bash -c "ccm status"
   args:
     warn: false
     chdir: /home/cassandra
@@ -148,7 +148,7 @@
     CASSANDRA_HOME: "/home/cassandra"
 
 - name: Get output of node1 status
-  command: sudo -u cassandra bash -c "ccm node1 status"
+  shell: sudo -u cassandra bash -c "ccm node1 status"
   args:
     warn: false
     chdir: /home/cassandra
