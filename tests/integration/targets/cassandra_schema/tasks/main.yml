@@ -48,3 +48,14 @@
   assert:
     that:
       - "rhys.msg == 'The cluster has reached schema consensus'"
+
+- name: Cleanup any ccm stuff
+  shell: "sudo -E -u cassandra bash -c \"ccm remove test > /dev/null\""
+  become_user: cassandra
+  args:
+    warn: false
+    chdir: /home/cassandra
+  environment:
+    CCM_CONFIG_DIR: "/home/cassandra/config"
+    CASSANDRA_HOME: "/home/cassandra"
+  ignore_errors: yes

@@ -118,6 +118,17 @@
     name: ccm
     state: present
 
+- name: Cleanup any previous ccm stuff
+  shell: "sudo -E -u cassandra bash -c \"ccm remove test > /dev/null\""
+  become_user: cassandra
+  args:
+    warn: false
+    chdir: /home/cassandra
+  environment:
+    CCM_CONFIG_DIR: "/home/cassandra/config"
+    CASSANDRA_HOME: "/home/cassandra"
+  ignore_errors: yes  
+
 - name: Install Cassandra via ccm tool
   shell: "sudo -E -u cassandra bash -c \"ccm create test -v {{ cassandra_version }} > /dev/null\""
   #shell: ccm create test -v {{ cassandra_version }} > /dev/null

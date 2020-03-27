@@ -136,7 +136,16 @@
       - "rhys.msg == 'Too many nodes are in a DOWN state'"
       - "rhys.failed == True"
 
-
+- name: Cleanup any ccm stuff
+  shell: "sudo -E -u cassandra bash -c \"ccm remove test > /dev/null\""
+  become_user: cassandra
+  args:
+    warn: false
+    chdir: /home/cassandra
+  environment:
+    CCM_CONFIG_DIR: "/home/cassandra/config"
+    CASSANDRA_HOME: "/home/cassandra"
+  ignore_errors: yes
 
 #- include_tasks: ../../setup_cassandra/tasks/cassandra_auth.yml
 #  when: cassandra_auth_tests == True
