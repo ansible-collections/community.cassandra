@@ -191,6 +191,6 @@
   copy:
     dest: /home/cassandra/nodetool_path.sh
     content: |
-      export PATH="$PATH:/home/cassandra/.ccm/repository/{{ cassandra_version }}/bin/"
+      export PATH="$PATH:/home/cassandra/config/repository/{{ cassandra_version }}/bin/"
     owner: cassandra
     group: users
