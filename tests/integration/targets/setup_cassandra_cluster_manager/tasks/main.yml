@@ -184,8 +184,8 @@
     CCM_CONFIG_DIR: "/home/cassandra/config"
     CASSANDRA_HOME: "/home/cassandra"
 
-- shell: find / -name nodetool
-  ignore_errors: yes
+#- shell: find / -name nodetool
+#  ignore_errors: yes
 
 - name: Set nodetool path
   copy:

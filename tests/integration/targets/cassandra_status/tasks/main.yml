@@ -43,7 +43,7 @@
   assert:
     that:
       - "rhys.cluster_status['datacenter1']['down'] | length == 0"
-      - "rhys.cluster_status['datacenter1']['up'] | length == 6"
+      - "rhys.cluster_status['datacenter1']['up'] | length == 3"
 
 - name: Stop node2
   shell: "sudo -u cassandra bash -c \"ccm node2 stop\" && sleep 5"
@@ -65,7 +65,7 @@
   assert:
     that:
       - "rhys.cluster_status['datacenter1']['down'] | length == 1"
-      - "rhys.cluster_status['datacenter1']['up'] | length == 5"
+      - "rhys.cluster_status['datacenter1']['up'] | length == 2"
       - "'127.0.0.2' in rhys.cluster_status['datacenter1']['down']"
       - "'127.0.0.2' not in rhys.cluster_status['datacenter1']['up']"
 
@@ -91,7 +91,7 @@
   assert:
     that:
       - "rhys.cluster_status['datacenter1']['down'] | length == 0"
-      - "rhys.cluster_status['datacenter1']['up'] | length == 6"
+      - "rhys.cluster_status['datacenter1']['up'] | length == 3"
       - "rhys.iterations > 1"
       - "rhys.cluster_status_list[0]['datacenter1']['down'][0] == '127.0.0.2'"
       - "'127.0.0.2' in rhys.cluster_status_list[-1]['datacenter1']['up']"
@@ -115,7 +115,7 @@
   assert:
     that:
       - "rhys.cluster_status['datacenter1']['down'] | length == 1"
-      - "rhys.cluster_status['datacenter1']['up'] | length == 5"
+      - "rhys.cluster_status['datacenter1']['up'] | length == 2"
       - "rhys.cluster_status['datacenter1']['down'][0] == '127.0.0.3'"
       - "rhys.msg == 'Down nodes are within the tolerated level'"
 
@@ -131,13 +131,13 @@
   assert:
     that:
       - "rhys.cluster_status['datacenter1']['down'] | length == 1"
-      - "rhys.cluster_status['datacenter1']['up'] | length == 5"
+      - "rhys.cluster_status['datacenter1']['up'] | length == 2"
       - "rhys.cluster_status['datacenter1']['down'][0] == '127.0.0.3'"
       - "rhys.msg == 'Too many nodes are in a DOWN state'"
       - "rhys.failed == True"
 
 - name: Cleanup any ccm stuff
-  shell: "sudo -E -u cassandra bash -c \"ccm remove test > /dev/null\""
+  shell: "sudo -E -u cassandra bash -c \"ccm stop test && ccm remove test > /dev/null\""
   become_user: cassandra
   args:
     warn: false
