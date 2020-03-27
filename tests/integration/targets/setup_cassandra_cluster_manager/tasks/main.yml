@@ -23,6 +23,13 @@
 #- command: hostname localhost
 #  become: yes
 
+- name: Ensure Cassandra service from setup_cassandra isn't running
+  service:
+    name: "{{ cassandra_service }}"
+    enabled: "yes"
+    state: "stopped"
+  ignore_errors: yes  # Might not exist
+
 - name: Install sudo
   package:
     name: sudo
