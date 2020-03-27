@@ -25,7 +25,7 @@
 #- name: Fnd nodetool
 #  shell: find / -name nodetool
 
-- shell: yum install net-tools -y && netstat -tulpen
+#- shell: yum install net-tools -y && netstat -tulpen
 
 #shell: source /home/cassandra/nodetool_path.sh && nodetool -h 127.0.0.1 -p 7100 status
 #register: status
