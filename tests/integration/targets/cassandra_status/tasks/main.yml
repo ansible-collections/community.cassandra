@@ -36,7 +36,7 @@
   cassandra_status:
     host: 127.0.0.1
     port: 7100
-    nodetool_path: /root/.ccm/repository/{{ cassandra_version }}/bin
+    nodetool_path: /home/cassandra/.ccm/repository/{{ cassandra_version }}/bin
   register: rhys
 
 - name: Assert module output reports all nodes up
