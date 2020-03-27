@@ -46,9 +46,14 @@
       - "rhys.cluster_status['datacenter1']['up'] | length == 3"
 
 - name: Stop node2
-  shell: "sudo -u cassandra bash -c \"ccm node2 stop\" && sleep 5"
+  shell: "sudo -E -u cassandra bash -c \"ccm node2 stop\" && sleep 5"
+  become_user: cassandra
   args:
     warn: false
+    chdir: /home/cassandra
+  environment:
+    CCM_CONFIG_DIR: "/home/cassandra/config"
+    CASSANDRA_HOME: "/home/cassandra"
 
 # jmx port only open on ccm node1
 - name: Execute module against the second ccm node
@@ -73,8 +78,13 @@
   shell: "sudo -u cassandra bash -c \"ccm node2 start\""
   async: 45
   poll: 0
+  become_user: cassandra
   args:
     warn: false
+    chdir: /home/cassandra
+  environment:
+    CCM_CONFIG_DIR: "/home/cassandra/config"
+    CASSANDRA_HOME: "/home/cassandra"
 
 # We expect node2 to rejoin the cluster
 - name: Execute module after node2 started again
@@ -99,8 +109,13 @@
 
 - name: Bring down node3
   shell: "sudo -u cassandra bash -c \"ccm node3 stop\""
+  become_user: cassandra
   args:
     warn: false
+    chdir: /home/cassandra
+  environment:
+    CCM_CONFIG_DIR: "/home/cassandra/config"
+    CASSANDRA_HOME: "/home/cassandra"
 
 - name: Allow one down
   cassandra_status:
