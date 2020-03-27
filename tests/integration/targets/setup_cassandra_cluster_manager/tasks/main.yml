@@ -127,7 +127,7 @@
   environment:
     CCM_CONFIG_DIR: "/home/cassandra/config"
     CASSANDRA_HOME: "/home/cassandra"
-  ignore_errors: yes  
+  ignore_errors: yes
 
 - name: Install Cassandra via ccm tool
   shell: "sudo -E -u cassandra bash -c \"ccm create test -v {{ cassandra_version }} > /dev/null\""
@@ -183,6 +183,9 @@
   environment:
     CCM_CONFIG_DIR: "/home/cassandra/config"
     CASSANDRA_HOME: "/home/cassandra"
+
+- shell: find / -name nodetool
+  ignore_errors: yes
 
 - name: Set nodetool path
   copy:

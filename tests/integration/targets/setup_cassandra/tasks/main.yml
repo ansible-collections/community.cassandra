@@ -125,7 +125,10 @@
 
 - name: Allow a little time for Cassandra to start listening on ports
   wait_for:
-    port: 9042
-    host: 0.0.0.0
+    port: "{{ item.port }}"
+    host: "{{ item.host }}"
     delay: 10
     timeout: 60
+  with_items:
+    - { "host": "0.0.0.0", "port": 9042 }
+    - { "host": "127.0.0.1", "port": 7199 }

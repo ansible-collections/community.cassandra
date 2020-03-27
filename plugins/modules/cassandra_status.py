@@ -112,14 +112,14 @@ class NodeToolCmd(object):
         self.nodetool_path = module.params['nodetool_path']
         self.debug = module.params['debug']
         # TODO these variables need normalizing with the other modules
-        if login_host is None:
-            login_host = []
+        if self.host is None:
+            self.host = []
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             result = s.connect_ex(('127.0.0.1', self.port))
             if result == 0:
-                login_host.append('127.0.0.1')
+                self.host.append('127.0.0.1')
             else:
-                login_host.append(socket.getfqdn())
+                self.host.append(socket.getfqdn())
 
     def execute_command(self, cmd):
         return self.module.run_command(cmd)

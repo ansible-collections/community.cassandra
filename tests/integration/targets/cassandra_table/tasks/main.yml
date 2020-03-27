@@ -54,17 +54,6 @@
     name: epel-release
   when: ansible_os_family == "RedHat"
 
-- name: Packages needed for cassandra-driver
-  package:
-    name: "{{ item }}"
-  with_items:
-    - gcc
-    - python-devel
-    - python-requests
-    - libev
-    - libev-devel
-    - pyOpenSSL
-
 - name: Install cassandra-driver
   pip:
     name: cassandra-driver
