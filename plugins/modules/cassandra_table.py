@@ -54,13 +54,11 @@ options:
       - "Specifiy pairs as <column name>: <data type>"
     type: list
     elements: dict
-    required: true
   primary_key:
     description:
       - The Primary key speicfication for the table
     type: list
     elements: str
-    required: true
   partition_key:
     description:
       - The partition key columns.
@@ -248,9 +246,9 @@ def drop_table(keyspace_name,
 
 def main():
 
-    required_if_args = [
-        ["state", "present", ["columns", "primary_key"]]
-    ]
+    #required_if_args = [
+    #    ["state", "present", ["columns", "primary_key"]]
+    #]
 
     module = AnsibleModule(
         argument_spec=dict(
@@ -268,7 +266,6 @@ def main():
             table_options=dict(type='dict', default=None),
             is_type=dict(type='bool', default=False),
             debug=dict(type='bool', default=False)),
-        required_if=required_if_args,
         supports_check_mode=True
     )
 
@@ -292,6 +289,10 @@ def main():
     table_options = module.params['table_options']
     is_type = module.params['is_type']
     debug = module.params['debug']
+
+    if is_type is False and state == "present":
+        if columns Is None or primary_key is None:
+            module.fail_json(msg="Both columns and primary_key must be specified when creating a table")
 
     result = dict(
         changed=False,

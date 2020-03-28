@@ -47,7 +47,7 @@
           - "rhys.cluster_status['datacenter1']['up'] | length == 3"
 
     - name: Stop node2
-      shell: "sudo -E -u cassandra bash -c \"ccm node2 stop\" && sleep 5"
+      shell: "sudo -E -u cassandra bash -c \"ccm node2 stop\""
       become_user: cassandra
       args:
         warn: false
@@ -55,6 +55,9 @@
       environment:
         CCM_CONFIG_DIR: "/home/cassandra/config"
         CASSANDRA_HOME: "/home/cassandra"
+
+    - pause:
+        seconds: 5
 
     # jmx port only open on ccm node1
     - name: Execute module against the second ccm node
