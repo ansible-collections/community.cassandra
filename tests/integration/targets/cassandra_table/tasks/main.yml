@@ -635,7 +635,7 @@
       - column2
     clustering:
       - column3: "ASC"
-      - column2: "DESC"
+      - column4: "DESC"
     table_options:
       bloom_filter_fp_chance: '0.02'
       caching: "{ 'keys': 'ALL', 'rows_per_partition': 'ALL' }"
