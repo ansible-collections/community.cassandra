@@ -131,7 +131,7 @@
   shell: "cqlsh -u  {{ cassandra_admin_user }} -p {{ cassandra_admin_pwd }} --execute 'DESC KEYSPACE myapp'"
   register: myapp
 
-- name: Ensure mypp.users table does not exist
+- name: Ensure myapp.users table does not exist
   assert:
     that:
       - "'CREATE TABLE myapp.users' not in myapp.stdout"

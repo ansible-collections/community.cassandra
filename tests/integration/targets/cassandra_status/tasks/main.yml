@@ -110,7 +110,7 @@
           - "rhys.msg == 'All nodes are in an UP/NORMAL state'"
 
     - name: Bring down node3
-      shell: "sudo -u cassandra bash -c \"ccm node3 stop\""
+      shell: "sudo -E -u cassandra bash -c \"ccm node3 stop\""
       become_user: cassandra
       args:
         warn: false
