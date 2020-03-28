@@ -266,8 +266,7 @@ def main():
     result = {}
 
     result['cluster_status'] = cluster_status
-    if iterations > 1:
-        result['iterations'] = iterations
+    result['iterations'] = iterations
 
     if debug:
         result['cluster_status_list'] = cluster_status_list
