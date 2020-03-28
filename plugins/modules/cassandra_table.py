@@ -209,7 +209,7 @@ def create_table(keyspace_name,
                                       table_name)
     cql += " ( "
     for column in columns:
-        cql += "{0} {1}, ".format(str(column.keys()[0]), str(column.values()[0]))
+        cql += "{0} {1}, ".format(list(column.keys())[0], list(column.values())[0])
     # cql += "PRIMARY KEY ({0}))".format(str(primary_key.keys()).replace('[', '').replace(']', '').replace("'", '')) # TODO Partition
     if primary_key is not None:
         pk_cql = create_primary_key_with_partition_key(primary_key,
