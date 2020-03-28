@@ -291,7 +291,7 @@ def main():
     debug = module.params['debug']
 
     if is_type is False and state == "present":
-        if columns Is None or primary_key is None:
+        if columns is None or primary_key is None:
             module.fail_json(msg="Both columns and primary_key must be specified when creating a table")
 
     result = dict(
