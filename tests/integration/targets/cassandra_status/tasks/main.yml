@@ -76,7 +76,7 @@
           - "'127.0.0.2' not in rhys.cluster_status['datacenter1']['up']"
 
     - name: Start node2
-      shell: "sudo -E -u cassandra bash -c \"ccm node2 start\""
+      shell: "sudo -E -u cassandra bash -c \"ccm node2 start &\""
       become_user: cassandra
       args:
         warn: false
@@ -88,8 +88,8 @@
     # We expect node2 to rejoin the cluster
     - name: Execute module after node2 started again
       cassandra_status:
-        poll: 10
-        interval: 5
+        poll: 99
+        interval: 1
         host: 127.0.0.1
         port: 7100
         nodetool_path: /home/cassandra/config/repository/{{ cassandra_version }}/bin
