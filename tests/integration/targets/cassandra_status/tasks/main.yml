@@ -76,7 +76,7 @@
           - "'127.0.0.2' not in rhys.cluster_status['datacenter1']['up']"
 
     - name: Start node2
-      shell: "sudo -u cassandra bash -c \"ccm node2 start\""
+      shell: "sudo -E -u cassandra bash -c \"ccm node2 start\""
       become_user: cassandra
       args:
         warn: false

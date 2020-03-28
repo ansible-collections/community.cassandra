@@ -132,7 +132,6 @@ msg:
 __metaclass__ = type
 import re
 import sys
-import traceback
 import collections
 
 
@@ -343,12 +342,7 @@ def main():
         module.exit_json(**result)
 
     except Exception as excep:
-        exType, ex, tb = sys.exc_info()
-        msg = "An error occured on line {0}: {1} | {2} | {3} | {4}".format(traceback.tb_lineno(tb),
-                                                                           excep,
-                                                                           exType,
-                                                                           ex,
-                                                                           traceback.print_exc())
+        msg = str(excep)
         if cql is not None:
             msg += " | {0}".format(cql)
         if debug:
