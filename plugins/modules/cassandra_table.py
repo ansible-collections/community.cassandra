@@ -247,6 +247,11 @@ def drop_table(keyspace_name,
 ############################################
 
 def main():
+
+    required_if_args = [
+        ["state", "present", ["columns", "primary_key"]]
+    ]
+
     module = AnsibleModule(
         argument_spec=dict(
             login_user=dict(type='str'),
@@ -256,13 +261,14 @@ def main():
             name=dict(type='str', required=True),
             state=dict(type='str', required=True, choices=['present', 'absent']),
             keyspace=dict(type='str', required=True),
-            columns=dict(type='list', elements='dict', required=True),
-            primary_key=dict(type='list', elements='str', required=True),
+            columns=dict(type='list', elements='dict'),
+            primary_key=dict(type='list', elements='str'),
             clustering=dict(type='list', elements='str'),
             partition_key=dict(type='list', elements='str', default=[]),
             table_options=dict(type='dict', default=None),
             is_type=dict(type='bool', default=False),
             debug=dict(type='bool', default=False)),
+        required_if=required_if_args,
         supports_check_mode=True
     )
 
@@ -271,8 +277,6 @@ def main():
                " driver. You can probably install it with pip"
                " install cassandra-driver.")
         module.fail_json(msg=msg)
-
-    required_if = [["state", "present", ["columns", "primary_key"]]]
 
     login_user = module.params['login_user']
     login_password = module.params['login_password']
