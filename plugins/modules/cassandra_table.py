@@ -261,7 +261,7 @@ def main():
             keyspace=dict(type='str', required=True),
             columns=dict(type='list', elements='dict'),
             primary_key=dict(type='list', elements='str'),
-            clustering=dict(type='list', elements='str'),
+            clustering=dict(type='list', elements='dict'),
             partition_key=dict(type='list', elements='str', default=[]),
             table_options=dict(type='dict', default=None),
             is_type=dict(type='bool', default=False),
