@@ -495,7 +495,7 @@
       - userid
     clustering:
       - event_timestamp: "DESC"
-      - event": "ASC"
+      - event: "ASC"
     login_user: "{{ cassandra_admin_user }}"
     login_password: "{{ cassandra_admin_pwd }}"
   register: video_event

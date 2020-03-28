@@ -69,7 +69,7 @@ options:
     description:
       - The clustering specification.
     type: list
-    elements: str
+    elements: dict
   table_options:
     description:
       - Options for the table
