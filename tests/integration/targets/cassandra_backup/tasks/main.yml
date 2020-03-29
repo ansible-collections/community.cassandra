@@ -18,7 +18,7 @@
 
 # ===========================================================
 - name: Get incremental backup status 1
-  shell: nodetool -h $(hostname) statusbackup
+  shell: nodetool -h 127.0.0.1 statusbackup
   register: backup_status
 
 - name: Assert incremental backup is not running 1
@@ -30,7 +30,7 @@
     state: "enabled"
 
 - name: Get incremental backup status 2
-  shell: nodetool -h $(hostname) statusbackup
+  shell: nodetool -h 127.0.0.1 statusbackup
   register: backup_status
 
 - name: Assert incremental backup is running
@@ -42,7 +42,7 @@
     state: "disabled"
 
 - name: Get incremental backup status 3
-  shell: nodetool -h $(hostname) statusbackup
+  shell: nodetool -h 127.0.0.1 statusbackup
   register: backup_status
 
 - name: Assert incremental backup is not running 2
@@ -60,7 +60,7 @@
     that: backup_status.changed == True
 
 - name: Get incremental backup status 4
-  shell: nodetool -h $(hostname) statusbackup
+  shell: nodetool -h 127.0.0.1 statusbackup
   register: backup_status
 
 - name: Assert incremental backup is not running (after check_mode)
@@ -79,7 +79,7 @@
   when: cassandra_auth_tests == True
 
 - name: Get incremental backup status 5
-  shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h $(hostname) statusbackup
+  shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 statusbackup
   register: backup_status
   when: cassandra_auth_tests == True
 
@@ -97,7 +97,7 @@
   when: cassandra_auth_tests == True
 
 - name: Get incremental backup status 6
-  shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h $(hostname) statusbackup
+  shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 statusbackup
   register: backup_status
   when: cassandra_auth_tests == True
 
@@ -119,7 +119,7 @@
   assert:
     that:
       - login_status.failed == True
-      - "\"nodetool: Failed to connect to 'localhost:7199' - FailedLoginException: 'Invalid username or password'.\" == login_status.stderr_lines[0]"
+      - "\"nodetool: Failed to connect to '127.0.0.1:7199' - FailedLoginException: 'Invalid username or password'.\" == login_status.stderr_lines[0]"
   when: cassandra_auth_tests == True
 
 - name: Test incorrect nodetool_path handling

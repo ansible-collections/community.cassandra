@@ -1,0 +1,1 @@
+cassandra_env_file: /etc/cassandra/default.conf/cassandra-env.sh

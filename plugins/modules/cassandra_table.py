@@ -54,13 +54,11 @@ options:
       - "Specifiy pairs as <column name>: <data type>"
     type: list
     elements: dict
-    required: true
   primary_key:
     description:
       - The Primary key speicfication for the table
     type: list
     elements: str
-    required: true
   partition_key:
     description:
       - The partition key columns.
@@ -71,7 +69,7 @@ options:
     description:
       - The clustering specification.
     type: list
-    elements: str
+    elements: dict
   table_options:
     description:
       - Options for the table
@@ -132,7 +130,6 @@ msg:
 __metaclass__ = type
 import re
 import sys
-import traceback
 import collections
 
 
@@ -212,7 +209,7 @@ def create_table(keyspace_name,
                                       table_name)
     cql += " ( "
     for column in columns:
-        cql += "{0} {1}, ".format(column.keys()[0], column.values()[0])
+        cql += "{0} {1}, ".format(list(column.keys())[0], list(column.values())[0])
     # cql += "PRIMARY KEY ({0}))".format(str(primary_key.keys()).replace('[', '').replace(']', '').replace("'", '')) # TODO Partition
     if primary_key is not None:
         pk_cql = create_primary_key_with_partition_key(primary_key,
@@ -224,7 +221,7 @@ def create_table(keyspace_name,
         cql += " WITH CLUSTERING ORDER BY ("
         used_with = True
         for c in clustering:
-            cql += "{0} {1}, ".format(c.keys()[0], c.values()[0])
+            cql += "{0} {1}, ".format(list(c.keys())[0], list(c.values())[0])
         cql = cql[:-2] + ")"
     if table_options is not None:
         for option in table_options:
@@ -248,6 +245,11 @@ def drop_table(keyspace_name,
 ############################################
 
 def main():
+
+    # required_if_args = [
+    #    ["state", "present", ["columns", "primary_key"]]
+    # ]
+
     module = AnsibleModule(
         argument_spec=dict(
             login_user=dict(type='str'),
@@ -257,9 +259,9 @@ def main():
             name=dict(type='str', required=True),
             state=dict(type='str', required=True, choices=['present', 'absent']),
             keyspace=dict(type='str', required=True),
-            columns=dict(type='list', elements='dict', required=True),
-            primary_key=dict(type='list', elements='str', required=True),
-            clustering=dict(type='list', elements='str'),
+            columns=dict(type='list', elements='dict'),
+            primary_key=dict(type='list', elements='str'),
+            clustering=dict(type='list', elements='dict'),
             partition_key=dict(type='list', elements='str', default=[]),
             table_options=dict(type='dict', default=None),
             is_type=dict(type='bool', default=False),
@@ -267,12 +269,11 @@ def main():
         supports_check_mode=True
     )
 
-    if not HAS_CASSANDRA_DRIVER:
-        module.fail_json(msg="This module requires the cassandra-driver \
-                         python driver. You can probably install it with\
-                          pip install cassandra-driver.")
-
-    required_if = [["state", "present", ["columns", "primary_key"]]]
+    if HAS_CASSANDRA_DRIVER is False:
+        msg = ("This module requires the cassandra-driver python"
+               " driver. You can probably install it with pip"
+               " install cassandra-driver.")
+        module.fail_json(msg=msg)
 
     login_user = module.params['login_user']
     login_password = module.params['login_password']
@@ -288,6 +289,10 @@ def main():
     table_options = module.params['table_options']
     is_type = module.params['is_type']
     debug = module.params['debug']
+
+    if is_type is False and state == "present":
+        if columns is None or primary_key is None:
+            module.fail_json(msg="Both columns and primary_key must be specified when creating a table")
 
     result = dict(
         changed=False,
@@ -342,12 +347,7 @@ def main():
         module.exit_json(**result)
 
     except Exception as excep:
-        exType, ex, tb = sys.exc_info()
-        msg = "An error occured on line {0}: {1} | {2} | {3} | {4}".format(traceback.tb_lineno(tb),
-                                                                           excep,
-                                                                           exType,
-                                                                           ex,
-                                                                           traceback.print_exc())
+        msg = str(excep)
         if cql is not None:
             msg += " | {0}".format(cql)
         if debug:

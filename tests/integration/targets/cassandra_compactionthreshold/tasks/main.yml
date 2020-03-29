@@ -23,7 +23,7 @@
     seconds: 1
 
 - name: Get incremental backup status 1
-  shell: nodetool -h $(hostname) getcompactionthreshold system local
+  shell: nodetool -h 127.0.0.1 getcompactionthreshold system local
   register: compactionthreshold
 
 - name: Assert starting status of compactionthreshold
@@ -38,7 +38,7 @@
     max: 64
 
 - name: Get compactionthreshold
-  shell: nodetool -h $(hostname) getcompactionthreshold system local
+  shell: nodetool -h 127.0.0.1 getcompactionthreshold system local
   register: compactionthreshold
 
 - name: Assert compactionthreshold 8 / 64 MB
@@ -53,7 +53,7 @@
     max: 32
 
 - name: Get compactionthreshold
-  shell: nodetool -h $(hostname) getcompactionthreshold system local
+  shell: nodetool -h 127.0.0.1 getcompactionthreshold system local
   register: compactionthreshold
 
 - name: Assert compactionthreshold is 4 / 32 MB
@@ -74,7 +74,7 @@
     that: compactionthreshold.changed == True
 
 - name: Get compactionthreshold
-  shell: nodetool -h $(hostname) getcompactionthreshold system local
+  shell: nodetool -h 127.0.0.1 getcompactionthreshold system local
   register: compactionthreshold
 
 - name: Assert compactionthreshold is still 4 / 32 MB
@@ -90,7 +90,7 @@
   register: module_nochange
 
 - name: Get compactionthreshold
-  shell: nodetool -h $(hostname) getcompactionthreshold system local
+  shell: nodetool -h 127.0.0.1 getcompactionthreshold system local
   register: compactionthreshold
 
 - name: Assert compactionthreshold is still 4 / 32 MB and module reports no change
@@ -114,7 +114,7 @@
   when: cassandra_auth_tests == True
 
 - name: Get compactionthreshold auth 1
-  shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h $(hostname) getcompactionthreshold system local
+  shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 getcompactionthreshold system local
   register: compactionthreshold
   when: cassandra_auth_tests == True
 
@@ -136,7 +136,7 @@
   when: cassandra_auth_tests == True
 
 - name: Get compactionthreshold auth 2
-  shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h $(hostname) getcompactionthreshold system local
+  shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 getcompactionthreshold system local
   register: compactionthreshold
   when: cassandra_auth_tests == True
 

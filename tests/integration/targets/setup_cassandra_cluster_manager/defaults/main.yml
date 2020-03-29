@@ -7,3 +7,4 @@ ant_version: "1.9.14"
 ant_download: "https://www-eu.apache.org/dist//ant/binaries/apache-ant-{{ ant_version }}-bin.tar.gz"
 cassandra_version: 3.11.6  # Released version from http://archive.apache.org/dist/cassandra/
 cassandra_nodes: 3
+cassandra_service: cassandra  # Service from setup_cassandra. We don't want this running for the cluster tests

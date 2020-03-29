@@ -1,0 +1,2 @@
+cassandra_env_file: "/etc/cassandra/cassandra-env.sh"
+cassandra_yml_file: "/etc/cassandra/cassandra.yaml"

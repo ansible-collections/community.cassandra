@@ -31,7 +31,8 @@ options:
   login_host:
     description:
       - The Cassandra hostname.
-      - Set to the value returned by socket.getfqdn() if left unset.
+      - If unset the instance will check 127.0.0.1 for a C* instance.
+      - Otherwise the value returned by socket.getfqdn() is used.
     type: list
     elements: str
   login_port:
@@ -241,17 +242,24 @@ def main():
     )
 
     if HAS_CASSANDRA_DRIVER is False:
-        module.fail_json(msg="This module requires the cassandra-driver python \
-                         driver. You can probably install it with pip\
-                          install cassandra-driver.")
+        msg = ("This module requires the cassandra-driver python"
+               " driver. You can probably install it with pip"
+               " install cassandra-driver.")
+        module.fail_json(msg=msg)
 
     login_user = module.params['login_user']
     login_password = module.params['login_password']
     login_host = module.params['login_host']
+    login_port = module.params['login_port']
     if login_host is None:
         login_host = []
-        login_host.append(socket.getfqdn())
-    login_port = module.params['login_port']
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        result = s.connect_ex(('127.0.0.1', login_port))
+        if result == 0:
+            login_host.append('127.0.0.1')
+        else:
+            login_host.append(socket.getfqdn())
+
     name = module.params['name']
     keyspace = name
     state = module.params['state']

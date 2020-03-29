@@ -17,39 +17,39 @@
 # along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
 
 # ===========================================================
-- name: Test missing driver handling
-  cassandra_keyspace:
-    name: mykeyspace
-    state: present
-  register: no_driver
-  ignore_errors: yes
+- name: Include vars for os family
+  include_vars:
+    file: "{{ ansible_os_family }}.yml"
 
-- assert:
-    that:
-      - no_driver.changed == False
-      - "no_driver.msg == 'This module requires the cassandra-driver python driver. You can probably install it with pip install cassandra-driver.'"
+#- name: Test missing driver handling
+#  cassandra_keyspace:
+#    name: mykeyspace
+#    state: present
+#  register: no_driver
+#  ignore_errors: yes
+
+#- assert:
+#    that:
+#      - no_driver.changed == False
+#      - "no_driver.msg == 'This module requires the cassandra-driver python driver. You can probably install it with pip install cassandra-driver.'"
 
 # This should go into a cassandra_driver dependency
 - name: Ensure epel is available
   yum:
     name: epel-release
+  when: ansible_os_family == "RedHat"
 
 - name: Packages needed for cassandra-driver
-  yum:
-    name: "{{ item }}"
-  with_items:
-    - gcc
-    - python-devel
-    - python-requests
-    - libev
-    - libev-devel
-    - pyOpenSSL
+  package:
+    name: "{{ packages_for_cass_driver }}"
 
 - name: Install cassandra-driver
   pip:
     name: cassandra-driver
   environment:
     CASS_DRIVER_NO_CYTHON: 1
+
+#- shell: apt install net-tools -y && netstat -tulpen
 
 - name: Create a keyspace 1
   cassandra_keyspace:

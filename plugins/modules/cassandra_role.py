@@ -228,8 +228,8 @@ def create_alter_role(module, session, role, super_user, login, password,
         cql = "CREATE ROLE {0} ".format(role)
     else:
         cql = "ALTER ROLE {0} ".format(role)
-        cql += "WITH SUPERUSER = {0} ".format(super_user)
-        cql += "AND LOGIN = {0} ".format(login)
+    cql += "WITH SUPERUSER = {0} ".format(super_user)
+    cql += "AND LOGIN = {0} ".format(login)
     if password is not None:
         cql += "AND PASSWORD = '{0}' ".format(password)
     if options is not None:
@@ -556,9 +556,10 @@ def main():
     )
 
     if HAS_CASSANDRA_DRIVER is False:
-        module.fail_json(msg="This module requires the cassandra-driver python \
-                         driver. You can probably install it with \
-                         pip install cassandra-driver.")
+        msg = ("This module requires the cassandra-driver python"
+               " driver. You can probably install it with pip"
+               " install cassandra-driver.")
+        module.fail_json(msg=msg)
 
     login_user = module.params['login_user']
     login_password = module.params['login_password']
@@ -590,8 +591,8 @@ def main():
     try:
         if keyspace_permissions is not None:
             if not validate_keyspace_permissions(keyspace_permissions):
-                module.fail_json(msg="Invalid permission provided in the \
-                                 keyspace_permission parameter.")
+                module.fail_json(msg=("Invalid permission provided in the "
+                                 "keyspace_permission parameter."))
         auth_provider = None
         if login_user is not None:
             auth_provider = PlainTextAuthProvider(
@@ -748,12 +749,7 @@ def main():
         module.exit_json(**result)
 
     except Exception as excep:
-        exType, ex, tb = sys.exc_info()
-        msg = "An error occured on line {0}: {1} | {2} | {3} | {4}".format(traceback.tb_lineno(tb),
-                                                                           excep,
-                                                                           exType,
-                                                                           ex,
-                                                                           traceback.print_exc())
+        msg = str(excep)
         if cql is not None:
             msg += " | {0}".format(cql)
         if debug:

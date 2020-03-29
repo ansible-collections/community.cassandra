@@ -18,7 +18,7 @@
 
 # ===========================================================
 - name: Get thrift status 1
-  shell: nodetool -h $(hostname) statusthrift
+  shell: nodetool -h 127.0.0.1 statusthrift
   register: thrift_status
 
 - name: Assert thrift is not running 1
@@ -30,7 +30,7 @@
     state: "enabled"
 
 - name: Get thrift status 2
-  shell: nodetool -h $(hostname) statusthrift
+  shell: nodetool -h 127.0.0.1 statusthrift
   register: thrift_status
 
 - name: Assert thrift is running
@@ -42,7 +42,7 @@
     state: "disabled"
 
 - name: Get thrift status 3
-  shell: nodetool -h $(hostname) statusthrift
+  shell: nodetool -h 127.0.0.1 statusthrift
   register: thrift_status
 
 - name: Assert thrift is not running 2
@@ -60,7 +60,7 @@
     that: thrift_status.changed == True
 
 - name: Get thrift status 3
-  shell: nodetool -h $(hostname) statusthrift
+  shell: nodetool -h 127.0.0.1 statusthrift
   register: thrift_status
 
 - name: Assert thrift is still not running (after check_mode)
@@ -79,7 +79,7 @@
   when: cassandra_auth_tests == True
 
 - name: Get thrift status 5
-  shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h $(hostname) statusthrift
+  shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 statusthrift
   register: thrift_status
   when: cassandra_auth_tests == True
 
@@ -97,7 +97,7 @@
   when: cassandra_auth_tests == True
 
 - name: Get thrift status 6
-  shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h $(hostname) statusthrift
+  shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 statusthrift
   register: thrift_status
   when: cassandra_auth_tests == True
 

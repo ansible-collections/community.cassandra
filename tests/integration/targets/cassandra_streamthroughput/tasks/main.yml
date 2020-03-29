@@ -18,7 +18,7 @@
 
 # ===========================================================
 - name: Get streamthroughput BLAH
-  shell: nodetool -h $(hostname) getstreamthroughput
+  shell: nodetool -h 127.0.0.1 getstreamthroughput
   register: streamthroughput
 
 - name: Assert starting status of streamthroughput
@@ -30,7 +30,7 @@
     value: 500
 
 - name: Get streamthroughput
-  shell: nodetool -h $(hostname) getstreamthroughput
+  shell: nodetool -h 127.0.0.1 getstreamthroughput
   register: streamthroughput
 
 - name: Assert streamthroughput is 500MB
@@ -42,7 +42,7 @@
     value: 200
 
 - name: Get streamthroughput
-  shell: nodetool -h $(hostname) getstreamthroughput
+  shell: nodetool -h 127.0.0.1 getstreamthroughput
   register: streamthroughput
 
 - name: Assert streamthroughput is 200MB
@@ -60,7 +60,7 @@
     that: streamthroughput.changed == True
 
 - name: Get streamthroughput
-  shell: nodetool -h $(hostname) getstreamthroughput
+  shell: nodetool -h 127.0.0.1 getstreamthroughput
   register: streamthroughput
 
 - name: Assert streamthroughput is still 200MB
@@ -72,7 +72,7 @@
     value: 250
 
 - name: Get streamthroughput
-  shell: nodetool -h $(hostname) getstreamthroughput
+  shell: nodetool -h 127.0.0.1 getstreamthroughput
   register: streamthroughput
 
 - name: Assert streamthroughput is 250MB
@@ -85,7 +85,7 @@
   register: module_nochange
 
 - name: Get streamthroughput
-  shell: nodetool -h $(hostname) getstreamthroughput
+  shell: nodetool -h 127.0.0.1 getstreamthroughput
   register: streamthroughput
 
 - name: Assert streamthroughput is still 250MB and module reports no change
@@ -106,7 +106,7 @@
   when: cassandra_auth_tests == True
 
 - name: Get streamthroughput auth 1
-  shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h $(hostname) getstreamthroughput
+  shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 getstreamthroughput
   register: streamthroughput
   when: cassandra_auth_tests == True
 
@@ -125,7 +125,7 @@
   when: cassandra_auth_tests == True
 
 - name: Get streamthroughput auth 2
-  shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h $(hostname) getstreamthroughput
+  shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 getstreamthroughput
   register: streamthroughput
   when: cassandra_auth_tests == True
 

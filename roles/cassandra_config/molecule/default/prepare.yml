@@ -22,6 +22,12 @@
         recurse: yes
         mode: 0751
 
+    - name: Ensure epel is available
+      yum:
+        name: epel-release
+        state: present
+      when: ansible_os_family == "RedHat"
+
     - name: Ensure pip is available
       package:
         name: python-pip

@@ -1,6 +1,0 @@
-nrpe_package: nagios-nrpe-server
-nagios_plugins:
-  - nagios-plugins
-nagios_plugin_dir: /usr/local/nagios/libexec/
-nrpe_cfg: /etc/nagios/nrpe.cfg
-nrpe_allowed_hosts: "127.0.0.1,192.168.1.200"

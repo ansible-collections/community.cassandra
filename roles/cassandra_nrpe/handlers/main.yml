@@ -1,6 +1,0 @@
----
-# handlers file for cassandra_nrpe
-- name: Restart nrpe
-  service:
-    name: nrpe
-    state: restarted

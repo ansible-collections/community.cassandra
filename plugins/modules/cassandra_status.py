@@ -28,6 +28,7 @@ options:
     description:
       - The hostname.
     type: str
+    default: 127.0.0.1
   port:
     description:
       - The Cassandra TCP port.
@@ -110,8 +111,15 @@ class NodeToolCmd(object):
         self.username = module.params['username']
         self.nodetool_path = module.params['nodetool_path']
         self.debug = module.params['debug']
+        # TODO these variables need normalizing with the other modules
         if self.host is None:
-            self.host = socket.getfqdn()
+            self.host = []
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            result = s.connect_ex(('127.0.0.1', self.port))
+            if result == 0:
+                self.host.append('127.0.0.1')
+            else:
+                self.host.append(socket.getfqdn())
 
     def execute_command(self, cmd):
         return self.module.run_command(cmd)
@@ -236,7 +244,7 @@ def cluster_up_down(stdout):
 def main():
     module = AnsibleModule(
         argument_spec=dict(
-            host=dict(type='str', default=None),
+            host=dict(type='str', default="127.0.0.1"),
             port=dict(type='int', default=7199),
             password=dict(type='str', no_log=True),
             password_file=dict(type='str', no_log=True),
@@ -258,8 +266,7 @@ def main():
     result = {}
 
     result['cluster_status'] = cluster_status
-    if iterations > 1:
-        result['iterations'] = iterations
+    result['iterations'] = iterations
 
     if debug:
         result['cluster_status_list'] = cluster_status_list

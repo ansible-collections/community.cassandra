@@ -20,8 +20,20 @@
 - meta: end_play
   when: ansible_os_family not in  ['RedHat', 'Debian' ]
 
-- command: hostname localhost
-  become: yes
+#- command: hostname localhost
+#  become: yes
+
+- name: Ensure Cassandra service from setup_cassandra isn't running
+  service:
+    name: "{{ cassandra_service }}"
+    enabled: "yes"
+    state: "stopped"
+  ignore_errors: yes  # Might not exist
+
+- name: Install sudo
+  package:
+    name: sudo
+    state: present
 
 - name: Install OpenJDK package
   yum:
@@ -88,41 +100,97 @@
     name: cassandra
     state: present
     shell: /bin/bash
+    create_home: yes
+
+- name: Ensure dirs exist
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: cassandra
+    group: cassandra
+    mode: 0755
+  with_items:
+    - /home/cassandra
+    - /home/cassandra/config
 
 - name: Install ccm via pip
   pip:
     name: ccm
     state: present
 
-- name: Install Cassandra via ccm tool
-  shell: "sudo -u cassandra bash -c \"ccm create test -v {{ cassandra_version }} > /dev/null\""
+- name: Cleanup any previous ccm stuff
+  shell: "sudo -E -u cassandra bash -c \"ccm remove test > /dev/null\""
+  become_user: cassandra
   args:
     warn: false
+    chdir: /home/cassandra
+  environment:
+    CCM_CONFIG_DIR: "/home/cassandra/config"
+    CASSANDRA_HOME: "/home/cassandra"
+  ignore_errors: yes
+
+- name: Install Cassandra via ccm tool
+  shell: "sudo -E -u cassandra bash -c \"ccm create test -v {{ cassandra_version }} > /dev/null\""
+  #shell: ccm create test -v {{ cassandra_version }} > /dev/null
+  become_user: cassandra
+  args:
+    warn: false
+    chdir: /home/cassandra
+  environment:
+    CCM_CONFIG_DIR: "/home/cassandra/config"
+    CASSANDRA_HOME: "/home/cassandra"
 
 - name: Add nodes to the Cassandra cluster
-  shell: "sudo -u cassandra bash -c \"ccm populate -n {{ cassandra_nodes }}\""
+  shell: "sudo -E -u cassandra bash -c \"ccm populate -n {{ cassandra_nodes }}\""
+  #shell: ccm populate -n {{ cassandra_nodes }}
+  become_user: cassandra
   args:
     warn: false
+    chdir: /home/cassandra
+  environment:
+    CCM_CONFIG_DIR: "/home/cassandra/config"
+    CASSANDRA_HOME: "/home/cassandra"
 
 - name: Start the ccm cluster
-  command: sudo -u cassandra bash -c "ccm start"
+  shell: sudo -E -u cassandra bash -c "ccm start"
+  #shell: ccm start
+  become_user: cassandra
   args:
     warn: false
+    chdir: /home/cassandra
+  environment:
+    CCM_CONFIG_DIR: "/home/cassandra/config"
+    CASSANDRA_HOME: "/home/cassandra"
 
 - name: Get cluster status
-  command: sudo -u cassandra bash -c "ccm status"
+  shell: sudo -E -u cassandra bash -c "ccm status"
+  #shell: ccm status
+  become_user: cassandra
   args:
     warn: false
+    chdir: /home/cassandra
+  environment:
+    CCM_CONFIG_DIR: "/home/cassandra/config"
+    CASSANDRA_HOME: "/home/cassandra"
 
 - name: Get output of node1 status
-  command: sudo -u cassandra bash -c "ccm node1 status"
+  shell: sudo -E -u cassandra bash -c "ccm node1 status"
+  #shell: ccm node1 status
+  become_user: cassandra
   args:
     warn: false
+    chdir: /home/cassandra
+  environment:
+    CCM_CONFIG_DIR: "/home/cassandra/config"
+    CASSANDRA_HOME: "/home/cassandra"
+
+#- shell: find / -name nodetool
+#  ignore_errors: yes
 
 - name: Set nodetool path
   copy:
     dest: /home/cassandra/nodetool_path.sh
     content: |
-      export PATH="$PATH:/home/cassandra/.ccm/repository/{{ cassandra_version }}/bin/"
+      export PATH="$PATH:/home/cassandra/config/repository/{{ cassandra_version }}/bin/"
     owner: cassandra
     group: users

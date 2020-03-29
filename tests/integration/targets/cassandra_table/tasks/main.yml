@@ -18,43 +18,41 @@
 
 # ===========================================================
 
-- name: Test missing driver handling
-  cassandra_table:
-    name: users
-    keyspace: myapp
-    state: present
-    columns:
-      - id: uuid
-      - username: text
-      - encrypted_password: blob
-      - first_name: text
-      - last_name: text
-      - dob: date
-    primary_key:
-      - username
-  register: no_driver
-  ignore_errors: yes
+#- name: Test missing driver handling
+#  cassandra_table:
+#    name: users
+#    keyspace: myapp
+#    state: present
+#    columns:
+#      - id: uuid
+#      - username: text
+#      - encrypted_password: blob
+#      - first_name: text
+#      - last_name: text
+#      - dob: date
+#    primary_key:
+#      - username
+#  register: no_driver
+#  ignore_errors: yes
 
-- assert:
-    that:
-      - no_driver.changed == False
-      - "no_driver.msg == 'This module requires the cassandra-driver python driver. You can probably install it with pip install cassandra-driver.'"
+#- assert:
+#    that:
+#      - no_driver.changed == False
+#      - "no_driver.msg == 'This module requires the cassandra-driver python driver. You can probably install it with pip install cassandra-driver.'"
+
+- name: Include vars for os family
+  include_vars:
+    file: "{{ ansible_os_family }}.yml"
+
+- name: Packages needed for cassandra-driver
+  package:
+    name: "{{ packages_for_cass_driver }}"
 
 # This should go into a cassandra_driver dependency
 - name: Ensure epel is available
   yum:
     name: epel-release
-
-- name: Packages needed for cassandra-driver
-  yum:
-    name: "{{ item }}"
-  with_items:
-    - gcc
-    - python-devel
-    - python-requests
-    - libev
-    - libev-devel
-    - pyOpenSSL
+  when: ansible_os_family == "RedHat"
 
 - name: Install cassandra-driver
   pip:
@@ -133,7 +131,7 @@
   shell: "cqlsh -u  {{ cassandra_admin_user }} -p {{ cassandra_admin_pwd }} --execute 'DESC KEYSPACE myapp'"
   register: myapp
 
-- name: Ensure mypp.users table does not exist
+- name: Ensure myapp.users table does not exist
   assert:
     that:
       - "'CREATE TABLE myapp.users' not in myapp.stdout"
@@ -304,8 +302,8 @@
       - added_date
       - videoid
     clustering:
-      - { "added_date": "DESC" }
-      - { "videoid": "ASC" }
+      - added_date: "DESC"
+      - videoid: "ASC"
     login_user: "{{ cassandra_admin_user }}"
     login_password: "{{ cassandra_admin_pwd }}"
   register: user_videos
@@ -331,8 +329,8 @@
       - added_date
       - videoid
     clustering:
-      - { "added_date": "DESC" }
-      - { "videoid": "ASC" }
+      - added_date: "DESC"
+      - videoid: "ASC"
     login_user: "{{ cassandra_admin_user }}"
     login_password: "{{ cassandra_admin_pwd }}"
   register: latest_videos
@@ -441,7 +439,7 @@
       - videoid
       - commentid
     clustering:
-      - { "commentid": "DESC" }
+      - commentid: "DESC"
     login_user: "{{ cassandra_admin_user }}"
     login_password: "{{ cassandra_admin_pwd }}"
   register: comments_by_video
@@ -465,7 +463,7 @@
       - userid
       - commentid
     clustering:
-      - { "commentid": "DESC" }
+      - commentid: "DESC"
     login_user: "{{ cassandra_admin_user }}"
     login_password: "{{ cassandra_admin_pwd }}"
   register: comments_by_user
@@ -496,8 +494,8 @@
       - videoid
       - userid
     clustering:
-      - { "event_timestamp": "DESC" }
-      - { "event": "ASC" }
+      - event_timestamp: "DESC"
+      - event: "ASC"
     login_user: "{{ cassandra_admin_user }}"
     login_password: "{{ cassandra_admin_pwd }}"
   register: video_event
@@ -571,8 +569,8 @@
       - status_date
       - etag
     clustering:
-      - { "status_date": "DESC" }
-      - { "etag": "ASC" }
+      - status_date: "DESC"
+      - etag: "ASC"
     login_user: "{{ cassandra_admin_user }}"
     login_password: "{{ cassandra_admin_pwd }}"
   register: encoding_job_notifications
@@ -636,8 +634,8 @@
       - column1
       - column2
     clustering:
-      - { "column3": "ASC" }
-      - { "column3": "DESC" }
+      - column3: "ASC"
+      - column4: "DESC"
     table_options:
       bloom_filter_fp_chance: '0.02'
       caching: "{ 'keys': 'ALL', 'rows_per_partition': 'ALL' }"

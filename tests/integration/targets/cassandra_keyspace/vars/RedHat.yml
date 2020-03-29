@@ -1,0 +1,7 @@
+packages_for_cass_driver:
+  - gcc
+  - python-devel
+  - python-requests
+  - libev
+  - libev-devel
+  - pyOpenSSL

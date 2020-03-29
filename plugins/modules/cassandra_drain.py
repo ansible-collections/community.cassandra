@@ -28,6 +28,7 @@ options:
     description:
       - The hostname.
     type: str
+    default: 127.0.0.1
   port:
     description:
       - The Cassandra TCP port.
@@ -126,7 +127,7 @@ class NodeToolCommand(NodeToolCmd):
 def main():
     module = AnsibleModule(
         argument_spec=dict(
-            host=dict(type='str', default=None),
+            host=dict(type='str', default="127.0.0.1"),
             port=dict(type='int', default=7199),
             password=dict(type='str', no_log=True),
             password_file=dict(type='str', no_log=True),
