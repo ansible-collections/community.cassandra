@@ -5,7 +5,6 @@ roles/cassandra_firewall/molecule/virtualbox/tests/test_default.py future-import
 roles/cassandra_install/molecule/default/tests/test_default.py future-import-boilerplate
 roles/cassandra_linux/molecule/default/tests/test_default.py future-import-boilerplate
 roles/cassandra_medusa/molecule/default/tests/test_default.py future-import-boilerplate
-roles/cassandra_nrpe/molecule/default/tests/test_default.py future-import-boilerplate
 roles/cassandra_repository/molecule/default/tests/test_default.py future-import-boilerplate
 roles/cassandra_config/molecule/default/tests/test_default.py metaclass-boilerplate
 roles/cassandra_dba/molecule/default/tests/test_default.py metaclass-boilerplate
@@ -14,5 +13,4 @@ roles/cassandra_firewall/molecule/virtualbox/tests/test_default.py metaclass-boi
 roles/cassandra_install/molecule/default/tests/test_default.py metaclass-boilerplate
 roles/cassandra_linux/molecule/default/tests/test_default.py metaclass-boilerplate
 roles/cassandra_medusa/molecule/default/tests/test_default.py metaclass-boilerplate
-roles/cassandra_nrpe/molecule/default/tests/test_default.py metaclass-boilerplate
 roles/cassandra_repository/molecule/default/tests/test_default.py metaclass-boilerplate
