@@ -20,6 +20,21 @@ Any contribution is welcome and we only ask contributors to:
 * Provide *at least* integration tests for any contribution.
 * Create an issues for any significant contribution that would change a large portion of the code base.
 
+## Running integration tests locally
+
+Run all tests
+
+```
+ansible-test integration --docker -v --color --retry-on-error --python 3.6 --continue-on-error --diff --coverage
+```
+
+Run tests just for the cassandra_role module
+
+```
+ansible-test integration --docker -v --color --retry-on-error --python 3.6 --continue-on-error —diff --coverage cassandra_role
+```
+
+
 ## License
 
 GNU General Public License v3.0 or later
