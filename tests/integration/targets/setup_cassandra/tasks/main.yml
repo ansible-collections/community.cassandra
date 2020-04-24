@@ -69,7 +69,7 @@
   when: ansible_os_family == 'RedHat'
   notify:
     - redhat_remove_cassandra
-    - redhat_remove_python3
+    #- redhat_remove_python3
 
 - name: Add an Apt keys for Cassandra
   apt_key:
