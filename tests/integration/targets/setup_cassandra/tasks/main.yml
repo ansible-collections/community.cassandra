@@ -69,7 +69,7 @@
   when: ansible_os_family == 'RedHat'
   notify:
     - redhat_remove_cassandra
-    - redhat_remove_python3
+    #- redhat_remove_python3
 
 - name: Add an Apt keys for Cassandra
   apt_key:
@@ -83,11 +83,11 @@
     state: present
   when: ansible_os_family == 'Debian'
 
-- name: Run the equivalent of "apt-get update"
-  apt:
-    update_cache: yes
-    cache_valid_time: 3600
-  when: ansible_os_family == 'Debian'
+#- name: Run the equivalent of "apt-get update"
+#  apt:
+#    update_cache: yes
+#    cache_valid_time: 3600
+#  when: ansible_os_family == 'Debian'
 
 - name: Install cassandra deb package
   apt:
@@ -122,7 +122,7 @@
 
 #- shell: cat /etc/cassandra/cassandra.yaml
 #- shell: sleep 30 && tail -n 1000 /var/log/cassandra/system.log
-- shell: apt install net-tools -y && netstat -tulpen
+#- shell: apt install net-tools -y && netstat -tulpen
 
 - name: Allow a little time for Cassandra to start listening on ports
   wait_for:
@@ -133,3 +133,18 @@
   with_items:
     - { "host": "0.0.0.0", "port": 9042 }
     - { "host": "127.0.0.1", "port": 7199 }
+
+- name: Set Python version back on Debian flavours (Cassandra rpm changes this)
+  block:
+    - shell: python --version
+      register: python_version
+
+    - shell: update-alternatives --install /usr/bin/python python {{ item.python_path }} {{ item.priority }}
+      with_items:
+        - { "python_path": "/usr/bin/python3.6", "priority": 1 }
+        - { "python_path": "/usr/bin/python2.7", "priority": 2 }
+      when: "'3.6' not in python_version"
+
+    - shell: update-alternatives --set python /usr/bin/python3.6
+      when: "'3.6' not in python_version"
+  when: ansible_os_family == "Debian"
