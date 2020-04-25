@@ -134,14 +134,17 @@
     - { "host": "0.0.0.0", "port": 9042 }
     - { "host": "127.0.0.1", "port": 7199 }
 
-- shell: python --version
-  register: python_version
+- name: Set Python version back on Debian flavours (Cassandra rpm changes this)
+  block:
+    - shell: python --version
+      register: python_version
 
-- shell: update-alternatives --install /usr/bin/python python {{ item.python_path }} {{ item.priority }}
-  with_items:
-    - { "python_path": "/usr/bin/python3.6", "priority": 1 }
-    - { "python_path": "/usr/bin/python2.7", "priority": 2 }
-  when: "'3.6' not in python_version"
+    - shell: update-alternatives --install /usr/bin/python python {{ item.python_path }} {{ item.priority }}
+      with_items:
+        - { "python_path": "/usr/bin/python3.6", "priority": 1 }
+        - { "python_path": "/usr/bin/python2.7", "priority": 2 }
+      when: "'3.6' not in python_version"
 
-- shell: update-alternatives --set python /usr/bin/python3.6
-  when: "'3.6' not in python_version"
+    - shell: update-alternatives --set python /usr/bin/python3.6
+      when: "'3.6' not in python_version"
+  when: ansible_os_family == "Debian"
