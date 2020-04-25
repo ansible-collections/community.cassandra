@@ -136,15 +136,15 @@
 
 - name: Set Python version back on Debian flavours (Cassandra rpm changes this)
   block:
-    - shell: python --version
-      register: python_version
+    #- shell: python --version
+    #  register: python_version
 
     - shell: update-alternatives --install /usr/bin/python python {{ item.python_path }} {{ item.priority }}
       with_items:
         - { "python_path": "/usr/bin/python3.6", "priority": 1 }
         - { "python_path": "/usr/bin/python2.7", "priority": 2 }
-      when: "'3.6' not in python_version.stdout"
+      #when: "'3.6' not in python_version.stdout"
 
     - shell: update-alternatives --set python /usr/bin/python3.6
-      when: "'3.6' not in python_version.stdout"
+      #when: "'3.6' not in python_version.stdout"
   when: ansible_os_family == "Debian"
