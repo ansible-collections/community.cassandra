@@ -135,4 +135,4 @@
     - { "host": "127.0.0.1", "port": 7199 }
 
 
-- shell: update-alternatives —set python /usr/bin/python3.6
+- shell: update-alternatives --set python /usr/bin/python3.6
