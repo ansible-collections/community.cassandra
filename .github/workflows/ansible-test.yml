@@ -54,12 +54,12 @@ jobs:
       - name: Run integration tests on Python ${{ matrix.python_version }} & Cassandra 311x
         run: ansible-test integration --docker -v --color --retry-on-error --python ${{ matrix.python_version }} --continue-on-error --diff --coverage
 
-      - name: Ensure cassandra versions are set to 40x
+      - name: Ensure cassandra versions are set to 22x
         run: |
-          sed -i 's/^cassandra_version:.*/cassandra_version: \"40x\"/g' ${{ env.setup_cassandra_version_file }}
-          sed -i 's/^cassandra_version:.*/cassandra_version: \"4.0-alpha4\"/g' ${{ env.setup_ccm_version_file }}
+          sed -i 's/^cassandra_version:.*/cassandra_version: \"22x\"/g' ${{ env.setup_cassandra_version_file }}
+          sed -i 's/^cassandra_version:.*/cassandra_version: \"2.2.9\"/g' ${{ env.setup_ccm_version_file }}
 
-      - name: Run integration tests on Python ${{ matrix.python_version }} & Cassandra 40x
+      - name: Run integration tests on Python ${{ matrix.python_version }} & Cassandra 22x
         run: ansible-test integration --docker -v --color --retry-on-error --python ${{ matrix.python_version }} --continue-on-error --diff --coverage
 
       - name: Upload Coverage data
