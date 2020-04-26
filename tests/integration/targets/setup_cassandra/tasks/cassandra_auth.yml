@@ -129,4 +129,4 @@
 
 - assert:
     that:
-      - "'Provided username cassandra and/or password are incorrect' in bad_cqlsh_login.stderr"
+      - "'password are incorrect' in bad_cqlsh_login.stderr"
