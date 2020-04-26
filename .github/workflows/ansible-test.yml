@@ -2,6 +2,10 @@ name: CI
 on:
 - pull_request
 
+env:
+  setup_cassandra_version_file: "./tests/integration/targets/setup_cassandra/defaults/main.yml"
+  setup_ccm_version_file: "./tests/integration/targets/setup_cassandra_cluster_manager/defaults/main.yml"
+
 jobs:
   sanity:
     runs-on: ubuntu-latest
@@ -42,7 +46,20 @@ jobs:
       - name: Install ansible-base (devel)
         run: pip install https://github.com/ansible/ansible/archive/devel.tar.gz --disable-pip-version-check
 
-      - name: Run integration tests on Python ${{ matrix.python_version }}
+      - name: Ensure cassandra versions are set to 311x
+        run: |
+          sed -i 's/^cassandra_version:.*/cassandra_version: \"311x\"/g' ${{ env.setup_cassandra_version_file }}
+          sed -i 's/^cassandra_version:.*/cassandra_version: \"3.11.6\"/g' ${{ env.setup_ccm_version_file }}
+
+      - name: Run integration tests on Python ${{ matrix.python_version }} & Cassandra 311x
+        run: ansible-test integration --docker -v --color --retry-on-error --python ${{ matrix.python_version }} --continue-on-error --diff --coverage
+
+      - name: Ensure cassandra versions are set to 40x
+        run: |
+          sed -i 's/^cassandra_version:.*/cassandra_version: \"40x\"/g' ${{ env.setup_cassandra_version_file }}
+          sed -i 's/^cassandra_version:.*/cassandra_version: \"4.0-alpha4\"/g' ${{ env.setup_ccm_version_file }}
+
+      - name: Run integration tests on Python ${{ matrix.python_version }} & Cassandra 40x
         run: ansible-test integration --docker -v --color --retry-on-error --python ${{ matrix.python_version }} --continue-on-error --diff --coverage
 
       - name: Upload Coverage data
