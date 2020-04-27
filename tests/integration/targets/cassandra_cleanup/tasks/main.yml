@@ -158,7 +158,7 @@
 - assert:
     that:
       - "cleanup.msg == 'nodetool cleanup executed successfully'"
-      - "cleanup.stdout == 'jobs (5) is bigger'"
+      - "'jobs (5) is bigger' in cleanup.stdout"
       - "cleanup.changed == True"
 
 - name: Run with num_jobs = 1
