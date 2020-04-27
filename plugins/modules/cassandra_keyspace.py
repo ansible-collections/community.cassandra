@@ -143,9 +143,14 @@ from ansible.module_utils._text import to_native
 # =========================================
 
 
-# Does the keyspace exists on the cluster?
+# Does the keyspace exists on the cluster? TODO Better to use luster.metadata.keyspaces here?
 def keyspace_exists(session, keyspace):
-    keyspaces = session.execute("SELECT keyspace_name FROM system_schema.keyspaces")
+    server_version = session.execute("SELECT release_version FROM system.local WHERE key='local'")[0]
+    if int(server_version.release_version[1]) >= 3:
+        cql = "SELECT keyspace_name FROM system_schema.keyspaces"
+    else:
+        cql = "SELECT keyspace_name FROM system.schema_keyspaces"
+    keyspaces = session.execute()
     keyspace_exists = False
     for ks in keyspaces:
         if ks.keyspace_name == keyspace:
