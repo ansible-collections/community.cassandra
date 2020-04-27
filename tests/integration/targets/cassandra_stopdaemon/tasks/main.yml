@@ -21,6 +21,7 @@
 - name: Run stopdaemon on the node
   cassandra_stopdaemon:
   register: stopdaemon
+  ignore_errors: true # C* 2.2 throws a connect error
 
 #- debug:
 #    var: stopdaemon
@@ -49,6 +50,7 @@
     username: "{{ cassandra_admin_user }}"
     password: "{{ cassandra_admin_pwd }}"
   register: stopdaemon
+  ignore_errors: yes # C* 2.2 throws a connect error
 
 #- debug:
 #    var: stopdaemon
@@ -74,7 +76,7 @@
     username: "{{ cassandra_admin_user }}"
     password: XXXXXXXXXXXXXXXXXXXXX
   register: login_status
-  ignore_errors: yes
+  ignore_errors: true
   when: cassandra_auth_tests == True
 
 - name: Assert failed login
