@@ -150,7 +150,7 @@ def keyspace_exists(session, keyspace):
         cql = "SELECT keyspace_name FROM system_schema.keyspaces"
     else:
         cql = "SELECT keyspace_name FROM system.schema_keyspaces"
-    keyspaces = session.execute()
+    keyspaces = session.execute(cql)
     keyspace_exists = False
     for ks in keyspaces:
         if ks.keyspace_name == keyspace:
