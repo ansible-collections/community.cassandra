@@ -36,6 +36,9 @@
   cassandra_handoff:
     state: "disabled"
 
+- pause:
+    seconds: 5
+
 - name: Get handoff status 2
   shell: nodetool -h 127.0.0.1 statushandoff
   register: handoff_status
