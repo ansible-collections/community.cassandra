@@ -27,7 +27,7 @@
 
 - assert:
     that:
-      - "stopdaemon.msg == "nodetool stopdaemon executed successfully"
+      - "stopdaemon.msg == 'nodetool stopdaemon executed successfully'"
       - "stopdaemon.changed == True"
 
 - name: Restart Cassandra
@@ -55,7 +55,7 @@
 
 - assert:
     that:
-      - "stopdaemon.msg == "nodetool stopdaemon executed successfully"
+      - "stopdaemon.msg == 'nodetool stopdaemon executed successfully'"
       - "stopdaemon.changed == True"
 
 - name: Restart Cassandra
