@@ -26,6 +26,17 @@
     name: iproute2
     state: present
 
+- name: Start Cassandra service if it is installed
+  service:
+    name: "{{ cassandra_service }}"
+    state: "started"
+  ignore_errors: yes
+  register: cass
+
+- pause:
+    seconds: 30
+  when: cass.changed is defined
+
 - name: Test nodetool without auth from shell
   command: nodetool status
   register: nt
