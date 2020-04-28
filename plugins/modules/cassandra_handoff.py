@@ -167,8 +167,8 @@ def main():
     status_cmd = 'statushandoff'
     enable_cmd = 'enablehandoff'
     disable_cmd = 'disablehandoff'
-    status_active = 'Hinted handoff is running'
-    status_inactive = 'Hinted handoff is not running'
+    status_active = ['Hinted handoff is running', 'running']
+    status_inactive = ['Hinted handoff is not running', 'not running']
 
     n = NodeTool3PairCommand(module, status_cmd, enable_cmd, disable_cmd)
 
@@ -190,11 +190,11 @@ def main():
             module.fail_json(name=status_cmd,
                              msg="status command failed", **result)
         if module.check_mode:
-            if out == status_active:
+            if out in status_active:
                 module.exit_json(changed=True, msg="check mode", **result)
             else:
                 module.exit_json(changed=False, msg="check mode", **result)
-        if out == status_active:
+        if out in status_active:
             (rc, out, err) = n.disable_command()
             if out:
                 result['stdout'] = out
@@ -212,11 +212,11 @@ def main():
             module.fail_json(name=status_cmd,
                              msg="status command failed", **result)
         if module.check_mode:
-            if out == status_inactive:
+            if out in status_inactive:
                 module.exit_json(changed=True, msg="check mode", **result)
             else:
                 module.exit_json(changed=False, msg="check mode", **result)
-        if out == status_inactive:
+        if out in status_inactive:
             (rc, out, err) = n.enable_command()
             if out:
                 result['stdout'] = out
