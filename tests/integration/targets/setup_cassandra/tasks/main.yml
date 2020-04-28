@@ -35,7 +35,9 @@
 
 - pause:
     seconds: 30
-  when: cass.changed is defined
+  when:
+    - cass.changed is defined
+    - cass.changed == True
 
 - name: Test nodetool without auth from shell
   command: nodetool status

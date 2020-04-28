@@ -152,6 +152,11 @@ def main():
         result['changed'] = True
         result['msg'] = "nodetool stopdaemon executed successfully"
         module.exit_json(**result)
+    elif rc == 2 and out == "Cassandra has shutdown.":
+        # 2.2 behaves a little differently
+        result['changed'] = True
+        result['msg'] = "nodetool stopdaemon executed successfully"
+        module.exit_json(**result)
     else:
         result['rc'] = rc
         result['changed'] = False

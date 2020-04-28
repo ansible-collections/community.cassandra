@@ -21,14 +21,13 @@
 - name: Run stopdaemon on the node
   cassandra_stopdaemon:
   register: stopdaemon
-  ignore_errors: true # C* 2.2 throws a connect error
 
 #- debug:
 #    var: stopdaemon
 
 - assert:
     that:
-      - "stopdaemon.msg == 'nodetool stopdaemon executed successfully'"
+      - "stopdaemon.msg == "nodetool stopdaemon executed successfully"
       - "stopdaemon.changed == True"
 
 - name: Restart Cassandra
@@ -50,14 +49,13 @@
     username: "{{ cassandra_admin_user }}"
     password: "{{ cassandra_admin_pwd }}"
   register: stopdaemon
-  ignore_errors: yes # C* 2.2 throws a connect error
 
 #- debug:
 #    var: stopdaemon
 
 - assert:
     that:
-      - "stopdaemon.msg == 'nodetool stopdaemon executed successfully'"
+      - "stopdaemon.msg == "nodetool stopdaemon executed successfully"
       - "stopdaemon.changed == True"
 
 - name: Restart Cassandra
