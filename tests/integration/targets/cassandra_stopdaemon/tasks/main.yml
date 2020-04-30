@@ -50,9 +50,6 @@
     password: "{{ cassandra_admin_pwd }}"
   register: stopdaemon
 
-#- debug:
-#    var: stopdaemon
-
 - assert:
     that:
       - "stopdaemon.msg == 'nodetool stopdaemon executed successfully'"
@@ -74,7 +71,7 @@
     username: "{{ cassandra_admin_user }}"
     password: XXXXXXXXXXXXXXXXXXXXX
   register: login_status
-  ignore_errors: yes
+  ignore_errors: true
   when: cassandra_auth_tests == True
 
 - name: Assert failed login

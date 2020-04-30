@@ -153,12 +153,19 @@ from ansible.module_utils._text import to_native
 # =========================================
 
 
-# Does the role exist on the cluster?
+# Does the table exist on the cluster?
 def table_exists(session,
                  keyspace_name,
                  table_name):
-    cql = "SELECT table_name FROM system_schema.tables WHERE keyspace_name = '{0}' AND table_name = '{1}'".format(keyspace_name,
-                                                                                                                  table_name)
+    server_version = session.execute("SELECT release_version FROM system.local WHERE key='local'")[0]
+    if int(server_version.release_version[0]) >= 3:
+        cql = "SELECT table_name FROM system_schema.tables WHERE keyspace_name = '{0}' AND table_name = '{1}'".format(keyspace_name,
+                                                                                                                      table_name)
+    else:
+        cql = "SELECT columnfamily_name AS table_name \
+                FROM system.schema_columnfamilies \
+                WHERE keyspace_name = '{0}' \
+                AND columnfamily_name = '{1}';".format(keyspace_name, table_name)
     t = session.execute(cql)
     s = False
     if len(list(t)) > 0:

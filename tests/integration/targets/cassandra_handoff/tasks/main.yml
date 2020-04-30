@@ -30,11 +30,14 @@
 
 - name: Assert handoff is running 1
   assert:
-    that: "'Hinted handoff is running' == handoff_status.stdout"
+    that: "handoff_status.stdout in ['Hinted handoff is running', 'running']"
 
 - name: Turn off handoff with module
   cassandra_handoff:
     state: "disabled"
+
+- pause:
+    seconds: 5
 
 - name: Get handoff status 2
   shell: nodetool -h 127.0.0.1 statushandoff
@@ -42,7 +45,7 @@
 
 - name: Assert handoff is not running
   assert:
-    that: "'Hinted handoff is not running' == handoff_status.stdout"
+    that: "handoff_status.stdout in ['Hinted handoff is not running', 'not running']"
 
 - name: Turn on handoff with module
   cassandra_handoff:
@@ -54,7 +57,7 @@
 
 - name: Assert handoff is running 2
   assert:
-    that: "'Hinted handoff is running' == handoff_status.stdout"
+    that: "handoff_status.stdout in ['Hinted handoff is running', 'running']"
 
 - name: Execute with check_mode = True
   cassandra_handoff:
@@ -72,7 +75,7 @@
 
 - name: Assert handoff is still running (after check_mode)
   assert:
-    that: "'Hinted handoff is running' == handoff_status.stdout"
+    that: "handoff_status.stdout in ['Hinted handoff is running', 'running']"
 
 - include_tasks: ../../setup_cassandra/tasks/cassandra_auth.yml
   when: cassandra_auth_tests == True
@@ -92,7 +95,7 @@
 
 - name: Assert handoff is not running
   assert:
-    that: "'Hinted handoff is not running' == handoff_status.stdout"
+    that: "handoff_status.stdout in ['Hinted handoff is not running', 'not running']"
   when: cassandra_auth_tests == True
 
 - name: Turn on handoff using password file
@@ -110,7 +113,7 @@
 
 - name: Assert handoff is running
   assert:
-    that: "'Hinted handoff is running' == handoff_status.stdout"
+    that: "handoff_status.stdout in ['Hinted handoff is running', 'running']"
   when: cassandra_auth_tests == True
 
 - name: Test login failure handling
