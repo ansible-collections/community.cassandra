@@ -41,6 +41,11 @@
     state: present
   when: ansible_os_family == 'RedHat'
 
+- name: Install packges needed on Debian OS family
+  apt:
+    name: "{{ debian_packages }}"
+  when: ansible_os_family == 'Debian'
+
 - name: Run the equivalent of "apt-get update"
   apt:
     update_cache: yes
