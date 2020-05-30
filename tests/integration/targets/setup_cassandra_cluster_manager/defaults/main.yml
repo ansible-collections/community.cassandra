@@ -1,6 +1,7 @@
 openjdk: java-1.8.0-openjdk
 debian_packages:
   - apt-transport-https
+  - ca-certificates
 pip_packages:
   - pyYaml
   - six
