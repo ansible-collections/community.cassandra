@@ -173,6 +173,7 @@
     state: "enabled"
     username: "{{ cassandra_admin_user }}"
     password: XXXXXXXXXXXXXXXXXXXXX
+    debug: true
   register: login_status
   ignore_errors: true
   when: cassandra_auth_tests == True
