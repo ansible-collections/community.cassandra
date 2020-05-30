@@ -85,7 +85,11 @@
     #- redhat_remove_python3
 - name: Install ca-certificates on Debian
   apt:
-    name: ca-certificates
+    name: "{{ item }}"
+  with_items:
+    - apt-utils
+    - gnupg
+    - ca-certificates
   when: ansible_os_family == 'Debian'
 
 - name: Add an Apt keys for Cassandra
