@@ -6,16 +6,11 @@
 # (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 from __future__ import absolute_import, division, print_function
 
-ANSIBLE_METADATA =\
-    {"metadata_version": "1.1",
-     "status": "['preview']",
-     "supported_by": "community"}
 
 DOCUMENTATION = '''
 ---
 module: cassandra_status
 author: Rhys Campbell (@rhysmeister)
-version_added: 2.9
 short_description: Validates the status of the cluster as seen from the node.
 requirements: [ nodetool ]
 description:

@@ -4,16 +4,12 @@
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 from __future__ import absolute_import, division, print_function
 
-ANSIBLE_METADATA = {'metadata_version': '1.1',
-                    'status': ['preview'],
-                    'supported_by': 'community'}
 
 DOCUMENTATION = r'''
 ---
 module: cassandra_role
 short_description: Manage roles on your Cassandra cluster
 description: Manage roles on your Cassandra Cluster.
-version_added: 2.9
 author: Rhys Campbell (@rhysmeister)
 options:
   login_user:
