@@ -28,6 +28,7 @@
 - name: Turn on incremental backup with module
   cassandra_backup:
     state: "enabled"
+    debug: true
 
 - name: Get incremental backup status 2
   shell: nodetool -h 127.0.0.1 statusbackup
@@ -40,6 +41,7 @@
 - name: Turn off incremental backup with module
   cassandra_backup:
     state: "disabled"
+    debug: true
 
 - name: Get incremental backup status 3
   shell: nodetool -h 127.0.0.1 statusbackup
@@ -52,6 +54,7 @@
 - name: Execute with check_mode = True
   cassandra_backup:
     state: "enabled"
+    debug: true
   check_mode: true
   register: backup_status
 
@@ -75,6 +78,7 @@
     state: "enabled"
     username: "{{ cassandra_admin_user }}"
     password: "{{ cassandra_admin_pwd }}"
+    debug: true
   register: backup_status
   when: cassandra_auth_tests == True
 
@@ -93,6 +97,7 @@
     state: "disabled"
     username: "{{ cassandra_admin_user }}"
     password_file: /etc/cassandra/jmxremote.password
+    debug: true
   register: backup_status
   when: cassandra_auth_tests == True
 
@@ -111,6 +116,7 @@
     state: "disabled"
     username: "{{ cassandra_admin_user }}"
     password: XXXXXXXXXXXXXXXXXXXXX
+    debug: true
   register: login_status
   ignore_errors: true
   when: cassandra_auth_tests == True
@@ -126,6 +132,7 @@
   cassandra_backup:
     state: "disabled"
     nodetool_path: /tmp
+    debug: true
   register: nodetool_path_error
   ignore_errors: true
   when: cassandra_auth_tests == True
