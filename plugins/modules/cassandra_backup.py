@@ -179,7 +179,7 @@ def main():
         if out:
             result['stdout'] = out
         if err:
-            result['stderr'] = errs
+            result['stderr'] = err
 
     if module.params['state'] == "disabled":
 
