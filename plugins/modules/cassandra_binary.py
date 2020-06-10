@@ -174,10 +174,11 @@ def main():
 
     (rc, out, err) = n.status_command()
     out = out.strip()
-    if out:
-        result['stdout'] = out
-    if err:
-        result['stderr'] = err
+    if module.debug:
+        if out:
+            result['stdout'] = out
+        if err:
+            result['stderr'] = err
 
     if module.params['state'] == "disabled":
 
@@ -191,10 +192,11 @@ def main():
                 module.exit_json(changed=False, msg="check mode", **result)
         if out == status_active:
             (rc, out, err) = n.disable_command()
-            if out:
-                result['stdout'] = out
-            if err:
-                result['stderr'] = err
+            if module.debug:
+                if out:
+                    result['stdout'] = out
+                if err:
+                    result['stderr'] = err
         if rc != 0:
             module.fail_json(name=disable_cmd,
                              msg="disable command failed", **result)
@@ -213,10 +215,11 @@ def main():
                 module.exit_json(changed=False, msg="check mode", **result)
         if out == status_inactive:
             (rc, out, err) = n.enable_command()
-            if out:
-                result['stdout'] = out
-            if err:
-                result['stderr'] = err
+            if module.debug:
+                if out:
+                    result['stdout'] = out
+                if err:
+                    result['stderr'] = err
         if rc is not None and rc != 0:
             module.fail_json(name=enable_cmd,
                              msg="enable command failed", **result)
