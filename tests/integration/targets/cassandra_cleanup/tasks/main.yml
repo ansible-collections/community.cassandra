@@ -20,6 +20,7 @@
 
 - name: Cleanup the node
   cassandra_cleanup:
+    debug: yes
   register: cleanup
 
 #- debug:
@@ -37,6 +38,7 @@
   cassandra_cleanup:
     username: "{{ cassandra_admin_user }}"
     password: "{{ cassandra_admin_pwd }}"
+    debug: yes
   register: cleanup
 
 - assert:
@@ -48,6 +50,7 @@
   cassandra_cleanup:
     username: "{{ cassandra_admin_user }}"
     password: XXXXXXXXXXXXXXXXXXXXX
+    debug: yes
   register: login_status
   ignore_errors: yes
   when: cassandra_auth_tests == True
@@ -62,6 +65,7 @@
 - name: Test incorrect nodetool_path handling
   cassandra_cleanup:
     nodetool_path: /tmp
+    debug: yes
   register: nodetool_path_error
   ignore_errors: true
   when: cassandra_auth_tests == True
@@ -76,6 +80,7 @@
     username: "{{ cassandra_admin_user }}"
     password: "{{ cassandra_admin_pwd }}"
     keyspace: system_auth
+    debug: yes
   register: cleanup
 
 - assert:
@@ -89,6 +94,7 @@
     password: "{{ cassandra_admin_pwd }}"
     keyspace: system_auth
     table: roles
+    debug: yes
   register: cleanup
 
 - assert:
@@ -103,6 +109,7 @@
     keyspace: system_auth
     table:
       - roles
+    debug: yes
   register: cleanup
 
 - assert:
@@ -119,6 +126,7 @@
       - roles
       - role_permissions
       - role_members
+    debug: yes
   register: cleanup
 
 - assert:
@@ -136,6 +144,7 @@
       - role_permissions
       - role_members
     num_jobs: 0
+    debug: yes
   register: cleanup
 
 - assert:
@@ -153,6 +162,7 @@
       - role_permissions
       - role_members
     num_jobs: 5
+    debug: yes
   register: cleanup
 
 - assert:
@@ -171,6 +181,7 @@
       - role_permissions
       - role_members
     num_jobs: 1
+    debug: yes
   register: cleanup
 
 - assert:

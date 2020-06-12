@@ -57,6 +57,10 @@ options:
     description:
       - The path to nodetool.
     type: str
+  debug:
+    description:
+      - Enable additional debug output.
+    type: bool
 '''
 
 EXAMPLES = '''
@@ -155,7 +159,8 @@ def main():
             keyspace=dict(type='str', default=None, required=False),
             table=dict(type='raw', default=None, required=False),
             num_jobs=dict(type='int', default=2, aliases=['j'], required=False),
-            nodetool_path=dict(type='str', default=None, required=False)),
+            nodetool_path=dict(type='str', default=None, required=False),
+            debug=dict(type='bool', default=False, required=False)),
         supports_check_mode=False)
 
     cmd = 'cleanup'
@@ -170,10 +175,11 @@ def main():
     (rc, out, err) = n.run_command()
     out = out.strip()
     err = err.strip()
-    if out:
-        result['stdout'] = out
-    if err:
-        result['stderr'] = err
+    if module.debug:
+        if out:
+            result['stdout'] = out
+        if err:
+            result['stderr'] = err
 
     if rc == 0:
         result['changed'] = True
