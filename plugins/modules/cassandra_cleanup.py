@@ -155,7 +155,8 @@ def main():
             keyspace=dict(type='str', default=None, required=False),
             table=dict(type='raw', default=None, required=False),
             num_jobs=dict(type='int', default=2, aliases=['j'], required=False),
-            nodetool_path=dict(type='str', default=None, required=False)),
+            nodetool_path=dict(type='str', default=None, required=False),
+            debug=dict(type='bool', default=False, required=False)),
         supports_check_mode=False)
 
     cmd = 'cleanup'
