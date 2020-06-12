@@ -170,10 +170,11 @@ def main():
     (rc, out, err) = n.run_command()
     out = out.strip()
     err = err.strip()
-    if out:
-        result['stdout'] = out
-    if err:
-        result['stderr'] = err
+    if module.debug:
+        if out:
+            result['stdout'] = out
+        if err:
+            result['stderr'] = err
 
     if rc == 0:
         result['changed'] = True
