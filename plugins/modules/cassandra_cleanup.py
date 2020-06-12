@@ -57,6 +57,10 @@ options:
     description:
       - The path to nodetool.
     type: str
+  debug:
+    description:
+      - Enable additional debug output.
+    type: bool
 '''
 
 EXAMPLES = '''
