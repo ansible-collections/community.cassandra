@@ -36,6 +36,7 @@
     table: local
     min: 8
     max: 64
+    debug: true
 
 - name: Get compactionthreshold
   shell: nodetool -h 127.0.0.1 getcompactionthreshold system local
@@ -51,6 +52,7 @@
     table: local
     min: 4
     max: 32
+    debug: true
 
 - name: Get compactionthreshold
   shell: nodetool -h 127.0.0.1 getcompactionthreshold system local
@@ -66,6 +68,7 @@
     table: local
     min: 8
     max: 64
+    debug: true
   check_mode: true
   register: compactionthreshold
 
@@ -87,6 +90,7 @@
     table: local
     min: 4
     max: 32
+    debug: true
   register: module_nochange
 
 - name: Get compactionthreshold
@@ -110,6 +114,7 @@
     max: 64
     username: "{{ cassandra_admin_user }}"
     password: "{{ cassandra_admin_pwd }}"
+    debug: true
   register: compactionthreshold
   when: cassandra_auth_tests == True
 
@@ -132,6 +137,7 @@
     max: 32
     username: "{{ cassandra_admin_user }}"
     password_file: /etc/cassandra/jmxremote.password
+    debug: true
   register: compactionthreshold
   when: cassandra_auth_tests == True
 
@@ -155,6 +161,7 @@
     max: 32
     username: "{{ cassandra_admin_user }}"
     password: XXXXXXXXXXXXXXXXXXXXX
+    debug: true
   register: login_status
   ignore_errors: true
   when: cassandra_auth_tests == True
@@ -173,6 +180,7 @@
     min: 4
     max: 32
     nodetool_path: /tmp
+    debug: true
   register: nodetool_path_error
   ignore_errors: true
   when: cassandra_auth_tests == True
