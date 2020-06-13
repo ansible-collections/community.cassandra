@@ -45,6 +45,10 @@ options:
     description:
       - The path to nodetool.
     type: str
+  debug:
+    description:
+      - Enable additional debug output.
+    type: bool
 '''
 
 EXAMPLES = '''
@@ -127,7 +131,8 @@ def main():
             password=dict(type='str', no_log=True),
             password_file=dict(type='str', no_log=True),
             username=dict(type='str', no_log=True),
-            nodetool_path=dict(type='str', default=None, required=False)),
+            nodetool_path=dict(type='str', default=None, required=False),
+            debug=dict(type='bool', default=False, required=False)),
         supports_check_mode=False)
 
     cmd = 'drain'
@@ -141,10 +146,11 @@ def main():
 
     (rc, out, err) = n.run_command()
     out = out.strip()
-    if out:
-        result['stdout'] = out
-    if err:
-        result['stderr'] = err
+    if module.debug:
+        if out:
+            result['stdout'] = out
+        if err:
+            result['stderr'] = err
 
     if rc == 0:
         result['changed'] = True
