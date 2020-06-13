@@ -192,10 +192,11 @@ def main():
     (rc, out, err) = n.get_command()
     out = out.strip()
 
-    if out:
-        result['stdout'] = out
-    if err:
-        result['stderr'] = err
+    if module.debug:
+        if out:
+            result['stdout'] = out
+        if err:
+            result['stderr'] = err
 
     get_response = "Current compaction thresholds for {0}/{1}: \n min = {2},  max = {3}".format(keyspace, table, min, max)
     if get_response == out:
@@ -211,10 +212,11 @@ def main():
         else:
             (rc, out, err) = n.set_command()
             out = out.strip()
-            if out:
-                result['stdout'] = out
-            if err:
-                result['stderr'] = err
+            if module.debug:
+                if out:
+                    result['stdout'] = out
+                if err:
+                    result['stderr'] = err
             if rc != 0:
                 result['changed'] = False
                 module.fail_json(name=set_cmd,
