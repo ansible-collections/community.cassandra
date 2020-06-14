@@ -28,6 +28,7 @@
 - name: Set compactionthroughput with module
   cassandra_compactionthroughput:
     value: 32
+    debug: yes
 
 - name: Get compactionthroughput
   shell: nodetool -h 127.0.0.1 getcompactionthroughput
@@ -40,6 +41,7 @@
 - name: Set throughput to 64
   cassandra_compactionthroughput:
     value: 64
+    debug: yes
 
 - name: Get compactionthroughput
   shell: nodetool -h 127.0.0.1 getcompactionthroughput
@@ -52,6 +54,7 @@
 - name: Test module with check_mode = true
   cassandra_compactionthroughput:
     value: 128
+    debug: yes
   check_mode: true
   register: compactionthroughput
 
@@ -70,6 +73,7 @@
 - name: Set compactionthroughput back to 32MB
   cassandra_compactionthroughput:
     value: 32
+    debug: yes
 
 - name: Get compactionthroughput
   shell: nodetool -h 127.0.0.1 getcompactionthroughput
@@ -82,6 +86,7 @@
 - name: Set compactionthroughput 32 MB should not change
   cassandra_compactionthroughput:
     value: 32
+    debug: yes
   register: module_nochange
 
 - name: Get compactionthroughput
@@ -102,6 +107,7 @@
     value: 64
     username: "{{ cassandra_admin_user }}"
     password: "{{ cassandra_admin_pwd }}"
+    debug: yes
   register: compactionthroughput
   when: cassandra_auth_tests == True
 
@@ -121,6 +127,7 @@
     value:  32
     username: "{{ cassandra_admin_user }}"
     password_file: /etc/cassandra/jmxremote.password
+    debug: yes
   register: compactionthroughput
   when: cassandra_auth_tests == True
 
@@ -141,6 +148,7 @@
     value: 128
     username: "{{ cassandra_admin_user }}"
     password: XXXXXXXXXXXXXXXXXXXXX
+    debug: yes
   register: login_status
   ignore_errors: true
   when: cassandra_auth_tests == True
@@ -156,6 +164,7 @@
   cassandra_compactionthroughput:
     value: 128
     nodetool_path: /tmp
+    debug: yes
   register: nodetool_path_error
   ignore_errors: true
   when: cassandra_auth_tests == True
