@@ -44,6 +44,7 @@
         host: 127.0.0.1
         port: 7100
         nodetool_path: /home/cassandra/config/repository/{{ cassandra_version }}/bin
+        debug: yes
       register: rhys
 
     - name: Check schema agreement
