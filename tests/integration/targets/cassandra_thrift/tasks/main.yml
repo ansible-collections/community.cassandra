@@ -131,7 +131,7 @@
 - name: Test incorrect nodetool_path handling
   cassandra_thrift:
     state: "disabled"
-    nodetool_path: /
+    nodetool_path: "/tmp/"
     debug: yes
   register: nodetool_path_error
   ignore_errors: true
