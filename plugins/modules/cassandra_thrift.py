@@ -225,7 +225,7 @@ def main():
             module.fail_json(name=enable_cmd,
                              msg="enable command failed", **result)
         else:
-            result['msg'] = "running"
+            result['msg'] = status_active
             result['changed'] = True
 
     module.exit_json(**result)

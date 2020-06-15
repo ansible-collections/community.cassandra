@@ -23,7 +23,7 @@
 
 - name: Assert thrift is not running 1
   assert:
-    that: "'not running' == thrift_status.msg"
+    that: "'not running' == thrift_status.stdout"
 
 - name: Turn on thrift with module
   cassandra_thrift:
@@ -36,7 +36,7 @@
 
 - name: Assert thrift is running
   assert:
-    that: "'running' == thrift_status.msg"
+    that: "'running' == thrift_status.stdout"
 
 - name: Turn off thrift with module
   cassandra_thrift:
@@ -49,7 +49,7 @@
 
 - name: Assert thrift is not running 2
   assert:
-    that: "'not running' == thrift_status.msg"
+    that: "'not running' == thrift_status.stdout"
 
 - name: Execute with check_mode = True
   cassandra_thrift:
@@ -68,7 +68,7 @@
 
 - name: Assert thrift is still not running (after check_mode)
   assert:
-    that: "'not running' == thrift_status.msg"
+    that: "'not running' == thrift_status.stdout"
 
 - include_tasks: ../../setup_cassandra/tasks/cassandra_auth.yml
   when: cassandra_auth_tests == True
@@ -89,7 +89,7 @@
 
 - name: Assert thrift is running
   assert:
-    that: "'running' == thrift_status.msg"
+    that: "'running' == thrift_status.stdout"
   when: cassandra_auth_tests == True
 
 - name: Turn off incremental thrift using password file
@@ -108,7 +108,7 @@
 
 - name: Assert thrift is running
   assert:
-    that: "'not running' == thrift_status.msg"
+    that: "'not running' == thrift_status.stdout"
   when: cassandra_auth_tests == True
 
 - name: Test login failure handling
