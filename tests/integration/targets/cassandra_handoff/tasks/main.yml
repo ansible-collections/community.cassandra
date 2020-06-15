@@ -35,6 +35,7 @@
 - name: Turn off handoff with module
   cassandra_handoff:
     state: "disabled"
+    debug: true
 
 - pause:
     seconds: 5
@@ -50,6 +51,7 @@
 - name: Turn on handoff with module
   cassandra_handoff:
     state: "enabled"
+    debug: true
 
 - name: Get handoff status 3
   shell: nodetool -h 127.0.0.1 statushandoff
@@ -62,6 +64,7 @@
 - name: Execute with check_mode = True
   cassandra_handoff:
     state: "disabled"
+    debug: true
   check_mode: true
   register: handoff_staus
 
@@ -85,6 +88,7 @@
     state: "disabled"
     username: "{{ cassandra_admin_user }}"
     password: "{{ cassandra_admin_pwd }}"
+    debug: true
   register: handoff_status
   when: cassandra_auth_tests == True
 
@@ -103,6 +107,7 @@
     state: "enabled"
     username: "{{ cassandra_admin_user }}"
     password_file: /etc/cassandra/jmxremote.password
+    debug: true
   register: handoff_status
   when: cassandra_auth_tests == True
 
@@ -121,6 +126,7 @@
     state: "disabled"
     username: "{{ cassandra_admin_user }}"
     password: XXXXXXXXXXXXXXXXXXXXX
+    debug: true
   register: login_status
   ignore_errors: true
   when: cassandra_auth_tests == True
@@ -136,6 +142,7 @@
   cassandra_handoff:
     state: "disabled"
     nodetool_path: /tmp
+    debug: true
   register: nodetool_path_error
   ignore_errors: true
   when: cassandra_auth_tests == True
