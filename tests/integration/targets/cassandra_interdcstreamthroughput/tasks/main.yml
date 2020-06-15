@@ -28,6 +28,7 @@
 - name: Increase interdcstreamthroughput with module
   cassandra_interdcstreamthroughput:
     value: 500
+    debug: true
 
 - name: Get interdcstreamthroughput
   shell: nodetool -h 127.0.0.1 getinterdcstreamthroughput
@@ -40,6 +41,7 @@
 - name: Set throughput to 200
   cassandra_interdcstreamthroughput:
     value: 200
+    debug: true
 
 - name: Get interdcstreamthroughput
   shell: nodetool -h 127.0.0.1 getinterdcstreamthroughput
@@ -52,6 +54,7 @@
 - name: Test module with check_mode = true
   cassandra_interdcstreamthroughput:
     value: 128
+    debug: true
   check_mode: true
   register: interdcstreamthroughput
 
@@ -70,6 +73,7 @@
 - name: Set interdcstreamthroughput to 250
   cassandra_interdcstreamthroughput:
     value: 250
+    debug: true
 
 - name: Get interdcstreamthroughput
   shell: nodetool -h 127.0.0.1 getinterdcstreamthroughput
@@ -82,6 +86,7 @@
 - name: Set interdcstreamthroughput 250 should not change
   cassandra_interdcstreamthroughput:
     value: 250
+    debug: true
   register: module_nochange
 
 - name: Get interdcstreamthroughput
@@ -102,6 +107,7 @@
     value: 300
     username: "{{ cassandra_admin_user }}"
     password: "{{ cassandra_admin_pwd }}"
+    debug: true
   register: interdcstreamthroughput
   when: cassandra_auth_tests == True
 
@@ -121,6 +127,7 @@
     value:  200
     username: "{{ cassandra_admin_user }}"
     password_file: /etc/cassandra/jmxremote.password
+    debug: true
   register: interdcstreamthroughput
   when: cassandra_auth_tests == True
 
@@ -141,6 +148,7 @@
     value: 128
     username: "{{ cassandra_admin_user }}"
     password: XXXXXXXXXXXXXXXXXXXXX
+    debug: true
   register: login_status
   ignore_errors: true
   when: cassandra_auth_tests == True
@@ -156,6 +164,7 @@
   cassandra_interdcstreamthroughput:
     value: 128
     nodetool_path: /tmp
+    debug: true
   register: nodetool_path_error
   ignore_errors: true
   when: cassandra_auth_tests == True
