@@ -187,9 +187,9 @@ def main():
                              msg="status command failed", **result)
         if module.check_mode:
             if out == status_active:
-                module.exit_json(changed=True, msg="check mode", **result)
+                module.exit_json(changed=True, msg=status_inactive, **result)
             else:
-                module.exit_json(changed=False, msg="check mode", **result)
+                module.exit_json(changed=False, msg=status_active, **result)
         if out == status_active:
             (rc, out, err) = n.disable_command()
         if module.debug:
@@ -201,6 +201,7 @@ def main():
             module.fail_json(name=disable_cmd,
                              msg="disable command failed", **result)
         else:
+            result['msg'] = status_inactive
             result['changed'] = True
 
     elif module.params['state'] == "enabled":
@@ -210,9 +211,9 @@ def main():
                              msg="status command failed", **result)
         if module.check_mode:
             if out == status_inactive:
-                module.exit_json(changed=True, msg="check mode", **result)
+                module.exit_json(changed=True, msg=status_active, **result)
             else:
-                module.exit_json(changed=False, msg="check mode", **result)
+                module.exit_json(changed=False, msg=status_inactive, **result)
         if out == status_inactive:
             (rc, out, err) = n.enable_command()
             if module.debug:
@@ -224,6 +225,7 @@ def main():
             module.fail_json(name=enable_cmd,
                              msg="enable command failed", **result)
         else:
+            result['msg'] = "running"
             result['changed'] = True
 
     module.exit_json(**result)
