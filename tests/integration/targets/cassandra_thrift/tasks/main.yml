@@ -28,6 +28,7 @@
 - name: Turn on thrift with module
   cassandra_thrift:
     state: "enabled"
+    debug: yes
 
 - name: Get thrift status 2
   shell: nodetool -h 127.0.0.1 statusthrift
@@ -40,6 +41,7 @@
 - name: Turn off thrift with module
   cassandra_thrift:
     state: "disabled"
+    debug: yes
 
 - name: Get thrift status 3
   shell: nodetool -h 127.0.0.1 statusthrift
@@ -52,6 +54,7 @@
 - name: Execute with check_mode = True
   cassandra_thrift:
     state: "enabled"
+    debug: yes
   check_mode: true
   register: thrift_staus
 
@@ -75,6 +78,7 @@
     state: "enabled"
     username: "{{ cassandra_admin_user }}"
     password: "{{ cassandra_admin_pwd }}"
+    debug: yes
   register: thrift_status
   when: cassandra_auth_tests == True
 
@@ -93,6 +97,7 @@
     state: "disabled"
     username: "{{ cassandra_admin_user }}"
     password_file: /etc/cassandra/jmxremote.password
+    debug: yes
   register: thrift_status
   when: cassandra_auth_tests == True
 
@@ -111,6 +116,7 @@
     state: "disabled"
     username: "{{ cassandra_admin_user }}"
     password: XXXXXXXXXXXXXXXXXXXXX
+    debug: yes
   register: login_status
   ignore_errors: true
   when: cassandra_auth_tests == True
@@ -125,7 +131,8 @@
 - name: Test incorrect nodetool_path handling
   cassandra_thrift:
     state: "disabled"
-    nodetool_path: /tmp
+    nodetool_path: /
+    debug: yes
   register: nodetool_path_error
   ignore_errors: true
   when: cassandra_auth_tests == True

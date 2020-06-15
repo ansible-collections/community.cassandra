@@ -28,6 +28,7 @@
 - name: Increase streamthroughput with module
   cassandra_streamthroughput:
     value: 500
+    debug: yes
 
 - name: Get streamthroughput
   shell: nodetool -h 127.0.0.1 getstreamthroughput
@@ -40,6 +41,7 @@
 - name: Set throughput to 200
   cassandra_streamthroughput:
     value: 200
+    debug: yes
 
 - name: Get streamthroughput
   shell: nodetool -h 127.0.0.1 getstreamthroughput
@@ -52,6 +54,7 @@
 - name: Test module with check_mode = true
   cassandra_streamthroughput:
     value: 128
+    debug: yes
   check_mode: true
   register: streamthroughput
 
@@ -70,6 +73,7 @@
 - name: Set streamthroughput to 250
   cassandra_streamthroughput:
     value: 250
+    debug: yes
 
 - name: Get streamthroughput
   shell: nodetool -h 127.0.0.1 getstreamthroughput
@@ -82,6 +86,7 @@
 - name: Set streamthroughput 250 should not change
   cassandra_streamthroughput:
     value: 250
+    debug: yes
   register: module_nochange
 
 - name: Get streamthroughput
@@ -102,6 +107,7 @@
     value: 300
     username: "{{ cassandra_admin_user }}"
     password: "{{ cassandra_admin_pwd }}"
+    debug: yes
   register: streamthroughput
   when: cassandra_auth_tests == True
 
@@ -121,6 +127,7 @@
     value:  200
     username: "{{ cassandra_admin_user }}"
     password_file: /etc/cassandra/jmxremote.password
+    debug: yes
   register: streamthroughput
   when: cassandra_auth_tests == True
 
@@ -141,6 +148,7 @@
     value: 128
     username: "{{ cassandra_admin_user }}"
     password: XXXXXXXXXXXXXXXXXXXXX
+    debug: yes
   register: login_status
   ignore_errors: true
   when: cassandra_auth_tests == True
@@ -156,6 +164,7 @@
   cassandra_streamthroughput:
     value: 128
     nodetool_path: /tmp
+    debug: yes
   register: nodetool_path_error
   ignore_errors: true
   when: cassandra_auth_tests == True

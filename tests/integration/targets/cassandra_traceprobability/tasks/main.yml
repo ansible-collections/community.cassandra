@@ -28,6 +28,7 @@
 - name: Increase traceprobability with module
   cassandra_traceprobability:
     value: 0.1
+    debug: yes
 
 - name: Get traceprobability
   shell: nodetool -h 127.0.0.1 gettraceprobability
@@ -40,6 +41,7 @@
 - name: Set traceprobability to 0.9
   cassandra_traceprobability:
     value: 0.9
+    debug: yes
 
 - name: Get traceprobability
   shell: nodetool -h 127.0.0.1 gettraceprobability
@@ -52,6 +54,7 @@
 - name: Test module with check_mode = true
   cassandra_traceprobability:
     value: 0.1
+    debug: yes
   check_mode: true
   register: traceprobability
 
@@ -70,6 +73,7 @@
 - name: Set traceprobability to 0.0
   cassandra_traceprobability:
     value: 0.0
+    debug: yes
 
 - name: Get traceprobability
   shell: nodetool -h 127.0.0.1 gettraceprobability
@@ -81,7 +85,8 @@
 
 - name: Set traceprobability 0.0 should not change
   cassandra_traceprobability:
-    value: 0.0
+    value: 0.
+    debug: yes
   register: module_nochange
 
 - name: Get traceprobability
@@ -102,6 +107,7 @@
     value: 1
     username: "{{ cassandra_admin_user }}"
     password: "{{ cassandra_admin_pwd }}"
+    debug: yes
   register: traceprobability
   when: cassandra_auth_tests == True
 
@@ -121,6 +127,7 @@
     value:  0.1
     username: "{{ cassandra_admin_user }}"
     password_file: /etc/cassandra/jmxremote.password
+    debug: yes
   register: traceprobability
   when: cassandra_auth_tests == True
 
@@ -141,6 +148,7 @@
     value: 128
     username: "{{ cassandra_admin_user }}"
     password: XXXXXXXXXXXXXXXXXXXXX
+    debug: yes
   register: login_status
   ignore_errors: true
   when: cassandra_auth_tests == True
@@ -156,6 +164,7 @@
   cassandra_traceprobability:
     value: 0.1
     nodetool_path: /tmp
+    debug: yes
   register: nodetool_path_error
   ignore_errors: true
   when: cassandra_auth_tests == True
