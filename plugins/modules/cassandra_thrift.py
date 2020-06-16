@@ -99,9 +99,9 @@ class NodeToolCmd(object):
         return self.module.run_command(cmd)
 
     def nodetool_cmd(self, sub_command):
-        if self.nodetool_path is not None and len(self.nodetool_path) > 0 and \
-                not self.nodetool_path.endswith('/'):
-            self.nodetool_path += '/'
+        if self.nodetool_path is not None and len(self.nodetool_path) > 0
+                if not self.nodetool_path.endswith('/'):
+                    self.nodetool_path += '/'
         else:
             self.nodetool_path = ""
         cmd = "{0}nodetool --host {1} --port {2}".format(self.nodetool_path,
