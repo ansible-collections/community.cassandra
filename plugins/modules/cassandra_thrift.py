@@ -99,7 +99,7 @@ class NodeToolCmd(object):
         return self.module.run_command(cmd)
 
     def nodetool_cmd(self, sub_command):
-        if self.nodetool_path is not None and len(self.nodetool_path) > 0
+        if self.nodetool_path is not None and len(self.nodetool_path) > 0:
                 if not self.nodetool_path.endswith('/'):
                     self.nodetool_path += '/'
         else:
