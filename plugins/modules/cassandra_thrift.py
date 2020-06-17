@@ -74,7 +74,6 @@ cassandra_gossip:
 '''
 
 from ansible.module_utils.basic import AnsibleModule, load_platform_subclass
-import socket
 __metaclass__ = type
 
 
