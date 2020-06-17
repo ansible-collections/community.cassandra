@@ -71,67 +71,7 @@ import socket
 __metaclass__ = type
 
 
-class NodeToolCmd(object):
-    """
-    This is a generic NodeToolCmd class for building nodetool commands
-    """
-
-    def __init__(self, module):
-        self.module = module
-        self.host = module.params['host']
-        self.port = module.params['port']
-        self.password = module.params['password']
-        self.password_file = module.params['password_file']
-        self.username = module.params['username']
-        self.nodetool_path = module.params['nodetool_path']
-        self.debug = module.params['debug']
-        if self.host is None:
-            self.host = socket.getfqdn()
-
-    def execute_command(self, cmd):
-        return self.module.run_command(cmd)
-
-    def nodetool_cmd(self, sub_command):
-        if self.nodetool_path is not None and len(self.nodetool_path) > 0 and \
-                not self.nodetool_path.endswith('/'):
-            self.nodetool_path += '/'
-        else:
-            self.nodetool_path = ""
-        cmd = "{0}nodetool --host {1} --port {2}".format(self.nodetool_path,
-                                                         self.host,
-                                                         self.port)
-        if self.username is not None:
-            cmd += " --username {0}".format(self.username)
-            if self.password_file is not None:
-                cmd += " --password-file {0}".format(self.password_file)
-            else:
-                cmd += " --password '{0}'".format(self.password)
-        # The thing we want nodetool to execute
-        cmd += " {0}".format(sub_command)
-        if self.debug:
-            self.module.debug(cmd)
-        return self.execute_command(cmd)
-
-
-class NodeToolGetSetCommand(NodeToolCmd):
-
-    """
-    Inherits from the NodeToolCmd class. Adds the following methods;
-
-        - get_cmd
-        - set_cmd
-    """
-
-    def __init__(self, module, get_cmd, set_cmd):
-        NodeToolCmd.__init__(self, module)
-        self.get_cmd = get_cmd
-        self.set_cmd = set_cmd
-
-    def get_command(self):
-        return self.nodetool_cmd(self.get_cmd)
-
-    def set_command(self):
-        return self.nodetool_cmd(self.set_cmd)
+from ansible_collections.community.cassandra.plugins.module_utils.NodeToolCmdObjects import NodeToolCmd, NodeToolGetSetCommand
 
 
 def main():
