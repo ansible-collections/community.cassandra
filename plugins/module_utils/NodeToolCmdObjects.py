@@ -2,6 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 import socket
 
+
 class NodeToolCmd(object):
     """
     This is a generic NodeToolCmd class for building nodetool commands
