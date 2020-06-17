@@ -99,9 +99,9 @@ class NodeToolCmd(object):
         return self.module.run_command(cmd)
 
     def nodetool_cmd(self, sub_command):
-        if self.nodetool_path is not None and len(self.nodetool_path) > 0 and \
-                not self.nodetool_path.endswith('/'):
-            self.nodetool_path += '/'
+        if self.nodetool_path is not None and len(self.nodetool_path) > 0:
+            if not self.nodetool_path.endswith('/'):  # replace with os.path.join
+                self.nodetool_path += '/'
         else:
             self.nodetool_path = ""
         cmd = "{0}nodetool --host {1} --port {2}".format(self.nodetool_path,
@@ -174,10 +174,11 @@ def main():
 
     (rc, out, err) = n.status_command()
     out = out.strip()
-    if out:
-        result['stdout'] = out
-    if err:
-        result['stderr'] = err
+    if module.debug:
+        if out:
+            result['stdout'] = out
+        if err:
+            result['stderr'] = err
 
     if module.params['state'] == "disabled":
 
@@ -186,11 +187,12 @@ def main():
                              msg="status command failed", **result)
         if module.check_mode:
             if out == status_active:
-                module.exit_json(changed=True, msg="check mode", **result)
+                module.exit_json(changed=True, msg=status_inactive, **result)
             else:
-                module.exit_json(changed=False, msg="check mode", **result)
+                module.exit_json(changed=False, msg=status_active, **result)
         if out == status_active:
             (rc, out, err) = n.disable_command()
+        if module.debug:
             if out:
                 result['stdout'] = out
             if err:
@@ -199,6 +201,7 @@ def main():
             module.fail_json(name=disable_cmd,
                              msg="disable command failed", **result)
         else:
+            result['msg'] = status_inactive
             result['changed'] = True
 
     elif module.params['state'] == "enabled":
@@ -208,19 +211,21 @@ def main():
                              msg="status command failed", **result)
         if module.check_mode:
             if out == status_inactive:
-                module.exit_json(changed=True, msg="check mode", **result)
+                module.exit_json(changed=True, msg=status_active, **result)
             else:
-                module.exit_json(changed=False, msg="check mode", **result)
+                module.exit_json(changed=False, msg=status_inactive, **result)
         if out == status_inactive:
             (rc, out, err) = n.enable_command()
-            if out:
-                result['stdout'] = out
-            if err:
-                result['stderr'] = err
+            if module.debug:
+                if out:
+                    result['stdout'] = out
+                if err:
+                    result['stderr'] = err
         if rc is not None and rc != 0:
             module.fail_json(name=enable_cmd,
                              msg="enable command failed", **result)
         else:
+            result['msg'] = status_active
             result['changed'] = True
 
     module.exit_json(**result)

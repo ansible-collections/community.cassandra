@@ -20,6 +20,7 @@
 
 - name: upgradesstablesUpgrade sstables on the node
   cassandra_upgradesstables:
+    debug: yes
   register: upgradesstables
 
 - assert:
@@ -45,6 +46,7 @@
   cassandra_upgradesstables:
     username: "{{ cassandra_admin_user }}"
     password: "{{ cassandra_admin_pwd }}"
+    debug: yes
   register: upgradesstables
 
 - assert:
@@ -67,6 +69,7 @@
   cassandra_upgradesstables:
     username: "{{ cassandra_admin_user }}"
     password: XXXXXXXXXXXXXXXXXXXXX
+    debug: yes
   register: login_status
   ignore_errors: yes
   when: cassandra_auth_tests == True
@@ -81,6 +84,7 @@
 - name: Test incorrect nodetool_path handling
   cassandra_upgradesstables:
     nodetool_path: /tmp
+    debug: yes
   register: nodetool_path_error
   ignore_errors: true
   when: cassandra_auth_tests == True
