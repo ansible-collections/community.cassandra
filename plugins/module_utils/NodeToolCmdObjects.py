@@ -45,6 +45,56 @@ class NodeToolCmd(object):
         return self.execute_command(cmd)
 
 
+class NodeToolCommand(NodeToolCmd):
+
+    """
+    Inherits from the NodeToolCmd class. Adds the following methods;
+
+        - run_command
+
+    2020.01.10 - Added additonal keyspace and table params
+    """
+
+    def __init__(self, module, cmd):
+        NodeToolCmd.__init__(self, module)
+        self.keyspace = module.params['keyspace']
+        self.table = module.params['table']
+        self.num_jobs = module.params['num_jobs']
+        cmd = "{0} -j {1}".format(cmd, self.num_jobs)
+        if self.keyspace is not None:
+            cmd = "{0} {1}".format(cmd, self.keyspace)
+        if self.table is not None:
+            if isinstance(self.table, str):
+                cmd = "{0} {1}".format(cmd, self.table)
+            elif isinstance(self.table, list):
+                cmd = "{0} {1}".format(cmd, " ".join(self.table))
+        self.cmd = cmd
+
+    def run_command(self):
+        return self.nodetool_cmd(self.cmd)
+
+
+class NodeTool2PairCommand(NodeToolCmd):
+
+    """
+    Inherits from the NodeToolCmd class. Adds the following methods;
+
+        - enable_command
+        - disable_command
+    """
+
+    def __init__(self, module, enable_cmd, disable_cmd):
+        NodeToolCmd.__init__(self, module)
+        self.enable_cmd = enable_cmd
+        self.disable_cmd = disable_cmd
+
+    def enable_command(self):
+        return self.nodetool_cmd(self.enable_cmd)
+
+    def disable_command(self):
+        return self.nodetool_cmd(self.disable_cmd)
+
+
 class NodeTool3PairCommand(NodeToolCmd):
 
     """
@@ -69,3 +119,24 @@ class NodeTool3PairCommand(NodeToolCmd):
 
     def disable_command(self):
         return self.nodetool_cmd(self.disable_cmd)
+
+
+class NodeToolGetSetCommand(NodeToolCmd):
+
+    """
+    Inherits from the NodeToolCmd class. Adds the following methods;
+
+        - get_cmd
+        - set_cmd
+    """
+
+    def __init__(self, module, get_cmd, set_cmd):
+        NodeToolCmd.__init__(self, module)
+        self.get_cmd = get_cmd
+        self.set_cmd = set_cmd
+
+    def get_command(self):
+        return self.nodetool_cmd(self.get_cmd)
+
+    def set_command(self):
+        return self.nodetool_cmd(self.set_cmd)
