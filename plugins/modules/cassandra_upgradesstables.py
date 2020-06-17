@@ -102,7 +102,7 @@ def main():
 
     cmd = 'upgradesstables'
 
-    n = NodeToolCommand(module, cmd)
+    n = NodeToolCommandKeyspaceTableNumJobs(module, cmd)
 
     rc = None
     out = ''
