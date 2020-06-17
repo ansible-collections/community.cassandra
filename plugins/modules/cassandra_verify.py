@@ -85,52 +85,14 @@ import socket
 __metaclass__ = type
 
 
-class NodeToolCmd(object):
-    """
-    This is a generic NodeToolCmd class for building nodetool commands
-    """
-
-    def __init__(self, module):
-        self.module = module
-        self.host = module.params['host']
-        self.port = module.params['port']
-        self.password = module.params['password']
-        self.password_file = module.params['password_file']
-        self.username = module.params['username']
-        self.nodetool_path = module.params['nodetool_path']
-        if self.host is None:
-            self.host = socket.getfqdn()
-
-    def execute_command(self, cmd):
-        return self.module.run_command(cmd)
-
-    def nodetool_cmd(self, sub_command):
-        if self.nodetool_path is not None and len(self.nodetool_path) > 0 and \
-                not self.nodetool_path.endswith('/'):
-            self.nodetool_path += '/'
-        else:
-            self.nodetool_path = ""
-        cmd = "{0}nodetool --host {1} --port {2}".format(self.nodetool_path,
-                                                         self.host,
-                                                         self.port)
-        if self.username is not None:
-            cmd += " --username {0}".format(self.username)
-            if self.password_file is not None:
-                cmd += " --password-file {0}".format(self.password_file)
-            else:
-                cmd += " --password '{0}'".format(self.password)
-        # The thing we want nodetool to execute
-        cmd += " {0}".format(sub_command)
-        return self.execute_command(cmd)
+from ansible_collections.community.cassandra.plugins.module_utils.NodeToolCmdObjects import NodeToolCmd
 
 
 class NodeToolCommand(NodeToolCmd):
 
     """
     Inherits from the NodeToolCmd class. Adds the following methods;
-
         - run_command
-
     2020.01.10 - Added additonal keyspace and table params
     """
 
