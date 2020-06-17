@@ -85,7 +85,7 @@ def main():
 
     cmd = 'drain'
 
-    n = NodeToolCommand(module, cmd)
+    n = NodeToolCommandSimple(module, cmd)
 
     rc = None
     out = ''

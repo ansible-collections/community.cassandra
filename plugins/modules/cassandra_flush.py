@@ -92,7 +92,7 @@ def main():
 
     cmd = 'flush'
 
-    n = NodeToolCommand(module, cmd)
+    n = NodeToolCommandKeyspaceTable(module, cmd)
 
     rc = None
     out = ''

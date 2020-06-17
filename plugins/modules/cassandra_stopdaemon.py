@@ -77,7 +77,7 @@ def main():
 
     cmd = 'stopdaemon'
 
-    n = NodeToolCommand(module, cmd)
+    n = NodeToolCommandSimple(module, cmd)
 
     rc = None
     out = ''

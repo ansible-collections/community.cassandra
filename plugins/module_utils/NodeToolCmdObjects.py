@@ -45,13 +45,26 @@ class NodeToolCmd(object):
         return self.execute_command(cmd)
 
 
-class NodeToolCommand(NodeToolCmd):
+class NodeToolCommandSimple(NodeToolCmd):
 
     """
     Inherits from the NodeToolCmd class. Adds the following methods;
-
         - run_command
+    """
 
+    def __init__(self, module, cmd):
+        NodeToolCmd.__init__(self, module)
+        self.cmd = cmd
+
+    def run_command(self):
+        return self.nodetool_cmd(self.cmd)
+
+
+class NodeToolCommandKeyspaceTable(NodeToolCmd):
+
+    """
+    Inherits from the NodeToolCmd class. Adds the following methods;
+        - run_command
     2020.01.10 - Added additonal keyspace and table params
     """
 
@@ -59,8 +72,6 @@ class NodeToolCommand(NodeToolCmd):
         NodeToolCmd.__init__(self, module)
         self.keyspace = module.params['keyspace']
         self.table = module.params['table']
-        self.num_jobs = module.params['num_jobs']
-        cmd = "{0} -j {1}".format(cmd, self.num_jobs)
         if self.keyspace is not None:
             cmd = "{0} {1}".format(cmd, self.keyspace)
         if self.table is not None:

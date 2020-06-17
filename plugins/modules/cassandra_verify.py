@@ -85,7 +85,35 @@ import socket
 __metaclass__ = type
 
 
-from ansible_collections.community.cassandra.plugins.module_utils.NodeToolCmdObjects import NodeToolCmd, NodeToolCommand
+from ansible_collections.community.cassandra.plugins.module_utils.NodeToolCmdObjects import NodeToolCmd
+
+
+class NodeToolCommand(NodeToolCmd):
+
+    """
+    Inherits from the NodeToolCmd class. Adds the following methods;
+        - run_command
+    2020.01.10 - Added additonal keyspace and table params
+    """
+
+    def __init__(self, module, cmd):
+        NodeToolCmd.__init__(self, module)
+        self.keyspace = module.params['keyspace']
+        self.table = module.params['table']
+        self.extended = module.params['extended']
+        if self.extended:
+            cmd = "{0} -e".format(cmd)
+        if self.keyspace is not None:
+            cmd = "{0} {1}".format(cmd, self.keyspace)
+        if self.table is not None:
+            if isinstance(self.table, str):
+                cmd = "{0} {1}".format(cmd, self.table)
+            elif isinstance(self.table, list):
+                cmd = "{0} {1}".format(cmd, " ".join(self.table))
+        self.cmd = cmd
+
+    def run_command(self):
+        return self.nodetool_cmd(self.cmd)
 
 
 def main():
