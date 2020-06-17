@@ -20,6 +20,7 @@
 
 - name: Run stopdaemon on the node
   cassandra_stopdaemon:
+    debug: true
   register: stopdaemon
 
 #- debug:
@@ -48,6 +49,7 @@
   cassandra_stopdaemon:
     username: "{{ cassandra_admin_user }}"
     password: "{{ cassandra_admin_pwd }}"
+    debug: true
   register: stopdaemon
 
 - assert:
@@ -70,6 +72,7 @@
   cassandra_stopdaemon:
     username: "{{ cassandra_admin_user }}"
     password: XXXXXXXXXXXXXXXXXXXXX
+    debug: true
   register: login_status
   ignore_errors: true
   when: cassandra_auth_tests == True
@@ -84,6 +87,7 @@
 - name: Test incorrect nodetool_path handling
   cassandra_stopdaemon:
     nodetool_path: /tmp
+    debug: true
   register: nodetool_path_error
   ignore_errors: true
   when: cassandra_auth_tests == True
