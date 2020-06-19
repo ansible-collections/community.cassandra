@@ -1,6 +1,7 @@
 name: CI
 on:
 - pull_request
+- push
 
 env:
   setup_cassandra_version_file: "./tests/integration/targets/setup_cassandra/defaults/main.yml"
