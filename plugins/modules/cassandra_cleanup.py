@@ -80,36 +80,7 @@ import socket
 __metaclass__ = type
 
 
-from ansible_collections.community.cassandra.plugins.module_utils.NodeToolCmdObjects import NodeToolCmd
-
-
-class NodeToolCommand(NodeToolCmd):
-
-    """
-    Inherits from the NodeToolCmd class. Adds the following methods;
-
-        - run_command
-
-    2020.01.10 - Added additonal keyspace and table params
-    """
-
-    def __init__(self, module, cmd):
-        NodeToolCmd.__init__(self, module)
-        self.keyspace = module.params['keyspace']
-        self.table = module.params['table']
-        self.num_jobs = module.params['num_jobs']
-        cmd = "{0} -j {1}".format(cmd, self.num_jobs)
-        if self.keyspace is not None:
-            cmd = "{0} {1}".format(cmd, self.keyspace)
-        if self.table is not None:
-            if isinstance(self.table, str):
-                cmd = "{0} {1}".format(cmd, self.table)
-            elif isinstance(self.table, list):
-                cmd = "{0} {1}".format(cmd, " ".join(self.table))
-        self.cmd = cmd
-
-    def run_command(self):
-        return self.nodetool_cmd(self.cmd)
+from ansible_collections.community.cassandra.plugins.module_utils.NodeToolCmdObjects import NodeToolCmd, NodeToolCommandKeyspaceTableNumJobs
 
 
 def main():
@@ -129,7 +100,7 @@ def main():
 
     cmd = 'cleanup'
 
-    n = NodeToolCommand(module, cmd)
+    n = NodeToolCommandKeyspaceTableNumJobs(module, cmd)
 
     rc = None
     out = ''

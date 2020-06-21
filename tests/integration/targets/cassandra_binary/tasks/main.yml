@@ -25,6 +25,12 @@
   assert:
     that: "'running' == binary_status.stdout"
 
+- name: Turn on binary with module (check mode)
+  cassandra_binary:
+    state: "enabled"
+    debug: true
+  check_mode: yes
+
 - name: Turn on binary with module
   cassandra_binary:
     state: "enabled"
@@ -37,6 +43,12 @@
 - name: Assert binary is running
   assert:
     that: "'running' == binary_status.stdout"
+
+- name: Turn off binary with module (check mode)
+  cassandra_binary:
+    state: "disabled"
+    debug: true
+  check_mode: yes
 
 - name: Turn off binary with module
   cassandra_binary:

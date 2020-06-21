@@ -25,6 +25,12 @@
   assert:
     that: "'running' == gossip_status.stdout"
 
+- name: Turn on gossip with module (check mode)
+  cassandra_gossip:
+    state: "enabled"
+    debug: yes
+  check_mode: yes
+
 - name: Turn on gossip with module
   cassandra_gossip:
     state: "enabled"
@@ -37,6 +43,12 @@
 - name: Assert gossip is running 2
   assert:
     that: "'running' == gossip_status.stdout"
+
+- name: Turn off gossip with module (check mode)
+  cassandra_gossip:
+    state: "disabled"
+    debug: yes
+  check_mode: yes
 
 - name: Turn off gossip with module
   cassandra_gossip:
