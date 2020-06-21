@@ -114,6 +114,16 @@
     that:
       - 'create_role.changed == True'
 
+- name: Create a role (check mode)
+  cassandra_role:
+    name: app_user
+    password: 'secretZHB78'
+    state: present
+    login: yes
+    login_user: "{{ cassandra_admin_user }}"
+    login_password: "{{ cassandra_admin_pwd }}"
+  check_mode: yes
+
 - name: Get output of list roles
   shell: cqlsh --username "{{ cassandra_admin_user }}" --password "{{ cassandra_admin_pwd }}" --execute "LIST ROLES"
   register: myrole
@@ -139,12 +149,26 @@
 #    that:
 #      - "myrole.changed == False"
 
+- name: Remove a role (check mode)
+  cassandra_role:
+    name: app_user
+    state: absent
+    login_user: "{{ cassandra_admin_user }}"
+    login_password: "{{ cassandra_admin_pwd }}"
+  check_mode: yes
+
 - name: Remove a role
   cassandra_role:
     name: app_user
     state: absent
     login_user: "{{ cassandra_admin_user }}"
     login_password: "{{ cassandra_admin_pwd }}"
+  register: absent
+
+- name: Asser role changed
+  assert:
+    that:
+      - "absent.changed == True"
 
 - name: Get output of list roles
   shell: cqlsh --username "{{ cassandra_admin_user }}" --password "{{ cassandra_admin_pwd }}" --execute "LIST ROLES"

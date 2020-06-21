@@ -32,6 +32,12 @@
   assert:
     that: "handoff_status.stdout in ['Hinted handoff is running', 'running']"
 
+- name: Turn off handoff with module (check mode)
+  cassandra_handoff:
+    state: "disabled"
+    debug: true
+  check_mode: yes
+
 - name: Turn off handoff with module
   cassandra_handoff:
     state: "disabled"
@@ -47,6 +53,12 @@
 - name: Assert handoff is not running
   assert:
     that: "handoff_status.stdout in ['Hinted handoff is not running', 'not running']"
+
+- name: Turn on handoff with module
+  cassandra_handoff:
+    state: "enabled"
+    debug: true
+  check_mode: yes
 
 - name: Turn on handoff with module
   cassandra_handoff:

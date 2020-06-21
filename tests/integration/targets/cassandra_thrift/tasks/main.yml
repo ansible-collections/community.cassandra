@@ -25,6 +25,12 @@
   assert:
     that: "'not running' == thrift_status.stdout"
 
+- name: Turn on thrift with module (check mode)
+  cassandra_thrift:
+    state: "enabled"
+    debug: yes
+  check_mode: yes
+
 - name: Turn on thrift with module
   cassandra_thrift:
     state: "enabled"
@@ -37,6 +43,12 @@
 - name: Assert thrift is running
   assert:
     that: "'running' == thrift_status.stdout"
+
+- name: Turn off thrift with module (check mode)
+  cassandra_thrift:
+    state: "disabled"
+    debug: yes
+  check_mode: yes
 
 - name: Turn off thrift with module
   cassandra_thrift:
