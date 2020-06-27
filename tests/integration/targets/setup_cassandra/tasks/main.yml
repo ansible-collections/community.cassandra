@@ -139,10 +139,8 @@
     enabled: "yes"
     state: "restarted"
 
-#- shell: cat /etc/cassandra/cassandra.yaml
-#- shell: sleep 30 && tail -n 1000  /var/log/cassandra/*
-#  when: ansible_os_family == "RedHat"
-#- shell: apt install net-tools -y && netstat -tulpen
+- shell: ls /var/log/ && ls /var/log/cassandra/
+- shell: cat /var/log/cassandra/*.log
 
 - name: Allow a little time for Cassandra to start listening on ports
   wait_for:
