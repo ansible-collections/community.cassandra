@@ -109,6 +109,7 @@
     state: present
     force: yes
   when: ansible_os_family == 'Debian'
+  notify: debian_remove_cassandra
 
 - name: Adjust heap size
   lineinfile:

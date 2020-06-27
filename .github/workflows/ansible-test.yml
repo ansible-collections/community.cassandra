@@ -37,8 +37,11 @@ jobs:
             tar_version: "3.11.6"
           - package_version: "22x"
             tar_version: "2.2.9"
-        docker_image:
-          - ubuntu1804
+        test_scenario:
+          - docker_image: ubuntu1804
+            python_version: "3.6"
+          - docker_image: centos7
+            python_version: "2.7"
         cassandra_module:
           - cassandra_autocompaction
           - cassandra_backup
@@ -68,10 +71,10 @@ jobs:
         with:
           path: ansible_collections/community/cassandra
 
-      - name: Set up Python ${{ matrix.python_version }}
+      - name: Set up Python ${{ matrix.test_scenario.python_version }}
         uses: actions/setup-python@v1
         with:
-          python-version: ${{ matrix.python_version }}
+          python-version: ${{ matrix.test_scenario.python_version }}
 
       - name: Install ansible-base (devel)
         run: pip install https://github.com/ansible/ansible/archive/devel.tar.gz --disable-pip-version-check
@@ -81,8 +84,8 @@ jobs:
           sed -i 's/^cassandra_version:.*/cassandra_version: \"${{ matrix.cassandra_version.package_version }}\"/g' ${{ env.setup_cassandra_version_file }}
           sed -i 's/^cassandra_version:.*/cassandra_version: \"${{ matrix.cassandra_version.tar_version }}\"/g' ${{ env.setup_ccm_version_file }}
 
-      - name: Run integration tests on Python ${{ matrix.python_version }} | ${{ matrix.docker_image }}
-        run: ansible-test integration --docker ${{ matrix.docker_image }} -v --color --retry-on-error --python ${{ matrix.python_version }} --continue-on-error --diff --coverage  ${{ matrix.cassandra_module }}
+      - name: Run integration tests on Python ${{ matrix.test_scenario.python_version }} | ${{ matrix.test_scenario.docker_image }}
+        run: ansible-test integration --docker ${{ matrix.test_scenario.docker_image }} -v --color --retry-on-error --python ${{ matrix.test_scenario.python_version }} --continue-on-error --diff --coverage  ${{ matrix.cassandra_module }}
 
       - name: Generate coverage report.
         run: ansible-test coverage xml -v --requirements --group-by command --group-by version
@@ -93,5 +96,3 @@ jobs:
 
       - name: Upload Coverage data
         run: tests/coverage.sh
-
-# FIXME FUTURE: Other Python Versions
