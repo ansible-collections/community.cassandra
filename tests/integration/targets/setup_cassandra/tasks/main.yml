@@ -25,6 +25,7 @@
   package:
     name: iproute2
     state: present
+  when: ansible_os_family == "Debian"
 
 - name: Start Cassandra service if it is installed
   service:
