@@ -39,7 +39,6 @@ jobs:
             tar_version: "2.2.9"
         docker_image:
           - ubuntu1804
-          - centos8
         cassandra_module:
           - cassandra_autocompaction
           - cassandra_backup
