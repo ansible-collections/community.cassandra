@@ -138,6 +138,7 @@
     name: "{{ cassandra_service }}"
     enabled: "yes"
     state: "restarted"
+  ignore_errors: yes
 
 - shell: ls /var/log/ && ls /var/log/cassandra/
 - shell: cat /var/log/cassandra/*.log
