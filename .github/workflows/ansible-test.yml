@@ -32,7 +32,7 @@ jobs:
     strategy:
       matrix:
         python_version: ["3.6"]
-        cassandra_versions:
+        cassandra_version:
           - package_version: "311x"
             tar_version: "3.11.6"
           - package_version: "22x"
