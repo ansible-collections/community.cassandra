@@ -141,7 +141,9 @@
   ignore_errors: yes
 
 - shell: ls /var/log/ && ls /var/log/cassandra/
+  ignore_errors: yes
 - shell: cat /var/log/cassandra/*.log
+  ignore_errors: yes
 
 - name: Allow a little time for Cassandra to start listening on ports
   wait_for:
