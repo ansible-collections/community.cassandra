@@ -46,8 +46,8 @@ jobs:
           - cassandra_interdcstreamthroughput
           - cassandra_keyspace
           - cassandra_role
-          #- cassandra_schema
-          #- cassandra_status
+          - cassandra_schema
+          - cassandra_status
           - cassandra_stopdaemon
           - cassandra_streamthroughput
           - cassandra_table
