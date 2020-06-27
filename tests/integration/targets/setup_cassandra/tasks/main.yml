@@ -134,9 +134,10 @@
     name: "{{ cassandra_service }}"
     enabled: "yes"
     state: "restarted"
+  ignore_errors: yes
 
 #- shell: cat /etc/cassandra/cassandra.yaml
-#- shell: sleep 30 && tail -n 1000 /var/log/cassandra/system.log
+- shell: sleep 30 && tail -n 1000 /var/log/cassandra/system.log
 #- shell: apt install net-tools -y && netstat -tulpen
 
 - name: Allow a little time for Cassandra to start listening on ports
