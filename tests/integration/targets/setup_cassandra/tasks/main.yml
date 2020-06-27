@@ -25,6 +25,7 @@
   package:
     name: iproute2
     state: present
+  when: ansible_os_family == "Debian"
 
 - name: Start Cassandra service if it is installed
   service:
@@ -108,6 +109,11 @@
     state: present
     force: yes
   when: ansible_os_family == 'Debian'
+  #notify: debian_remove_cassandra
+
+- name: Reload systemd
+  systemd:
+    daemon_reload: yes
 
 - name: Adjust heap size
   lineinfile:
@@ -133,9 +139,11 @@
     enabled: "yes"
     state: "restarted"
 
-#- shell: cat /etc/cassandra/cassandra.yaml
-#- shell: sleep 30 && tail -n 1000 /var/log/cassandra/system.log
-#- shell: apt install net-tools -y && netstat -tulpen
+#- shell: ls /var/log/cassandra/
+#  ignore_errors: yes
+#- shell: cat /var/log/cassandra/cassandra.log   #  error on centos7 with and without become_user "su: cannot open session: Permission denied"
+#  become_user: cassandra
+#  ignore_errors: yes
 
 - name: Allow a little time for Cassandra to start listening on ports
   wait_for:

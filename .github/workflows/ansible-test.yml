@@ -32,35 +32,62 @@ jobs:
     strategy:
       matrix:
         python_version: ["3.6"]
+        cassandra_version:
+          - package_version: "311x"
+            tar_version: "3.11.6"
+          - package_version: "22x"
+            tar_version: "2.2.9"
+        test_scenario:
+          - docker_image: default
+            python_version: "3.6"
+          #- docker_image: ubuntu1804
+          #  python_version: "3.6"
+          #- docker_image: centos7
+          #  python_version: "2.7"
+        cassandra_module:
+          - cassandra_autocompaction
+          - cassandra_backup
+          - cassandra_binary
+          - cassandra_cleanup
+          - cassandra_compactionthreshold
+          - cassandra_compactionthroughput
+          - cassandra_drain
+          - cassandra_flush
+          - cassandra_gossip
+          - cassandra_handoff
+          - cassandra_interdcstreamthroughput
+          - cassandra_keyspace
+          - cassandra_role
+          - cassandra_schema
+          - cassandra_status
+          - cassandra_stopdaemon
+          - cassandra_streamthroughput
+          - cassandra_table
+          - cassandra_thrift
+          - cassandra_traceprobability
+          - cassandra_upgradesstables
+          - cassandra_verify
     steps:
       - name: Check out code
         uses: actions/checkout@v1
         with:
           path: ansible_collections/community/cassandra
 
-      - name: Set up Python ${{ matrix.python_version }}
+      - name: Set up Python ${{ matrix.test_scenario.python_version }}
         uses: actions/setup-python@v1
         with:
-          python-version: ${{ matrix.python_version }}
+          python-version: ${{ matrix.test_scenario.python_version }}
 
       - name: Install ansible-base (devel)
         run: pip install https://github.com/ansible/ansible/archive/devel.tar.gz --disable-pip-version-check
 
-      - name: Ensure cassandra versions are set to 311x
+      - name: Ensure cassandra versions are set to ${{ matrix.cassandra_version.package_version }} | ${{ matrix.cassandra_version.tar_version }}
         run: |
-          sed -i 's/^cassandra_version:.*/cassandra_version: \"311x\"/g' ${{ env.setup_cassandra_version_file }}
-          sed -i 's/^cassandra_version:.*/cassandra_version: \"3.11.6\"/g' ${{ env.setup_ccm_version_file }}
+          sed -i 's/^cassandra_version:.*/cassandra_version: \"${{ matrix.cassandra_version.package_version }}\"/g' ${{ env.setup_cassandra_version_file }}
+          sed -i 's/^cassandra_version:.*/cassandra_version: \"${{ matrix.cassandra_version.tar_version }}\"/g' ${{ env.setup_ccm_version_file }}
 
-      - name: Run integration tests on Python ${{ matrix.python_version }} & Cassandra 311x
-        run: ansible-test integration --docker -v --color --retry-on-error --python ${{ matrix.python_version }} --continue-on-error --diff --coverage
-
-      - name: Ensure cassandra versions are set to 22x
-        run: |
-          sed -i 's/^cassandra_version:.*/cassandra_version: \"22x\"/g' ${{ env.setup_cassandra_version_file }}
-          sed -i 's/^cassandra_version:.*/cassandra_version: \"2.2.9\"/g' ${{ env.setup_ccm_version_file }}
-
-      - name: Run integration tests on Python ${{ matrix.python_version }} & Cassandra 22x
-        run: ansible-test integration --docker -v --color --retry-on-error --python ${{ matrix.python_version }} --continue-on-error --diff --coverage
+      - name: Run integration tests on Python ${{ matrix.test_scenario.python_version }} | ${{ matrix.test_scenario.docker_image }}
+        run: ansible-test integration --docker ${{ matrix.test_scenario.docker_image }} -v --color --retry-on-error --python ${{ matrix.test_scenario.python_version }} --continue-on-error --diff --coverage  ${{ matrix.cassandra_module }}
 
       - name: Generate coverage report.
         run: ansible-test coverage xml -v --requirements --group-by command --group-by version
@@ -71,8 +98,3 @@ jobs:
 
       - name: Upload Coverage data
         run: tests/coverage.sh
-
-
-# FIXME FUTURE: If Look if we want to split integration tests into it's own job if they are long running
-# FIXME FUTURE: Other Python Versions
-# FIXME FUTURE: Other Operating Systems
