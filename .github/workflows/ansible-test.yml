@@ -37,8 +37,10 @@ jobs:
             tar_version: "3.11.6"
           - package_version: "22x"
             tar_version: "2.2.9"
-
-        cassandra_modules:
+        docker_image:
+          - ubuntu1804
+          - centos8
+        cassandra_module:
           - cassandra_autocompaction
           - cassandra_backup
           - cassandra_binary
@@ -80,16 +82,8 @@ jobs:
           sed -i 's/^cassandra_version:.*/cassandra_version: \"${{ matrix.cassandra_version.package_version }}\"/g' ${{ env.setup_cassandra_version_file }}
           sed -i 's/^cassandra_version:.*/cassandra_version: \"${{ matrix.cassandra_version.tar_version }}\"/g' ${{ env.setup_ccm_version_file }}
 
-      - name: Run integration tests on Python ${{ matrix.python_version }} & Cassandra 311x
-        run: ansible-test integration --docker -v --color --retry-on-error --python ${{ matrix.python_version }} --continue-on-error --diff --coverage  ${{ matrix.cassandra_modules }}
-
-    #  - name: Ensure cassandra versions are set to 22x
-    #    run: |
-    #      sed -i 's/^cassandra_version:.*/cassandra_version: \"22x\"/g' ${{ env.setup_cassandra_version_file }}
-    #      sed -i 's/^cassandra_version:.*/cassandra_version: \"2.2.9\"/g' ${{ env.setup_ccm_version_file }}
-
-    #  - name: Run integration tests on Python ${{ matrix.python_version }} & Cassandra 22x
-    #    run: ansible-test integration --docker -v --color --retry-on-error --python ${{ matrix.python_version }} --continue-on-error --diff --coverage ${{ matrix.cassandra_modules }}
+      - name: Run integration tests on Python ${{ matrix.python_version }} | ${{ matrix.docker_image }}
+        run: ansible-test integration --docker ${{ matrix.docker_image }} -v --color --retry-on-error --python ${{ matrix.python_version }} --continue-on-error --diff --coverage  ${{ matrix.cassandra_module }}
 
       - name: Generate coverage report.
         run: ansible-test coverage xml -v --requirements --group-by command --group-by version
@@ -102,4 +96,3 @@ jobs:
         run: tests/coverage.sh
 
 # FIXME FUTURE: Other Python Versions
-# FIXME FUTURE: Other Operating Systems
