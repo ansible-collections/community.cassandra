@@ -38,10 +38,12 @@ jobs:
           - package_version: "22x"
             tar_version: "2.2.9"
         test_scenario:
-          - docker_image: ubuntu1804
+          - docker_image: default
             python_version: "3.6"
-          - docker_image: centos7
-            python_version: "2.7"
+          #- docker_image: ubuntu1804
+          #  python_version: "3.6"
+          #- docker_image: centos7
+          #  python_version: "2.7"
         cassandra_module:
           - cassandra_autocompaction
           - cassandra_backup
