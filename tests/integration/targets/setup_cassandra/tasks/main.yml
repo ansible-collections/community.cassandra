@@ -149,9 +149,10 @@
 
 #- shell: ls /var/log/cassandra/
 #  ignore_errors: yes
+- shell: systemctl status cassandra.service
+  ignore_errors: yes
 - shell: tail -n 100 /var/log/cassandra/cassandra.log   #  error on centos7 with and without become_user "su: cannot open session: Permission denied"
   ignore_errors: yes
-  become: no
 
 - name: Allow a little time for Cassandra to start listening on ports
   wait_for:
