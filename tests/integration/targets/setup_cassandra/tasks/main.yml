@@ -132,6 +132,13 @@
 #    path: "{{ cassandra_yml_file }}"
 #    regexp: "^rpc_address:"
 #    line: "rpc_address: {{ ansible_default_ipv4.address }}"
+- name: Modify limits on CentOS 7
+  copy:
+    content: |
+      *         hard    nofile      65536
+      *         soft    nofile      65536
+    dest: /etc/security/limits.d/50-open-files.conf
+  when: ansible_os_family == "RedHat"
 
 - name: Start Cassandra service
   service:
