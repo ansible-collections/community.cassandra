@@ -140,19 +140,27 @@
 #    dest: /etc/security/limits.d/50-open-files.conf
 #  when: ansible_os_family == "RedHat"
 
+- name: Replace default cassandra init script - RedHat 7
+  copy:
+    src: cassandra
+    dest: /etc/init.d/cassandra
+    owner: root
+    group: root
+    mode: 0755
+  when: ansible_os_family == "RedHat"
+
 - name: Start Cassandra service
   service:
     name: "{{ cassandra_service }}"
     enabled: "yes"
     state: "restarted"
-  ignore_errors: yes
 
 #- shell: ls /var/log/cassandra/
 #  ignore_errors: yes
-- shell: systemctl status cassandra.service
-  ignore_errors: yes
-- shell: tail -n 100 /var/log/cassandra/cassandra.log   #  error on centos7 with and without become_user "su: cannot open session: Permission denied"
-  ignore_errors: yes
+#- shell: systemctl status cassandra.service
+#  ignore_errors: yes
+#- shell: tail -n 100 /var/log/cassandra/cassandra.log   #  error on centos7 with and without become_user "su: cannot open session: Permission denied"
+#  ignore_errors: yes
 
 - name: Allow a little time for Cassandra to start listening on ports
   wait_for:
