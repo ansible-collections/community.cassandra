@@ -111,10 +111,6 @@
   when: ansible_os_family == 'Debian'
   #notify: debian_remove_cassandra
 
-- name: Reload systemd
-  systemd:
-    daemon_reload: yes
-
 - name: Adjust heap size
   lineinfile:
     path: "{{ cassandra_env_file }}"
@@ -148,6 +144,10 @@
     group: root
     mode: 0755
   when: ansible_os_family == "RedHat"
+
+- name: Reload systemd
+  systemd:
+    daemon_reload: yes
 
 - name: Start Cassandra service
   service:
