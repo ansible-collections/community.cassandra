@@ -111,10 +111,6 @@
   when: ansible_os_family == 'Debian'
   #notify: debian_remove_cassandra
 
-- name: Reload systemd
-  systemd:
-    daemon_reload: yes
-
 - name: Adjust heap size
   lineinfile:
     path: "{{ cassandra_env_file }}"
@@ -132,6 +128,26 @@
 #    path: "{{ cassandra_yml_file }}"
 #    regexp: "^rpc_address:"
 #    line: "rpc_address: {{ ansible_default_ipv4.address }}"
+#- name: Modify limits on CentOS 7
+#  copy:
+#    content: |
+#      *         hard    nofile      65536
+#      *         soft    nofile      65536
+#    dest: /etc/security/limits.d/50-open-files.conf
+#  when: ansible_os_family == "RedHat"
+
+- name: Replace default cassandra init script - RedHat 7
+  copy:
+    src: cassandra
+    dest: /etc/init.d/cassandra
+    owner: root
+    group: root
+    mode: 0755
+  when: ansible_os_family == "RedHat"
+
+- name: Reload systemd
+  systemd:
+    daemon_reload: yes
 
 - name: Start Cassandra service
   service:
@@ -141,8 +157,9 @@
 
 #- shell: ls /var/log/cassandra/
 #  ignore_errors: yes
-#- shell: cat /var/log/cassandra/cassandra.log   #  error on centos7 with and without become_user "su: cannot open session: Permission denied"
-#  become_user: cassandra
+#- shell: systemctl status cassandra.service
+#  ignore_errors: yes
+#- shell: tail -n 100 /var/log/cassandra/cassandra.log   #  error on centos7 with and without become_user "su: cannot open session: Permission denied"
 #  ignore_errors: yes
 
 - name: Allow a little time for Cassandra to start listening on ports

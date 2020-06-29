@@ -40,10 +40,12 @@ jobs:
         test_scenario:
           - docker_image: default
             python_version: "3.6"
+            ansible_test_options: ""
           #- docker_image: ubuntu1804
           #  python_version: "3.6"
-          #- docker_image: centos7
-          #  python_version: "2.7"
+          - docker_image: centos7
+            python_version: "2.7"
+            ansible_test_options: "--docker-privileged"
         cassandra_module:
           - cassandra_autocompaction
           - cassandra_backup
@@ -87,7 +89,7 @@ jobs:
           sed -i 's/^cassandra_version:.*/cassandra_version: \"${{ matrix.cassandra_version.tar_version }}\"/g' ${{ env.setup_ccm_version_file }}
 
       - name: Run integration tests on Python ${{ matrix.test_scenario.python_version }} | ${{ matrix.test_scenario.docker_image }}
-        run: ansible-test integration --docker ${{ matrix.test_scenario.docker_image }} -v --color --retry-on-error --python ${{ matrix.test_scenario.python_version }} --continue-on-error --diff --coverage  ${{ matrix.cassandra_module }}
+        run: ansible-test integration --docker ${{ matrix.test_scenario.docker_image }} ${{ matrix.test_scenario.ansible_test_options }} -v --color --retry-on-error --python ${{ matrix.test_scenario.python_version }} --continue-on-error --diff --coverage  ${{ matrix.cassandra_module }}
 
       - name: Generate coverage report.
         run: ansible-test coverage xml -v --requirements --group-by command --group-by version
