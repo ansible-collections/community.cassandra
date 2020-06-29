@@ -18,28 +18,6 @@
 
 # ===========================================================
 
-#- name: Test missing driver handling
-#  cassandra_table:
-#    name: users
-#    keyspace: myapp
-#    state: present
-#    columns:
-#      - id: uuid
-#      - username: text
-#      - encrypted_password: blob
-#      - first_name: text
-#      - last_name: text
-#      - dob: date
-#    primary_key:
-#      - username
-#  register: no_driver
-#  ignore_errors: yes
-
-#- assert:
-#    that:
-#      - no_driver.changed == False
-#      - "no_driver.msg == 'This module requires the cassandra-driver python driver. You can probably install it with pip install cassandra-driver.'"
-
 - name: Include vars for os family
   include_vars:
     file: "{{ ansible_os_family }}.yml"
@@ -175,7 +153,6 @@
   assert:
     that:
       - "create_users.changed == True"
-      #- "drop_users.cql == 'DROP TABLE myapp.users'"
 
 - name: Get output of DESC KEYSPACE myapp
   shell: "cqlsh -u  {{ cassandra_admin_user }} -p {{ cassandra_admin_pwd }} --execute 'DESC KEYSPACE myapp'"

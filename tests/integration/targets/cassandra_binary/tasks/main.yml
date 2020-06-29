@@ -149,7 +149,6 @@
   ignore_errors: true
   when: cassandra_auth_tests == True
 
-# We don't get stderr / stdout keys here. Why?
 - name: Assert no such file
   assert:
     that:

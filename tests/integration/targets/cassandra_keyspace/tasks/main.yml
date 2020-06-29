@@ -21,18 +21,6 @@
   include_vars:
     file: "{{ ansible_os_family }}.yml"
 
-#- name: Test missing driver handling
-#  cassandra_keyspace:
-#    name: mykeyspace
-#    state: present
-#  register: no_driver
-#  ignore_errors: yes
-
-#- assert:
-#    that:
-#      - no_driver.changed == False
-#      - "no_driver.msg == 'This module requires the cassandra-driver python driver. You can probably install it with pip install cassandra-driver.'"
-
 # This should go into a cassandra_driver dependency
 - name: Ensure epel is available
   yum:
@@ -48,8 +36,6 @@
     name: cassandra-driver
   environment:
     CASS_DRIVER_NO_CYTHON: 1
-
-#- shell: apt install net-tools -y && netstat -tulpen
 
 - name: Create a keyspace 1
   cassandra_keyspace:

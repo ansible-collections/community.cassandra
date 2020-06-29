@@ -17,18 +17,6 @@
 # along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
 
 # ===========================================================
-#- name: Test missing driver handling
-#  cassandra_role:
-#    name: mykeyspace
-#    state: present
-#  register: no_driver
-#  ignore_errors: yes
-
-#- assert:
-#    that:
-#      - no_driver.changed == False
-#      - "no_driver.msg == 'This module requires the cassandra-driver python driver. You can probably install it with pip install cassandra-driver.'"
-
 - name: Include vars for os family
   include_vars:
     file: "{{ ansible_os_family }}.yml"
@@ -143,11 +131,6 @@
     login_password: "{{ cassandra_admin_pwd }}"
   register: myrole
   ignore_errors: yes
-
-#- name: Assert not changed
-#  assert:
-#    that:
-#      - "myrole.changed == False"
 
 - name: Remove a role (check mode)
   cassandra_role:
@@ -312,7 +295,7 @@
   shell: cqlsh --username "{{ cassandra_admin_user }}" --password "{{ cassandra_admin_pwd }}" --execute "LIST ALL PERMISSIONS OF cassandra"
   register: myperms
 
-# - name: Validate assigned keyspace permissions
+# - name: Validate assigned keyspace permissions TODO
 
 - name: Create role using all_keyspaces special dict key
   cassandra_role:
@@ -327,7 +310,7 @@
     login_password: "{{ cassandra_admin_pwd }}"
   register: app_user_all_keyspaces
 
-#-name: Get output of list permission for app_user_all_keyspaces user
+#-name: Get output of list permission for app_user_all_keyspaces user TODO
 #-name: Assert that app_user_all_keyspaces user has expected permissions
 
 - name: Create a read-only user for all keyspaces

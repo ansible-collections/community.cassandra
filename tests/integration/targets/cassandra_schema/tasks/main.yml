@@ -24,20 +24,6 @@
       include_vars:
         file: ../setup_cassandra_cluster_manager/defaults/main.yml
 
-    #- name: Fnd nodetool
-    #  shell: find / -name nodetool
-
-    #- shell: yum install net-tools -y && netstat -tulpen
-
-    #shell: source /home/cassandra/nodetool_path.sh && nodetool -h 127.0.0.1 -p 7100 status
-    #register: status
-
-    #- debug:
-    #    var: status
-
-    #- shell: file /home/cassandra/config/repository/{{ cassandra_version }}/bin/nodetool
-    #- shell:  /home/cassandra/config/repository/{{ cassandra_version }}/bin/nodetool describecluster --port 7100
-
     # ccm created nodes seem to number the jmx ports 7100, 7200, 7300 usw
     - name: Execute module against the first ccm node
       cassandra_schema:

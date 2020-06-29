@@ -44,38 +44,11 @@
       JVM_OPTS="$JVM_OPTS -Djava.security.auth.login.config=$CASSANDRA_HOME/cassandra-jaas.config"
       JVM_OPTS="$JVM_OPTS -Dcassandra.jmx.authorizer=org.apache.cassandra.auth.jmx.AuthorizationProxy"
 
-#- name: Create password file
-#  tempfile:
-#    state: file
-#    suffix: temp
-#  register: pwd_file TO REMOVE
-
-#- name: Set password in pwd file
-#  shell: "echo {{ cassandra_admin_pwd }} > {{ pwd_file.path }}" TO REMOVE
-
 - name: Deactivate local jmx
   lineinfile:
     path:  "{{ cassandra_env_file }}"
     regexp: '^if \[ \"\$LOCAL_JMX\" \=*'
     line: 'if [ "$LOCAL_JMX" = "yes" ]; then'
-
-#- name: Set jmx password file
-#  copy:
-#    dest: /etc/cassandra/jmxremote.password
-#    content: |
-#      {{ cassandra_admin_user }} {{ cassandra_admin_pwd }}
-#    mode: 0400
-#    owner: cassandra
-#    group: cassandra
-
-#- name: Set jmx access file
-#  copy:
-#    dest: /etc/cassandra/jmxremote.access
-#    content: |
-#      {{ cassandra_admin_user }} readwrite
-#    mode: 0400
-#    owner: cassandra
-#    group: cassandra
 
 - name: Remove jmx auth options
   blockinfile:
@@ -100,8 +73,6 @@
     delay: 10
   when: cassandra_restarted.changed == True
 
-# nodetool drain tests seem to need this additional wait... perhaps variablize with a boolean?
-#- shell: cat /var/log/cassandra/cassandra.log && sleep 10
 - pause:
     seconds: 10
   when: cassandra_restarted.changed == True
