@@ -23,9 +23,6 @@
     debug: true
   register: stopdaemon
 
-#- debug:
-#    var: stopdaemon
-
 - assert:
     that:
       - "stopdaemon.msg == 'nodetool stopdaemon executed successfully'"

@@ -93,8 +93,6 @@
     delay: 10
   when: cassandra_restarted.changed == True
 
-# nodetool drain tests seem to need this additional wait... perhaps variablize with a boolean?
-#- shell: cat /var/log/cassandra/cassandra.log && sleep 10
 - pause:
     seconds: 10
   when: cassandra_restarted.changed == True

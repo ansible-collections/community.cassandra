@@ -23,9 +23,6 @@
     debug: yes
   register: cleanup
 
-#- debug:
-#    var: cleanup
-
 - assert:
     that:
       - "cleanup.msg == 'nodetool cleanup executed successfully'"

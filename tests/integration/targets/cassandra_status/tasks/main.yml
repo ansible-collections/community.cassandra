@@ -18,18 +18,6 @@
 
 # ===========================================================
 
-#- name: Fnd nodetool
-#  shell: find / -name nodetool
-
-#- shell: yum install net-tools -y && netstat -tulpen
-
-#shell: source /home/cassandra/nodetool_path.sh && nodetool -h 127.0.0.1 -p 7100 status
-#register: status
-
-#- debug:
-#    var: status
-
-#- shell: file /home/cassandra/config/repository/{{ cassandra_version }}/bin/nodetool
 - name: Run module tests for cassandra_status
   block:
     # ccm created nodes seem to number the jmx ports 7100, 7200, 7300 usw
@@ -67,8 +55,6 @@
         nodetool_path: /home/cassandra/config/repository/{{ cassandra_version }}/bin
       ignore_errors: yes
       register: rhys
-
-    #- shell: source /home/cassandra/nodetool_path.sh && nodetool -h 127.0.0.1 -p 7100 status
 
     - name: Assert module output reports node2 down
       assert:
@@ -164,5 +150,6 @@
         CASSANDRA_HOME: "/home/cassandra"
       ignore_errors: yes
 
+# TODO - Add tests with auth
 #- include_tasks: ../../setup_cassandra/tasks/cassandra_auth.yml
 #  when: cassandra_auth_tests == True
