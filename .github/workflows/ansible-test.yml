@@ -32,6 +32,9 @@ jobs:
     strategy:
       matrix:
         python_version: ["3.6"]
+        ansible_version:
+          - stable-2.10
+          - devel
         cassandra_version:
           - package_version: "311x"
             tar_version: "3.11.6"
@@ -41,8 +44,6 @@ jobs:
           - docker_image: default
             python_version: "3.6"
             ansible_test_options: ""
-          #- docker_image: ubuntu1804
-          #  python_version: "3.6"
           - docker_image: centos7
             python_version: "2.7"
             ansible_test_options: "--docker-privileged"
@@ -80,8 +81,8 @@ jobs:
         with:
           python-version: ${{ matrix.test_scenario.python_version }}
 
-      - name: Install ansible-base (devel)
-        run: pip install https://github.com/ansible/ansible/archive/devel.tar.gz --disable-pip-version-check
+      - name: Install ansible-base (${{ matrix.ansible }})
+        run: pip install https://github.com/ansible/ansible/archive/(${{ matrix.ansible }}).tar.gz --disable-pip-version-check
 
       - name: Ensure cassandra versions are set to ${{ matrix.cassandra_version.package_version }} | ${{ matrix.cassandra_version.tar_version }}
         run: |
