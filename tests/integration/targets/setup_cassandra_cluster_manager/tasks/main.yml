@@ -42,6 +42,8 @@
   apt:
     update_cache: yes
   when: ansible_os_family == 'Debian'
+  
+- shell: pip install --user --upgrade setuptools
 
 - name: Install required pip packages
   pip:
