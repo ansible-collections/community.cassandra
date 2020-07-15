@@ -23,6 +23,7 @@ options:
     description:
       - The hostname.
     type: str
+    default: "127.0.0.1"
   port:
     description:
       - The Cassandra TCP port.
@@ -186,9 +187,9 @@ def cluster_schema(stdout):
 def main():
     argument_spec = cassandra_common_argument_spec()
     argument_spec.update(
-            uuid=dict(type='str', aliases=['is']),
-            poll=dict(type='int', default=1),
-            interval=dict(type='int', default=30)
+        uuid=dict(type='str', aliases=['is']),
+        poll=dict(type='int', default=1),
+        interval=dict(type='int', default=30)
     )
     module = AnsibleModule(
         argument_spec=argument_spec,
