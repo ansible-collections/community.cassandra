@@ -23,6 +23,7 @@ options:
     description:
       - The hostname.
     type: str
+    default: "127.0.0.1"
   port:
     description:
       - The Cassandra TCP port.
@@ -91,6 +92,7 @@ __metaclass__ = type
 
 
 from ansible_collections.community.cassandra.plugins.module_utils.NodeToolCmdObjects import NodeToolCmd
+from ansible_collections.community.cassandra.plugins.module_utils.cassandra_common_options import cassandra_common_argument_spec
 
 
 class NodeToolStatusCommand(NodeToolCmd):
@@ -183,19 +185,16 @@ def cluster_schema(stdout):
 
 
 def main():
+    argument_spec = cassandra_common_argument_spec()
+    argument_spec.update(
+        uuid=dict(type='str', aliases=['is']),
+        poll=dict(type='int', default=1),
+        interval=dict(type='int', default=30)
+    )
     module = AnsibleModule(
-        argument_spec=dict(
-            host=dict(type='str', default=None),
-            port=dict(type='int', default=7199),
-            password=dict(type='str', no_log=True),
-            password_file=dict(type='str', no_log=True),
-            username=dict(type='str', no_log=True),
-            uuid=dict(type='str', aliases=['is']),
-            poll=dict(type='int', default=1),
-            interval=dict(type='int', default=30),
-            nodetool_path=dict(type='str', default=None, required=False),
-            debug=dict(type='bool', default=False, required=False)),
-        supports_check_mode=False)
+        argument_spec=argument_spec,
+        supports_check_mode=False,
+    )
 
     uuid = module.params['uuid']
     debug = module.params['debug']

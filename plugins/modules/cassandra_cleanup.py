@@ -81,22 +81,20 @@ __metaclass__ = type
 
 
 from ansible_collections.community.cassandra.plugins.module_utils.NodeToolCmdObjects import NodeToolCmd, NodeToolCommandKeyspaceTableNumJobs
+from ansible_collections.community.cassandra.plugins.module_utils.cassandra_common_options import cassandra_common_argument_spec
 
 
 def main():
+    argument_spec = cassandra_common_argument_spec()
+    argument_spec.update(
+        keyspace=dict(type='str', default=None, required=False),
+        table=dict(type='raw', default=None, required=False),
+        num_jobs=dict(type='int', default=2, aliases=['j'], required=False),
+    )
     module = AnsibleModule(
-        argument_spec=dict(
-            host=dict(type='str', default="127.0.0.1"),
-            port=dict(type='int', default=7199),
-            password=dict(type='str', no_log=True),
-            password_file=dict(type='str', no_log=True),
-            username=dict(type='str', no_log=True),
-            keyspace=dict(type='str', default=None, required=False),
-            table=dict(type='raw', default=None, required=False),
-            num_jobs=dict(type='int', default=2, aliases=['j'], required=False),
-            nodetool_path=dict(type='str', default=None, required=False),
-            debug=dict(type='bool', default=False, required=False)),
-        supports_check_mode=False)
+        argument_spec=argument_spec,
+        supports_check_mode=False,
+    )
 
     cmd = 'cleanup'
 
