@@ -5,7 +5,7 @@ readme: README.md
 authors: Rhys Campbell
 description: null
 license: null
-license_file: null
+license_file: COPYING
 tags: null
 dependencies:
   community.general: '>=0.1.1'
