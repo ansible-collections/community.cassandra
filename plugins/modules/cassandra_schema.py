@@ -18,29 +18,11 @@ description:
     - Ensure that all nodes are have the same schema version.
     - Can also specifiy a specific schema version if required.
     - Schema version is obtained thtough the usage of the nodetool describecluster command.
+
+extends_documentation_fragment:
+  - community.cassandra.nodetool_module_options
+
 options:
-  host:
-    description:
-      - The hostname.
-    type: str
-    default: "127.0.0.1"
-  port:
-    description:
-      - The Cassandra TCP port.
-    type: int
-    default: 7199
-  password:
-    description:
-      - The password to authenticate with.
-    type: str
-  password_file:
-    description:
-      - Path to a file containing the password.
-    type: str
-  username:
-    description:
-      - The username to authenticate with.
-    type: str
   uuid:
     description:
       - The expected schema version.
@@ -57,14 +39,6 @@ options:
       - The number of seconds to wait between poll executions.
     type: int
     default: 30
-  nodetool_path:
-    description:
-      - The path to nodetool.
-    type: str
-  debug:
-    description:
-      - Enable additional debug output.
-    type: bool
 '''
 
 EXAMPLES = '''

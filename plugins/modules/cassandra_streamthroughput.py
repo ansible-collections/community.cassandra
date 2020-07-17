@@ -15,42 +15,16 @@ short_description: Sets the stream throughput.
 requirements: [ nodetool ]
 description:
     - Sets the stream throughput.
+
+extends_documentation_fragment:
+  - community.cassandra.nodetool_module_options
+
 options:
-  host:
-    description:
-      - The hostname.
-    type: str
-    default: 127.0.0.1
-  port:
-    description:
-      - The Cassandra TCP port.
-    type: int
-    default: 7199
-  password:
-    description:
-      - The password to authenticate with.
-    type: str
-  password_file:
-    description:
-      - Path to a file containing the password.
-    type: str
-  username:
-    description:
-      - The username to authenticate with.
-    type: str
   value:
     description:
       - MB value to set stream throughput to.
     type: int
     required: True
-  nodetool_path:
-    description:
-      - The path to nodetool.
-    type: str
-  debug:
-    description:
-      - Enable additional debug output.
-    type: bool
 '''
 
 EXAMPLES = '''

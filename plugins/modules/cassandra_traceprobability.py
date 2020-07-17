@@ -15,42 +15,16 @@ short_description: Sets the trace probability.
 requirements: [ nodetool ]
 description:
     - Sets the trace probability.
+
+extends_documentation_fragment:
+  - community.cassandra.nodetool_module_options
+
 options:
-  host:
-    description:
-      - The hostname.
-    type: str
-    default: 127.0.0.1
-  port:
-    description:
-      - The Cassandra TCP port.
-    type: int
-    default: 7199
-  password:
-    description:
-      - The password to authenticate with.
-    type: str
-  password_file:
-    description:
-      - Path to a file containing the password.
-    type: str
-  username:
-    description:
-      - The username to authenticate with.
-    type: str
   value:
     description:
       - Trace probability between 0.0 and 1.0
     type: float
     required: True
-  nodetool_path:
-    description:
-      - The path to nodetool.
-    type: str
-  debug:
-    description:
-      - Enable additional debug output.
-    type: bool
 '''
 
 EXAMPLES = '''
