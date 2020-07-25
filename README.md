@@ -1,6 +1,6 @@
 # Cassandra Collection
 ![CI](https://github.com/ansible-collections/community.cassandra/workflows/CI/badge.svg)
-[![Codecov](https://img.shields.io/codecov/c/github/ansible-collections/cassandra)](https://codecov.io/gh/ansible-collections/cassandra)
+[![Codecov](https://img.shields.io/codecov/c/github/ansible-collections/community.cassandra)](https://codecov.io/gh/ansible-collections/community.cassandra)
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
 [![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
