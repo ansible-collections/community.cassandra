@@ -1,5 +1,5 @@
 # Cassandra Collection
-![CI](https://github.com/ansible-collections/community.cassandra/workflows/CI/badge.svg?kill_cache=1&test=2)
+
 ![documentation](https://github.com/ansible-collections/community.cassandra/workflows/documentation/badge.svg)
 [![Codecov](https://img.shields.io/codecov/c/github/ansible-collections/community.cassandra)](https://codecov.io/gh/ansible-collections/community.cassandra)
 [![Build Status](https://travis-ci.com/ansible-collections/community.cassandra.svg?branch=master)](https://travis-ci.com/ansible-collections/community.cassandra)
