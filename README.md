@@ -2,6 +2,7 @@
 ![CI](https://github.com/ansible-collections/community.cassandra/workflows/CI/badge.svg)
 ![documentation](https://github.com/ansible-collections/community.cassandra/workflows/documentation/badge.svg)
 [![Codecov](https://img.shields.io/codecov/c/github/ansible-collections/community.cassandra)](https://codecov.io/gh/ansible-collections/community.cassandra)
+[![Build Status](https://travis-ci.com/ansible-collections/community.cassandra.svg?branch=master)](https://travis-ci.com/ansible-collections/community.cassandra)
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
 [![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
