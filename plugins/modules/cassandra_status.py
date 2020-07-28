@@ -57,6 +57,14 @@ EXAMPLES = '''
 '''
 
 RETURN = '''
+msg:
+  description: A message indicating what has happened.
+  returned: on success
+  type: bool
+rc:
+  description: Return code of the last executed command.
+  returned: always
+  type: int
 '''
 
 from ansible.module_utils.basic import AnsibleModule, load_platform_subclass
