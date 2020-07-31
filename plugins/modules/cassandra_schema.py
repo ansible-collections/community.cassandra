@@ -43,14 +43,14 @@ options:
 
 EXAMPLES = '''
 - name: Ensure all Cassandra nodes are in schema agreement.
-  cassandra_schema:
+  community.cassandra.cassandra_schema:
 
 - name: Ensure all Cassandra nodes have the expected schema version
-  cassandra_schema:
+  community.cassandra.cassandra_schema:
     is: 1176b7ac-8993-395d-85fd-41b89ef49fbb
 
 - name: Poll schema version a max of 5 times with a 30 second interval
-  cassandra_schema:
+  community.cassandra.cassandra_schema:
     poll: 5
     interval: 30
 '''

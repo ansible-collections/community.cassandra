@@ -44,15 +44,15 @@ options:
 
 EXAMPLES = '''
 - name: Ensure all Cassandra nodes are in the UN (Up/Normal) state.
-  cassandra_status:
+  community.cassandra.cassandra_status:
 
 - name: Ensure all Cassandra nodes are in the UN (Up/Normal) state polling max 3 times, 60 seconds interval
-  cassandra_status:
+  community.cassandra.cassandra_status:
     poll: 3
     interval: 60
 
 - name: Ensure down nodes are no more than 1
-  cassandra_status:
+  community.cassandra.cassandra_status:
     down: 1
 '''
 

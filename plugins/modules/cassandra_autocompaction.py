@@ -43,13 +43,13 @@ options:
 
 EXAMPLES = '''
 - name: Ensure Cassandra Autocompaction is enabled
-  cassandra_autocompaction:
+  community.cassandra.cassandra_autocompaction:
     keyspace: system
     table: local
     state: enabled
 
 - name: Ensure Cassandra Autocompaction is disabled
-  cassandra_autocompaction:
+  community.cassandra.cassandra_autocompaction:
     keyspace: system
     table: local
     state: disabled

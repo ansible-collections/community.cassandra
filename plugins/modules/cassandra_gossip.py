@@ -32,11 +32,11 @@ options:
 
 EXAMPLES = '''
 - name: Ensure Cassandra gossip is enabled
-  cassandra_gossip:
+  community.cassandra.cassandra_gossip:
     state: enabled
 
 - name: Ensure Cassandra gossip is disabled
-  cassandra_gossip:
+  community.cassandra.cassandra_gossip:
     state: disabled
 '''
 

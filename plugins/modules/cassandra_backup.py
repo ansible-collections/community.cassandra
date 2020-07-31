@@ -32,11 +32,11 @@ options:
 
 EXAMPLES = '''
 - name: Ensure Cassandra incremental backup feature is enabled
-  cassandra_backup:
+  community.cassandra.cassandra_backup:
     state: enabled
 
 - name: Ensure Cassandra incremental backup feature is disabled
-  cassandra_backup:
+  community.cassandra.cassandra_backup:
     state: disabled
 '''
 

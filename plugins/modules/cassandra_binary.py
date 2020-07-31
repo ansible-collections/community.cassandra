@@ -32,11 +32,11 @@ options:
 
 EXAMPLES = '''
 - name: Ensure Cassandra binary feature is enabled
-  cassandra_binary:
+  community.cassandra.cassandra_binary:
     state: enabled
 
 - name: Ensure Cassandra binary feature is disabled
-  cassandra_binary:
+  community.cassandra.cassandra_binary:
     state: disabled
 '''
 

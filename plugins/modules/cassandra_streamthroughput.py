@@ -29,7 +29,7 @@ options:
 
 EXAMPLES = '''
 - name: Set throughput to 200
-  cassandra_streamthroughput:
+  community.cassandra.cassandra_streamthroughput:
     value: 200
 '''
 

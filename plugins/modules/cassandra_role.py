@@ -86,19 +86,19 @@ options:
 
 EXAMPLES = r'''
 - name: Create a role
-  cassandra_role:
+  community.cassandra.cassandra_role:
     name: app_user
     password: 'secretZHB78'
     state: present
     login: yes
 
 - name: Remove a role
-  cassandra_role:
+  community.cassandra.cassandra_role:
     name: app_user
     state: absent
 
 - name: Create a super user
-  cassandra_role:
+  community.cassandra.cassandra_role:
     name: admin
     password: 'BigSecretUser2019'
     state: present
@@ -106,7 +106,7 @@ EXAMPLES = r'''
     super_user: yes
 
 - name: Create a user with access only to certain data centres
-  cassandra_role:
+  community.cassandra.cassandra_role:
     name: rhys
     password: 'secret'
     state: present
@@ -115,8 +115,8 @@ EXAMPLES = r'''
       london:
       zurich:
 
-- name: TODO Create a user with specific permissions for specific keyspaces
-  cassandra_role:
+- name: Create a user with specific permissions for specific keyspaces
+  community.cassandra.cassandra_role:
     name: rhys
     password: 'secret'
     state: present

@@ -29,7 +29,7 @@ options:
 
 EXAMPLES = '''
 - name: Set traceprobability to 0.9
-  cassandra_traceprobability:
+  community.cassandra.cassandra_traceprobability:
     value: 0.9
 '''
 

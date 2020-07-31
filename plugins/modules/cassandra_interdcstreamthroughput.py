@@ -29,7 +29,7 @@ options:
 
 EXAMPLES = '''
 - name: Set inter dc stream throughput to 200
-  cassandra_interdcstreamthroughput:
+  community.cassandra.cassandra_interdcstreamthroughput:
     value: 200
 '''
 

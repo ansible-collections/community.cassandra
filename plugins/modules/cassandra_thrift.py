@@ -32,11 +32,11 @@ options:
 
 EXAMPLES = '''
 - name: Ensure Cassandra thrift is enabled
-  cassandra_thrift:
+  community.cassandra.cassandra_thrift:
     state: enabled
 
 - name: Ensure Cassandra thrift is disabled
-  cassandra_thrift:
+  community.cassandra.cassandra_thrift:
     state: disabled
 '''
 
