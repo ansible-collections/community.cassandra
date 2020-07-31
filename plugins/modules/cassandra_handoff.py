@@ -32,11 +32,11 @@ options:
 
 EXAMPLES = '''
 - name: Ensure Cassandra handoff is enabled
-  cassandra_handoff:
+  community.cassandra.cassandra_handoff:
     state: enabled
 
 - name: Ensure Cassandra handoff is disabled
-  cassandra_handoff:
+  community.cassandra.cassandra_handoff:
     state: disabled
 '''
 

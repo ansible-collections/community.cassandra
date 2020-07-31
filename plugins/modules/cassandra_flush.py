@@ -32,7 +32,7 @@ options:
 
 EXAMPLES = '''
 - name: Run flush on the Cassandra node
-  cassandra_flush:
+  community.cassandra.cassandra_flush:
 '''
 
 RETURN = '''

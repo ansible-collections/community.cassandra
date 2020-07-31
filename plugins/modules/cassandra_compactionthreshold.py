@@ -46,7 +46,7 @@ options:
 
 EXAMPLES = '''
 - name: Adjust compactionthreshold with module
-  cassandra_compactionthreshold:
+  community.cassandra.cassandra_compactionthreshold:
     keyspace: system
     table: local
     min: 8

@@ -39,7 +39,7 @@ options:
 
 EXAMPLES = '''
 - name: Run cleanup on the Cassandra node
-  cassandra_cleanup:
+  community.cassandra.cassandra_cleanup:
 '''
 
 RETURN = '''

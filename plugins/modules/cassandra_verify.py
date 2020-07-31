@@ -39,7 +39,7 @@ options:
 
 EXAMPLES = '''
 - name: Run verify on the Cassandra node
-  cassandra_verify:
+  community.cassandra.cassandra_verify:
     keyspace: mykeyspace
     tables:
       - table1

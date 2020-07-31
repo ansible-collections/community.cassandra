@@ -69,23 +69,23 @@ options:
 
 EXAMPLES = r'''
 - name: Create a keyspace
-  cassandra_keyspace:
+  community.cassandra.cassandra_keyspace:
     name: mykeyspace
     state: present
 
 - name: Remove a keyspace
-  cassandra_keyspace:
+  community.cassandra.cassandra_keyspace:
     name: mykeyspace
     state: absent
 
 - name: Create a keyspace with RF 3
-  cassandra_keyspace:
+  community.cassandra.cassandra_keyspace:
     name: mykeyspace
     state: present
     replication_factor: 3
 
 - name: Create a keyspace with network topology
-  cassandra_keyspace:
+  community.cassandra.cassandra_keyspace:
     name: mykeyspace
     data_centres:
       london: 3

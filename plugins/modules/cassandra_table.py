@@ -83,7 +83,7 @@ options:
 
 EXAMPLES = r'''
 - name: Create a table
-  cassandra_table:
+  community.cassandra.cassandra_table:
     name: users
     state: present
     keyspace: myapp
@@ -100,7 +100,7 @@ EXAMPLES = r'''
       username
 
 - name: Remove a table
-  cassandra_table:
+  community.cassandra.cassandra_table:
     name: users
     state: absent
     keyspace: myapp

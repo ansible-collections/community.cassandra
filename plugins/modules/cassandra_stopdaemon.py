@@ -22,7 +22,7 @@ extends_documentation_fragment:
 
 EXAMPLES = '''
 - name: Stops cassandra daemon.
-  cassandra_stopdaemon:
+  community.cassandra.cassandra_stopdaemon:
 '''
 
 RETURN = '''
