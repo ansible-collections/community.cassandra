@@ -26,7 +26,7 @@
     that: "'Current compaction throughput: 16 MB/s' == compactionthroughput.stdout"
 
 - name: Set compactionthroughput with module
-  cassandra_compactionthroughput:
+  community.cassandra.cassandra_compactionthroughput:
     value: 32
     debug: yes
 
@@ -39,7 +39,7 @@
     that: "'Current compaction throughput: 32 MB/s' == compactionthroughput.stdout"
 
 - name: Set throughput to 64
-  cassandra_compactionthroughput:
+  community.cassandra.cassandra_compactionthroughput:
     value: 64
     debug: yes
 
@@ -52,7 +52,7 @@
     that: "'Current compaction throughput: 64 MB/s' == compactionthroughput.stdout"
 
 - name: Test module with check_mode = true
-  cassandra_compactionthroughput:
+  community.cassandra.cassandra_compactionthroughput:
     value: 128
     debug: yes
   check_mode: true
@@ -71,7 +71,7 @@
     that: "'Current compaction throughput: 64 MB/s' == compactionthroughput.stdout"
 
 - name: Set compactionthroughput back to 32MB
-  cassandra_compactionthroughput:
+  community.cassandra.cassandra_compactionthroughput:
     value: 32
     debug: yes
 
@@ -84,7 +84,7 @@
     that: "'Current compaction throughput: 32 MB/s' == compactionthroughput.stdout"
 
 - name: Set compactionthroughput 32 MB should not change
-  cassandra_compactionthroughput:
+  community.cassandra.cassandra_compactionthroughput:
     value: 32
     debug: yes
   register: module_nochange
@@ -103,7 +103,7 @@
   when: cassandra_auth_tests == True
 
 - name: Set compactionthroughput 64MB when auth is enabled
-  cassandra_compactionthroughput:
+  community.cassandra.cassandra_compactionthroughput:
     value: 64
     username: "{{ cassandra_admin_user }}"
     password: "{{ cassandra_admin_pwd }}"
@@ -123,7 +123,7 @@
       - compactionthroughput.changed == True
 
 - name: Set back to 32MB using the pw file option
-  cassandra_compactionthroughput:
+  community.cassandra.cassandra_compactionthroughput:
     value:  32
     username: "{{ cassandra_admin_user }}"
     password_file: /etc/cassandra/jmxremote.password
@@ -144,7 +144,7 @@
   when: cassandra_auth_tests == True
 
 - name: Test login failure handling
-  cassandra_compactionthroughput:
+  community.cassandra.cassandra_compactionthroughput:
     value: 128
     username: "{{ cassandra_admin_user }}"
     password: XXXXXXXXXXXXXXXXXXXXX
@@ -161,7 +161,7 @@
   when: cassandra_auth_tests == True
 
 - name: Test incorrect nodetool_path handling
-  cassandra_compactionthroughput:
+  community.cassandra.cassandra_compactionthroughput:
     value: 128
     nodetool_path: /tmp
     debug: yes

@@ -26,7 +26,7 @@
     that: "'Current trace probability: 0.0' == traceprobability.stdout"
 
 - name: Increase traceprobability with module
-  cassandra_traceprobability:
+  community.cassandra.cassandra_traceprobability:
     value: 0.1
     debug: yes
 
@@ -39,7 +39,7 @@
     that: "'Current trace probability: 0.1' == traceprobability.stdout"
 
 - name: Set traceprobability to 0.9
-  cassandra_traceprobability:
+  community.cassandra.cassandra_traceprobability:
     value: 0.9
     debug: yes
 
@@ -52,7 +52,7 @@
     that: "'Current trace probability: 0.9' == traceprobability.stdout"
 
 - name: Test module with check_mode = true
-  cassandra_traceprobability:
+  community.cassandra.cassandra_traceprobability:
     value: 0.1
     debug: yes
   check_mode: true
@@ -71,7 +71,7 @@
     that: "'Current trace probability: 0.9' == traceprobability.stdout"
 
 - name: Set traceprobability to 0.0
-  cassandra_traceprobability:
+  community.cassandra.cassandra_traceprobability:
     value: 0.0
     debug: yes
 
@@ -84,7 +84,7 @@
     that: "'Current trace probability: 0.0' == traceprobability.stdout"
 
 - name: Set traceprobability 0.0 should not change
-  cassandra_traceprobability:
+  community.cassandra.cassandra_traceprobability:
     value: 0.
     debug: yes
   register: module_nochange
@@ -103,7 +103,7 @@
   when: cassandra_auth_tests == True
 
 - name: Set traceprobability 1 when auth is enabled
-  cassandra_traceprobability:
+  community.cassandra.cassandra_traceprobability:
     value: 1
     username: "{{ cassandra_admin_user }}"
     password: "{{ cassandra_admin_pwd }}"
@@ -123,7 +123,7 @@
       - traceprobability.changed == True
 
 - name: Set back to 0.1 using the pw file option
-  cassandra_traceprobability:
+  community.cassandra.cassandra_traceprobability:
     value:  0.1
     username: "{{ cassandra_admin_user }}"
     password_file: /etc/cassandra/jmxremote.password
@@ -144,7 +144,7 @@
   when: cassandra_auth_tests == True
 
 - name: Test login failure handling
-  cassandra_traceprobability:
+  community.cassandra.cassandra_traceprobability:
     value: 128
     username: "{{ cassandra_admin_user }}"
     password: XXXXXXXXXXXXXXXXXXXXX
@@ -161,7 +161,7 @@
   when: cassandra_auth_tests == True
 
 - name: Test incorrect nodetool_path handling
-  cassandra_traceprobability:
+  community.cassandra.cassandra_traceprobability:
     value: 0.1
     nodetool_path: /tmp
     debug: yes

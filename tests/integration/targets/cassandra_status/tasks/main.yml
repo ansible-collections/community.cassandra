@@ -22,7 +22,7 @@
   block:
     # ccm created nodes seem to number the jmx ports 7100, 7200, 7300 usw
     - name: Execute module against the first ccm node
-      cassandra_status:
+      community.cassandra.cassandra_status:
         host: 127.0.0.1
         port: 7100
         nodetool_path: /home/cassandra/config/repository/{{ cassandra_version }}/bin
@@ -49,7 +49,7 @@
 
     # jmx port only open on ccm node1
     - name: Execute module against the second ccm node
-      cassandra_status:
+      community.cassandra.cassandra_status:
         host: 127.0.0.1
         port: 7100
         nodetool_path: /home/cassandra/config/repository/{{ cassandra_version }}/bin
@@ -76,7 +76,7 @@
 
     # We expect node2 to rejoin the cluster
     - name: Execute module after node2 started again
-      cassandra_status:
+      community.cassandra.cassandra_status:
         poll: 99
         interval: 1
         host: 127.0.0.1
@@ -106,7 +106,7 @@
         CASSANDRA_HOME: "/home/cassandra"
 
     - name: Allow one down
-      cassandra_status:
+      community.cassandra.cassandra_status:
         down: 1
         host: 127.0.0.1
         port: 7100
@@ -123,7 +123,7 @@
           - "rhys.msg == 'Down nodes are within the tolerated level'"
 
     - name: Allow none down and test msg
-      cassandra_status:
+      community.cassandra.cassandra_status:
         host: 127.0.0.1
         port: 7100
         nodetool_path: /home/cassandra/config/repository/{{ cassandra_version }}/bin

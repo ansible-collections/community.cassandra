@@ -19,7 +19,7 @@
 # ===========================================================
 
 - name: Flush the node
-  cassandra_flush:
+  community.cassandra.cassandra_flush:
     debug: true
   register: flush
 
@@ -32,7 +32,7 @@
   when: cassandra_auth_tests == True
 
 - name: Run flush with auth
-  cassandra_flush:
+  community.cassandra.cassandra_flush:
     username: "{{ cassandra_admin_user }}"
     password: "{{ cassandra_admin_pwd }}"
     debug: true
@@ -44,7 +44,7 @@
       - "flush.changed == True"
 
 - name: Test login failure handling
-  cassandra_flush:
+  community.cassandra.cassandra_flush:
     username: "{{ cassandra_admin_user }}"
     password: XXXXXXXXXXXXXXXXXXXXX
     debug: true
@@ -60,7 +60,7 @@
   when: cassandra_auth_tests == True
 
 - name: Test incorrect nodetool_path handling
-  cassandra_flush:
+  community.cassandra.cassandra_flush:
     nodetool_path: /tmp
     debug: true
   register: nodetool_path_error
@@ -73,7 +73,7 @@
       - "'No such file or directory' in nodetool_path_error.msg"
 
 - name: Run flush against system_auth keyspace
-  cassandra_flush:
+  community.cassandra.cassandra_flush:
     username: "{{ cassandra_admin_user }}"
     password: "{{ cassandra_admin_pwd }}"
     keyspace: system_auth
@@ -86,7 +86,7 @@
       - "flush.changed == True"
 
 - name: Run flush against system_auth/roles (str)
-  cassandra_flush:
+  community.cassandra.cassandra_flush:
     username: "{{ cassandra_admin_user }}"
     password: "{{ cassandra_admin_pwd }}"
     keyspace: system_auth
@@ -100,7 +100,7 @@
       - "flush.changed == True"
 
 - name: Run cleanup against system_auth/roles (list)
-  cassandra_flush:
+  community.cassandra.cassandra_flush:
     username: "{{ cassandra_admin_user }}"
     password: "{{ cassandra_admin_pwd }}"
     keyspace: system_auth
@@ -115,7 +115,7 @@
       - "flush.changed == True"
 
 - name: Run flush against multiple system_auth table (list)
-  cassandra_flush:
+  community.cassandra.cassandra_flush:
     username: "{{ cassandra_admin_user }}"
     password: "{{ cassandra_admin_pwd }}"
     keyspace: system_auth

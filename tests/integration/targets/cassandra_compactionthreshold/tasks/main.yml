@@ -31,7 +31,7 @@
     that: "'Current compaction thresholds for system/local: \n min = 4,  max = 32' == compactionthreshold.stdout"
 
 - name: Adjust compactionthreshold with module
-  cassandra_compactionthreshold:
+  community.cassandra.cassandra_compactionthreshold:
     keyspace: system
     table: local
     min: 8
@@ -47,7 +47,7 @@
     that: "'Current compaction thresholds for system/local: \n min = 8,  max = 64' == compactionthreshold.stdout"
 
 - name: Set throughput back to 4 / 32
-  cassandra_compactionthreshold:
+  community.cassandra.cassandra_compactionthreshold:
     keyspace: system
     table: local
     min: 4
@@ -63,7 +63,7 @@
     that: "'Current compaction thresholds for system/local: \n min = 4,  max = 32' == compactionthreshold.stdout"
 
 - name: Test module with check_mode = true
-  cassandra_compactionthreshold:
+  community.cassandra.cassandra_compactionthreshold:
     keyspace: system
     table: local
     min: 8
@@ -85,7 +85,7 @@
     that: "'Current compaction thresholds for system/local: \n min = 4,  max = 32' == compactionthreshold.stdout"
 
 - name: Set compactionthreshold 4 / 32 should not change
-  cassandra_compactionthreshold:
+  community.cassandra.cassandra_compactionthreshold:
     keyspace: system
     table: local
     min: 4
@@ -107,7 +107,7 @@
   when: cassandra_auth_tests == True
 
 - name: Set compactionthreshold 8 / 64 MB when auth is enabled
-  cassandra_compactionthreshold:
+  community.cassandra.cassandra_compactionthreshold:
     keyspace: system
     table: local
     min: 8
@@ -130,7 +130,7 @@
       - compactionthreshold.changed == True
 
 - name: Set back to 4 / 32 MB using the pw file option
-  cassandra_compactionthreshold:
+  community.cassandra.cassandra_compactionthreshold:
     keyspace: system
     table: local
     min: 4
@@ -154,7 +154,7 @@
   when: cassandra_auth_tests == True
 
 - name: Test login failure handling
-  cassandra_compactionthreshold:
+  community.cassandra.cassandra_compactionthreshold:
     keyspace: system
     table: local
     min: 4
@@ -174,7 +174,7 @@
   when: cassandra_auth_tests == True
 
 - name: Test incorrect nodetool_path handling
-  cassandra_compactionthreshold:
+  community.cassandra.cassandra_compactionthreshold:
     keyspace: system
     table: local
     min: 4

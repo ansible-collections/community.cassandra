@@ -19,7 +19,7 @@
 # ===========================================================
 
 - name: Cleanup the node
-  cassandra_cleanup:
+  community.cassandra.cassandra_cleanup:
     debug: yes
   register: cleanup
 
@@ -32,7 +32,7 @@
   when: cassandra_auth_tests == True
 
 - name: Run cleanup with auth
-  cassandra_cleanup:
+  community.cassandra.cassandra_cleanup:
     username: "{{ cassandra_admin_user }}"
     password: "{{ cassandra_admin_pwd }}"
     debug: yes
@@ -44,7 +44,7 @@
       - "cleanup.changed == True"
 
 - name: Test login failure handling
-  cassandra_cleanup:
+  community.cassandra.cassandra_cleanup:
     username: "{{ cassandra_admin_user }}"
     password: XXXXXXXXXXXXXXXXXXXXX
     debug: yes
@@ -60,7 +60,7 @@
   when: cassandra_auth_tests == True
 
 - name: Test incorrect nodetool_path handling
-  cassandra_cleanup:
+  community.cassandra.cassandra_cleanup:
     nodetool_path: /tmp
     debug: yes
   register: nodetool_path_error
@@ -73,7 +73,7 @@
       - "'No such file or directory' in nodetool_path_error.msg"
 
 - name: Run cleanup against system_auth keyspace
-  cassandra_cleanup:
+  community.cassandra.cassandra_cleanup:
     username: "{{ cassandra_admin_user }}"
     password: "{{ cassandra_admin_pwd }}"
     keyspace: system_auth
@@ -86,7 +86,7 @@
       - "cleanup.changed == True"
 
 - name: Run cleanup against system_auth/roles (str)
-  cassandra_cleanup:
+  community.cassandra.cassandra_cleanup:
     username: "{{ cassandra_admin_user }}"
     password: "{{ cassandra_admin_pwd }}"
     keyspace: system_auth
@@ -100,7 +100,7 @@
       - "cleanup.changed == True"
 
 - name: Run cleanup against system_auth/roles (list)
-  cassandra_cleanup:
+  community.cassandra.cassandra_cleanup:
     username: "{{ cassandra_admin_user }}"
     password: "{{ cassandra_admin_pwd }}"
     keyspace: system_auth
@@ -115,7 +115,7 @@
       - "cleanup.changed == True"
 
 - name: Run cleanup against multiple system_auth table (list)
-  cassandra_cleanup:
+  community.cassandra.cassandra_cleanup:
     username: "{{ cassandra_admin_user }}"
     password: "{{ cassandra_admin_pwd }}"
     keyspace: system_auth
@@ -132,7 +132,7 @@
       - "cleanup.changed == True"
 
 - name: Run with num_jobs = 0
-  cassandra_cleanup:
+  community.cassandra.cassandra_cleanup:
     username: "{{ cassandra_admin_user }}"
     password: "{{ cassandra_admin_pwd }}"
     keyspace: system_auth
@@ -150,7 +150,7 @@
       - "cleanup.changed == True"
 
 - name: Run with num_jobs = 5
-  cassandra_cleanup:
+  community.cassandra.cassandra_cleanup:
     username: "{{ cassandra_admin_user }}"
     password: "{{ cassandra_admin_pwd }}"
     keyspace: system_auth
@@ -169,7 +169,7 @@
       - "cleanup.changed == True"
 
 - name: Run with num_jobs = 1
-  cassandra_cleanup:
+  community.cassandra.cassandra_cleanup:
     username: "{{ cassandra_admin_user }}"
     password: "{{ cassandra_admin_pwd }}"
     keyspace: system_auth

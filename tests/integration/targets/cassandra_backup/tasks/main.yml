@@ -26,13 +26,13 @@
     that: "'not running' == backup_status.stdout"
 
 - name: Turn on incremental backup with module (check mode)
-  cassandra_backup:
+  community.cassandra.cassandra_backup:
     state: "enabled"
     debug: true
   check_mode: yes
 
 - name: Turn on incremental backup with module
-  cassandra_backup:
+  community.cassandra.cassandra_backup:
     state: "enabled"
     debug: true
 
@@ -45,13 +45,13 @@
     that: "'running' == backup_status.stdout"
 
 - name: Turn off incremental backup with module (check mode)
-  cassandra_backup:
+  community.cassandra.cassandra_backup:
     state: "disabled"
     debug: true
   check_mode: yes
 
 - name: Turn off incremental backup with module
-  cassandra_backup:
+  community.cassandra.cassandra_backup:
     state: "disabled"
     debug: true
 
@@ -64,7 +64,7 @@
     that: "'not running' == backup_status.stdout"
 
 - name: Execute with check_mode = True
-  cassandra_backup:
+  community.cassandra.cassandra_backup:
     state: "enabled"
     debug: true
   check_mode: true
@@ -86,7 +86,7 @@
   when: cassandra_auth_tests == True
 
 - name: Turn on incremental backup with auth
-  cassandra_backup:
+  community.cassandra.cassandra_backup:
     state: "enabled"
     username: "{{ cassandra_admin_user }}"
     password: "{{ cassandra_admin_pwd }}"
@@ -105,7 +105,7 @@
   when: cassandra_auth_tests == True
 
 - name: Turn off incremental backup using password file
-  cassandra_backup:
+  community.cassandra.cassandra_backup:
     state: "disabled"
     username: "{{ cassandra_admin_user }}"
     password_file: /etc/cassandra/jmxremote.password
@@ -124,7 +124,7 @@
   when: cassandra_auth_tests == True
 
 - name: Test login failure handling
-  cassandra_backup:
+  community.cassandra.cassandra_backup:
     state: "disabled"
     username: "{{ cassandra_admin_user }}"
     password: XXXXXXXXXXXXXXXXXXXXX
@@ -141,7 +141,7 @@
   when: cassandra_auth_tests == True
 
 - name: Test incorrect nodetool_path handling
-  cassandra_backup:
+  community.cassandra.cassandra_backup:
     state: "disabled"
     nodetool_path: /tmp
     debug: true

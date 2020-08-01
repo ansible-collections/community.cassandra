@@ -26,13 +26,13 @@
     that: "'running' == binary_status.stdout"
 
 - name: Turn on binary with module (check mode)
-  cassandra_binary:
+  community.cassandra.cassandra_binary:
     state: "enabled"
     debug: true
   check_mode: yes
 
 - name: Turn on binary with module
-  cassandra_binary:
+  community.cassandra.cassandra_binary:
     state: "enabled"
     debug: true
 
@@ -45,13 +45,13 @@
     that: "'running' == binary_status.stdout"
 
 - name: Turn off binary with module (check mode)
-  cassandra_binary:
+  community.cassandra.cassandra_binary:
     state: "disabled"
     debug: true
   check_mode: yes
 
 - name: Turn off binary with module
-  cassandra_binary:
+  community.cassandra.cassandra_binary:
     state: "disabled"
     debug: true
 
@@ -64,7 +64,7 @@
     that: "'not running' == binary_status.stdout"
 
 - name: Execute with check_mode = True
-  cassandra_binary:
+  community.cassandra.cassandra_binary:
     state: "enabled"
     debug: true
   check_mode: true
@@ -86,7 +86,7 @@
   when: cassandra_auth_tests == True
 
 - name: Turn on binary with auth
-  cassandra_binary:
+  community.cassandra.cassandra_binary:
     state: "enabled"
     username: "{{ cassandra_admin_user }}"
     password: "{{ cassandra_admin_pwd }}"
@@ -105,7 +105,7 @@
   when: cassandra_auth_tests == True
 
 - name: Turn off binary using password file
-  cassandra_binary:
+  community.cassandra.cassandra_binary:
     state: "disabled"
     username: "{{ cassandra_admin_user }}"
     password_file: /etc/cassandra/jmxremote.password
@@ -124,7 +124,7 @@
   when: cassandra_auth_tests == True
 
 - name: Test login failure handling
-  cassandra_binary:
+  community.cassandra.cassandra_binary:
     state: "disabled"
     username: "{{ cassandra_admin_user }}"
     password: XXXXXXXXXXXXXXXXXXXXX
@@ -141,7 +141,7 @@
   when: cassandra_auth_tests == True
 
 - name: Test incorrect nodetool_path handling
-  cassandra_binary:
+  community.cassandra.cassandra_binary:
     state: "disabled"
     nodetool_path: /tmp
     debug: true

@@ -19,7 +19,7 @@
 # ===========================================================
 
 - name: upgradesstablesUpgrade sstables on the node
-  cassandra_upgradesstables:
+  community.cassandra.cassandra_upgradesstables:
     debug: yes
   register: upgradesstables
 
@@ -43,7 +43,7 @@
   when: cassandra_auth_tests == True
 
 - name: Run upgradesstables with auth
-  cassandra_upgradesstables:
+  community.cassandra.cassandra_upgradesstables:
     username: "{{ cassandra_admin_user }}"
     password: "{{ cassandra_admin_pwd }}"
     debug: yes
@@ -66,7 +66,7 @@
     delay: 10
 
 - name: Test login failure handling
-  cassandra_upgradesstables:
+  community.cassandra.cassandra_upgradesstables:
     username: "{{ cassandra_admin_user }}"
     password: XXXXXXXXXXXXXXXXXXXXX
     debug: yes
@@ -82,7 +82,7 @@
   when: cassandra_auth_tests == True
 
 - name: Test incorrect nodetool_path handling
-  cassandra_upgradesstables:
+  community.cassandra.cassandra_upgradesstables:
     nodetool_path: /tmp
     debug: yes
   register: nodetool_path_error
