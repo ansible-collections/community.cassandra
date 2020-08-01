@@ -38,7 +38,7 @@
     CASS_DRIVER_NO_CYTHON: 1
 
 - name: Create a role - Auth is not enabled so will fail
-  cassandra_role:
+  community.cassandra.cassandra_role:
     name: app_user
     password: 'secretZHB78'
     state: present
@@ -57,7 +57,7 @@
   when: cassandra_auth_tests == True
 
 - name: Ensure handling of no credentials
-  cassandra_role:
+  community.cassandra.cassandra_role:
     name: app_user
     password: XXXXXXXXX
     state: present
@@ -72,7 +72,7 @@
       - "'Remote end requires authentication' in no_credentials.msg"
 
 - name: Ensure handling of dodgy credentials
-  cassandra_role:
+  community.cassandra.cassandra_role:
     name: app_user
     password: XXXXXXXXX
     state: present
@@ -89,7 +89,7 @@
       - "'or password are incorrect' in dodgy_credentials.msg"
 
 - name: Create a role
-  cassandra_role:
+  community.cassandra.cassandra_role:
     name: app_user
     password: 'secretZHB78'
     state: present
@@ -103,7 +103,7 @@
       - 'create_role.changed == True'
 
 - name: Create a role (check mode)
-  cassandra_role:
+  community.cassandra.cassandra_role:
     name: app_user
     password: 'secretZHB78'
     state: present
@@ -122,7 +122,7 @@
       - "'app_user' in myrole.stdout"
 
 - name: Run same create role again
-  cassandra_role:
+  community.cassandra.cassandra_role:
     name: app_user
     password: 'secretZHB78'
     state: present
@@ -133,7 +133,7 @@
   ignore_errors: yes
 
 - name: Remove a role (check mode)
-  cassandra_role:
+  community.cassandra.cassandra_role:
     name: app_user
     state: absent
     login_user: "{{ cassandra_admin_user }}"
@@ -141,7 +141,7 @@
   check_mode: yes
 
 - name: Remove a role
-  cassandra_role:
+  community.cassandra.cassandra_role:
     name: app_user
     state: absent
     login_user: "{{ cassandra_admin_user }}"
@@ -163,7 +163,7 @@
       - "'app_user' not in myrole.stdout"
 
 - name: Run same create role again with check mode
-  cassandra_role:
+  community.cassandra.cassandra_role:
     name: app_user
     password: 'secretZHB78'
     state: present
@@ -189,7 +189,7 @@
       - "'app_user' not in myrole.stdout"
 
 - name: Test invalid permission handling
-  cassandra_role:
+  community.cassandra.cassandra_role:
     name: app_user
     password: 'secretZHB78'
     state: present
@@ -249,7 +249,7 @@
       - "'mykeyspace6' in keyspaces.stdout"
 
 - name: Create role with a range of keyspace permissions
-  cassandra_role:
+  community.cassandra.cassandra_role:
     name: app_user_multi_keyspace
     password: 'secretZHB78'
     state: present
@@ -298,7 +298,7 @@
 # - name: Validate assigned keyspace permissions TODO
 
 - name: Create role using all_keyspaces special dict key
-  cassandra_role:
+  community.cassandra.cassandra_role:
     name: app_user_all_keyspaces
     password: 'secretZHB78'
     state: present
@@ -314,7 +314,7 @@
 #-name: Assert that app_user_all_keyspaces user has expected permissions
 
 - name: Create a read-only user for all keyspaces
-  cassandra_role:
+  community.cassandra.cassandra_role:
     name: read_only
     password: "secret"
     state: present
@@ -340,7 +340,7 @@
       - "'(1 rows)' in read_only_user_perms.stdout"
 
 - name: Run read_only user for but remove all_keyspaces permission and add another
-  cassandra_role:
+  community.cassandra.cassandra_role:
     name: read_only
     password: "secret"
     state: present
@@ -367,7 +367,7 @@
       - "'(1 rows)' in read_only_user_perms.stdout"
 
 - name: Test revoke of read_only user
-  cassandra_role:
+  community.cassandra.cassandra_role:
     name: read_only
     password: "secret"
     state: present
@@ -386,14 +386,14 @@
       - "'(0 rows)' in read_only_user_perms.stdout"
 
 - name: Drop the read_only role
-  cassandra_role:
+  community.cassandra.cassandra_role:
     name: read_only
     state: absent
     login_user: "{{ cassandra_admin_user }}"
     login_password: "{{ cassandra_admin_pwd }}"
 
 - name: Create a role to assign to users
-  cassandra_role:
+  community.cassandra.cassandra_role:
     name: rw_role
     state: present
     login: false
@@ -416,7 +416,7 @@
       - "'<all keyspaces> |     MODIFY' in rw_role_perms.stdout"
 
 - name: Create a user and assign rw_role
-  cassandra_role:
+  community.cassandra.cassandra_role:
     name: myapp
     password: "secret"
     state: present
@@ -449,7 +449,7 @@
       - "'<keyspace mykeyspace1> |      ALTER' in rw_role_user_perms.stdout"
 
 - name: Run same thing with check mode
-  cassandra_role:
+  community.cassandra.cassandra_role:
     name: myapp
     password: "secret"
     state: present
@@ -483,7 +483,7 @@
       - "'<keyspace mykeyspace1> |      ALTER' in rw_role_user_perms.stdout"
 
 - name: Add select permission
-  cassandra_role:
+  community.cassandra.cassandra_role:
     name: myapp
     password: "secret"
     state: present
@@ -518,7 +518,7 @@
       - "'<keyspace mykeyspace1> |     SELECT' in rw_role_user_perms.stdout"
 
 - name: Revoke alter permission
-  cassandra_role:
+  community.cassandra.cassandra_role:
     name: myapp
     password: "secret"
     state: present
@@ -551,7 +551,7 @@
       - "'<keyspace mykeyspace1> |     SELECT' in rw_role_user_perms.stdout"
 
 - name: Create a user with complex permissions
-  cassandra_role:
+  community.cassandra.cassandra_role:
     name: complex
     password: "secret"
     state: present
@@ -609,7 +609,7 @@
 
 # Drop permissions from complex user
 - name: Drop permissions and add role to complex user
-  cassandra_role:
+  community.cassandra.cassandra_role:
     name: complex
     password: "secret"
     state: present

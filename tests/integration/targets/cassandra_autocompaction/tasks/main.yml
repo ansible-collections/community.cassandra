@@ -19,7 +19,7 @@
 # ===========================================================
 
 - name: Turn on autocompaction with module
-  cassandra_autocompaction:
+  community.cassandra.cassandra_autocompaction:
     keyspace: system
     table: local
     state: "enabled"
@@ -29,7 +29,7 @@
     that: autocompaction.changed == True
 
 - name: Turn off autocompaction with module
-  cassandra_autocompaction:
+  community.cassandra.cassandra_autocompaction:
     keyspace: system
     table: local
     state: "disabled"
@@ -39,7 +39,7 @@
     that: autocompaction.changed == True
 
 - name: Turn on autocompaction with module
-  cassandra_autocompaction:
+  community.cassandra.cassandra_autocompaction:
     keyspace: system
     table:
       - local
@@ -52,7 +52,7 @@
     that: autocompaction.changed == True
 
 - name: Turn off autocompaction with module
-  cassandra_autocompaction:
+  community.cassandra.cassandra_autocompaction:
     keyspace: system
     table:
       - local
@@ -65,7 +65,7 @@
     that: autocompaction.changed == True
 
 - name: Turn on autocompaction with module
-  cassandra_autocompaction:
+  community.cassandra.cassandra_autocompaction:
     keyspace: system
     table:
       - local
@@ -80,7 +80,7 @@
     that: autocompaction.changed == True
 
 - name: Turn off autocompaction with module
-  cassandra_autocompaction:
+  community.cassandra.cassandra_autocompaction:
     keyspace: system
     table:
       - local
@@ -95,7 +95,7 @@
     that: autocompaction.changed == True
 
 - name: Non-existent keyspace
-  cassandra_autocompaction:
+  community.cassandra.cassandra_autocompaction:
     keyspace: systemXXXXX
     table:
       - local
@@ -117,7 +117,7 @@
       - "\"See 'nodetool help' or 'nodetool help <command>'.\" == autocompaction.stdout_lines[1]"
 
 - name: Non-existent table
-  cassandra_autocompaction:
+  community.cassandra.cassandra_autocompaction:
     keyspace: system
     table:
       - localXXXXX
@@ -139,7 +139,7 @@
   when: cassandra_auth_tests == True
 
 - name: Turn on autocompaction with module
-  cassandra_autocompaction:
+  community.cassandra.cassandra_autocompaction:
     keyspace: system
     table: local
     state: "enabled"
@@ -153,7 +153,7 @@
   when: cassandra_auth_tests == True
 
 - name: Turn off autocompaction with module using pwd file
-  cassandra_autocompaction:
+  community.cassandra.cassandra_autocompaction:
     keyspace: system
     table: local
     state: "disabled"
@@ -167,7 +167,7 @@
   when: cassandra_auth_tests == True
 
 - name: Test login failure handling
-  cassandra_autocompaction:
+  community.cassandra.cassandra_autocompaction:
     keyspace: system
     table: local
     state: "enabled"
@@ -185,7 +185,7 @@
   when: cassandra_auth_tests == True
 
 - name: Test incorrect nodetool_path handling
-  cassandra_autocompaction:
+  community.cassandra.cassandra_autocompaction:
     keyspace: system
     table: local
     state: "enabled"

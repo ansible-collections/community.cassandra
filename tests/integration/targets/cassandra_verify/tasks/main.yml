@@ -19,7 +19,7 @@
 # ===========================================================
 
 - name: verify the node
-  cassandra_verify:
+  community.cassandra.cassandra_verify:
     debug: yes
   register: verify
 
@@ -32,7 +32,7 @@
   when: cassandra_auth_tests == True
 
 - name: Run verify with auth
-  cassandra_verify:
+  community.cassandra.cassandra_verify:
     username: "{{ cassandra_admin_user }}"
     password: "{{ cassandra_admin_pwd }}"
     debug: yes
@@ -44,7 +44,7 @@
       - "verify.changed == True"
 
 - name: Test login failure handling
-  cassandra_verify:
+  community.cassandra.cassandra_verify:
     username: "{{ cassandra_admin_user }}"
     password: XXXXXXXXXXXXXXXXXXXXX
     debug: yes
@@ -60,7 +60,7 @@
   when: cassandra_auth_tests == True
 
 - name: Test incorrect nodetool_path handling
-  cassandra_verify:
+  community.cassandra.cassandra_verify:
     nodetool_path: /tmp
     debug: yes
   register: nodetool_path_error
@@ -73,7 +73,7 @@
       - "'No such file or directory' in nodetool_path_error.msg"
 
 - name: Run verify against system_auth keyspace
-  cassandra_verify:
+  community.cassandra.cassandra_verify:
     username: "{{ cassandra_admin_user }}"
     password: "{{ cassandra_admin_pwd }}"
     keyspace: system_auth
@@ -86,7 +86,7 @@
       - "verify.changed == True"
 
 - name: Run verify against system_auth/roles (str)
-  cassandra_verify:
+  community.cassandra.cassandra_verify:
     username: "{{ cassandra_admin_user }}"
     password: "{{ cassandra_admin_pwd }}"
     keyspace: system_auth
@@ -100,7 +100,7 @@
       - "verify.changed == True"
 
 - name: Run verify against system_auth/roles (list)
-  cassandra_verify:
+  community.cassandra.cassandra_verify:
     username: "{{ cassandra_admin_user }}"
     password: "{{ cassandra_admin_pwd }}"
     keyspace: system_auth
@@ -115,7 +115,7 @@
       - "verify.changed == True"
 
 - name: Run verify against multiple system_auth table (list)
-  cassandra_verify:
+  community.cassandra.cassandra_verify:
     username: "{{ cassandra_admin_user }}"
     password: "{{ cassandra_admin_pwd }}"
     keyspace: system_auth
@@ -132,7 +132,7 @@
       - "verify.changed == True"
 
 - name: Run with extended mode
-  cassandra_verify:
+  community.cassandra.cassandra_verify:
     username: "{{ cassandra_admin_user }}"
     password: "{{ cassandra_admin_pwd }}"
     keyspace: system_auth
@@ -150,7 +150,7 @@
       - "verify.changed == True"
 
 - name: Run with extended on
-  cassandra_verify:
+  community.cassandra.cassandra_verify:
     username: "{{ cassandra_admin_user }}"
     password: "{{ cassandra_admin_pwd }}"
     keyspace: system_auth
@@ -168,7 +168,7 @@
       - "verify.changed == True"
 
 - name: Run list again
-  cassandra_verify:
+  community.cassandra.cassandra_verify:
     username: "{{ cassandra_admin_user }}"
     password: "{{ cassandra_admin_pwd }}"
     keyspace: system_auth

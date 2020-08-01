@@ -19,7 +19,7 @@
 # ===========================================================
 
 - name: Drain the node
-  cassandra_drain:
+  community.cassandra.cassandra_drain:
   register: drain
 
 - assert:
@@ -42,7 +42,7 @@
   when: cassandra_auth_tests == True
 
 - name: Run drain with auth
-  cassandra_drain:
+  community.cassandra.cassandra_drain:
     username: "{{ cassandra_admin_user }}"
     password: "{{ cassandra_admin_pwd }}"
     debug: yes
@@ -65,7 +65,7 @@
     delay: 10
 
 - name: Test login failure handling
-  cassandra_drain:
+  community.cassandra.cassandra_drain:
     username: "{{ cassandra_admin_user }}"
     password: XXXXXXXXXXXXXXXXXXXXX
     debug: yes
@@ -81,7 +81,7 @@
   when: cassandra_auth_tests == True
 
 - name: Test incorrect nodetool_path handling
-  cassandra_drain:
+  community.cassandra.cassandra_drain:
     nodetool_path: /tmp
     debug: yes
   register: nodetool_path_error

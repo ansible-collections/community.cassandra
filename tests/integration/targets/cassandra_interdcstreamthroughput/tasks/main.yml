@@ -26,7 +26,7 @@
     that: "'Current inter-datacenter stream throughput: 200 Mb/s' == interdcstreamthroughput.stdout"
 
 - name: Increase interdcstreamthroughput with module
-  cassandra_interdcstreamthroughput:
+  community.cassandra.cassandra_interdcstreamthroughput:
     value: 500
     debug: true
 
@@ -39,7 +39,7 @@
     that: "'Current inter-datacenter stream throughput: 500 Mb/s' == interdcstreamthroughput.stdout"
 
 - name: Set throughput to 200
-  cassandra_interdcstreamthroughput:
+  community.cassandra.cassandra_interdcstreamthroughput:
     value: 200
     debug: true
 
@@ -52,7 +52,7 @@
     that: "'Current inter-datacenter stream throughput: 200 Mb/s' == interdcstreamthroughput.stdout"
 
 - name: Test module with check_mode = true
-  cassandra_interdcstreamthroughput:
+  community.cassandra.cassandra_interdcstreamthroughput:
     value: 128
     debug: true
   check_mode: true
@@ -71,7 +71,7 @@
     that: "'Current inter-datacenter stream throughput: 200 Mb/s' == interdcstreamthroughput.stdout"
 
 - name: Set interdcstreamthroughput to 250
-  cassandra_interdcstreamthroughput:
+  community.cassandra.cassandra_interdcstreamthroughput:
     value: 250
     debug: true
 
@@ -84,7 +84,7 @@
     that: "'Current inter-datacenter stream throughput: 250 Mb/s' == interdcstreamthroughput.stdout"
 
 - name: Set interdcstreamthroughput 250 should not change
-  cassandra_interdcstreamthroughput:
+  community.cassandra.cassandra_interdcstreamthroughput:
     value: 250
     debug: true
   register: module_nochange
@@ -103,7 +103,7 @@
   when: cassandra_auth_tests == True
 
 - name: Set interdcstreamthroughput 300MB when auth is enabled
-  cassandra_interdcstreamthroughput:
+  community.cassandra.cassandra_interdcstreamthroughput:
     value: 300
     username: "{{ cassandra_admin_user }}"
     password: "{{ cassandra_admin_pwd }}"
@@ -123,7 +123,7 @@
       - interdcstreamthroughput.changed == True
 
 - name: Set back to 200MB using the pw file option
-  cassandra_interdcstreamthroughput:
+  community.cassandra.cassandra_interdcstreamthroughput:
     value:  200
     username: "{{ cassandra_admin_user }}"
     password_file: /etc/cassandra/jmxremote.password
@@ -144,7 +144,7 @@
   when: cassandra_auth_tests == True
 
 - name: Test login failure handling
-  cassandra_interdcstreamthroughput:
+  community.cassandra.cassandra_interdcstreamthroughput:
     value: 128
     username: "{{ cassandra_admin_user }}"
     password: XXXXXXXXXXXXXXXXXXXXX
@@ -161,7 +161,7 @@
   when: cassandra_auth_tests == True
 
 - name: Test incorrect nodetool_path handling
-  cassandra_interdcstreamthroughput:
+  community.cassandra.cassandra_interdcstreamthroughput:
     value: 128
     nodetool_path: /tmp
     debug: true

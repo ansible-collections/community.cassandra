@@ -26,7 +26,7 @@
     that: "'Current stream throughput: 200 Mb/s' == streamthroughput.stdout"
 
 - name: Increase streamthroughput with module
-  cassandra_streamthroughput:
+  community.cassandra.cassandra_streamthroughput:
     value: 500
     debug: yes
 
@@ -39,7 +39,7 @@
     that: "'Current stream throughput: 500 Mb/s' == streamthroughput.stdout"
 
 - name: Set throughput to 200
-  cassandra_streamthroughput:
+  community.cassandra.cassandra_streamthroughput:
     value: 200
     debug: yes
 
@@ -52,7 +52,7 @@
     that: "'Current stream throughput: 200 Mb/s' == streamthroughput.stdout"
 
 - name: Test module with check_mode = true
-  cassandra_streamthroughput:
+  community.cassandra.cassandra_streamthroughput:
     value: 128
     debug: yes
   check_mode: true
@@ -71,7 +71,7 @@
     that: "'Current stream throughput: 200 Mb/s' == streamthroughput.stdout"
 
 - name: Set streamthroughput to 250
-  cassandra_streamthroughput:
+  community.cassandra.cassandra_streamthroughput:
     value: 250
     debug: yes
 
@@ -84,7 +84,7 @@
     that: "'Current stream throughput: 250 Mb/s' == streamthroughput.stdout"
 
 - name: Set streamthroughput 250 should not change
-  cassandra_streamthroughput:
+  community.cassandra.cassandra_streamthroughput:
     value: 250
     debug: yes
   register: module_nochange
@@ -103,7 +103,7 @@
   when: cassandra_auth_tests == True
 
 - name: Set streamthroughput 300MB when auth is enabled
-  cassandra_streamthroughput:
+  community.cassandra.cassandra_streamthroughput:
     value: 300
     username: "{{ cassandra_admin_user }}"
     password: "{{ cassandra_admin_pwd }}"
@@ -123,7 +123,7 @@
       - streamthroughput.changed == True
 
 - name: Set back to 200MB using the pw file option
-  cassandra_streamthroughput:
+  community.cassandra.cassandra_streamthroughput:
     value:  200
     username: "{{ cassandra_admin_user }}"
     password_file: /etc/cassandra/jmxremote.password
@@ -144,7 +144,7 @@
   when: cassandra_auth_tests == True
 
 - name: Test login failure handling
-  cassandra_streamthroughput:
+  community.cassandra.cassandra_streamthroughput:
     value: 128
     username: "{{ cassandra_admin_user }}"
     password: XXXXXXXXXXXXXXXXXXXXX
@@ -161,7 +161,7 @@
   when: cassandra_auth_tests == True
 
 - name: Test incorrect nodetool_path handling
-  cassandra_streamthroughput:
+  community.cassandra.cassandra_streamthroughput:
     value: 128
     nodetool_path: /tmp
     debug: yes
