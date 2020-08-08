@@ -195,7 +195,7 @@ def main():
     args = add_arg_to_cmd(args, "--no-compact", None, module.params['no_compact'])
     #module.exit_json(msg=str(args))
 
-    result = module.run_command(args, check_rc=True)
+    result = module.run_command(args.join(" "), check_rc=True)
     # Everything is good
     module.exit_json(**result)
 
