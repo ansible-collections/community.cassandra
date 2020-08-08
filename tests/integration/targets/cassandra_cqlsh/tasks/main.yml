@@ -25,4 +25,4 @@
 
 - assert:
     that:
-      - "cqlsh.changed = True"
+      - "cqlsh.changed == True"
