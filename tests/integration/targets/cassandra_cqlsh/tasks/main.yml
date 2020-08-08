@@ -25,4 +25,22 @@
 
 - assert:
     that:
-      - "cqlsh.changed == True"
+      - "cqlsh.changed == False"
+      - "'system_auth' in cqlsh.msg"
+      - "'system' in cqlsh.msg"
+
+- name: SELECT from system.local table
+  community.cassandra.cassandra_cqlsh:
+    execute: "SELECT * FROM system.local"
+  register: cqlsh
+
+- debug:
+    var: cqlsh
+
+- name: SELECT from system.local table as json
+  community.cassandra.cassandra_cqlsh:
+    execute: "SELECT json * FROM system.local"
+  register: cqlsh
+
+- debug:
+    var: cqlsh
