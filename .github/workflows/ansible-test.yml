@@ -54,6 +54,7 @@ jobs:
           - cassandra_cleanup
           - cassandra_compactionthreshold
           - cassandra_compactionthroughput
+          - cassandra_cqlsh
           - cassandra_drain
           - cassandra_flush
           - cassandra_gossip
