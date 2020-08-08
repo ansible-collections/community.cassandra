@@ -193,9 +193,9 @@ def main():
     args = add_arg_to_cmd(args, "--tty", None, module.params['tty'])
     args = add_arg_to_cmd(args, "--debug", None, module.params['debug'])
     args = add_arg_to_cmd(args, "--no-compact", None, module.params['no_compact'])
+    module.exit_json(msg=str(args))
 
     result = module.run_command(args, check_rc=True)
-    module.exit_json(msg="I am exiting")
     # Everything is good
     module.exit_json(**result)
 
