@@ -142,7 +142,10 @@ def add_arg_to_cmd(cmd_list, param_name, param_value, is_bool=False):
     """
     if is_bool is False and param_value is not None:
         cmd_list.append(param_name)
-        cmd_list.append(param_value)
+        if param_name == "--execute":
+            cmd_list.append("'{0}'".format(param_value))
+        else:
+            cmd_list.append(param_value)
     elif is_bool is True:
         cmd_list.append(param_name)
     return cmd_list
