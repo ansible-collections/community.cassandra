@@ -151,16 +151,6 @@ def add_arg_to_cmd(cmd_list, param_name, param_value, is_bool=False):
 
 
 def main():
-    argument_spec = cassandra_common_argument_spec()
-        return dict(
-            debug=dict(type='bool', default=False, required=False),
-            host=dict(type='str', default="127.0.0.1"),
-            nodetool_path=dict(type='str', default=None, required=False),
-            password=dict(type='str', no_log=True),
-            password_file=dict(type='str', no_log=True),
-            port=dict(type='int', default=7199),
-            username=dict(type='str', no_log=True)
-        )
     argument_spec = dict(
         cqlsh_host=dict(type='str', default='localhost'),
         cqlsh_port=dict(type='int', default=9042),
