@@ -198,8 +198,17 @@ def main():
     args = add_arg_to_cmd(args, "--no-compact", None, module.params['no_compact'])
     # module.exit_json(msg=str(args))
 
-    result = module.run_command(" ".join(str(item) for item in args), check_rc=True)
-    # Everything is good
+    rc = None
+    out = ''
+    err = ''
+    result = {}
+
+    (rc, out, err) = module.run_command(" ".join(str(item) for item in args), check_rc=False)
+    if rc != 0:
+        module.fail_json(msg=err.strip())
+    else:
+        result['changed'] = False
+        result['msg'] = out
     module.exit_json(**result)
 
 
