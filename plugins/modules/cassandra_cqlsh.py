@@ -16,9 +16,6 @@ requirements: [ nodetool ]
 description:
     - Run cql commands via the clqsh shell.
 
-extends_documentation_fragment:
-  - community.cassandra.nodetool_module_options
-
 options:
   cqlsh_host:
     description:
@@ -71,7 +68,7 @@ options:
     description:
       - Specify the connection timeout in seconds.
     type: int
-    int: 5
+    default: 5
   request_timeout:
     description:
       - Specify the default request timeout in seconds.
@@ -164,8 +161,8 @@ def main():
         cqlshrc=dict(type='str'),
         cqlversion=dict(type='str'),
         protocol_version=dict(type='str'),
-        connect_timeout=dict(type='int'),
-        request_timeout=dict(type='int'),
+        connect_timeout=dict(type='int', default=5),
+        request_timeout=dict(type='int', default=10),
         tty=dict(type='bool', default=False),
         debug=dict(type='bool', default=False),
         ssl=dict(type='bool', default=False),
