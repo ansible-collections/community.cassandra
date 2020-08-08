@@ -135,6 +135,7 @@ import re
 import time
 __metaclass__ = type
 
+
 def add_arg_to_cmd(cmd_list, param_name, param_value, is_bool=False):
     """
     @cmd_list - List of cmd args.
@@ -142,10 +143,10 @@ def add_arg_to_cmd(cmd_list, param_name, param_value, is_bool=False):
     @param_value - Value of the parameter
     @is_bool - Flag is a boolean and has no value.
     """
-    if is_bool == False and param_value is not None:
+    if is_bool is False and param_value is not None:
         cmd_list.append(param_name)
         cmd_list.append(param_value)
-    elif is_bool == True:
+    elif is_bool is True:
         cmd_list.append(param_name)
     return cmd_list
 
@@ -197,7 +198,7 @@ def main():
     args = add_arg_to_cmd(args, "--no-compact", None, module.params['no_compact'])
 
     result = module.run_command(args, check_rc=True)
-
+    module.exit_json(msg="I am exiting")
     # Everything is good
     module.exit_json(**result)
 
