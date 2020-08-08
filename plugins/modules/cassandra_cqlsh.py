@@ -208,7 +208,7 @@ def main():
         module.fail_json(msg=err.strip())
     else:
         result['changed'] = False
-        result['msg'] = out
+        result['msg'] = out.strip()
     module.exit_json(**result)
 
 
