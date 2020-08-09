@@ -253,9 +253,9 @@ def main():
         module.fail_json(msg=err.strip())
     else:
         result['changed'] = False
-        output = transform_type(out,
-                                module.params['transform'],
-                                module.params['split_char'])
+        output = transform_output(out,
+                                  module.params['transform'],
+                                  module.params['split_char'])
         result['msg'] = out.strip()
         result['transformed_output'] = output
     module.exit_json(**result)
