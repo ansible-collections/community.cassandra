@@ -194,11 +194,14 @@ def transform_output(output, transform_type, split_char):
             tranform_type = "raw"
     if transform_type == "json":
         json_list = []
-        results = output.strip().split("\n")[2:-2]
-        if len(results) > 0:
-            for item in results:
-                json_list.append(json.loads(item))
-        output = json_list
+        if output.strip().split("\n")[-1] == "(0 rows)":
+            pass
+        else:
+            results = output.strip().split("\n")[2:-2]
+            if len(results) > 0:
+                for item in results:
+                    json_list.append(json.loads(item))
+            output = json_list
     elif transform_type == "split":
         output = output.strip().split(split_char)
     elif tranform_type == "raw":
