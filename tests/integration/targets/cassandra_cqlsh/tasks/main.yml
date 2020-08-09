@@ -116,6 +116,11 @@
 - name: Execute the cql file using module
   community.cassandra.cassandra_cqlsh:
     file: /root/test.cql
+  register: cql_file
+
+- assert:
+    that:
+      - "cql_file.file == '/root/test.cql'"
 
 - name: Select from test.test as json (should be many rows)
   community.cassandra.cassandra_cqlsh:
@@ -131,6 +136,6 @@
 
 - name: Check that we can iterate over the results
   debug:
-    var: "{{ item['username'] }}"
+    var: "{{ item }}"
   with_items:
     - "{{ cqlsh.transformed_output }}"
