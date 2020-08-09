@@ -149,6 +149,7 @@ from ansible.module_utils.basic import AnsibleModule, load_platform_subclass
 import socket
 import re
 import time
+import json
 __metaclass__ = type
 
 
@@ -256,8 +257,8 @@ def main():
         output = transform_output(out,
                                   module.params['transform'],
                                   module.params['split_char'])
-        result['msg'] = out.strip()
         result['transformed_output'] = output
+        result['msg'] = "transform type was {0}".format(module.params['transform'])
     module.exit_json(**result)
 
 
