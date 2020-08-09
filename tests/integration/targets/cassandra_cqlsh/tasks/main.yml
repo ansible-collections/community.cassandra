@@ -59,6 +59,7 @@
 - name: SELECT from system.sstable_activity table as json
   community.cassandra.cassandra_cqlsh:
     execute: "SELECT json * FROM system.sstable_activity"
+    debug: yes
   register: cqlsh
 
 - assert:

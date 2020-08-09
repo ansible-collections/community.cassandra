@@ -275,6 +275,11 @@ def main():
             result['msg'] = "Error tranforming output: {0}".format(str(excep))
             result['transformed_output'] = None
 
+    if module.params['debug']:
+        result['out'] = out
+        result['err'] = err
+        result['rc'] = rc
+
     module.exit_json(**result)
 
 
