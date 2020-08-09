@@ -196,7 +196,10 @@ def transform_output(output, transform_type, split_char):
         json_list = []
         for item in output.strip().split("\n")[2:-2]:
             json_list.append(json.loads(item))
-        output = json_list
+        if len(json_list) > 1:
+            output = json_list
+        else:
+            output = json_list[0]
     elif transform_type == "split":
         output = output.strip().split(split_char)
     elif tranform_type == "raw":
