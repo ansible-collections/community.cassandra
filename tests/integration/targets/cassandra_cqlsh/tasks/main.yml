@@ -139,3 +139,21 @@
     var: "{{ item }}"
   with_items:
     - "{{ cqlsh.transformed_output }}"
+
+- include_tasks: ../../setup_cassandra/tasks/cassandra_auth.yml
+  when: cassandra_auth_tests == True
+
+- name: Run the DESC KEYSPACES command (auth)
+  community.cassandra.cassandra_cqlsh:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    execute: "DESC KEYSPACES"
+  register: cqlsh
+
+- assert:
+    that:
+      - "cqlsh.changed == False"
+      #- "cqlsh.transform_output | type_debug == 'list'"
+      - "'system_auth' in cqlsh.transformed_output"
+      - "'system' in cqlsh.transformed_output"
+      - "cqlsh.msg == 'transform type was auto'"
