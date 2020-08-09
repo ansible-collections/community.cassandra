@@ -133,16 +133,16 @@ EXAMPLES = '''
 RETURN = '''
 msg:
   description: A message indicating what has happened.
-  returned: on success
-  type: bool
-rc:
-  description: Return code of the last executed command.
   returned: always
-  type: int
-results:
-  description: Results of whatever cql command was executed.
+  type: str
+transformed_output:
+  description: Output from the cqlsh command. We attempt to parse this into a list or json where possible.
   returned: on success
-  type: raw
+  type: list
+changed:
+  description: Change status
+  returned: alawys
+  type: bool
 '''
 
 from ansible.module_utils.basic import AnsibleModule, load_platform_subclass
@@ -194,8 +194,10 @@ def transform_output(output, transform_type, split_char):
             tranform_type = "raw"
     if transform_type == "json":
         json_list = []
-        for item in output.strip().split("\n")[2:-2]:
-            json_list.append(json.loads(item))
+        results = output.strip().split("\n")[2:-2]
+        if len(results) > 0:
+            for item in results:
+                json_list.append(json.loads(item))
         output = json_list
     elif transform_type == "split":
         output = output.strip().split(split_char)

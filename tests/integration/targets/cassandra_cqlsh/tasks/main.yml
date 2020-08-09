@@ -50,7 +50,7 @@
 - assert:
     that:
       - "cqlsh.changed == False"
-      #- "cqlsh.transform_output | type_debug == 'dict'"
+      - "cqlsh.transformed_output | type_debug == 'list'"
       #- "'cql_version' in cqlsh.transformed_output[0] | string"
       #- "cqlsh.msg == 'transform type was auto'"
       #- "cqlsh.transformed_output[0]['bootstrapped'] == 'COMPLETED'"
@@ -64,6 +64,7 @@
 - assert:
     that:
       - "cqlsh.changed == False"
-      #- "cqlsh.transform_output | type_debug == 'dict'"
+      - "cqlsh.transformed_output | type_debug == 'list'"
+      - "cqlsh.transformed_output[0] | type_debug == 'dict'"
       #- "'columnfamily_name' in cqlsh.transformed_output"
       #- "cqlsh.msg == 'transform type was auto'"
