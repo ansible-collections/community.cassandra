@@ -99,10 +99,29 @@ options:
       - cqlsh executable
     type: str
     default: "cqlsh"
+  transform:
+    description:
+      - Transform the output returned to the user..
+      - auto - Attempt to automatically decice the best tranformation.
+      - split - Split output on a character.
+      - json - parse as json.
+      - raw - Return the raw output.
+    type: str
+    choices:
+      - "auto"
+      - "split"
+      - "json"
+      - "raw"
+    default: "auto"
+  split_char:
+    description:
+      - Use by the split action in the transform stage.
+    type: str
+    default: " "
 '''
 
 EXAMPLES = '''
-- name: RUn the DESC KEYSPACES cql command
+- name: Run the DESC KEYSPACES cql command
   community.cassandra.cassandra_cqlsh:
     execute: "DESC KEYSPACES"
 
@@ -151,6 +170,30 @@ def add_arg_to_cmd(cmd_list, param_name, param_value, is_bool=False):
     return cmd_list
 
 
+def transform_output(output, transform_type, split_char):
+    if transform_type == "auto":  # determine what transform_type to perform
+        if output.strip().startswith("[json]"):
+            transform_type == "json"
+        elif isinstance(output.strip().split(","), list):
+            transform_type = "split"
+            split_char = ","
+        elif isinstance(output.strip().split(" "), list):
+            transform_type = "split"
+            split_char = " "
+        elif isinstance(output.strip().split("|"), list):
+            transform_type = "split"
+            split_char = "|"
+        else:
+            tranform_type = "raw"
+    if transform_type == "json":
+        output = json.loads("\n".join(output.strip().split("\n")[2:]))
+    elif transform_type == "split":
+        output = output.strip().split(split_char)
+    elif tranform_type == "raw":
+        output = output.strip()
+    return output
+
+
 def main():
     argument_spec = dict(
         cqlsh_host=dict(type='str', default='localhost'),
@@ -170,7 +213,9 @@ def main():
         debug=dict(type='bool', default=False),
         ssl=dict(type='bool', default=False),
         no_compact=dict(type='bool', default=False),
-        cqlsh_cmd=dict(type='str', default='cqlsh')
+        cqlsh_cmd=dict(type='str', default='cqlsh'),
+        transform=dict(type='str', choices=["auto", "split", "json", "raw"], default="auto"),
+        split_char=dict(type='str', default=" ")
     )
     module = AnsibleModule(
         argument_spec=argument_spec,
@@ -208,7 +253,11 @@ def main():
         module.fail_json(msg=err.strip())
     else:
         result['changed'] = False
+        output = transform_type(out,
+                                module.params['transform_type'],
+                                module.params['split_char'])
         result['msg'] = out.strip()
+        result['transformed_output'] = output
     module.exit_json(**result)
 
 
