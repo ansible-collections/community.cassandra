@@ -184,6 +184,9 @@ def transform_output(output, transform_type, split_char):
         elif isinstance(output.strip().split("|"), list):
             transform_type = "split"
             split_char = "|"
+        elif isinstance(output.strip().split("\t"), list):
+            transform_type = "split"
+            split_char = "\t"
         else:
             tranform_type = "raw"
     if transform_type == "json":

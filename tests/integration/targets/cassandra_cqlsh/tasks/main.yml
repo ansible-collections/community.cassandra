@@ -26,8 +26,8 @@
 - assert:
     that:
       - "cqlsh.changed == False"
-      - "'system_auth' in cqlsh.msg"
-      - "'system' in cqlsh.msg"
+      - "'system_auth' in cqlsh.transformed_output"
+      - "'system' in cqlsh.transformed_output"
 
 - name: SELECT from system.local table
   community.cassandra.cassandra_cqlsh:
