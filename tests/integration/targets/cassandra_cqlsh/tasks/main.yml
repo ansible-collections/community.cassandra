@@ -56,16 +56,22 @@
       #- "cqlsh.transformed_output[0]['bootstrapped'] == 'COMPLETED'"
       #- "cqlsh.transformed_output[0]['gossip_generation'] > 0"
 
-- name: SELECT from system.sstable_activity table as json
+- name: SELECT from system.sstable_activity table as json (should be empty)
   community.cassandra.cassandra_cqlsh:
     execute: "SELECT json * FROM system.sstable_activity"
-    debug: yes
   register: cqlsh
 
 - assert:
     that:
       - "cqlsh.changed == False"
       - "cqlsh.transformed_output | type_debug == 'list'"
-      - "cqlsh.transformed_output[0] | type_debug == 'dict'"
-      #- "'columnfamily_name' in cqlsh.transformed_output"
-      #- "cqlsh.msg == 'transform type was auto'"
+
+- name: Select from system_schema.tables as json (should be many rows)
+  community.cassandra.cassandra_cqlsh:
+    execute: "SELECT json * FROM system_schema.tables"
+  register: cqlsh
+  
+- assert:
+    that:
+      - "cqlsh.changed == False"
+      - "cqlsh.transformed_output | type_debug == 'list'"
