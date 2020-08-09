@@ -50,8 +50,20 @@
 - assert:
     that:
       - "cqlsh.changed == False"
-      - "cqlsh.transform_output | type_debug == 'dict'"
+      #- "cqlsh.transform_output | type_debug == 'dict'"
       - "'cql_version' in cqlsh.transformed_output"
       - "cqlsh.msg == 'transform type was auto'"
       - "cqlsh.transformed_output['bootstrapped'] == 'COMPLETED'"
       - "cqlsh.transformed_output['gossip_generation'] > 0"
+
+- name: SELECT from system.sstable_activity table as json
+  community.cassandra.cassandra_cqlsh:
+    execute: "SELECT json * FROM system.sstable_activity"
+  register: cqlsh
+
+- assert:
+    that:
+      - "cqlsh.changed == False"
+      #- "cqlsh.transform_output | type_debug == 'dict'"
+      - "'columnfamily_name' in cqlsh.transformed_output"
+      - "cqlsh.msg == 'transform type was auto'"
