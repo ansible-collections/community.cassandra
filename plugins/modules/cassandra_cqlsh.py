@@ -131,6 +131,10 @@ EXAMPLES = '''
 '''
 
 RETURN = '''
+file:
+  description: CQL file that was executed successfully.
+  returned: When a cql file is used.
+  type: str
 msg:
   description: A message indicating what has happened.
   returned: always
@@ -140,8 +144,12 @@ transformed_output:
   returned: on success
   type: list
 changed:
-  description: Change status
-  returned: alawys
+  description: Change status.
+  returned: always
+  type: bool
+failed:
+  description: Something went wrong.
+  returned: on failure
   type: bool
 '''
 
@@ -256,7 +264,6 @@ def main():
     args = add_arg_to_cmd(args, "--tty", None, module.params['tty'])
     args = add_arg_to_cmd(args, "--debug", None, module.params['debug'])
     args = add_arg_to_cmd(args, "--no-compact", None, module.params['no_compact'])
-    # module.exit_json(msg=str(args))
 
     rc = None
     out = ''
@@ -274,6 +281,8 @@ def main():
                                       module.params['split_char'])
             result['transformed_output'] = output
             result['msg'] = "transform type was {0}".format(module.params['transform'])
+            if module.params['file'] is not None:
+                result['file'] = module.params['file']
         except Exception as excep:
             result['msg'] = "Error tranforming output: {0}".format(str(excep))
             result['transformed_output'] = None
