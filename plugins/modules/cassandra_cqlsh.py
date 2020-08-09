@@ -195,7 +195,7 @@ def transform_output(output, transform_type, split_char):
     if transform_type == "json":
         json_list = []
         if output.strip().split("\n")[-1] == "(0 rows)":
-            pass
+            output = json_list
         else:
             results = output.strip().split("\n")[2:-2]
             if len(results) > 0:
