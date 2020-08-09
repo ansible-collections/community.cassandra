@@ -111,6 +111,7 @@
       INSERT INTO test.test (id, username, first_name, last_name) VALUES (uuid(), 'rhysmeister8', 'Rhys', 'Campbell');
       INSERT INTO test.test (id, username, first_name, last_name) VALUES (uuid(), 'rhysmeister9', 'Rhys', 'Campbell');
     dest: /root/test.cql
+    mode: 0600
 
 - name: Execute the cql file using module
   community.cassandra.cassandra_cqlsh:
@@ -126,3 +127,10 @@
       - "cqlsh.changed == False"
       - "cqlsh.transformed_output | type_debug == 'list'"
       - "cqlsh.transformed_output | length == 10"
+      - "cqlsh.transformed_output[0] | type_debug == 'dict'"
+
+- name: Check that we can iterate over the results
+  debug:
+    var: "{{ item['username'] }}"
+  with_items:
+    - "{{ cqlsh.transformed_output }}"
