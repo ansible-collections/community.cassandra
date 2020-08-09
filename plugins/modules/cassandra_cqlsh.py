@@ -254,7 +254,7 @@ def main():
     else:
         result['changed'] = False
         output = transform_type(out,
-                                module.params['transform_type'],
+                                module.params['transform'],
                                 module.params['split_char'])
         result['msg'] = out.strip()
         result['transformed_output'] = output
