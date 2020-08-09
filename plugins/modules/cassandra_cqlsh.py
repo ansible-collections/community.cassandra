@@ -193,7 +193,7 @@ def transform_output(output, transform_type, split_char):
         else:
             tranform_type = "raw"
     if transform_type == "json":
-        output = json.loads("\n".join(output.strip().split("\n")[2:][0]))
+        output = json.loads(output.strip().split("\n")[2:][0])
     elif transform_type == "split":
         output = output.strip().split(split_char)
     elif tranform_type == "raw":
@@ -260,11 +260,16 @@ def main():
         module.fail_json(msg=err.strip())
     else:
         result['changed'] = False
-        output = transform_output(out,
-                                  module.params['transform'],
-                                  module.params['split_char'])
-        result['transformed_output'] = output
-        result['msg'] = "transform type was {0}".format(module.params['transform'])
+        try:
+            output = transform_output(out,
+                                      module.params['transform'],
+                                      module.params['split_char'])
+            result['transformed_output'] = output
+            result['msg'] = "transform type was {0}".format(module.params['transform'])
+        except Exception as excep:
+            result['msg'] = "Error tranforming output: {0}".format(str(excep))
+            result['transformed_output'] = None
+
     module.exit_json(**result)
 
 
