@@ -51,7 +51,7 @@
     that:
       - "cqlsh.changed == False"
       #- "cqlsh.transform_output | type_debug == 'dict'"
-      - "'cql_version' in cqlsh.transformed_output"
+      - "'cql_version' in str(cqlsh.transformed_output)"
       - "cqlsh.msg == 'transform type was auto'"
       - "cqlsh.transformed_output['bootstrapped'] == 'COMPLETED'"
       - "cqlsh.transformed_output['gossip_generation'] > 0"
