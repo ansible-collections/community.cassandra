@@ -66,6 +66,17 @@
       - "cqlsh.changed == False"
       - "cqlsh.transformed_output | type_debug == 'list'"
 
+- name: Ensure epel is available
+  yum:
+    name: epel-release
+  when: ansible_os_family == "RedHat"
+
+- name: Install cassandra-driver
+  pip:
+    name: cassandra-driver
+  environment:
+    CASS_DRIVER_NO_CYTHON: 1
+
 - name: Create test keyspace
   community.cassandra.cassandra_keyspace:
     name: test
