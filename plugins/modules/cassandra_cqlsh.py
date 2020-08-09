@@ -177,6 +177,9 @@ def transform_output(output, transform_type, split_char):
             transform_type = "json"
         elif isinstance(output.strip().split(","), list):
             transform_type = "split"
+            split_char = None
+        elif isinstance(output.strip().split(","), list):
+            transform_type = "split"
             split_char = ","
         elif isinstance(output.strip().split(" "), list):
             transform_type = "split"
