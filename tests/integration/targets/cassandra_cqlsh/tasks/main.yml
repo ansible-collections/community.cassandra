@@ -100,16 +100,16 @@
 - name: Create an file with a bucnh of cql command
   copy:
     content: |
-      INSERT INTO test.test (id, username, firstname, lastname) VALUES (uuid(), "rhysmeister", "Rhys", "Campbell");
-      INSERT INTO test.test (id, username, firstname, lastname) VALUES (uuid(), "rhysmeister1", "Rhys", "Campbell");
-      INSERT INTO test.test (id, username, firstname, lastname) VALUES (uuid(), "rhysmeister2", "Rhys", "Campbell");
-      INSERT INTO test.test (id, username, firstname, lastname) VALUES (uuid(), "rhysmeister3", "Rhys", "Campbell");
-      INSERT INTO test.test (id, username, firstname, lastname) VALUES (uuid(), "rhysmeister4", "Rhys", "Campbell");
-      INSERT INTO test.test (id, username, firstname, lastname) VALUES (uuid(), "rhysmeister5", "Rhys", "Campbell");
-      INSERT INTO test.test (id, username, firstname, lastname) VALUES (uuid(), "rhysmeister6", "Rhys", "Campbell");
-      INSERT INTO test.test (id, username, firstname, lastname) VALUES (uuid(), "rhysmeister7", "Rhys", "Campbell");
-      INSERT INTO test.test (id, username, firstname, lastname) VALUES (uuid(), "rhysmeister8", "Rhys", "Campbell");
-      INSERT INTO test.test (id, username, firstname, lastname) VALUES (uuid(), "rhysmeister9", "Rhys", "Campbell");
+      INSERT INTO test.test (id, username, firstname, lastname) VALUES (uuid(), 'rhysmeister', 'Rhys', 'Campbell');
+      INSERT INTO test.test (id, username, firstname, lastname) VALUES (uuid(), 'rhysmeister1', 'Rhys', 'Campbell');
+      INSERT INTO test.test (id, username, firstname, lastname) VALUES (uuid(), 'rhysmeister2', 'Rhys', 'Campbell');
+      INSERT INTO test.test (id, username, firstname, lastname) VALUES (uuid(), 'rhysmeister3', 'Rhys', 'Campbell');
+      INSERT INTO test.test (id, username, firstname, lastname) VALUES (uuid(), 'rhysmeister4', 'Rhys', 'Campbell');
+      INSERT INTO test.test (id, username, firstname, lastname) VALUES (uuid(), 'rhysmeister5', 'Rhys', 'Campbell');
+      INSERT INTO test.test (id, username, firstname, lastname) VALUES (uuid(), 'rhysmeister6', 'Rhys', 'Campbell');
+      INSERT INTO test.test (id, username, firstname, lastname) VALUES (uuid(), 'rhysmeister7', 'Rhys', 'Campbell');
+      INSERT INTO test.test (id, username, firstname, lastname) VALUES (uuid(), 'rhysmeister8', 'Rhys', 'Campbell');
+      INSERT INTO test.test (id, username, firstname, lastname) VALUES (uuid(), 'rhysmeister9', 'Rhys', 'Campbell');
     dest: /root/test.cql
 
 - name: Execute the cql file using module
