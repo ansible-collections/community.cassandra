@@ -157,3 +157,27 @@
       - "'system_auth' in cqlsh.transformed_output"
       - "'system' in cqlsh.transformed_output"
       - "cqlsh.msg == 'transform type was auto'"
+
+- name: Select from test.test as json (should be many rows)
+  community.cassandra.cassandra_cqlsh:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    execute: "SELECT json * FROM test.test"
+    debug: yes
+  register: cqlsh
+
+- assert:
+    that:
+      - "cqlsh.changed == False"
+      - "cqlsh.transformed_output | type_debug == 'list'"
+      - "cqlsh.transformed_output | length == 10"
+      - "cqlsh.transformed_output[0] | type_debug == 'dict'"
+      - "cqlsh.out is defined"
+      - "cqlsh.err is defined"
+      - "cqlsh.rc is defined"
+
+- name: Check that we can iterate over the results
+  debug:
+    var: "{{ item }}"
+  with_items:
+    - "{{ cqlsh.transformed_output }}"
