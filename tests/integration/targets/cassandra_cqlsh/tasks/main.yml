@@ -26,7 +26,7 @@
 - assert:
     that:
       - "cqlsh.changed == False"
-      #- "cqlsh.transform_output | type_debug == 'list'"
+      - "cqlsh.transformed_output | type_debug == 'list'"
       - "'system_auth' in cqlsh.transformed_output"
       - "'system' in cqlsh.transformed_output"
       - "cqlsh.msg == 'transform type was auto'"
@@ -51,10 +51,10 @@
     that:
       - "cqlsh.changed == False"
       - "cqlsh.transformed_output | type_debug == 'list'"
-      #- "'cql_version' in cqlsh.transformed_output[0] | string"
-      #- "cqlsh.msg == 'transform type was auto'"
-      #- "cqlsh.transformed_output[0]['bootstrapped'] == 'COMPLETED'"
-      #- "cqlsh.transformed_output[0]['gossip_generation'] > 0"
+      - "'cql_version' in cqlsh.transformed_output[0] | string"
+      - "cqlsh.msg == 'transform type was auto'"
+      - "cqlsh.transformed_output[0]['bootstrapped'] == 'COMPLETED'"
+      - "cqlsh.transformed_output[0]['gossip_generation'] > 0"
 
 - name: SELECT from system.sstable_activity table as json (should be empty)
   community.cassandra.cassandra_cqlsh:
