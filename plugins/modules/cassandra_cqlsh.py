@@ -212,7 +212,7 @@ def transform_output(output, transform_type, split_char):
             output = json_list
     elif transform_type == "split":
         output = output.strip().split(split_char)
-    elif tranform_type == "raw":
+    elif transform_type == "raw":
         output = output.strip()
     return output
 
