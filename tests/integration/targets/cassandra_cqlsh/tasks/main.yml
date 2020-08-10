@@ -1,0 +1,209 @@
+# test code for the cassandra_cqlsh module
+# (c) 2020,  Rhys Campbell <rhys.james.campbell@googlemail.com>
+
+# This file is part of Ansible
+#
+# Ansible is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Ansible is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
+
+# ===========================================================
+
+- name: Run the DESC KEYSPACES command
+  community.cassandra.cassandra_cqlsh:
+    execute: "DESC KEYSPACES"
+  register: cqlsh
+
+- assert:
+    that:
+      - "cqlsh.changed == False"
+      - "cqlsh.transformed_output | type_debug == 'list'"
+      - "'system_auth' in cqlsh.transformed_output"
+      - "'system' in cqlsh.transformed_output"
+      - "cqlsh.msg == 'transform type was auto'"
+
+- name: SELECT from system.local table
+  community.cassandra.cassandra_cqlsh:
+    execute: "SELECT * FROM system.local"
+  register: cqlsh
+
+- assert:
+    that:
+      - "cqlsh.changed == False"
+      - "'cql_version' in cqlsh.transformed_output"
+      - "cqlsh.msg == 'transform type was auto'"
+
+- name: SELECT from system.local table as json
+  community.cassandra.cassandra_cqlsh:
+    execute: "SELECT json * FROM system.local"
+  register: cqlsh
+
+- assert:
+    that:
+      - "cqlsh.changed == False"
+      - "cqlsh.transformed_output | type_debug == 'list'"
+      - "'cql_version' in cqlsh.transformed_output[0] | string"
+      - "cqlsh.msg == 'transform type was auto'"
+      - "cqlsh.transformed_output[0]['bootstrapped'] == 'COMPLETED'"
+      - "cqlsh.transformed_output[0]['gossip_generation'] > 0"
+
+- name: SELECT from system.sstable_activity table as json (should be empty)
+  community.cassandra.cassandra_cqlsh:
+    execute: "SELECT json * FROM system.sstable_activity"
+  register: cqlsh
+
+- assert:
+    that:
+      - "cqlsh.changed == False"
+      - "cqlsh.transformed_output | type_debug == 'list'"
+
+- name: Ensure epel is available
+  yum:
+    name: epel-release
+  when: ansible_os_family == "RedHat"
+
+- name: Install cassandra-driver
+  pip:
+    name: cassandra-driver
+  environment:
+    CASS_DRIVER_NO_CYTHON: 1
+
+- name: Create test keyspace
+  community.cassandra.cassandra_keyspace:
+    name: test
+    state: present
+
+- name: Create a test table
+  community.cassandra.cassandra_table:
+    name: test
+    keyspace: test
+    state: present
+    columns:
+      - id: uuid
+      - username: text
+      - encrypted_password: blob
+      - first_name: text
+      - last_name: text
+      - dob: date
+    primary_key:
+      - username
+
+- name: Create an file with a bucnh of cql command
+  copy:
+    content: |
+      INSERT INTO test.test (id, username, first_name, last_name) VALUES (uuid(), 'rhysmeister', 'Rhys', 'Campbell');
+      INSERT INTO test.test (id, username, first_name, last_name) VALUES (uuid(), 'rhysmeister1', 'Rhys', 'Campbell');
+      INSERT INTO test.test (id, username, first_name, last_name) VALUES (uuid(), 'rhysmeister2', 'Rhys', 'Campbell');
+      INSERT INTO test.test (id, username, first_name, last_name) VALUES (uuid(), 'rhysmeister3', 'Rhys', 'Campbell');
+      INSERT INTO test.test (id, username, first_name, last_name) VALUES (uuid(), 'rhysmeister4', 'Rhys', 'Campbell');
+      INSERT INTO test.test (id, username, first_name, last_name) VALUES (uuid(), 'rhysmeister5', 'Rhys', 'Campbell');
+      INSERT INTO test.test (id, username, first_name, last_name) VALUES (uuid(), 'rhysmeister6', 'Rhys', 'Campbell');
+      INSERT INTO test.test (id, username, first_name, last_name) VALUES (uuid(), 'rhysmeister7', 'Rhys', 'Campbell');
+      INSERT INTO test.test (id, username, first_name, last_name) VALUES (uuid(), 'rhysmeister8', 'Rhys', 'Campbell');
+      INSERT INTO test.test (id, username, first_name, last_name) VALUES (uuid(), 'rhysmeister9', 'Rhys', 'Campbell');
+    dest: /root/test.cql
+    mode: 0600
+
+- name: Execute the cql file using module
+  community.cassandra.cassandra_cqlsh:
+    file: /root/test.cql
+  register: cql_file
+
+- assert:
+    that:
+      - "cql_file.file == '/root/test.cql'"
+
+- name: Select from test.test as json (should be many rows)
+  community.cassandra.cassandra_cqlsh:
+    execute: "SELECT json * FROM test.test"
+  register: cqlsh
+
+- assert:
+    that:
+      - "cqlsh.changed == False"
+      - "cqlsh.transformed_output | type_debug == 'list'"
+      - "cqlsh.transformed_output | length == 10"
+      - "cqlsh.transformed_output[0] | type_debug == 'dict'"
+
+- name: Check that we can iterate over the results
+  debug:
+    var: "{{ item }}"
+  with_items:
+    - "{{ cqlsh.transformed_output }}"
+
+- include_tasks: ../../setup_cassandra/tasks/cassandra_auth.yml
+  when: cassandra_auth_tests == True
+
+- name: Run the DESC KEYSPACES command (auth)
+  community.cassandra.cassandra_cqlsh:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    execute: "DESC KEYSPACES"
+  register: cqlsh
+
+- assert:
+    that:
+      - "cqlsh.changed == False"
+      - "cqlsh.transformed_output | type_debug == 'list'"
+      - "'system_auth' in cqlsh.transformed_output"
+      - "'system' in cqlsh.transformed_output"
+      - "cqlsh.msg == 'transform type was auto'"
+
+- name: Select from test.test as json (should be many rows)
+  community.cassandra.cassandra_cqlsh:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    execute: "SELECT json * FROM test.test"
+    debug: yes
+  register: cqlsh
+
+- assert:
+    that:
+      - "cqlsh.changed == False"
+      - "cqlsh.transformed_output | type_debug == 'list'"
+      - "cqlsh.transformed_output | length == 10"
+      - "cqlsh.transformed_output[0] | type_debug == 'dict'"
+      - "cqlsh.out is defined"
+      - "cqlsh.err is defined"
+      - "cqlsh.rc is defined"
+
+- name: Check that we can iterate over the results
+  debug:
+    var: "{{ item }}"
+  with_items:
+    - "{{ cqlsh.transformed_output }}"
+
+- name: Test with various transform values
+  community.cassandra.cassandra_cqlsh:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    execute: "SELECT json * FROM test.test"
+    transform: "{{ item }}"
+  with_items:
+    - "json"
+    - "split"
+    - "raw"
+  register: cqlsh
+
+- name: Test dodgy cql handling
+  community.cassandra.cassandra_cqlsh:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    execute: "INVALID CQL CMD"
+    transform: "raw"
+  register: cqlsh
+  ignore_errors: yes
+
+- assert:
+    that:
+      - "cqlsh.failed"
+      - "'SyntaxException: line 1:0 no viable alternative' in cqlsh.msg"
