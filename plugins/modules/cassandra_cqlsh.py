@@ -183,6 +183,9 @@ def transform_output(output, transform_type, split_char):
     if transform_type == "auto":  # determine what transform_type to perform
         if output.strip().startswith("[json]"):
             transform_type = "json"
+        elif isinstance(output.strip().split(None), list):
+            transform_type = "split"
+            split_char = None
         elif isinstance(output.strip().split(","), list):
             transform_type = "split"
             split_char = ","
