@@ -12,7 +12,8 @@ DOCUMENTATION = '''
 module: cassandra_cqlsh
 author: Rhys Campbell (@rhysmeister)
 short_description: Run cql commands via the clqsh shell.
-requirements: [ nodetool ]
+requirements:
+  - cqlsh
 description:
     - Run cql commands via the clqsh shell.
 
