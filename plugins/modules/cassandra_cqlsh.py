@@ -151,6 +151,18 @@ failed:
   description: Something went wrong.
   returned: on failure
   type: bool
+out:
+  description: Raw stdout from cqlsh.
+  returned: when debug is set to true
+  type: str
+err:
+  descrption: Raw stderr from cqlsh.
+  returned: when debug is set to true
+  type: str
+rc:
+  description: Return code from cqlsh.
+  returned: when debug is set to true
+  type: int
 '''
 
 from ansible.module_utils.basic import AnsibleModule, load_platform_subclass
@@ -183,7 +195,7 @@ def transform_output(output, transform_type, split_char):
     if transform_type == "auto":  # determine what transform_type to perform
         if output.strip().startswith("[json]"):
             transform_type = "json"
-        elif isinstance(output.strip().split(None), list):
+        elif isinstance(output.strip().split(None), list):  # Splits on whitespace
             transform_type = "split"
             split_char = None
         elif isinstance(output.strip().split(","), list):
