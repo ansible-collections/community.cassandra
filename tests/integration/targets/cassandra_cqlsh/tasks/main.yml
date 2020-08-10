@@ -153,7 +153,7 @@
 - assert:
     that:
       - "cqlsh.changed == False"
-      #- "cqlsh.transform_output | type_debug == 'list'"
+      - "cqlsh.transform_output | type_debug == 'list'"
       - "'system_auth' in cqlsh.transformed_output"
       - "'system' in cqlsh.transformed_output"
       - "cqlsh.msg == 'transform type was auto'"
