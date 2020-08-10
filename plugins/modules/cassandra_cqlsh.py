@@ -156,7 +156,7 @@ out:
   returned: when debug is set to true
   type: str
 err:
-  descrption: Raw stderr from cqlsh.
+  description: Raw stderr from cqlsh.
   returned: when debug is set to true
   type: str
 rc:
