@@ -181,3 +181,28 @@
     var: "{{ item }}"
   with_items:
     - "{{ cqlsh.transformed_output }}"
+
+- name: Test with various transform values
+  community.cassandra.cassandra_cqlsh:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    execute: "SELECT json * FROM test.test"
+    transform: "{{ item }}"
+  with_items:
+    - "json"
+    - "split"
+    - "raw"
+  register: cqlsh
+
+- name: Test dodgy cql handling
+  community.cassandra.cassandra_cqlsh:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    execute: "INVALID CQL CMD"
+    transform: "raw"
+  register: cqlsh
+  ignore_errors: yes
+
+- assert:
+    that:
+      - "cqlsh.failed"
