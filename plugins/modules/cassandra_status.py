@@ -12,12 +12,13 @@ DOCUMENTATION = '''
 module: cassandra_status
 author: Rhys Campbell (@rhysmeister)
 short_description: Validates the status of the cluster as seen from the node.
-requirements: [ nodetool ]
+requirements:
+  - nodetool
 description:
-    - Validates the status of the cluster as seen from the node.
+    - Validates the status of the cluster as seen from the C* node.
     - Ensure that all nodes are in a UP/NORMAL state or tolerate a few down nodes.
     - Optionally poll multiple times to allow the cluster state to stablise.
-    - Cluster status is obtained thtough the useage of the nodetool status command.
+    - Cluster status is obtained thtough the usage of the nodetool status command.
 
 extends_documentation_fragment:
   - community.cassandra.nodetool_module_options
@@ -32,7 +33,7 @@ options:
       - d
   poll:
     description:
-      - The maximum number of times to call nodetool status to get cluster status.
+      - The maximum number of times to call nodetool status to query cluster status.
     type: int
     default: 1
   interval:
