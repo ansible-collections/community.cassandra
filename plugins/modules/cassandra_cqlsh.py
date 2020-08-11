@@ -16,7 +16,7 @@ requirements:
   - cqlsh
 description:
     - Run cql commands via the clqsh shell.
-
+    - Attempts to parse returned data into a format that Ansible can use.
 options:
   cqlsh_host:
     description:
@@ -38,11 +38,11 @@ options:
     type: str
   keyspace:
     description:
-      - Authenticate to the given keyspace
+      - Authenticate to the given keyspace.
     type: str
   file:
     description:
-      - Path to a file containign cql commands.
+      - Path to a file containing cql commands.
     type: str
   execute:
     description:
@@ -77,7 +77,7 @@ options:
     default: 10
   tty:
     description:
-      - Force tty mode
+      - Force tty mode.
     type: bool
     default: false
   debug:
@@ -97,13 +97,13 @@ options:
     default: false
   cqlsh_cmd:
     description:
-      - cqlsh executable
+      - cqlsh executable.
     type: str
     default: "cqlsh"
   transform:
     description:
-      - Transform the output returned to the user..
-      - auto - Attempt to automatically decice the best tranformation.
+      - Transform the output returned to the user.
+      - auto - Attempt to automatically decide the best tranformation.
       - split - Split output on a character.
       - json - parse as json.
       - raw - Return the raw output.
@@ -116,7 +116,7 @@ options:
     default: "auto"
   split_char:
     description:
-      - Use by the split action in the transform stage.
+      - Used by the split action in the transform stage.
     type: str
     default: " "
 '''
