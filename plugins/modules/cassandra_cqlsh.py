@@ -129,7 +129,7 @@ EXAMPLES = '''
 - name: Run a file containing cql commands
   community.cassandra.cassandra_cqlsh:
     file: "/path/to/cql/file.sql"
-    
+
 - name: Run a cql query returning json data
   community.cassandra.cassandra_cqlsh:
     execute: "SELECT json * FROM my_keyspace.my_table WHERE partition = 'key' LIMIT 10"
