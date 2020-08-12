@@ -22,12 +22,12 @@ extends_documentation_fragment:
 options:
   keyspace:
     description:
-      - The keyspace to operate on.
+      - The keyspace on which to change autocompact status.
     type: str
     required: true
   table:
     description:
-      - The table to operate on.
+      - The table on which to change autocompact status.
     type: list
     elements: str
     required: true
