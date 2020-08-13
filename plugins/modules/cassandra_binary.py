@@ -12,9 +12,10 @@ DOCUMENTATION = '''
 module: cassandra_binary
 author: Rhys Campbell (@rhysmeister)
 short_description: Enable/disable the binary protocol
-requirements: [ nodetool ]
+requirements:
+  - nodetool
 description:
-    Enable/disable the binary protocol, also known as the native transport.
+    - Enable and disable the binary protocol, also known as the native transport.
 
 extends_documentation_fragment:
   - community.cassandra.nodetool_module_options
