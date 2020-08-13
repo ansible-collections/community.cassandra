@@ -12,7 +12,8 @@ DOCUMENTATION = '''
 module: cassandra_backup
 author: Rhys Campbell (@rhysmeister)
 short_description: Enables or disables incremental backup.
-requirements: [ nodetool ]
+requirements:
+  - nodetool
 description:
     Enables or disables incremental backup.
 
