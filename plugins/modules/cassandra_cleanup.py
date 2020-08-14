@@ -12,7 +12,8 @@ DOCUMENTATION = '''
 module: cassandra_cleanup
 author: Rhys Campbell (@rhysmeister)
 short_description: Runs cleanup on a Cassandra node.
-requirements: [ nodetool ]
+requirements:
+  - nodetool
 description:
     - Runs cleanup on a Cassandra node.
 
