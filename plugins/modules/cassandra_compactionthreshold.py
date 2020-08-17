@@ -12,7 +12,8 @@ DOCUMENTATION = '''
 module: cassandra_compactionthreshold
 author: Rhys Campbell (@rhysmeister)
 short_description: Sets the compaction threshold.
-requirements: [ nodetool ]
+requirements:
+  - nodetool
 description:
     - Sets the compaction threshold.
 
