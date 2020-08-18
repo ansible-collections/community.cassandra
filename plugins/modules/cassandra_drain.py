@@ -12,7 +12,8 @@ DOCUMENTATION = '''
 module: cassandra_drain
 author: Rhys Campbell (@rhysmeister)
 short_description: Drains a Cassandra node.
-requirements: [ nodetool ]
+requirements:
+  - nodetool
 description:
     - Flushes all memtables from the node to SSTables on disk.
     - Cassandra stops listening for connections from the client and other nodes.
