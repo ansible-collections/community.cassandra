@@ -12,9 +12,10 @@ DOCUMENTATION = '''
 module: cassandra_flush
 author: Rhys Campbell (@rhysmeister)
 short_description: Flushes one or more tables from the memtable to SSTables on disk.
-requirements: [ nodetool ]
+requirements:
+  - nodetool
 description:
-    - Flushes one or more tables from the memtable to SSTables on disk.
+  - Flushes one or more tables from the memtable to SSTables on disk.
 
 extends_documentation_fragment:
   - community.cassandra.nodetool_module_options
