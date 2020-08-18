@@ -12,7 +12,8 @@ DOCUMENTATION = '''
 module: cassandra_compactionthroughput
 author: Rhys Campbell (@rhysmeister)
 short_description: Sets the compaction throughput.
-requirements: [ nodetool ]
+requirements:
+  - nodetool
 description:
     - Sets the compaction throughput.
 
