@@ -12,7 +12,8 @@ DOCUMENTATION = '''
 module: cassandra_interdcstreamthroughput
 author: Rhys Campbell (@rhysmeister)
 short_description: Sets the inter-dc stream throughput.
-requirements: [ nodetool ]
+requirements:
+  - nodetool
 description:
     - Sets the inter-dc stream throughput.
 
