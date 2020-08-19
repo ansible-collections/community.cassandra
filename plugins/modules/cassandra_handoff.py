@@ -12,7 +12,8 @@ DOCUMENTATION = '''
 module: cassandra_handoff
 author: Rhys Campbell (@rhysmeister)
 short_description: Enables or disables the storing of future hints on the current node.
-requirements: [ nodetool ]
+requirements:
+  - nodetool
 description:
     Enables or disables the storing of future hints on the current node.
 
