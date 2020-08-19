@@ -12,7 +12,8 @@ DOCUMENTATION = '''
 module: cassandra_gossip
 author: Rhys Campbell (@rhysmeister)
 short_description: Enable or disable gossip.
-requirements: [ nodetool ]
+requirements:
+  - nodetool
 description:
     Enable or disable gossip.
 
