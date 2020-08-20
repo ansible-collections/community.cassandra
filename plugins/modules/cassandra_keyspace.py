@@ -65,7 +65,7 @@ options:
       - The keyspace will be created with NetworkTopologyStrategy.
       - Specify your data centres, along with replication_factor, as key-value pairs.
     type: dict
-    
+
 requirements:
   - cassandra-driver
 '''
