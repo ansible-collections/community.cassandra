@@ -8,14 +8,14 @@ from __future__ import absolute_import, division, print_function
 DOCUMENTATION = r'''
 ---
 module: cassandra_keyspace
-short_description: Manage keyspaces on your Cassandra cluster
+short_description: Manage keyspaces on your Cassandra cluster.
 description:
    - Manage keyspaces on your Cassandra Cluster.
    - Keyspace can be created to use SimpleStrategy or NetworkTopologyStrategy.
    - "Keyspace modifications are supported, for example duratable \
-   writes, replication factor or data centre changes but it is not \
-   supported to migrate between replication strategies \
-   i.e. NetworkTopologyStrategy -> SimpleStrategy."
+      writes, replication factor or data centre changes but it is not \
+      supported to migrate between replication strategies \
+      i.e. NetworkTopologyStrategy -> SimpleStrategy."
 author: Rhys Campbell (@rhysmeister)
 options:
   login_user:
@@ -65,6 +65,9 @@ options:
       - The keyspace will be created with NetworkTopologyStrategy.
       - Specify your data centres, along with replication_factor, as key-value pairs.
     type: dict
+
+requirements:
+  - cassandra-driver
 '''
 
 EXAMPLES = r'''
