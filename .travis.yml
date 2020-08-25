@@ -10,7 +10,6 @@ env:
     - CASSANDRA_ROLE="roles/cassandra_firewall"
     - CASSANDRA_ROLE="roles/cassandra_install"
     - CASSANDRA_ROLE="roles/cassandra_linux"
-    - CASSANDRA_ROLE="roles/cassandra_medusa"
     - CASSANDRA_ROLE="roles/cassandra_repository"
 before_install:
   - python --version

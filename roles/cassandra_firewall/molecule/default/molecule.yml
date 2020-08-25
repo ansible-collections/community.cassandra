@@ -21,10 +21,10 @@ platforms:
     image: ubuntu:18.04
     command: /sbin/init
     privileged: True
-  - name: debian_buster
-    image: debian:buster
-    command: /sbin/init
-    privileged: True
+  #- name: debian_buster
+  #  image: debian:buster
+  #  command: /sbin/init
+  #  privileged: True
   - name: debian_stretch
     image: debian:stretch
     command: /sbin/init
