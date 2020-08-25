@@ -9,10 +9,10 @@ lint:
     config-data:
       line-length: disable
 platforms:
-  - name: centos_7
-    image: centos:7
-    command: /sbin/init
-    privileged: True
+#  - name: centos_7
+#    image: centos:7
+#    command: /sbin/init
+#    privileged: True
   - name: ubuntu_16
     image: ubuntu:16.04
     command: /sbin/init
