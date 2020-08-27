@@ -295,7 +295,7 @@ def main():
         result['err'] = err
         result['rc'] = rc
         result['cmd'] = cmd
-   
+
     if rc != 0:
         module.fail_json(msg=err.strip())
     else:
