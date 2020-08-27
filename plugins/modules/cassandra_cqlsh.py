@@ -289,13 +289,13 @@ def main():
     cmd = " ".join(str(item) for item in args)
 
     (rc, out, err) = module.run_command(cmd, check_rc=False)
-    
+
     if module.params['debug']:
         result['out'] = out
         result['err'] = err
         result['rc'] = rc
         result['cmd'] = cmd
-        
+   
     if rc != 0:
         module.fail_json(msg=err.strip())
     else:
