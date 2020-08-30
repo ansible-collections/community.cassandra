@@ -286,8 +286,16 @@ def main():
     out = ''
     err = ''
     result = {}
+    cmd = " ".join(str(item) for item in args)
 
-    (rc, out, err) = module.run_command(" ".join(str(item) for item in args), check_rc=False)
+    (rc, out, err) = module.run_command(cmd, check_rc=False)
+
+    if module.params['debug']:
+        result['out'] = out
+        result['err'] = err
+        result['rc'] = rc
+        result['cmd'] = cmd
+
     if rc != 0:
         module.fail_json(msg=err.strip())
     else:
@@ -303,11 +311,6 @@ def main():
         except Exception as excep:
             result['msg'] = "Error tranforming output: {0}".format(str(excep))
             result['transformed_output'] = None
-
-    if module.params['debug']:
-        result['out'] = out
-        result['err'] = err
-        result['rc'] = rc
 
     module.exit_json(**result)
 
