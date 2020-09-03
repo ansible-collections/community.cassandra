@@ -8,10 +8,10 @@ from __future__ import absolute_import, division, print_function
 DOCUMENTATION = r'''
 ---
 module: cassandra_table
-short_description: Create or drop tables on a Cassandra database.
+short_description: Create or drop tables on a Cassandra Keyspace.
 description:
-   - Create or drop tables on a Cassandra database.
-   - No alter functionality.
+   - Create or drop tables on a Cassandra Keyspace.
+   - No alter functionality. If a table with the same name already exists then no changes are made.
 author: Rhys Campbell (@rhysmeister)
 options:
   login_user:
