@@ -17,6 +17,9 @@
 # along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
 
 # ===========================================================
+- name: Get Ensure thrift starts off disabled
+  shell: nodetool -h 127.0.0.1 disablethrift
+
 - name: Get thrift status 1
   shell: nodetool -h 127.0.0.1 statusthrift
   register: thrift_status
