@@ -120,7 +120,7 @@ EXAMPLES = r'''
     login_user: admin
     login_password: secret
   register: user_credentials
-  
+
 - name: Create user table
   community.cassandra.cassandra_table:
     name: users
@@ -137,7 +137,7 @@ EXAMPLES = r'''
     login_user: admin
     login_password: secret
   register: users
-  
+
 - name: Create video_metadata type
   community.cassandra.cassandra_table:
     name: video_metadata
@@ -152,7 +152,7 @@ EXAMPLES = r'''
     login_user: admin
     login_password: secret
   register: video_metadata
-  
+
 - name: Create videos table
   community.cassandra.cassandra_table:
     name: videos
@@ -174,7 +174,7 @@ EXAMPLES = r'''
     login_user: admin
     login_password: secret
   register: videos
-  
+
 - name: Create user_videos table
   community.cassandra.cassandra_table:
     name: user_videos
@@ -196,7 +196,7 @@ EXAMPLES = r'''
     login_user: admin
     login_password: secret
   register: user_videos
-  
+
 - name: Create latest_videos table
   community.cassandra.cassandra_table:
     name: latest_videos
