@@ -104,6 +104,120 @@ EXAMPLES = r'''
     name: users
     state: absent
     keyspace: myapp
+
+# killrvideo examples
+- name: Create user_credentials table
+  community.cassandra.cassandra_table:
+    name: user_credentials
+    state: present
+    keyspace: killrvideo
+    columns:
+      - email: text
+      - password: text
+      - userid: uuid
+    primary_key:
+      - email
+    login_user: admin
+    login_password: secret
+  register: user_credentials
+  
+- name: Create user table
+  community.cassandra.cassandra_table:
+    name: users
+    state: present
+    keyspace: killrvideo
+    columns:
+      - userid: uuid
+      - firstname: varchar
+      - lastname: varchar
+      - email: text
+      - created_date: timestamp
+    primary_key:
+      - userid
+    login_user: admin
+    login_password: secret
+  register: users
+  
+- name: Create video_metadata type
+  community.cassandra.cassandra_table:
+    name: video_metadata
+    state: present
+    keyspace: killrvideo
+    columns:
+      - height: int
+      - width: int
+      - video_bit_rate: "set<text>"
+      - encoding: text
+    is_type: True
+    login_user: admin
+    login_password: secret
+  register: video_metadata
+  
+- name: Create videos table
+  community.cassandra.cassandra_table:
+    name: videos
+    state: present
+    keyspace: killrvideo
+    columns:
+      - videoid: uuid
+      - userid: uuid
+      - name: varchar
+      - description: varchar
+      - location: text
+      - location_type: int
+      - preview_thumbnails: "map<text,text>"
+      - tags: "set<varchar>"
+      - metadata: "set<frozen<video_metadata>>"
+      - added_date: "timestamp"
+    primary_key:
+      - videoid
+    login_user: admin
+    login_password: secret
+  register: videos
+  
+- name: Create user_videos table
+  community.cassandra.cassandra_table:
+    name: user_videos
+    state: present
+    keyspace: killrvideo
+    columns:
+      - userid: uuid
+      - added_date: timestamp
+      - videoid: uuid
+      - name: text
+      - preview_image_location: text
+    primary_key:
+      - userid
+      - added_date
+      - videoid
+    clustering:
+      - added_date: "DESC"
+      - videoid: "ASC"
+    login_user: admin
+    login_password: secret
+  register: user_videos
+  
+- name: Create latest_videos table
+  community.cassandra.cassandra_table:
+    name: latest_videos
+    state: present
+    keyspace: killrvideo
+    columns:
+      - yyyymmdd: text
+      - added_date: timestamp
+      - videoid: uuid
+      - name: text
+      - preview_image_location: text
+    primary_key:
+      - yyyymmdd
+      - added_date
+      - videoid
+    clustering:
+      - added_date: "DESC"
+      - videoid: "ASC"
+    login_user: admin
+    login_password: secret
+  register: latest_videos
 '''
 
 
