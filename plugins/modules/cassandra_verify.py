@@ -12,7 +12,8 @@ DOCUMENTATION = '''
 module: cassandra_verify
 author: Rhys Campbell (@rhysmeister)
 short_description: Checks the data checksum for one or more specified tables.
-requirements: [ nodetool ]
+requirements:
+  - nodetool
 description:
     - Checks the data checksum for one or more specified tables.
 
