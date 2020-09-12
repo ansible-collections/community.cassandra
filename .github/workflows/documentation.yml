@@ -12,14 +12,15 @@ jobs:
       run:
         working-directory: ansible_collections/community/cassandra
     steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          path: ansible_collections/community/cassandra
 
       - name: Set up Python 3.6
         uses: actions/setup-python@v1
         with:
           python-version: 3.6
-
-      - name: Checkout
-        uses: actions/checkout@v1
 
       #- name: Install ansible-base (devel) - Docker image now has ansible pre-installed?
       #  run: pip install https://github.com/ansible/ansible/archive/devel.tar.gz --disable-pip-version-check
