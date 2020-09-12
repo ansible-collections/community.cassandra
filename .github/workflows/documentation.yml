@@ -61,6 +61,6 @@ jobs:
         uses: crazy-max/ghaction-github-pages@v1
         with:
           target_branch: gh-pages
-          build_dir: docs
+          build_dir: ansible_collections/community/cassandra/docs
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
