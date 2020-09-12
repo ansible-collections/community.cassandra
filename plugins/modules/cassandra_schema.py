@@ -17,7 +17,7 @@ description:
     - Validates the schema version as seen from the node.
     - Ensure that all nodes are have the same schema version.
     - Can poll multiple times to wait for the schema version to converge.
-    - Can also specifiy a specific schema version if required.
+    - Can also specify a schema version if required.
     - Schema version is obtained through the usage of the nodetool describecluster command.
 
 extends_documentation_fragment:
