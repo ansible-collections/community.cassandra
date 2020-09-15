@@ -22,16 +22,32 @@ Any contribution is welcome and we only ask contributors to:
 
 ## Running integration tests locally
 
+Clone the collection git project. The ansible-test tool requires a specific directory setup to function correctly so please follow carefully.
+
+```
+cd && mkdir -p git/ansible_collections/community
+git clone https://github.com/ansible-collections/community.cassandra.git ./ansible_collections/community/cassandra
+cd ./git/ansible_collections/community/cassandra
+```
+
+Create a virtual environment
+
+```
+virtualenv venv
+source venv/bin/activate
+pip install -r requirements-3.6.txt
+```
+
 Run all tests
 
 ```
-ansible-test integration --docker -v --color --retry-on-error --python 3.6 --continue-on-error --diff --coverage
+ansible-test integration --docker ubuntu1804 -v --color --python 3.6
 ```
 
 Run tests just for the cassandra_role module
 
 ```
-ansible-test integration --docker -v --color --retry-on-error --python 3.6 --continue-on-error —diff --coverage cassandra_role
+ansible-test integration --docker ubuntu1804 -v --color --python 3.6 cassandra_role
 ```
 
 
