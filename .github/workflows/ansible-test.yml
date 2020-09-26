@@ -30,7 +30,34 @@ jobs:
       - name: Run sanity tests
         run: ansible-test sanity --docker -v --color --python 3.6
 
+  integration_matrix:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ansible_collections/community/cassandra
+    outputs:
+      matrix: ${{ steps.json-list.outputs.modules-to-test }}
+
+    steps:
+
+      - name: Check out code
+        uses: actions/checkout@v2
+        with:
+          path: ansible_collections/community/cassandra
+
+      - name: Generate module list
+        run: |
+          find tests/integration/targets -type d -maxdepth 1 -not -name 'setup*' | cut -d '/' -f4 | sort | awk NF | jq -sRc 'split("\n") | map(select(length > 0))' > int_test_modules.json
+
+      - name: Set output variable
+        id: json-list
+        run: |
+          output=$(cat int_test_modules.json)
+          echo "::set-output name=modules-to-test::$output"
+          echo "$output"
+
   integration:
+    needs: integration_matrix
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -53,30 +80,7 @@ jobs:
           - docker_image: centos7
             python_version: "2.7"
             ansible_test_options: "--docker-privileged"
-        cassandra_module:
-          - cassandra_autocompaction
-          - cassandra_backup
-          - cassandra_binary
-          - cassandra_cleanup
-          - cassandra_compactionthreshold
-          - cassandra_compactionthroughput
-          - cassandra_cqlsh
-          - cassandra_drain
-          - cassandra_flush
-          - cassandra_gossip
-          - cassandra_handoff
-          - cassandra_interdcstreamthroughput
-          - cassandra_keyspace
-          - cassandra_role
-          - cassandra_schema
-          - cassandra_status
-          - cassandra_stopdaemon
-          - cassandra_streamthroughput
-          - cassandra_table
-          - cassandra_thrift
-          - cassandra_traceprobability
-          - cassandra_upgradesstables
-          - cassandra_verify
+        cassandra_module: ${{ fromJson(needs.integration_matrix.outputs.matrix) }}
     steps:
       - name: Check out code
         uses: actions/checkout@v2
@@ -96,7 +100,7 @@ jobs:
           sed -i 's/^cassandra_version:.*/cassandra_version: \"${{ matrix.cassandra_version.package_version }}\"/g' ${{ env.setup_cassandra_version_file }}
           sed -i 's/^cassandra_version:.*/cassandra_version: \"${{ matrix.cassandra_version.tar_version }}\"/g' ${{ env.setup_ccm_version_file }}
 
-      - name: Run integration tests on Python ${{ matrix.test_scenario.python_version }} | ${{ matrix.test_scenario.docker_image }}
+      - name: Run integration tests on Python ${{ matrix.test_scenario.python_version }} | ${{ matrix.test_scenario.docker_image }} | ${{ matrix.ansible_version }} | ${{ matrix.cassandra_module }} | ${{ matrix.cassandra_version.package_version }}
         run: ansible-test integration --docker ${{ matrix.test_scenario.docker_image }} ${{ matrix.test_scenario.ansible_test_options }} -v --color --retry-on-error --python ${{ matrix.test_scenario.python_version }} --continue-on-error --diff --coverage  ${{ matrix.cassandra_module }}
 
       - name: Generate coverage report.
