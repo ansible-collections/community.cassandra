@@ -16,6 +16,7 @@ requirements:
   - cqlsh
 description:
     - Run cql commands via the clqsh shell.
+    - Run commands inline or using a cql file.
     - Attempts to parse returned data into a format that Ansible can use.
 options:
   cqlsh_host:
