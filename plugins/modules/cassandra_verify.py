@@ -11,11 +11,11 @@ DOCUMENTATION = '''
 ---
 module: cassandra_verify
 author: Rhys Campbell (@rhysmeister)
-short_description: Checks the data checksum for one or more specified tables.
+short_description: Checks the data checksum for one or more tables.
 requirements:
   - nodetool
 description:
-    - Checks the data checksum for one or more specified tables.
+    - Checks the data checksum for one or more tables.
 
 extends_documentation_fragment:
   - community.cassandra.nodetool_module_options
