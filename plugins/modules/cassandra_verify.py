@@ -34,6 +34,7 @@ options:
       - Extended verify.
       - Each cell data, beyond simply checking SSTable checksums.
     type: bool
+    default: False
     aliases:
       - e
 '''

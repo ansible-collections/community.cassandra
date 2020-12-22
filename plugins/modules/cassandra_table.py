@@ -74,6 +74,7 @@ options:
     description:
       - Create a type instead of a table
     type: bool
+    default: False
   debug:
     description:
       - Debug flag

@@ -36,4 +36,5 @@ options:
     description:
       - Enable additional debug output.
     type: bool
+    default: False
 '''
