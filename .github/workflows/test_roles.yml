@@ -67,7 +67,7 @@ jobs:
           export pyv=$(python -c 'from platform import python_version; print(python_version()[:3])')
           pip install --requirement requirements-${pyv}.txt
 
-      - name: Run molecule test for ${{ casandra_role }}
+      - name: Run molecule test for ${{ cassandra_role }}
         run: molecule test
         working-directory: ansible_collections/community/cassandra/roles/${{ cassandra_role }}
 
