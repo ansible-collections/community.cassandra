@@ -46,7 +46,7 @@ jobs:
           - stable-2.10
           - stable-2.11
           - devel
-        cassandra_role: ${{ fromJson(needs.integration_matrix.outputs.matrix) }}
+        cassandra_role: ${{ fromJson(needs.roles_matrix.outputs.matrix) }}
 
     steps:
       - name: Check out code
