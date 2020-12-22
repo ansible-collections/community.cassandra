@@ -60,6 +60,9 @@ jobs:
         with:
           python-version: ${{ matrix.test_scenario.python_version }}
 
+      - name: Uninstall existing ansible
+        run: pip uninstall ansible
+
       - name: Install ansible-base (${{ matrix.ansible_version }})
         run: pip install https://github.com/ansible/ansible/archive/${{ matrix.ansible_version }}.tar.gz --disable-pip-version-check
 
