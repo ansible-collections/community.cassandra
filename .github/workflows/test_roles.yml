@@ -65,9 +65,6 @@ jobs:
       - name: Ensure wheel is installed
         run: pip install wheel
 
-      - name: Install ansible-base (${{ matrix.ansible_version }})
-        run: pip install https://github.com/ansible/ansible/archive/${{ matrix.ansible_version }}.tar.gz --disable-pip-version-check
-
       - name: Install requirements
         run: |
           export pyv=$(python -c 'from platform import python_version; print(python_version()[:3])')
