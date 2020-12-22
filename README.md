@@ -55,4 +55,4 @@ ansible-test integration --docker ubuntu1804 -v --color --python 3.6 cassandra_r
 
 GNU General Public License v3.0 or later
 
-See LICENCING to see the full text.
+See LICENCING to see the full text
