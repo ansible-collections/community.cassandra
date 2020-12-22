@@ -1,0 +1,82 @@
+name: CI
+on:
+  pull_request:
+  schedule:
+    - cron: "0 6 * * *"
+
+jobs:
+
+  roles_matrix:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ansible_collections/community/cassandra
+    outputs:
+      matrix: ${{ steps.json-list.outputs.roles-to-test }}
+
+    steps:
+
+      - name: Check out code
+        uses: actions/checkout@v2
+        with:
+          path: ansible_collections/community/cassandra
+
+      - name: Generate module list
+        run: |
+          find roles/ -type d -maxdepth 1 | cut -d '/' -f4 | sort | awk NF | jq -sRc 'split("\n") | map(select(length > 0))' > int_test_roles.json
+
+      - name: Set output variable
+        id: json-list
+        run: |
+          output=$(cat int_test_roles.json)
+          echo "::set-output name=roles-to-test::$output"
+          echo "$output"
+
+  roles:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ansible_collections/community/cassandra
+    strategy:
+      matrix:
+        python_version:
+          - "2.7"
+          - "3.6"
+        ansible_version:
+          - stable-2.10
+          - stable-2.11
+          - devel
+        cassandra_role: ${{ fromJson(needs.integration_matrix.outputs.matrix) }}
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+        with:
+          path: ansible_collections/community/cassandra
+
+      - name: Set up Python ${{ matrix.test_scenario.python_version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.test_scenario.python_version }}
+
+      - name: Install ansible-base (${{ matrix.ansible_version }})
+        run: pip install https://github.com/ansible/ansible/archive/${{ matrix.ansible_version }}.tar.gz --disable-pip-version-check
+
+      - name: Install requirements
+        run: |
+          export pyv=$(python -c 'from platform import python_version; print(python_version()[:3])')
+          pip install --requirement requirements-${pyv}.txt
+
+      - name: Run molecule test for ${{ casandra_role }}
+        run: molecule test
+        working-directory: ansible_collections/community/cassandra/roles/${{ cassandra_role }}
+
+      - name: Generate coverage report
+        run: ansible-test coverage xml -v --requirements --group-by command --group-by version
+
+      - uses: codecov/codecov-action@v1
+        with:
+          fail_ci_if_error: false
+
+      - name: Upload Coverage data
+        run: tests/coverage.sh
