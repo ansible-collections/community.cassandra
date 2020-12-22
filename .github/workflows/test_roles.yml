@@ -66,6 +66,8 @@ jobs:
           export pyv=$(python -c 'from platform import python_version; print(python_version()[:3])')
           pip install --requirement requirements-${pyv}.txt
 
+      - run: sudo find / -name molecule
+
       - name: Run molecule test for ${{ matrix.cassandra_role }}
         run: molecule test
         working-directory: ansible_collections/community/cassandra/roles/${{ matrix.cassandra_role }}
