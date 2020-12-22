@@ -23,7 +23,7 @@ jobs:
 
       - name: Generate module list
         run: |
-          find roles/ -type d -maxdepth 1 | cut -d '/' -f4 | sort | awk NF | jq -sRc 'split("\n") | map(select(length > 0))' > int_test_roles.json
+          find roles -type d -maxdepth 1 -mindepth 1 | cut -d '/' -f2 | awk NF | jq -sRc 'split("\n") | map(select(length > 0))' > int_test_roles.json
 
       - name: Set output variable
         id: json-list
