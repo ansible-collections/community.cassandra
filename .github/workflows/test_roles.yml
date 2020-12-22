@@ -38,6 +38,7 @@ jobs:
     defaults:
       run:
         working-directory: ansible_collections/community/cassandra
+
     strategy:
       matrix:
         python_version:
@@ -66,7 +67,8 @@ jobs:
           export pyv=$(python -c 'from platform import python_version; print(python_version()[:3])')
           pip install --requirement requirements-${pyv}.txt
 
-      - run: sudo find / -name molecule
+      - name: Add molecule location to path
+        run: echo "${HOME}/.local/bin" >> $GITHUB_PATH
 
       - name: Run molecule test for ${{ matrix.cassandra_role }}
         run: molecule test
