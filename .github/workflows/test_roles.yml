@@ -73,13 +73,3 @@ jobs:
       - name: Run molecule test for ${{ matrix.cassandra_role }}
         run: molecule test
         working-directory: ansible_collections/community/cassandra/roles/${{ matrix.cassandra_role }}
-
-      - name: Generate coverage report
-        run: ansible-test coverage xml -v --requirements --group-by command --group-by version
-
-      - uses: codecov/codecov-action@v1
-        with:
-          fail_ci_if_error: false
-
-      - name: Upload Coverage data
-        run: tests/coverage.sh
