@@ -4,6 +4,7 @@
 [![Codecov](https://img.shields.io/codecov/c/github/ansible-collections/community.cassandra)](https://codecov.io/gh/ansible-collections/community.cassandra)
 [![Build Status](https://travis-ci.com/ansible-collections/community.cassandra.svg?branch=master)](https://travis-ci.com/ansible-collections/community.cassandra)
 [![Travis Roles](https://travis-ci.com/rhysmeister/AutomatingCassandraWithAnsible.svg?token=EZq8qB3ASZpTwAxAkbiU&branch=master)](https://travis-ci.com/rhysmeister/AutomatingCassandraWithAnsible)
+![Build & Publish Collection](https://github.com/ansible-collections/community.cassandra/workflows/Build%20&%20Publish%20Collection/badge.svg)
 
 This collection called `cassandra` aims at providing all Ansible modules allowing to interact with Apache Cassandra.
 
