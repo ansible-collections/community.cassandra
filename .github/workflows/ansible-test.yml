@@ -10,7 +10,7 @@ env:
 
 jobs:
   sanity:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     defaults:
       run:
         working-directory: ansible_collections/community/cassandra
@@ -33,7 +33,7 @@ jobs:
         run: ansible-test sanity --docker -v --color --python 3.6
 
   integration_matrix:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     defaults:
       run:
         working-directory: ansible_collections/community/cassandra
@@ -60,7 +60,7 @@ jobs:
 
   integration:
     needs: integration_matrix
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     defaults:
       run:
         working-directory: ansible_collections/community/cassandra
