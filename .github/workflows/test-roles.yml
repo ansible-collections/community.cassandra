@@ -71,7 +71,7 @@ jobs:
         with:
           timeout_minutes: 3
           max_attempts: 3
-          command: : |
+          command: |
             export pyv=$(python -c 'from platform import python_version; print(python_version()[:3])')
             pip install --requirement requirements-${pyv}.txt
 
