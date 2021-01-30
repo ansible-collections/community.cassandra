@@ -73,6 +73,7 @@ jobs:
           max_attempts: 3
           command: |
             export pyv=$(python -c 'from platform import python_version; print(python_version()[:3])')
+            cd ansible_collections/community/cassandra
             pip install --requirement requirements-${pyv}.txt
 
       - name: Add molecule location to path
