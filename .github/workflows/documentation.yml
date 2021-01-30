@@ -22,8 +22,12 @@ jobs:
         with:
           python-version: 3.6
 
-      - name: Install ansible-base (devel) - Docker image now has ansible pre-installed?
-        run: pip install https://github.com/ansible/ansible/archive/devel.tar.gz --disable-pip-version-check
+      - name: Install ansible-base (devel)
+        uses: nick-invision/retry@v2
+        with:
+          timeout_minutes: 3
+          max_attempts: 3
+          command: pip install https://github.com/ansible/ansible/archive/devel.tar.gz --disable-pip-version-check
 
       - name: Build collection
         run: ansible-galaxy collection build .
@@ -32,10 +36,18 @@ jobs:
         run: ansible-galaxy collection install community-cassandra-*.tar.gz
 
       - name: Install ansible-doc-extractor
-        run: pip install wheel setuptools ansible-doc-extractor --upgrade
+        uses: nick-invision/retry@v2
+        with:
+          timeout_minutes: 3
+          max_attempts: 3
+          command: pip install wheel setuptools ansible-doc-extractor --upgrade
 
       - name: Install rstdoc
-        run: pip install -v rstdoc
+        uses: nick-invision/retry@v2
+        with:
+          timeout_minutes: 3
+          max_attempts: 3
+          command: pip install -v rstdoc
 
       - name: Create docs dir
         run: mkdir -p docs/{lookup,cache}

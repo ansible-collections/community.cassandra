@@ -60,10 +60,18 @@ jobs:
         run: sudo apt remove ansible
 
       - name: Ensure wheel is installed
-        run: pip install wheel
+        uses: nick-invision/retry@v2
+        with:
+          timeout_minutes: 3
+          max_attempts: 3
+          command: pip install wheel
 
       - name: Install requirements
-        run: |
+        uses: nick-invision/retry@v2
+        with:
+          timeout_minutes: 3
+          max_attempts: 3
+          command: : |
           export pyv=$(python -c 'from platform import python_version; print(python_version()[:3])')
           pip install --requirement requirements-${pyv}.txt
 
