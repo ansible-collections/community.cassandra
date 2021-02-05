@@ -47,7 +47,7 @@ jobs:
         with:
           timeout_minutes: 3
           max_attempts: 3
-          command: pip install -v rstdoc
+          command: pip install -v rstdoc==1.8.0
 
       - name: Create docs dir
         run: mkdir -p docs/{lookup,cache}
