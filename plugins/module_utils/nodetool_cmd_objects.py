@@ -41,7 +41,7 @@ class NodeToolCmd(object):
         # The thing we want nodetool to execute
         cmd += " {0}".format(sub_command)
         if self.debug:
-            self.module.debug(cmd)
+            self.module.params['debug'](cmd)
         return self.execute_command(cmd)
 
 

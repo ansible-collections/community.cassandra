@@ -102,7 +102,7 @@ def main():
         (rc, out, err) = n.enable_command()
         out = out.strip()
 
-        if module.debug:
+        if module.params['debug']:
             if out:
                 result['stdout'] = out
             if err:
@@ -120,7 +120,7 @@ def main():
         (rc, out, err) = n.disable_command()
         out = out.strip()
 
-        if module.debug:
+        if module.params['debug']:
             if out:
                 result['stdout'] = out
             if err:
