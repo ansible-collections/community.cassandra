@@ -8,9 +8,9 @@ def cassandra_common_argument_spec():
     in this collection
     """
     return dict(
-        debug=dict(type='bool', default=False, required=False),
+        debug=dict(type='bool', default=False),
         host=dict(type='str', default="127.0.0.1"),
-        nodetool_path=dict(type='str', default=None, required=False),
+        nodetool_path=dict(type='str', default=None),
         password=dict(type='str', no_log=True),
         password_file=dict(type='str', no_log=True),
         port=dict(type='int', default=7199),

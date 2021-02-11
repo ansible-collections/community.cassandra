@@ -84,7 +84,7 @@ def main():
     (rc, out, err) = n.run_command()
     out = out.strip()
     err = err.strip()
-    if module.debug:
+    if module.params['debug']:
         if out:
             result['stdout'] = out
         if err:

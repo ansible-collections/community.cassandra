@@ -80,7 +80,7 @@ def main():
 
     (rc, out, err) = n.status_command()
     out = out.strip()
-    if module.debug:
+    if module.params['debug']:
         if out:
             result['stdout'] = out
         if err:
@@ -98,7 +98,7 @@ def main():
                 module.exit_json(changed=False, msg=status_active, **result)
         if out == status_active:
             (rc, out, err) = n.disable_command()
-        if module.debug:
+        if module.params['debug']:
             if out:
                 result['stdout'] = out
             if err:
@@ -122,7 +122,7 @@ def main():
                 module.exit_json(changed=False, msg=status_inactive, **result)
         if out == status_inactive:
             (rc, out, err) = n.enable_command()
-            if module.debug:
+            if module.params['debug']:
                 if out:
                     result['stdout'] = out
                 if err:
