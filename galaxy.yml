@@ -1,15 +1,19 @@
 namespace: community
 name: cassandra
-version: 1.0.0
+version: 1.0.3
 readme: README.md
 authors: Rhys Campbell
 description: null
 license: null
 license_file: LICENSE
-tags: null
+tags: 
+  - cassandra
+  - nosql
+  - database
+  - datastore
 dependencies:
   community.general: '>=0.1.1'
-repository: git@github.com:ansible-collections/community.cassandra.git
+repository: https://github.com/ansible-collections/community.cassandra
 documentation: https://github.com/ansible-collections/community.cassandra/tree/master/docs
 homepage: https://github.com/ansible-collections/community.cassandra
 issues: https://github.com/ansible-collections/community.cassandra/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc
