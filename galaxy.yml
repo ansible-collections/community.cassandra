@@ -9,7 +9,7 @@ license_file: LICENSE
 tags: 
   - cassandra
   - nosql
-  - dababase
+  - database
   - datastore
 dependencies:
   community.general: '>=0.1.1'
