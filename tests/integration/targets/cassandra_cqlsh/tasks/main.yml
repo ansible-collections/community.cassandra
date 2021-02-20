@@ -212,6 +212,6 @@
   community.cassandra.cassandra_cqlsh:
     username: "{{ cassandra_admin_user }}"
     password: "{{ cassandra_admin_pwd }}"
-    execute: "ALTER KEYSPACE system_auth WITH REPLICATION = {'class': 'NetworkTopologyStrategy','datacentre001': 3}"
+    execute: "ALTER KEYSPACE system_auth WITH REPLICATION = {\'class\': \'NetworkTopologyStrategy\',\'datacentre001\': 3}"
     transform: "raw"
   register: cqlsh
