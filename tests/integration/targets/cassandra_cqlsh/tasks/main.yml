@@ -214,3 +214,8 @@
     password: "{{ cassandra_admin_pwd }}"
     execute: "ALTER KEYSPACE system_auth WITH REPLICATION= {'class':'NetworkTopologyStrategy','datacentre001':3}"
   register: cqlsh
+
+- assert:
+    that:
+      - "cqlsh.changed"
+      - "cqlsh.msg == 'transform type was auto'"

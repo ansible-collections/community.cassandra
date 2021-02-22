@@ -303,7 +303,7 @@ def main():
     if rc != 0:
         module.fail_json(msg=err.strip())
     else:
-        result['changed'] = False
+        result['changed'] = True
         try:
             output = transform_output(out,
                                       module.params['transform'],
