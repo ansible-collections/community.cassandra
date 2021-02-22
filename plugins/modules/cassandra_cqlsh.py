@@ -189,7 +189,10 @@ def add_arg_to_cmd(cmd_list, param_name, param_value, is_bool=False):
     if is_bool is False and param_value is not None:
         cmd_list.append(param_name)
         if param_name == "--execute":
-            cmd_list.append("'{0}'".format(param_value))
+            if "'" in param_value:
+                cmd_list.append('"{0}"'.format(param_value))
+            else:
+                cmd_list.append("'{0}'".format(param_value))
         else:
             cmd_list.append(param_value)
     elif is_bool is True:
@@ -300,7 +303,7 @@ def main():
     if rc != 0:
         module.fail_json(msg=err.strip())
     else:
-        result['changed'] = False
+        result['changed'] = True
         try:
             output = transform_output(out,
                                       module.params['transform'],

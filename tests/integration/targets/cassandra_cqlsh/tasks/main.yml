@@ -25,7 +25,7 @@
 
 - assert:
     that:
-      - "cqlsh.changed == False"
+      - "cqlsh.changed"
       - "cqlsh.transformed_output | type_debug == 'list'"
       - "'system_auth' in cqlsh.transformed_output"
       - "'system' in cqlsh.transformed_output"
@@ -38,7 +38,7 @@
 
 - assert:
     that:
-      - "cqlsh.changed == False"
+      - "cqlsh.changed"
       - "'cql_version' in cqlsh.transformed_output"
       - "cqlsh.msg == 'transform type was auto'"
 
@@ -49,7 +49,7 @@
 
 - assert:
     that:
-      - "cqlsh.changed == False"
+      - "cqlsh.changed"
       - "cqlsh.transformed_output | type_debug == 'list'"
       - "'cql_version' in cqlsh.transformed_output[0] | string"
       - "cqlsh.msg == 'transform type was auto'"
@@ -63,7 +63,7 @@
 
 - assert:
     that:
-      - "cqlsh.changed == False"
+      - "cqlsh.changed"
       - "cqlsh.transformed_output | type_debug == 'list'"
 
 - name: Ensure epel is available
@@ -129,7 +129,7 @@
 
 - assert:
     that:
-      - "cqlsh.changed == False"
+      - "cqlsh.changed"
       - "cqlsh.transformed_output | type_debug == 'list'"
       - "cqlsh.transformed_output | length == 10"
       - "cqlsh.transformed_output[0] | type_debug == 'dict'"
@@ -152,7 +152,7 @@
 
 - assert:
     that:
-      - "cqlsh.changed == False"
+      - "cqlsh.changed"
       - "cqlsh.transformed_output | type_debug == 'list'"
       - "'system_auth' in cqlsh.transformed_output"
       - "'system' in cqlsh.transformed_output"
@@ -168,7 +168,7 @@
 
 - assert:
     that:
-      - "cqlsh.changed == False"
+      - "cqlsh.changed"
       - "cqlsh.transformed_output | type_debug == 'list'"
       - "cqlsh.transformed_output | length == 10"
       - "cqlsh.transformed_output[0] | type_debug == 'dict'"
@@ -207,3 +207,15 @@
     that:
       - "cqlsh.failed"
       - "'SyntaxException: line 1:0 no viable alternative' in cqlsh.msg"
+
+- name: Test cmd with single quote
+  community.cassandra.cassandra_cqlsh:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    execute: "ALTER KEYSPACE system_auth WITH REPLICATION= {'class':'NetworkTopologyStrategy','datacentre001':3}"
+  register: cqlsh
+
+- assert:
+    that:
+      - "cqlsh.changed"
+      - "cqlsh.msg == 'transform type was auto'"
