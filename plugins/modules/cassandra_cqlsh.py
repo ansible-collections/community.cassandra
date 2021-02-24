@@ -240,10 +240,10 @@ def transform_output(output, transform_type, split_char):
 
 def main():
     argument_spec = dict(
-        cqlsh_host=dict(type='str', default='localhost'),
-        cqlsh_port=dict(type='int', default=9042),
-        username=dict(type='str'),
-        password=dict(type='str', no_log=True),
+        cqlsh_host=dict(type='str', default='localhost', aliases=['login_host']),
+        cqlsh_port=dict(type='int', default=9042, aliases=['login_port']),
+        username=dict(type='str', aliases=['login_user']),
+        password=dict(type='str', no_log=True, aliases=['login_password']),
         keyspace=dict(type='str'),
         file=dict(type='str'),
         execute=dict(type='str'),
