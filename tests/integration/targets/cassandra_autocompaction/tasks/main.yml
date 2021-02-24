@@ -168,11 +168,11 @@
     that: autocompaction.changed == True
   when: cassandra_auth_tests == True
 
-- name: Repeat last test with login_* aliases
+- name: Enable autocompaction with login_* aliases
   community.cassandra.cassandra_autocompaction:
     keyspace: system
     table: local
-    state: "disabled"
+    state: "enabled"
     login_user: "{{ cassandra_admin_user }}"
     login_password_file: /etc/cassandra/jmxremote.password
     login_host: "127.0.0.1"

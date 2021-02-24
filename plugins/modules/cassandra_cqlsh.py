@@ -24,19 +24,27 @@ options:
       - Host to connect to
     type: str
     default: localhost
+    aliases:
+      - "login_host"
   cqlsh_port:
     description:
       - Port to connect to.
     type: int
     default: 9042
+    aliases:
+      - "login_port"
   username:
     description:
       - The C* user to authenticate with.
     type: str
+    aliases:
+      - "login_user"
   password:
     description:
       - The C* users password.
     type: str
+    aliases:
+      - "login_password"
   keyspace:
     description:
       - Authenticate to the given keyspace.
