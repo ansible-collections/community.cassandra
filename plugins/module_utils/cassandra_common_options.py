@@ -9,10 +9,10 @@ def cassandra_common_argument_spec():
     """
     return dict(
         debug=dict(type='bool', default=False),
-        host=dict(type='str', default="127.0.0.1"),
+        host=dict(type='str', default="127.0.0.1", aliases=['login_host']),
         nodetool_path=dict(type='str', default=None),
-        password=dict(type='str', no_log=True),
-        password_file=dict(type='str', no_log=True),
-        port=dict(type='int', default=7199),
-        username=dict(type='str', no_log=True)
+        password=dict(type='str', no_log=True, aliases=['login_password']),
+        password_file=dict(type='str', no_log=True, aliases=['login_password_file']),
+        port=dict(type='int', default=7199, aliases=['login_port']),
+        username=dict(type='str', no_log=True, aliases=['login_user'])
     )

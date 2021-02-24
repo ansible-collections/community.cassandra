@@ -158,6 +158,24 @@
       - "'system' in cqlsh.transformed_output"
       - "cqlsh.msg == 'transform type was auto'"
 
+- name: Run the DESC KEYSPACES command (auth) - login aliases
+  community.cassandra.cassandra_cqlsh:
+    login_user: "{{ cassandra_admin_user }}"
+    login_password: "{{ cassandra_admin_pwd }}"
+    login_host: "127.0.0.1"
+    login_port: 9042
+    execute: "DESC KEYSPACES"
+  register: cqlsh
+
+- assert:
+    that:
+      - "cqlsh.changed"
+      - "cqlsh.transformed_output | type_debug == 'list'"
+      - "'system_auth' in cqlsh.transformed_output"
+      - "'system' in cqlsh.transformed_output"
+      - "cqlsh.msg == 'transform type was auto'"
+
+
 - name: Select from test.test as json (should be many rows)
   community.cassandra.cassandra_cqlsh:
     username: "{{ cassandra_admin_user }}"

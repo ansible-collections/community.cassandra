@@ -168,6 +168,23 @@
     that: autocompaction.changed == True
   when: cassandra_auth_tests == True
 
+- name: Disable autocompaction with login_* aliases
+  community.cassandra.cassandra_autocompaction:
+    keyspace: system
+    table: compaction_history
+    state: disabled
+    login_user: "{{ cassandra_admin_user }}"
+    login_password_file: /etc/cassandra/jmxremote.password
+    login_host: "127.0.0.1"
+    login_port: 7199
+    debug: true
+  register: autocompaction
+  when: cassandra_auth_tests == True
+
+- assert:
+    that: autocompaction.changed == True
+  when: cassandra_auth_tests == True
+
 - name: Test login failure handling
   community.cassandra.cassandra_autocompaction:
     keyspace: system
@@ -175,6 +192,24 @@
     state: "enabled"
     username: "{{ cassandra_admin_user }}"
     password: XXXXXXXXXXXXXXXXXXXXX
+    debug: true
+  register: login_status
+  ignore_errors: true
+  when: cassandra_auth_tests == True
+
+- assert:
+    that:
+      - login_status.failed == True
+      - "'Invalid username or password' in login_status.stderr"
+  when: cassandra_auth_tests == True
+
+- name: Test login failure handling with aliases
+  community.cassandra.cassandra_autocompaction:
+    keyspace: system
+    table: local
+    state: "enabled"
+    login_user: "{{ cassandra_admin_user }}"
+    login_password: XXXXXXXXXXXXXXXXXXXXX
     debug: true
   register: login_status
   ignore_errors: true
