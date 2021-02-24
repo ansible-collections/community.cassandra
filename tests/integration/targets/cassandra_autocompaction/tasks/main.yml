@@ -168,11 +168,11 @@
     that: autocompaction.changed == True
   when: cassandra_auth_tests == True
 
-- name: Enable autocompaction with login_* aliases
+- name: Disable autocompaction with login_* aliases
   community.cassandra.cassandra_autocompaction:
     keyspace: system
-    table: local
-    state: "disabled"
+    table: compaction_history
+    state: disabled
     login_user: "{{ cassandra_admin_user }}"
     login_password_file: /etc/cassandra/jmxremote.password
     login_host: "127.0.0.1"
@@ -181,7 +181,7 @@
   when: cassandra_auth_tests == True
 
 - assert:
-    that: autocompaction.changed == False
+    that: autocompaction.changed == True
   when: cassandra_auth_tests == True
 
 - name: Test login failure handling
