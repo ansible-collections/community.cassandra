@@ -177,6 +177,7 @@
     login_password_file: /etc/cassandra/jmxremote.password
     login_host: "127.0.0.1"
     login_port: 9042
+    debug: true
   register: autocompaction
   when: cassandra_auth_tests == True
 
