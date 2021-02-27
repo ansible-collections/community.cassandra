@@ -5,4 +5,4 @@ releases:
       bug_fixes:
         - cassandra_cqlsh - Double quote cql shell command when it contains single quotes.
         - All modules - Ensure login parameters are available across all modules.
-      release_date_ '2021-02-27'
+      release_date: '2021-02-27'
