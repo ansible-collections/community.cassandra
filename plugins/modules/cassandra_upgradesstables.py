@@ -63,7 +63,7 @@ from ansible_collections.community.cassandra.plugins.module_utils.cassandra_comm
 def main():
     argument_spec = cassandra_common_argument_spec()
     argument_spec.update(
-        keyspace=dict(type='str', default=None, required=False),
+        keyspace=dict(type='str', default=None, required=False, no_log=False),
         table=dict(type='raw', default=None, required=False),
         num_jobs=dict(type='int', default=2, aliases=['j'], required=False)
     )

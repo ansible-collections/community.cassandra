@@ -96,7 +96,7 @@ class NodeToolCommand(NodeToolCmd):
 def main():
     argument_spec = cassandra_common_argument_spec()
     argument_spec.update(
-        keyspace=dict(type='str', default=None, required=False),
+        keyspace=dict(type='str', default=None, required=False, no_log=False),
         table=dict(type='raw', default=None, required=False),
         extended=dict(type='bool', default=False, required=False, aliases=['e'])
     )

@@ -545,7 +545,7 @@ def main():
             login=dict(type='bool', default=True),
             options=dict(type='dict'),
             data_centers=dict(type='dict', aliases=['data_centres']),
-            keyspace_permissions=dict(type='dict'),
+            keyspace_permissions=dict(type='dict', no_log=False),
             roles=dict(type='list', elements='str'),
             debug=dict(type='bool', default=False)),
         supports_check_mode=True

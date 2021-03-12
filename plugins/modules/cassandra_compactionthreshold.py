@@ -73,7 +73,7 @@ from ansible_collections.community.cassandra.plugins.module_utils.cassandra_comm
 def main():
     argument_spec = cassandra_common_argument_spec()
     argument_spec.update(
-        keyspace=dict(type='str', required=True),
+        keyspace=dict(type='str', required=True, no_log=False),
         table=dict(type='str', required=True),
         min=dict(type='int', required=True),
         max=dict(type='int', required=True)

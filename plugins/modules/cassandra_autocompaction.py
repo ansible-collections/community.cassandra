@@ -74,7 +74,7 @@ from ansible_collections.community.cassandra.plugins.module_utils.cassandra_comm
 def main():
     argument_spec = cassandra_common_argument_spec()
     argument_spec.update(
-        keyspace=dict(type='str', required=True),
+        keyspace=dict(type='str', required=True, no_log=False),
         table=dict(type='list', elements='str', required=True),
         state=dict(required=True, choices=['enabled', 'disabled'])
     )

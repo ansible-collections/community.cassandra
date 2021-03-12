@@ -376,7 +376,7 @@ def main():
             login_port=dict(type='int', default=9042),
             name=dict(type='str', required=True),
             state=dict(type='str', required=True, choices=['present', 'absent']),
-            keyspace=dict(type='str', required=True),
+            keyspace=dict(type='str', required=True, no_log=False),
             columns=dict(type='list', elements='dict'),
             primary_key=dict(type='list', elements='str'),
             clustering=dict(type='list', elements='dict'),
