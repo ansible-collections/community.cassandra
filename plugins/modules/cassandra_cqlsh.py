@@ -252,7 +252,7 @@ def main():
         cqlsh_port=dict(type='int', default=9042, aliases=['login_port']),
         username=dict(type='str', aliases=['login_user']),
         password=dict(type='str', no_log=True, aliases=['login_password']),
-        keyspace=dict(type='str'),
+        keyspace=dict(type='str', no_log=False),
         file=dict(type='str'),
         execute=dict(type='str'),
         encoding=dict(type='str', default='utf-8'),
