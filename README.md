@@ -9,6 +9,8 @@ This collection called `cassandra` aims at providing all Ansible modules allowin
 
 As this is an independent Collection, it can be released on it's own release cadance.
 
+If you like this collection please give us a rating on [Ansible Galaxy](https://galaxy.ansible.com/community/cassandra).
+
 ## GitHub workflow
 
 * Maintainers would be members of this GitHub Repo.
