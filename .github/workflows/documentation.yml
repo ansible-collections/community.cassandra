@@ -46,11 +46,7 @@ jobs:
           command: pip install wheel setuptools ansible-doc-extractor --upgrade
 
       - name: Install rstdoc
-        uses: nick-invision/retry@v2
-        with:
-          timeout_minutes: 3
-          max_attempts: 3
-          command: pip install -v rstdoc
+        run: pip install -v rstdoc
 
       - name: Create docs dir
         run: mkdir -p docs/{lookup,cache}
