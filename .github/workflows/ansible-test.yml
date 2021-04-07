@@ -34,7 +34,6 @@ jobs:
         python_version: ["3.6"]
         ansible_version:
           - stable-2.11
-          - stable-2.10
           - devel
         cassandra_version:
           - package_version: "311x"
