@@ -1,12 +1,12 @@
 namespace: community
 name: cassandra
-version: 1.0.4
+version: 1.0.5
 readme: README.md
 authors: Rhys Campbell
 description: null
 license: null
 license_file: LICENSE
-tags: 
+tags:
   - cassandra
   - nosql
   - database
