@@ -6,3 +6,10 @@ releases:
         - cassandra_cqlsh - Double quote cql shell command when it contains single quotes.
         - All modules - Ensure login parameters are available across all modules.
       release_date: '2021-02-27'
+  1.0.5:
+    changes:
+      release_summary: "Maintenance release"
+      bugfixes:
+        - Remove cassandra_dba role.
+        - Add missing metadata to existing roles.
+      release_date: '2021-04-21'
