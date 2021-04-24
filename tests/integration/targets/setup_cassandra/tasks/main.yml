@@ -141,15 +141,6 @@
   register: current_python
   when: ansible_os_family == "Debian"
 
-
-# pip is set to pip 21.0.1 from /usr/local/lib/python3.9/dist-packages/pip
-- name: Why is pip messed up on Debian?
-  shell: |
-     update-alternatives --install /usr/local/bin/pip pip /usr/bin/pip3.6 1
-     update-alternatives --set pip /usr/bin/pip3.6
-     pip --version
-  when: "original_python.stdout == 'Python 3.6.9'"
-
 #- name: Set Python version on Debian flavours
 #  block:
 #
