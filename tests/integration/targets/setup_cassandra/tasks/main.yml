@@ -18,7 +18,7 @@
 
 # ============================================================
 - name: Ensure python3-apt is installed
-  shell: apt install python3-apt
+  shell: apt install python3-apt -y
   when: ansible_os_family == "Debian"
 
 - name: Install iproute2 package needed for ansible_default_ipv4 facts
