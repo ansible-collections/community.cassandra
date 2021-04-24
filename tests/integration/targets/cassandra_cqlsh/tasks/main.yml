@@ -18,10 +18,21 @@
 
 # ===========================================================
 
+# c* deb package pulls down py2.7 and sets it as default
+- name: DEBUG STEP
+  shell: python --version
+  register: current_python
+  when: ansible_os_family == "Debian"
+
 - name: Run the DESC KEYSPACES command
   community.cassandra.cassandra_cqlsh:
     execute: "DESC KEYSPACES"
   register: cqlsh
+
+- name: DEBUG STEP
+  shell: python --version
+  register: current_python
+  when: ansible_os_family == "Debian"
 
 - assert:
     that:
