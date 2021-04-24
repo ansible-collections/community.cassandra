@@ -134,8 +134,8 @@
 
     - shell: update-alternatives --install /usr/bin/python python {{ item.python_path }} {{ item.priority }}
       with_items:
-        - { "python_path": "/usr/bin/python3.9", "priority": 1 }
+        - { "python_path": "/usr/bin/python3.8", "priority": 1 }
         - { "python_path": "/usr/bin/python2.7", "priority": 2 }
 
-    - shell: update-alternatives --set python /usr/bin/python3.9
+    - shell: update-alternatives --set python /usr/bin/python3.8
   when: ansible_os_family == "Debian"
