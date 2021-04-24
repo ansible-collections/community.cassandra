@@ -1,3 +1,6 @@
 ---
-- shell: update-alternatives --set python /usr/bin/python2.7
-- shell: update-alternatives --set pip /usr/bin/pip2.7
+- apt:
+    name: "{{ cassandra_deb_pkg }}"
+    state: absent
+- shell: update-alternatives --set python /usr/bin/python3.9
+- shell: update-alternatives --set pip /usr/bin/pip3.9

@@ -4,6 +4,4 @@
     state: absent
 
 - name: debian_remove_cassandra
-  apt:
-    name: "{{ cassandra_deb_pkg }}"
-    state: absent
+  import_tasks: reset_python_env.yml
