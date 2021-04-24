@@ -157,5 +157,5 @@
     - shell: update-alternatives --set pip /usr/bin/pip3.9
   when:
     - ansible_os_family == "Debian"
-    - "'Python 2.7' in original_python.stdout"
-    - "'Python 3.9' in current_python.stdout"
+    - "'Python 3.9' in original_python.stdout"
+    - "'Python 2.7' in current_python.stdout"
