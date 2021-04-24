@@ -248,3 +248,8 @@
     that:
       - "cqlsh.changed"
       - "cqlsh.msg == 'transform type was auto'"
+
+- name: DEBUG STEP
+  shell: python --version
+  register: current_python
+  when: ansible_os_family == "Debian"
