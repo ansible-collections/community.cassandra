@@ -82,6 +82,7 @@
 
 - name: Install python-apt
   shell: apt -y install python-apt
+  when: ansible_os_family == 'Debian'
 
 - name: Setup Cassandra apt repo
   apt_repository:
