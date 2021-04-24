@@ -7,6 +7,3 @@
   apt:
     name: "{{ cassandra_deb_pkg }}"
     state: absent
-
-- name: Reset the Python Env for Debian
-  import_tasks: reset_python_env.yml
