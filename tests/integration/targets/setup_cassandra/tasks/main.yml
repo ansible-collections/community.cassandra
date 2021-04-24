@@ -73,7 +73,6 @@
   when: ansible_os_family == 'RedHat'
   notify:
     - redhat_remove_cassandra
-    #- redhat_remove_python3
 
 - name: Add an Apt keys for Cassandra
   apt_key:
@@ -81,17 +80,14 @@
     state: present
   when: ansible_os_family == 'Debian'
 
+- name: Install python-apt
+  shell: apt -y install python-apt
+
 - name: Setup Cassandra apt repo
   apt_repository:
     repo: "{{ cassandra_deb.repo }}"
     state: present
   when: ansible_os_family == 'Debian'
-
-#- name: Run the equivalent of "apt-get update"
-#  apt:
-#    update_cache: yes
-#    cache_valid_time: 3600
-#  when: ansible_os_family == 'Debian'
 
 - name: Install cassandra deb package
   apt:
@@ -99,7 +95,6 @@
     state: present
     force: yes
   when: ansible_os_family == 'Debian'
-  #notify: debian_remove_cassandra
 
 - name: Adjust heap size
   lineinfile:
