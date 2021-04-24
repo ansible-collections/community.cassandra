@@ -141,21 +141,30 @@
   register: current_python
   when: ansible_os_family == "Debian"
 
-- name: Set Python version on Debian flavours
-  block:
 
-    - shell: update-alternatives --install /usr/bin/python python {{ item.python_path }} {{ item.priority }}
-      with_items:
-        - { "python_path": "/usr/bin/python3.6", "priority": 1 }
-        - { "python_path": "/usr/bin/python2.7", "priority": 2 }
+# pip is set to pip 21.0.1 from /usr/local/lib/python3.9/dist-packages/pip
+- name: Why is pip messed up on Debian?
+  shell: |
+     update-alternatives --install /usr/local/bin/pip pip /usr/bin/pip3.6 1
+     update-alternatives --set pip /usr/bin/pip3.6
+     pip --version
+  when: "original_python.stdout == 'Python 3.6.9'"
 
-    - shell: update-alternatives --set python /usr/bin/python3.9
-
-    - shell: update-alternatives --install /usr/local/bin/pip pip {{ item.pip_path }} {{ item.priority }}
-      with_items:
-        - { "pip_path": "/usr/bin/pip3.6", "priority": 1 }
-        - { "pip_path": "/usr/bin/pip2.7", "priority": 2 }
-
-    - shell: update-alternatives --set pip /usr/bin/pip3.9
-  when:
-    - ansible_os_family == "Debian"
+#- name: Set Python version on Debian flavours
+#  block:
+#
+#    - shell: update-alternatives --install /usr/bin/python python {{ item.python_path }} {{ item.priority }}
+#      with_items:
+#        - { "python_path": "/usr/bin/python3.6", "priority": 1 }
+#        - { "python_path": "/usr/bin/python2.7", "priority": 2 }
+#
+#    - shell: update-alternatives --set python /usr/bin/python3.9
+#
+#    - shell: update-alternatives --install /usr/local/bin/pip pip {{ item.pip_path }} {{ item.priority }}
+#      with_items:
+#        - { "pip_path": "/usr/bin/pip3.6", "priority": 1 }
+#        - { "pip_path": "/usr/bin/pip2.7", "priority": 2 }
+#
+#    - shell: update-alternatives --set pip /usr/bin/pip3.9
+#  when:
+#    - ansible_os_family == "Debian"
