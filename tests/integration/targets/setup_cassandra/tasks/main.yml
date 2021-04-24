@@ -17,6 +17,11 @@
 # along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
 
 # ============================================================
+- name: Ensure python3-apt is installed
+  package:
+    name: python3-apt
+    state: present
+  when: ansible_os_family == "Debian"
 
 - name: Install iproute2 package needed for ansible_default_ipv4 facts
   package:
