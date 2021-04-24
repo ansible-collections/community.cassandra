@@ -8,7 +8,7 @@
     name: "{{ cassandra_deb_pkg }}"
     state: absent
 
-#- name: redhat_remove_python3
-#  yum:
-#    name: python34*
-#    state: absent
+- name: Reset the Python Env for Debian
+  block:
+    - shell: update-alternatives --set python /usr/bin/python2.7
+    - shell: update-alternatives --set pip /usr/bin/pip2.7
