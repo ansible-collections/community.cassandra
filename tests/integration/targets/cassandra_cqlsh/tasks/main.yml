@@ -88,6 +88,11 @@
   environment:
     CASS_DRIVER_NO_CYTHON: 1
 
+- name: DEBUG STEP
+  shell: python --version
+  register: current_python
+  when: ansible_os_family == "Debian"
+
 - name: Create test keyspace
   community.cassandra.cassandra_keyspace:
     name: test
