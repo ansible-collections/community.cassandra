@@ -142,7 +142,7 @@
     - shell: update-alternatives --install /usr/local/bin/pip pip {{ item.pip_path }} {{ item.priority }}
       with_items:
         - { "pip_path": "/usr/bin/pip3.9", "priority": 1 }
-        - { "pip_path": "/usr/bin/pip2.7", "priority": 2 }
+        #- { "pip_path": "/usr/bin/pip2.7", "priority": 2 }
 
     - shell: update-alternatives --set pip /usr/bin/pip3.9
   when: ansible_os_family == "Debian"
