@@ -100,12 +100,6 @@
   when: ansible_os_family == 'Debian'
   notify: debian_remove_cassandra
 
-# c* deb package pulls down py2.7 and sets it as default
-- name: Get current python
-  shell: python --version
-  register: current_python
-  when: ansible_os_family == "Debian"
-
 - name: Adjust heap size
   lineinfile:
     path: "{{ cassandra_env_file }}"
@@ -140,6 +134,12 @@
   with_items:
     - { "host": "0.0.0.0", "port": 9042 }
     - { "host": "127.0.0.1", "port": 7199 }
+
+# c* deb package pulls down py2.7 and sets it as default
+- name: Get current python
+  shell: python --version
+  register: current_python
+  when: ansible_os_family == "Debian"
 
 - name: Set Python version on Debian flavours
   block:
