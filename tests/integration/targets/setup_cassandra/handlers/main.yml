@@ -4,11 +4,4 @@
     state: absent
 
 - name: debian_remove_cassandra
-  apt:
-    name: "{{ cassandra_deb_pkg }}"
-    state: absent
-
-#- name: redhat_remove_python3
-#  yum:
-#    name: python34*
-#    state: absent
+  include_tasks: cleanup_debian_env.yml
