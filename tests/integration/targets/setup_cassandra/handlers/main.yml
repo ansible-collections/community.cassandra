@@ -4,4 +4,4 @@
     state: absent
 
 - name: debian_remove_cassandra
-  include_tasks: reset_python_env.yml
+  include_tasks: cleanup_debian_env.yml

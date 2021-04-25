@@ -3,6 +3,4 @@
     name: "{{ cassandra_deb_pkg }}"
     state: absent
 - shell: update-alternatives --install /usr/bin/python python /usr/bin/python3.9 1
-#- shell: update-alternatives --install /usr/local/bin/pip pip /usr/bin/pip3.9 1
 - shell: update-alternatives --set python /usr/bin/python3.9
-#- shell: update-alternatives --set pip /usr/bin/pip3.9
