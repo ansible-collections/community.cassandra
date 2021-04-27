@@ -2,5 +2,5 @@
 - apt:
     name: "{{ cassandra_deb_pkg }}"
     state: absent
-- shell: update-alternatives --install /usr/bin/python python /usr/bin/python3.9 1
-- shell: update-alternatives --set python /usr/bin/python3.9
+- shell: update-alternatives --install /usr/bin/python python /usr/bin/python3.6 1
+- shell: update-alternatives --set python /usr/bin/python3.6
