@@ -76,9 +76,9 @@ jobs:
           - devel
         cassandra_version:
           - package_version: "311x"
-            tar_version: "3.11.6"
+            tar_version: "3.11.10"
           - package_version: "22x"
-            tar_version: "2.2.9"
+            tar_version: "2.2.19"
         test_scenario:
           - docker_image: default
             python_version: "3.6"
