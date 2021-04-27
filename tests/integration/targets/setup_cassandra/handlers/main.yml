@@ -3,5 +3,6 @@
     name: "{{ cassandra_yum_pkg }}"
     state: absent
 
+# RPM Pulls down python2.7
 - name: debian_remove_cassandra
   include_tasks: cleanup_debian_env.yml
