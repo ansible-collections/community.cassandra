@@ -179,3 +179,121 @@ jobs:
 
       - name: Upload Coverage data
         run: tests/coverage.sh
+
+  integration_311x:
+    needs: integration_matrix
+    runs-on: ubuntu-20.04
+    defaults:
+      run:
+        working-directory: ansible_collections/community/cassandra
+    strategy:
+      matrix:
+        python_version: ["3.6"]
+        ansible_version:
+          - stable-2.11
+          - devel
+        cassandra_version:
+          - package_version: "311x"
+            tar_version: "3.11.10"
+        test_scenario:
+          - docker_image: default
+            python_version: "3.6"
+            ansible_test_options: ""
+          - docker_image: centos7
+            python_version: "2.7"
+            ansible_test_options: "--docker-privileged"
+        cassandra_module: ${{ fromJson(needs.integration_matrix.outputs.matrix) }}
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+        with:
+          path: ansible_collections/community/cassandra
+
+      - name: Set up Python ${{ matrix.test_scenario.python_version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.test_scenario.python_version }}
+
+      - name: Install ansible-base (devel)
+        uses: nick-invision/retry@v2
+        with:
+          timeout_minutes: 3
+          max_attempts: 3
+          command: pip install https://github.com/ansible/ansible/archive/devel.tar.gz --disable-pip-version-check
+
+      - name: Ensure cassandra versions are set to ${{ matrix.cassandra_version.package_version }} | ${{ matrix.cassandra_version.tar_version }}
+        run: |
+          sed -i 's/^cassandra_version:.*/cassandra_version: \"${{ matrix.cassandra_version.package_version }}\"/g' ${{ env.setup_cassandra_version_file }}
+          sed -i 's/^cassandra_version:.*/cassandra_version: \"${{ matrix.cassandra_version.tar_version }}\"/g' ${{ env.setup_ccm_version_file }}
+
+      - name: Run integration tests on Python ${{ matrix.test_scenario.python_version }} | ${{ matrix.test_scenario.docker_image }} | ${{ matrix.ansible_version }} | ${{ matrix.cassandra_module }} | ${{ matrix.cassandra_version.package_version }}
+        run: ansible-test integration --docker ${{ matrix.test_scenario.docker_image }} ${{ matrix.test_scenario.ansible_test_options }} -v --color --retry-on-error --python ${{ matrix.test_scenario.python_version }} --continue-on-error --diff --coverage  ${{ matrix.cassandra_module }}
+
+      - name: Generate coverage report.
+        run: ansible-test coverage xml -v --requirements --group-by command --group-by version
+
+      - uses: codecov/codecov-action@v1
+        with:
+          fail_ci_if_error: false
+
+      - name: Upload Coverage data
+        run: tests/coverage.sh
+
+  integration_40x:
+    needs: integration_matrix
+    runs-on: ubuntu-20.04
+    defaults:
+      run:
+        working-directory: ansible_collections/community/cassandra
+    strategy:
+      matrix:
+        python_version: ["3.6"]
+        ansible_version:
+          - stable-2.11
+          - devel
+        cassandra_version:
+          - package_version: "40x"
+            tar_version: "4.0-rc1"
+        test_scenario:
+          - docker_image: default
+            python_version: "3.6"
+            ansible_test_options: ""
+          - docker_image: centos7
+            python_version: "2.7"
+            ansible_test_options: "--docker-privileged"
+        cassandra_module: ${{ fromJson(needs.integration_matrix.outputs.matrix) }}
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+        with:
+          path: ansible_collections/community/cassandra
+
+      - name: Set up Python ${{ matrix.test_scenario.python_version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.test_scenario.python_version }}
+
+      - name: Install ansible-base (devel)
+        uses: nick-invision/retry@v2
+        with:
+          timeout_minutes: 3
+          max_attempts: 3
+          command: pip install https://github.com/ansible/ansible/archive/devel.tar.gz --disable-pip-version-check
+
+      - name: Ensure cassandra versions are set to ${{ matrix.cassandra_version.package_version }} | ${{ matrix.cassandra_version.tar_version }}
+        run: |
+          sed -i 's/^cassandra_version:.*/cassandra_version: \"${{ matrix.cassandra_version.package_version }}\"/g' ${{ env.setup_cassandra_version_file }}
+          sed -i 's/^cassandra_version:.*/cassandra_version: \"${{ matrix.cassandra_version.tar_version }}\"/g' ${{ env.setup_ccm_version_file }}
+
+      - name: Run integration tests on Python ${{ matrix.test_scenario.python_version }} | ${{ matrix.test_scenario.docker_image }} | ${{ matrix.ansible_version }} | ${{ matrix.cassandra_module }} | ${{ matrix.cassandra_version.package_version }}
+        run: ansible-test integration --docker ${{ matrix.test_scenario.docker_image }} ${{ matrix.test_scenario.ansible_test_options }} -v --color --retry-on-error --python ${{ matrix.test_scenario.python_version }} --continue-on-error --diff --coverage  ${{ matrix.cassandra_module }}
+
+      - name: Generate coverage report.
+        run: ansible-test coverage xml -v --requirements --group-by command --group-by version
+
+      - uses: codecov/codecov-action@v1
+        with:
+          fail_ci_if_error: false
+
+      - name: Upload Coverage data
+        run: tests/coverage.sh
