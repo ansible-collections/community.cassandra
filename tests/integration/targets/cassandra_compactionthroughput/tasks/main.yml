@@ -17,6 +17,13 @@
 # along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
 
 # ===========================================================
+
+# C* 4.0 has updated the default to 64MB
+- name: Set compactionthroughput with module - Ensure we start from 16MB
+  community.cassandra.cassandra_compactionthroughput:
+    value: 16
+    debug: yes
+
 - name: Get incremental backup status 1
   shell: nodetool -h 127.0.0.1 getcompactionthroughput
   register: compactionthroughput
