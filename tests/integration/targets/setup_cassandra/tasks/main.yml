@@ -100,6 +100,37 @@
   when: ansible_os_family == 'Debian'
   notify: debian_remove_cassandra
 
+- name: Add DC Names - Required for 4.0
+  blockinfile:
+    path: /etc/cassandra/cassandra-topology.properties
+    content: |
+      # Cassandra Node IP=Data Center:Rack
+      192.168.1.100=DC1:RAC1
+      192.168.2.200=DC2:RAC2
+
+      10.0.0.10=london:RAC1
+      10.0.0.11=zurich:RAC1
+      10.0.0.12=tokyo:RAC2
+      10.0.0.13=new_york:RAC2
+      10.0.0.14=marlow:RAC2
+      10.0.0.15=rome:RAC2
+      10.0.0.16=beijing:RAC2
+      10.0.0.17=singapore:RAC2
+      10.0.0.18=amsterdam:RAC2
+
+      10.20.114.10=DC2:RAC1
+      10.20.114.11=DC2:RAC1
+
+      10.21.119.13=DC3:RAC1
+      10.21.119.10=DC3:RAC1
+
+      10.0.0.13=DC1:RAC2
+      10.21.119.14=DC3:RAC2
+      10.20.114.15=DC2:RAC2
+
+      # default for unknown nodes
+      default=DC1:r1
+
 - name: Adjust heap size
   lineinfile:
     path: "{{ cassandra_env_file }}"

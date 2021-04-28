@@ -229,12 +229,12 @@
   community.cassandra.cassandra_cqlsh:
     username: "{{ cassandra_admin_user }}"
     password: "{{ cassandra_admin_pwd }}"
-    execute: "ALTER KEYSPACE system_auth WITH REPLICATION= {'class':'NetworkTopologyStrategy','datacentre001':3}"
+    execute: "ALTER KEYSPACE system_auth WITH REPLICATION= {'class':'NetworkTopologyStrategy','DC1':3}"
   register: cqlsh
-  when: "cassandra_version.startswith('4') == False"   # TODO Doesn't work on 4.0 RC1 for some reason? Fix later
+  #when: "cassandra_version.startswith('4') == False"   # TODO Doesn't work on 4.0 RC1 for some reason? Fix later
 
 - assert:
     that:
       - "cqlsh.changed"
       - "cqlsh.msg == 'transform type was auto'"
-  when: "cassandra_version.startswith('4') == False"   # TODO Doesn't work on 4.0 RC1 for some reason? Fix later
+  #when: "cassandra_version.startswith('4') == False"   # TODO Doesn't work on 4.0 RC1 for some reason? Fix later
