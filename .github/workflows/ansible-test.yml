@@ -199,8 +199,8 @@ jobs:
           - docker_image: default
             python_version: "3.6"
             ansible_test_options: ""
-          - docker_image: centos7
-            python_version: "2.7"
+          - docker_image: centos8
+            python_version: "3.6"
             ansible_test_options: "--docker-privileged"
         cassandra_module: ${{ fromJson(needs.integration_matrix.outputs.matrix) }}
     steps:
