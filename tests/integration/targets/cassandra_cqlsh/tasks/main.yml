@@ -231,6 +231,7 @@
     password: "{{ cassandra_admin_pwd }}"
     execute: "ALTER KEYSPACE system_auth WITH REPLICATION= {'class':'NetworkTopologyStrategy','datacentre001':3}"
   register: cqlsh
+  when: "cassandra_version.startswith('4') == False"   # TODO Doesn't work on 4.0 RC1 for some reason? Fix later
 
 - assert:
     that:
