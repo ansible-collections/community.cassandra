@@ -169,7 +169,7 @@ def create_alter_keyspace(module, session, keyspace, replication_factor, durable
     if data_centres is not None:
         cql += "WITH REPLICATION = { 'class' : 'NetworkTopologyStrategy', "
         for dc in data_centres:
-            cql += "'{0}' : {1},".format(str(dc), data_centres[dc])
+            cql += " '{0}' : {1},".format(str(dc), data_centres[dc])
         cql = cql[:-1] + " }"
     else:
         cql += "WITH REPLICATION = {{ 'class' : 'SimpleStrategy', 'replication_factor': {0} }}".format(replication_factor)
