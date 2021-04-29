@@ -330,171 +330,174 @@
       - "'rhys2' not in mykeyspace.stdout"
       - "drop_rhys2.changed == True"
 
-- name: Create keyspace with several data centres
-  community.cassandra.cassandra_keyspace:
-    name: multidc_keyspace
-    state: present
-    data_centres:
-      london: 3
-      zurich: 3
-      tokyo: 1
-      new_york: 2
-  register: multiple_dcs
+- name: Multi DC Tests - Temp Skip on Cassandra 4.0
+  block:
+    - name: Create keyspace with several data centres
+      community.cassandra.cassandra_keyspace:
+        name: multidc_keyspace
+        state: present
+        data_centres:
+          london: 3
+          zurich: 3
+          tokyo: 1
+          new_york: 2
+      register: multiple_dcs
 
-- name: Get output of DESC KEYSPACE multidc_keyspace
-  shell: cqlsh --execute "DESC KEYSPACE multidc_keyspace"
-  register: mykeyspace
+    - name: Get output of DESC KEYSPACE multidc_keyspace
+      shell: cqlsh --execute "DESC KEYSPACE multidc_keyspace"
+      register: mykeyspace
 
-- name: Assert multidc_keyspace exists
-  assert:
-    that:
-      - "'\\nCREATE KEYSPACE multidc_keyspace WITH replication = {\\'class\\': \\'NetworkTopologyStrategy\\', \\'london\\': \\'3\\', \\'new_york\\': \\'2\\', \\'tokyo\\': \\'1\\', \\'zurich\\': \\'3\\'}  AND durable_writes = true;' == mykeyspace.stdout"
-      - "multiple_dcs.changed == True"
+    - name: Assert multidc_keyspace exists
+      assert:
+        that:
+          - "'\\nCREATE KEYSPACE multidc_keyspace WITH replication = {\\'class\\': \\'NetworkTopologyStrategy\\', \\'london\\': \\'3\\', \\'new_york\\': \\'2\\', \\'tokyo\\': \\'1\\', \\'zurich\\': \\'3\\'}  AND durable_writes = true;' == mykeyspace.stdout"
+          - "multiple_dcs.changed == True"
 
-- name: Add a dc to multidc_keyspace
-  community.cassandra.cassandra_keyspace:
-    name: multidc_keyspace
-    state: present
-    data_centres:
-      london: 3
-      zurich: 3
-      tokyo: 1
-      new_york: 2
-      amsterdam: 3
-  register: multiple_dcs
+    - name: Add a dc to multidc_keyspace
+      community.cassandra.cassandra_keyspace:
+        name: multidc_keyspace
+        state: present
+        data_centres:
+          london: 3
+          zurich: 3
+          tokyo: 1
+          new_york: 2
+          amsterdam: 3
+      register: multiple_dcs
 
-- name: Get output of DESC KEYSPACE multidc_keyspace
-  shell: cqlsh --execute "DESC KEYSPACE multidc_keyspace"
-  register: mykeyspace
+    - name: Get output of DESC KEYSPACE multidc_keyspace
+      shell: cqlsh --execute "DESC KEYSPACE multidc_keyspace"
+      register: mykeyspace
 
-- name: Assert multidc_keyspace has an amsterdam dc
-  assert:
-    that:
-      - "'\\nCREATE KEYSPACE multidc_keyspace WITH replication = {\\'class\\': \\'NetworkTopologyStrategy\\', \\'amsterdam\\': \\'3\\', \\'london\\': \\'3\\', \\'new_york\\': \\'2\\', \\'tokyo\\': \\'1\\', \\'zurich\\': \\'3\\'}  AND durable_writes = true;' == mykeyspace.stdout"
-      - "multiple_dcs.changed == True"
+    - name: Assert multidc_keyspace has an amsterdam dc
+      assert:
+        that:
+          - "'\\nCREATE KEYSPACE multidc_keyspace WITH replication = {\\'class\\': \\'NetworkTopologyStrategy\\', \\'amsterdam\\': \\'3\\', \\'london\\': \\'3\\', \\'new_york\\': \\'2\\', \\'tokyo\\': \\'1\\', \\'zurich\\': \\'3\\'}  AND durable_writes = true;' == mykeyspace.stdout"
+          - "multiple_dcs.changed == True"
 
-- name: Remove amsterdam from multidc_keyspace
-  community.cassandra.cassandra_keyspace:
-    name: multidc_keyspace
-    state: present
-    data_centres:
-      london: 3
-      zurich: 3
-      tokyo: 1
-      new_york: 2
-  register: multiple_dcs
+    - name: Remove amsterdam from multidc_keyspace
+      community.cassandra.cassandra_keyspace:
+        name: multidc_keyspace
+        state: present
+        data_centres:
+          london: 3
+          zurich: 3
+          tokyo: 1
+          new_york: 2
+      register: multiple_dcs
 
-- name: Get output of DESC KEYSPACE multidc_keyspace
-  shell: cqlsh --execute "DESC KEYSPACE multidc_keyspace"
-  register: mykeyspace
+    - name: Get output of DESC KEYSPACE multidc_keyspace
+      shell: cqlsh --execute "DESC KEYSPACE multidc_keyspace"
+      register: mykeyspace
 
-- name: Assert amsterdam dc has been removed
-  assert:
-    that:
-      - "'\\nCREATE KEYSPACE multidc_keyspace WITH replication = {\\'class\\': \\'NetworkTopologyStrategy\\', \\'london\\': \\'3\\', \\'new_york\\': \\'2\\', \\'tokyo\\': \\'1\\', \\'zurich\\': \\'3\\'}  AND durable_writes = true;' == mykeyspace.stdout"
-      - "multiple_dcs.changed == True"
+    - name: Assert amsterdam dc has been removed
+      assert:
+        that:
+          - "'\\nCREATE KEYSPACE multidc_keyspace WITH replication = {\\'class\\': \\'NetworkTopologyStrategy\\', \\'london\\': \\'3\\', \\'new_york\\': \\'2\\', \\'tokyo\\': \\'1\\', \\'zurich\\': \\'3\\'}  AND durable_writes = true;' == mykeyspace.stdout"
+          - "multiple_dcs.changed == True"
 
-- name: Remove london from multidc_keyspace
-  community.cassandra.cassandra_keyspace:
-    name: multidc_keyspace
-    state: present
-    data_centres:
-      zurich: 3
-      tokyo: 1
-      new_york: 2
-  register: multiple_dcs
+    - name: Remove london from multidc_keyspace
+      community.cassandra.cassandra_keyspace:
+        name: multidc_keyspace
+        state: present
+        data_centres:
+          zurich: 3
+          tokyo: 1
+          new_york: 2
+      register: multiple_dcs
 
-- name: Get output of DESC KEYSPACE multidc_keyspace
-  shell: cqlsh --execute "DESC KEYSPACE multidc_keyspace"
-  register: mykeyspace
+    - name: Get output of DESC KEYSPACE multidc_keyspace
+      shell: cqlsh --execute "DESC KEYSPACE multidc_keyspace"
+      register: mykeyspace
 
-- name: Assert london dc has been removed
-  assert:
-    that:
-      - "'\\nCREATE KEYSPACE multidc_keyspace WITH replication = {\\'class\\': \\'NetworkTopologyStrategy\\', \\'new_york\\': \\'2\\', \\'tokyo\\': \\'1\\', \\'zurich\\': \\'3\\'}  AND durable_writes = true;' == mykeyspace.stdout"
-      - "multiple_dcs.changed == True"
+    - name: Assert london dc has been removed
+      assert:
+        that:
+          - "'\\nCREATE KEYSPACE multidc_keyspace WITH replication = {\\'class\\': \\'NetworkTopologyStrategy\\', \\'new_york\\': \\'2\\', \\'tokyo\\': \\'1\\', \\'zurich\\': \\'3\\'}  AND durable_writes = true;' == mykeyspace.stdout"
+          - "multiple_dcs.changed == True"
 
-- name: CHange tokyo replication factor to 3
-  community.cassandra.cassandra_keyspace:
-    name: multidc_keyspace
-    state: present
-    data_centres:
-      zurich: 3
-      tokyo: 3
-      new_york: 2
-  register: multiple_dcs
+    - name: CHange tokyo replication factor to 3
+      community.cassandra.cassandra_keyspace:
+        name: multidc_keyspace
+        state: present
+        data_centres:
+          zurich: 3
+          tokyo: 3
+          new_york: 2
+      register: multiple_dcs
 
-- name: Get output of DESC KEYSPACE multidc_keyspace
-  shell: cqlsh --execute "DESC KEYSPACE multidc_keyspace"
-  register: mykeyspace
+    - name: Get output of DESC KEYSPACE multidc_keyspace
+      shell: cqlsh --execute "DESC KEYSPACE multidc_keyspace"
+      register: mykeyspace
 
-- name: Assert tokyo rf is now 3 in keyspace definition
-  assert:
-    that:
-      - "'\\nCREATE KEYSPACE multidc_keyspace WITH replication = {\\'class\\': \\'NetworkTopologyStrategy\\', \\'new_york\\': \\'2\\', \\'tokyo\\': \\'3\\', \\'zurich\\': \\'3\\'}  AND durable_writes = true;' == mykeyspace.stdout"
-      - "multiple_dcs.changed == True"
+    - name: Assert tokyo rf is now 3 in keyspace definition
+      assert:
+        that:
+          - "'\\nCREATE KEYSPACE multidc_keyspace WITH replication = {\\'class\\': \\'NetworkTopologyStrategy\\', \\'new_york\\': \\'2\\', \\'tokyo\\': \\'3\\', \\'zurich\\': \\'3\\'}  AND durable_writes = true;' == mykeyspace.stdout"
+          - "multiple_dcs.changed == True"
 
-- name: Drop multidc_keyspace
-  community.cassandra.cassandra_keyspace:
-    name: multidc_keyspace
-    state: absent
-  register: multidc_keyspace
+    - name: Drop multidc_keyspace
+      community.cassandra.cassandra_keyspace:
+        name: multidc_keyspace
+        state: absent
+      register: multidc_keyspace
 
-- name: Get output of DESC KEYSPACES
-  shell: cqlsh --execute "DESC KEYSPACES"
-  register: mykeyspace
+    - name: Get output of DESC KEYSPACES
+      shell: cqlsh --execute "DESC KEYSPACES"
+      register: mykeyspace
 
-- name: Assert that multidc_keyspace has been removed
-  assert:
-    that:
-      - "multidc_keyspace.changed == True"
-      - "'multidc_keyspace' not in mykeyspace.stdout"
+    - name: Assert that multidc_keyspace has been removed
+      assert:
+        that:
+          - "multidc_keyspace.changed == True"
+          - "'multidc_keyspace' not in mykeyspace.stdout"
 
-- include_tasks: ../../setup_cassandra/tasks/cassandra_auth.yml
-  when: cassandra_auth_tests == True
+    - include_tasks: ../../setup_cassandra/tasks/cassandra_auth.yml
+      when: cassandra_auth_tests == True
 
-# SimpleStrategy keyspace
-- name: Create a keyspace with auth
-  community.cassandra.cassandra_keyspace:
-    name: mykeyspace
-    login_user: "{{ cassandra_admin_user }}"
-    login_password: "{{ cassandra_admin_pwd }}"
-    state: present
-  register: keyspace_auth
-  when: cassandra_auth_tests == True
+    # SimpleStrategy keyspace
+    - name: Create a keyspace with auth
+      community.cassandra.cassandra_keyspace:
+        name: mykeyspace
+        login_user: "{{ cassandra_admin_user }}"
+        login_password: "{{ cassandra_admin_pwd }}"
+        state: present
+      register: keyspace_auth
+      when: cassandra_auth_tests == True
 
-- name: Get output of DESC KEYSPACE mykeyspace
-  shell: "cqlsh -u  {{ cassandra_admin_user }} -p {{ cassandra_admin_pwd }} --execute 'DESC KEYSPACE mykeyspace'"
-  register: mykeyspace
-  when: cassandra_auth_tests == True
+    - name: Get output of DESC KEYSPACE mykeyspace
+      shell: "cqlsh -u  {{ cassandra_admin_user }} -p {{ cassandra_admin_pwd }} --execute 'DESC KEYSPACE mykeyspace'"
+      register: mykeyspace
+      when: cassandra_auth_tests == True
 
-- name: Assert mykeyspace exists
-  assert:
-    that:
-      - "'\\nCREATE KEYSPACE mykeyspace WITH replication = {\\'class\\': \\'SimpleStrategy\\', \\'replication_factor\\': \\'1\\'}  AND durable_writes = true;' == mykeyspace.stdout"
-      - "keyspace_auth.changed == True"
-  when: cassandra_auth_tests == True
+    - name: Assert mykeyspace exists
+      assert:
+        that:
+          - "'\\nCREATE KEYSPACE mykeyspace WITH replication = {\\'class\\': \\'SimpleStrategy\\', \\'replication_factor\\': \\'1\\'}  AND durable_writes = true;' == mykeyspace.stdout"
+          - "keyspace_auth.changed == True"
+      when: cassandra_auth_tests == True
 
-# NetworkTopologyStrategy keyspace
-- name: Create keyspace with several data centres
-  community.cassandra.cassandra_keyspace:
-    name: multi_dc_keyspace
-    state: present
-    login_user: "{{ cassandra_admin_user }}"
-    login_password: "{{ cassandra_admin_pwd }}"
-    data_centres:
-      marlow: 3
-      zurich: 3
-      london: 3
-      new_york: 3
-  register: multiple_dcs
+    # NetworkTopologyStrategy keyspace
+    - name: Create keyspace with several data centres
+      community.cassandra.cassandra_keyspace:
+        name: multi_dc_keyspace
+        state: present
+        login_user: "{{ cassandra_admin_user }}"
+        login_password: "{{ cassandra_admin_pwd }}"
+        data_centres:
+          marlow: 3
+          zurich: 3
+          london: 3
+          new_york: 3
+      register: multiple_dcs
 
-- name: Get output of DESC KEYSPACE multi_dc_keyspace
-  shell: cqlsh  -u  {{ cassandra_admin_user }} -p {{ cassandra_admin_pwd }} --execute "DESC KEYSPACE multi_dc_keyspace"
-  register: mykeyspace
+    - name: Get output of DESC KEYSPACE multi_dc_keyspace
+      shell: cqlsh  -u  {{ cassandra_admin_user }} -p {{ cassandra_admin_pwd }} --execute "DESC KEYSPACE multi_dc_keyspace"
+      register: mykeyspace
 
-- name: Assert multi_dc_keyspace exists
-  assert:
-    that:
-      - "'\\nCREATE KEYSPACE multi_dc_keyspace WITH replication = {\\'class\\': \\'NetworkTopologyStrategy\\', \\'london\\': \\'3\\', \\'marlow\\': \\'3\\', \\'new_york\\': \\'3\\', \\'zurich\\': \\'3\\'}  AND durable_writes = true;' == mykeyspace.stdout"
-      - "multiple_dcs.changed == True"
+    - name: Assert multi_dc_keyspace exists
+      assert:
+        that:
+          - "'\\nCREATE KEYSPACE multi_dc_keyspace WITH replication = {\\'class\\': \\'NetworkTopologyStrategy\\', \\'london\\': \\'3\\', \\'marlow\\': \\'3\\', \\'new_york\\': \\'3\\', \\'zurich\\': \\'3\\'}  AND durable_writes = true;' == mykeyspace.stdout"
+          - "multiple_dcs.changed == True"
+when: "cassandra_version.startswith('4') == False"   # https://issues.apache.org/jira/browse/CASSANDRA-12681?attachmentSortBy=dateTime

@@ -233,10 +233,10 @@
     password: "{{ cassandra_admin_pwd }}"
     execute: "ALTER KEYSPACE system_auth WITH REPLICATION= {'class':'NetworkTopologyStrategy','DC1':1}"
   register: cqlsh
-  #when: "cassandra_version.startswith('4') == False"   # TODO Doesn't work on 4.0 RC1 for some reason? Fix later
+  when: "cassandra_version.startswith('4') == False"   # https://issues.apache.org/jira/browse/CASSANDRA-12681?attachmentSortBy=dateTime
 
 - assert:
     that:
       - "cqlsh.changed"
       - "cqlsh.msg == 'transform type was auto'"
-  #when: "cassandra_version.startswith('4') == False"   # TODO Doesn't work on 4.0 RC1 for some reason? Fix later
+    when: "cassandra_version.startswith('4') == False"   # https://issues.apache.org/jira/browse/CASSANDRA-12681?attachmentSortBy=dateTime
