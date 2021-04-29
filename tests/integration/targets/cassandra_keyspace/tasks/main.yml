@@ -500,4 +500,4 @@
         that:
           - "'\\nCREATE KEYSPACE multi_dc_keyspace WITH replication = {\\'class\\': \\'NetworkTopologyStrategy\\', \\'london\\': \\'3\\', \\'marlow\\': \\'3\\', \\'new_york\\': \\'3\\', \\'zurich\\': \\'3\\'}  AND durable_writes = true;' == mykeyspace.stdout"
           - "multiple_dcs.changed == True"
-when: "cassandra_version.startswith('4') == False"   # https://issues.apache.org/jira/browse/CASSANDRA-12681?attachmentSortBy=dateTime
+  when: "cassandra_version.startswith('4') == False"   # https://issues.apache.org/jira/browse/CASSANDRA-12681?attachmentSortBy=dateTime
