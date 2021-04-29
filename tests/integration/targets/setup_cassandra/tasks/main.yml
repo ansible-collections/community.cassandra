@@ -101,8 +101,11 @@
   notify: debian_remove_cassandra
 
 - name: Add DC Names - Required for 4.0
-  blockinfile:
-    path: /etc/cassandra/cassandra-topology.properties
+  copy:
+    dest: /etc/cassandra/cassandra-topology.properties
+    owner: Cassandra
+    group: cassandra
+    mode: 0644
     content: |
       # Cassandra Node IP=Data Center:Rack
       192.168.1.100=DC1:RAC1
@@ -130,6 +133,7 @@
 
       # default for unknown nodes
       default=DC1:r1
+  when: "cassandra_version.startswith('4')"
 
 - name: Adjust heap size
   lineinfile:
