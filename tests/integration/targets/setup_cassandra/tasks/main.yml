@@ -123,9 +123,9 @@
 - name: Set Snitch to PropertyFileSnitch
   lineinfile:
     path: /etc/cassandra/cassandra.yaml
-    regexp: "endpoint_snitch\:"
+    regexp: "endpoint_snitch"
     line: 'endpoint_snitch: PropertyFileSnitch'
-  when: "cassandra_version.startswith('4')"  
+  when: "cassandra_version.startswith('4')"
 
 - name: Add DC Names - Required for 4.0 cassandra-topology.properties
   copy:
