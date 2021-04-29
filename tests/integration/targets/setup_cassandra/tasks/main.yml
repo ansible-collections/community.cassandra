@@ -100,26 +100,32 @@
   when: ansible_os_family == 'Debian'
   notify: debian_remove_cassandra
 
-- name: Add DC Names  - Required for 4.0 cassandra-rackdc.properties
-  copy:
-    dest: /etc/cassandra/cassandra-rackdc.properties
-    owner: cassandra
-    group: cassandra
-    mode: 0644
-    content: |
-      dc=dc1
-      rack=rack1
-
-      dc=london
-      dc=zurich
-      dc=tokyo
-      dc=new_york
-      dc=marlow
-      dc=rome
-      dc=beijing
-      dc=singapore
-      dc=amsterdam
-  when: "cassandra_version.startswith('4')"
+#- name: Add DC Names  - Required for 4.0 cassandra-rackdc.properties
+#  copy:
+#    dest: /etc/cassandra/cassandra-rackdc.properties
+#    owner: cassandra
+#    group: cassandra
+#    mode: 0644
+#    content: |
+#      dc=dc1
+#      rack=rack1
+#
+#      dc=london
+#      dc=zurich
+#      dc=tokyo
+#      dc=new_york
+#      dc=marlow
+#      dc=rome
+#      dc=beijing
+#      dc=singapore
+#      dc=amsterdam
+#  when: "cassandra_version.startswith('4')"
+- name: Set Snitch to PropertyFileSnitch
+  lineinfile:
+    path: /etc/cassandra/cassandra.yaml
+    regexp: "endpoint_snitch\:"
+    line: 'endpoint_snitch: PropertyFileSnitch'
+  when: "cassandra_version.startswith('4')"  
 
 - name: Add DC Names - Required for 4.0 cassandra-topology.properties
   copy:
