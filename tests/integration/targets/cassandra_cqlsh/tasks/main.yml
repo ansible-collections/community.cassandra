@@ -225,7 +225,7 @@
       - "cqlsh.failed"
       - "'SyntaxException: line 1:0 no viable alternative' in cqlsh.msg"
 
-- shell: "nodetool -u {{ cassandra_admin_user }} -pwd {{ cassandra_admin_pwd }} status"
+- shell: "nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} status"
 
 - name: Test cmd with single quote
   community.cassandra.cassandra_cqlsh:
