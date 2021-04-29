@@ -103,7 +103,7 @@
 - name: Add DC Names - Required for 4.0
   copy:
     dest: /etc/cassandra/cassandra-topology.properties
-    owner: Cassandra
+    owner: cassandra
     group: cassandra
     mode: 0644
     content: |
