@@ -239,4 +239,4 @@
     that:
       - "cqlsh.changed"
       - "cqlsh.msg == 'transform type was auto'"
-    when: "cassandra_version.startswith('4') == False"   # https://issues.apache.org/jira/browse/CASSANDRA-12681?attachmentSortBy=dateTime
+  when: "cassandra_version.startswith('4') == False"   # https://issues.apache.org/jira/browse/CASSANDRA-12681?attachmentSortBy=dateTime
