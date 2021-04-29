@@ -151,13 +151,13 @@
 
       10.0.0.10=london:RAC1
       10.0.0.11=zurich:RAC1
-      10.0.0.12=tokyo:RAC2
-      10.0.0.13=new_york:RAC2
-      10.0.0.14=marlow:RAC2
-      10.0.0.15=rome:RAC2
-      10.0.0.16=beijing:RAC2
-      10.0.0.17=singapore:RAC2
-      10.0.0.18=amsterdam:RAC2
+      10.0.0.12=tokyo:RAC1
+      10.0.0.13=new_york:RAC1
+      10.0.0.14=marlow:RAC1
+      10.0.0.15=rome:RAC1
+      10.0.0.16=beijing:RAC1
+      10.0.0.17=singapore:RAC1
+      10.0.0.18=amsterdam:RAC1
 
       10.20.114.10=DC2:RAC1
       10.20.114.11=DC2:RAC1
