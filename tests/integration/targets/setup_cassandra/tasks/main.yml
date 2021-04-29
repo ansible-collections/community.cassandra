@@ -165,7 +165,7 @@
     port: "{{ item.port }}"
     host: "{{ item.host }}"
     delay: 10
-    timeout: 300
+    timeout: 360
   with_items:
     - { "host": "0.0.0.0", "port": 9042 }
     - { "host": "127.0.0.1", "port": 7199 }
