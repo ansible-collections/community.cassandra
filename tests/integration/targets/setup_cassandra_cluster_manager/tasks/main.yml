@@ -115,10 +115,8 @@
     name: ccm
     state: present
 
-- shell: find /usr -name ccm
-
 - name: Cleanup any previous ccm stuff
-  shell: "sudo -E -u cassandra bash -c \"/usr/bin/ccm remove test > /dev/null\""
+  shell: "sudo -E -u cassandra bash -c \"ccm remove test > /dev/null\""
   become_user: cassandra
   args:
     warn: false
@@ -126,10 +124,11 @@
   environment:
     CCM_CONFIG_DIR: "/home/cassandra/config"
     CASSANDRA_HOME: "/home/cassandra"
+    PATH: /usr/bin:/usr/bin/local:{{ ansible_env.PATH }}
   ignore_errors: yes
 
 - name: Install Cassandra via ccm tool
-  shell: "sudo -E -u cassandra bash -c \"/usr/bin/ccm create test -v {{ cassandra_version }} > /dev/null\""
+  shell: "sudo -E -u cassandra bash -c \"ccm create test -v {{ cassandra_version }} > /dev/null\""
   become_user: cassandra
   args:
     warn: false
@@ -137,9 +136,10 @@
   environment:
     CCM_CONFIG_DIR: "/home/cassandra/config"
     CASSANDRA_HOME: "/home/cassandra"
+    PATH: /usr/bin:/usr/bin/local:{{ ansible_env.PATH }}
 
 - name: Add nodes to the Cassandra cluster
-  shell: "sudo -E -u cassandra bash -c \"/usr/bin/ccm populate -n {{ cassandra_nodes }}\""
+  shell: "sudo -E -u cassandra bash -c \"ccm populate -n {{ cassandra_nodes }}\""
   become_user: cassandra
   args:
     warn: false
@@ -147,9 +147,10 @@
   environment:
     CCM_CONFIG_DIR: "/home/cassandra/config"
     CASSANDRA_HOME: "/home/cassandra"
+    PATH: /usr/bin:/usr/bin/local:{{ ansible_env.PATH }}
 
 - name: Start the ccm cluster
-  shell: sudo -E -u cassandra bash -c "/usr/bin/ccm start"
+  shell: sudo -E -u cassandra bash -c "ccm start"
   become_user: cassandra
   args:
     warn: false
@@ -157,9 +158,10 @@
   environment:
     CCM_CONFIG_DIR: "/home/cassandra/config"
     CASSANDRA_HOME: "/home/cassandra"
+    PATH: /usr/bin:/usr/bin/local:{{ ansible_env.PATH }}
 
 - name: Get cluster status
-  shell: sudo -E -u cassandra bash -c "/usr/bin/ccm status"
+  shell: sudo -E -u cassandra bash -c "ccm status"
   become_user: cassandra
   args:
     warn: false
@@ -167,9 +169,10 @@
   environment:
     CCM_CONFIG_DIR: "/home/cassandra/config"
     CASSANDRA_HOME: "/home/cassandra"
+    PATH: /usr/bin:/usr/bin/local:{{ ansible_env.PATH }}
 
 - name: Get output of node1 status
-  shell: sudo -E -u cassandra bash -c "/usr/bin/ccm node1 status"
+  shell: sudo -E -u cassandra bash -c "ccm node1 status"
   become_user: cassandra
   args:
     warn: false
@@ -177,6 +180,7 @@
   environment:
     CCM_CONFIG_DIR: "/home/cassandra/config"
     CASSANDRA_HOME: "/home/cassandra"
+    PATH: /usr/bin:/usr/bin/local:{{ ansible_env.PATH }}
 
 - name: Set nodetool path
   copy:
