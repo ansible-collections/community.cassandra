@@ -115,6 +115,8 @@
     name: ccm
     state: present
 
+- shell: find /usr -name ccm
+
 - set_fact:
     ccm_cmd: /usr/bin/local/ccm
 
