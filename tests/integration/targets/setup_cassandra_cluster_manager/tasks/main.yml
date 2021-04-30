@@ -118,7 +118,7 @@
 - shell: find /usr -name ccm -ls
 
 - set_fact:
-    ccm_cmd: /usr/bin/local/ccm
+    ccm_cmd: /usr/local/bin/ccm
 
 - name: Test ccm executable
   shell:  /usr/local/bin/ccm --help
@@ -127,7 +127,7 @@
 
 - set_fact:
     ccm_cmd: /usr/bin/ccm
-  when: ccm.failed
+  when: "'Create a new cluster' not in ccm.stdout"
 
 - name: Cleanup any previous ccm stuff
   shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd }} remove test > /dev/null\""
