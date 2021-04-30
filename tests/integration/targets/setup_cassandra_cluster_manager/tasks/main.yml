@@ -121,7 +121,7 @@
     ccm_cmd: /usr/bin/local/ccm
 
 - name: Test ccm executable
-  shell:  /usr/bin/local/ccm --help
+  shell:  /usr/local/bin/ccm --help
   register: ccm
   ignore_errors: yes
 
