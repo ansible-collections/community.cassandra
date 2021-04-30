@@ -233,12 +233,14 @@
 - name: Get output of DESC KEYSPACE rhys
   shell: cqlsh --execute "DESC KEYSPACE rhys"
   register: mykeyspace
+  when: "cassandra_version.startswith('4') == False"   # https://issues.apache.org/jira/browse/CASSANDRA-12681?attachmentSortBy=dateTime
 
 - name: Assert that rhys keyspace has been created
   assert:
     that:
       - "rhys.changed == True"
       - "'\\nCREATE KEYSPACE rhys WITH replication = {\\'class\\': \\'NetworkTopologyStrategy\\', \\'beijing\\': \\'1\\', \\'london\\': \\'5\\', \\'marlow\\': \\'5\\', \\'rome\\': \\'3\\', \\'singapore\\': \\'2\\'}  AND durable_writes = true;' == mykeyspace.stdout"
+  when: "cassandra_version.startswith('4') == False"   # https://issues.apache.org/jira/browse/CASSANDRA-12681?attachmentSortBy=dateTime
 
 - name: Drop keyspace rhys
   community.cassandra.cassandra_keyspace:
