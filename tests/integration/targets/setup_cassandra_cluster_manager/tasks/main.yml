@@ -128,7 +128,7 @@
   when: ccm.failed
 
 - name: Cleanup any previous ccm stuff
-  shell: "sudo -E -u cassandra bash -c \"{{ ccmd_cmd }} remove test > /dev/null\""
+  shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd }} remove test > /dev/null\""
   become_user: cassandra
   args:
     warn: false
@@ -139,7 +139,7 @@
   ignore_errors: yes
 
 - name: Install Cassandra via ccm tool
-  shell: "sudo -E -u cassandra bash -c \"{{ ccmd_cmd }} create test -v {{ cassandra_version }} > /dev/null\""
+  shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd }} create test -v {{ cassandra_version }} > /dev/null\""
   become_user: cassandra
   args:
     warn: false
@@ -149,7 +149,7 @@
     CASSANDRA_HOME: "/home/cassandra"
 
 - name: Add nodes to the Cassandra cluster
-  shell: "sudo -E -u cassandra bash -c \"{{ ccmd_cmd }} populate -n {{ cassandra_nodes }}\""
+  shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd }} populate -n {{ cassandra_nodes }}\""
   become_user: cassandra
   args:
     warn: false
@@ -159,7 +159,7 @@
     CASSANDRA_HOME: "/home/cassandra"
 
 - name: Start the ccm cluster
-  shell: sudo -E -u cassandra bash -c "{{ ccmd_cmd }} start"
+  shell: sudo -E -u cassandra bash -c "{{ ccm_cmd }} start"
   become_user: cassandra
   args:
     warn: false
@@ -169,7 +169,7 @@
     CASSANDRA_HOME: "/home/cassandra"
 
 - name: Get cluster status
-  shell: sudo -E -u cassandra bash -c "{{ ccmd_cmd }} status"
+  shell: sudo -E -u cassandra bash -c "{{ ccm_cmd }} status"
   become_user: cassandra
   args:
     warn: false
@@ -179,7 +179,7 @@
     CASSANDRA_HOME: "/home/cassandra"
 
 - name: Get output of node1 status
-  shell: sudo -E -u cassandra bash -c "{{ ccmd_cmd }} node1 status"
+  shell: sudo -E -u cassandra bash -c "{{ ccm_cmd }} node1 status"
   become_user: cassandra
   args:
     warn: false
