@@ -115,6 +115,8 @@
     name: ccm
     state: present
 
+- shell: find /usr -name ccm
+
 - name: Cleanup any previous ccm stuff
   shell: "sudo -E -u cassandra bash -c \"/usr/local/bin/ccm remove test > /dev/null\""
   become_user: cassandra
