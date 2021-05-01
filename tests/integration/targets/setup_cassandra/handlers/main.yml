@@ -1,7 +1,5 @@
 - name: redhat_remove_cassandra
-  yum:
-    name: "{{ cassandra_yum_pkg }}"
-    state: absent
+  include_tasks: cleanup_redhat7:env.yml
 
 # RPM Pulls down python2.7
 - name: debian_remove_cassandra
