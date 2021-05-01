@@ -1,5 +1,5 @@
 - name: redhat_remove_cassandra
-  include_tasks: cleanup_redhat7:env.yml
+  include_tasks: cleanup_redhat7_env.yml
 
 # RPM Pulls down python2.7
 - name: debian_remove_cassandra
