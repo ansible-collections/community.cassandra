@@ -236,3 +236,13 @@
     that:
       - "cqlsh.changed"
       - "cqlsh.msg == 'transform type was auto'"
+
+- name: Test additional args using a python that does not exist
+  community.cassandra.cassandra_cqlsh:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    execute: "SELECT json * FROM test.test"
+    debug: yes
+    additional_args:
+      python: /i/do/not/exists/python
+  register: cqlsh
