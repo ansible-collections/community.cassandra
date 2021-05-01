@@ -76,6 +76,14 @@
   notify:
     - redhat_remove_cassandra
 
+- name: FLip back to python 2.7 on CentOS 7
+  block:
+    - shell: update-alternatives --install /usr/bin/python python /usr/bin/python2.7 1
+    - shell: update-alternatives --set python /usr/bin/python2.7
+  when:
+    - ansible_os_family == 'RedHat'
+    - ansible_distribution_major_version == "7"
+
 - name: Add an Apt keys for Cassandra
   apt_key:
     url: "{{ cassandra_deb.gpgkey }}"
