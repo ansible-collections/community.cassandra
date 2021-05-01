@@ -76,7 +76,7 @@
   notify:
     - redhat_remove_cassandra
 
-- name: FLip back to python 2.7 on CentOS 7
+- name: Flip back to python 2.7 on CentOS 7
   block:
     - shell: update-alternatives --install /usr/bin/python python /usr/bin/python2.7 1
     - shell: update-alternatives --set python /usr/bin/python2.7
