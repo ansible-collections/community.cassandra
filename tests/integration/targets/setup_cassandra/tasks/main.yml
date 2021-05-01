@@ -80,6 +80,8 @@
   block:
     - shell: update-alternatives --install /usr/bin/python python /usr/bin/python2.7 1
     - shell: update-alternatives --set python /usr/bin/python2.7
+    - set_fact:
+        ansible_python_interpreter: /usr/bin/python2.7
   when:
     - ansible_os_family == 'RedHat'
     - ansible_distribution_major_version == "7"
