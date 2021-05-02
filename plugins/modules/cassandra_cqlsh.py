@@ -293,14 +293,6 @@ def main():
         module.params['cqlsh_port'],
     ]
 
-    additional_args = module.params['additional_args']
-    if additional_args is not None:
-        for key, value in additional_args.items():
-            if isinstance(value, bool):
-                args.append(" --{0}".format(key))
-            elif isinstance(value, str) or isinstance(value, int):
-                args.append(" --{0} {1}".format(key, value))
-
     args = add_arg_to_cmd(args, "--username", module.params['username'])
     args = add_arg_to_cmd(args, "--password", module.params['password'])
     args = add_arg_to_cmd(args, "--keyspace", module.params['keyspace'])
@@ -314,6 +306,14 @@ def main():
     args = add_arg_to_cmd(args, "--tty", None, module.params['tty'])
     args = add_arg_to_cmd(args, "--debug", None, module.params['debug'])
     args = add_arg_to_cmd(args, "--no-compact", None, module.params['no_compact'])
+
+    additional_args = module.params['additional_args']
+    if additional_args is not None:
+        for key, value in additional_args.items():
+            if isinstance(value, bool):
+                args.append(" --{0}".format(key))
+            elif isinstance(value, str) or isinstance(value, int):
+                args.append(" --{0} {1}".format(key, value))
 
     rc = None
     out = ''
