@@ -117,6 +117,12 @@
 
 - shell: find /usr -name ccm -ls
 
+- name: DEBUG - Test with PATH set
+  shell: which ccm && which ant
+  environment:
+    PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+  ignore_errors: yes
+
 - set_fact:
     ccm_cmd: /usr/local/bin/ccm
 
