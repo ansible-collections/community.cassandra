@@ -2,8 +2,3 @@
   yum:
     name: "{{ cassandra_yum_pkg }}"
     state: absent
-
-- name: Remove python 3 packages
-  yum:
-    name: python3*
-    state: absent
