@@ -242,6 +242,8 @@
     username: "{{ cassandra_admin_user }}"
     password: "{{ cassandra_admin_pwd }}"
     execute: "SELECT json * FROM test.test"
+    connect_timeout: 60
+    request_timeout: 30
     debug: yes
     additional_args:
       no-color: True
