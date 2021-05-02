@@ -244,5 +244,5 @@
     execute: "SELECT json * FROM test.test"
     debug: yes
     additional_args:
-      encoding: utf8
+      no-color: True
   register: cqlsh
