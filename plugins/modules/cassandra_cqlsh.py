@@ -132,7 +132,7 @@ options:
     description:
       - Additional arguments to supply to the mongo command.
       - Supply as key-value pairs.
-      - If the parameter is a valueless flag supply an empty string as the value.
+      - If the parameter is a valueless flag supply a bool value.
     type: raw
 '''
 
@@ -330,7 +330,7 @@ def main():
         result['cmd'] = cmd
 
     if rc != 0:
-        module.fail_json(msg=err.strip())
+        module.fail_json(msg=err.strip(),cmd=cmd)
     else:
         result['changed'] = True
         try:
