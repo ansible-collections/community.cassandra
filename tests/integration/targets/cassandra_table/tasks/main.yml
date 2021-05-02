@@ -620,7 +620,6 @@
       comment: "'This is a comment'"
       default_time_to_live: 630720000
       gc_grace_seconds: 864001
-      read_repair_chance: '0.05'
       compaction: "{'class': 'SizeTieredCompactionStrategy', 'enabled': 'true' }"
       compression: "{'sstable_compression': 'LZ4Compressor', 'chunk_length_kb': 64}"
     login_user: "{{ cassandra_admin_user }}"
@@ -634,7 +633,6 @@
       - "'SizeTieredCompactionStrategy' in complex_table_options.cql"
       - "'LZ4Compressor' in complex_table_options.cql"
       - "'gc_grace_seconds = 864001' in complex_table_options.cql"
-      - "'read_repair_chance = 0.05' in complex_table_options.cql"
       - "'bloom_filter_fp_chance = 0.02' in complex_table_options.cql"
 
 - name: Get output of DESC KEYSPACE myapp
@@ -647,5 +645,4 @@
       - "'SizeTieredCompactionStrategy' in killrvideo.stdout"
       - "'LZ4Compressor' in killrvideo.stdout"
       - "'gc_grace_seconds = 864001' in killrvideo.stdout"
-      - "'read_repair_chance = 0.05' in killrvideo.stdout"
       - "'bloom_filter_fp_chance = 0.02' in killrvideo.stdout"
