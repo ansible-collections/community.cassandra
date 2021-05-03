@@ -128,6 +128,12 @@ options:
       - Used by the split action in the transform stage.
     type: str
     default: " "
+  additional_args:
+    description:
+      - Additional arguments to supply to the mongo command.
+      - Supply as key-value pairs.
+      - If the parameter is a valueless flag supply a bool value.
+    type: raw
 '''
 
 EXAMPLES = '''
@@ -142,6 +148,12 @@ EXAMPLES = '''
 - name: Run a cql query returning json data
   community.cassandra.cassandra_cqlsh:
     execute: "SELECT json * FROM my_keyspace.my_table WHERE partition = 'key' LIMIT 10"
+
+- name: Use a different python
+  community.cassandra.cassandra_cqlsh:
+    execute: "SELECT json * FROM my_keyspace.my_table WHERE partition = 'key' LIMIT 10"
+    additional_args:
+      python: /usr/bin/python2
 '''
 
 RETURN = '''
@@ -267,7 +279,8 @@ def main():
         no_compact=dict(type='bool', default=False),
         cqlsh_cmd=dict(type='str', default='cqlsh'),
         transform=dict(type='str', choices=["auto", "split", "json", "raw"], default="auto"),
-        split_char=dict(type='str', default=" ")
+        split_char=dict(type='str', default=" "),
+        additional_args=dict(type='raw')
     )
     module = AnsibleModule(
         argument_spec=argument_spec,
@@ -293,6 +306,14 @@ def main():
     args = add_arg_to_cmd(args, "--tty", None, module.params['tty'])
     args = add_arg_to_cmd(args, "--debug", None, module.params['debug'])
     args = add_arg_to_cmd(args, "--no-compact", None, module.params['no_compact'])
+
+    additional_args = module.params['additional_args']
+    if additional_args is not None:
+        for key, value in additional_args.items():
+            if isinstance(value, bool):
+                args.append(" --{0}".format(key))
+            elif isinstance(value, str) or isinstance(value, int):
+                args.append(" --{0} {1}".format(key, value))
 
     rc = None
     out = ''
