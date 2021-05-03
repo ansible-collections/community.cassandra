@@ -17,6 +17,12 @@
 # along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
 
 # ===========================================================
+- name: Install cassandra-driver
+  pip:
+    name: cassandra-driver
+  environment:
+    CASS_DRIVER_NO_CYTHON: 1
+
 - name: Run the DESC KEYSPACES command
   community.cassandra.cassandra_cqlsh:
     execute: "DESC KEYSPACES"
@@ -69,12 +75,6 @@
   yum:
     name: epel-release
   when: ansible_os_family == "RedHat"
-
-- name: Install cassandra-driver
-  pip:
-    name: cassandra-driver
-  environment:
-    CASS_DRIVER_NO_CYTHON: 1
 
 - name: Create test keyspace
   community.cassandra.cassandra_keyspace:
@@ -223,7 +223,7 @@
 - assert:
     that:
       - "cqlsh.failed"
-      - "'SyntaxException: line 1:0 no viable alternative' in cqlsh.msg"
+      - "cqlsh.msg == 'module execution failed'"
 
 - name: Test additional no-colour flag
   community.cassandra.cassandra_cqlsh:
@@ -237,7 +237,7 @@
       no-color: True
   register: cqlsh
 
-- name: Test additional request_timeout flag
+- name: Test additional request-timeout flag
   community.cassandra.cassandra_cqlsh:
     username: "{{ cassandra_admin_user }}"
     password: "{{ cassandra_admin_pwd }}"
@@ -252,10 +252,12 @@
   community.cassandra.cassandra_cqlsh:
     username: "{{ cassandra_admin_user }}"
     password: "{{ cassandra_admin_pwd }}"
-    execute: "ALTER KEYSPACE system_auth WITH REPLICATION= {'class':'NetworkTopologyStrategy','datacentre001':3}"
+    execute: "ALTER KEYSPACE system_auth WITH REPLICATION= {'class':'NetworkTopologyStrategy','DC1':1}"
   register: cqlsh
+  when: "cassandra_version.startswith('4') == False"   # https://issues.apache.org/jira/browse/CASSANDRA-12681?attachmentSortBy=dateTime
 
 - assert:
     that:
       - "cqlsh.changed"
       - "cqlsh.msg == 'transform type was auto'"
+  when: "cassandra_version.startswith('4') == False"   # https://issues.apache.org/jira/browse/CASSANDRA-12681?attachmentSortBy=dateTime

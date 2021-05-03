@@ -112,6 +112,13 @@
 - name: Test nodetool authentication with passwordFile
   command: nodetool -u {{ cassandra_admin_user }} -pwf /etc/cassandra/jmxremote.password status
 
+- name: Install cassandra-driver
+  pip:
+    name: cassandra-driver
+  environment:
+    CASS_DRIVER_NO_CYTHON: 1
+  when: "cassandra_version.startswith('4')"
+
 - name: Test cqlsh access with default admin user
   command: cqlsh localhost -u cassandra -p cassandra --execute "DESC KEYSPACES"
   register: cqlsh_login

@@ -1,0 +1,4 @@
+- name: redhat_remove_cassandra
+  yum:
+    name: "{{ cassandra_yum_pkg }}"
+    state: absent

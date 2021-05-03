@@ -17,6 +17,10 @@
 # along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
 
 # ===========================================================
+- name: Thrift remove starting form Cassandra 4.0
+  meta: end_play
+  when: "cassandra_version[0] | int >= 4"
+
 - name: Get Ensure thrift starts off disabled
   shell: nodetool -h 127.0.0.1 disablethrift
 

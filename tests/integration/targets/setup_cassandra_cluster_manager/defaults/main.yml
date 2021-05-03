@@ -3,7 +3,7 @@ pip_packages:
   - pyYaml
   - six
   - psutil==5.7.0
-ant_version: "1.9.15"
+ant_version: "1.10.10"
 ant_download: "https://www-eu.apache.org/dist//ant/binaries/apache-ant-{{ ant_version }}-bin.tar.gz"
 cassandra_version: 3.11.10  # Released version from http://archive.apache.org/dist/cassandra/
 cassandra_nodes: 3

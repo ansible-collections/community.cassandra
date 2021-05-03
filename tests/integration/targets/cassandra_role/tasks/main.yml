@@ -30,6 +30,7 @@
 - name: Packages needed for cassandra-driver
   package:
     name: "{{ packages_for_cass_driver }}"
+  when: "cassandra_version.startswith('4') == False"
 
 - name: Install cassandra-driver
   pip:
@@ -233,6 +234,19 @@
     - mykeyspace4
     - mykeyspace5
     - mykeyspace6
+  when: "cassandra_version.startswith('4') == False"
+
+- name: Create keyspaces for 4.0 - Until issue fixed with NetworkTopology
+  cassandra_keyspace:
+    name: "{{ item }}"
+    state: present
+    login_user: "{{ cassandra_admin_user }}"
+    login_password: "{{ cassandra_admin_pwd }}"
+  with_items:
+    - mykeyspace4
+    - mykeyspace5
+    - mykeyspace6
+  when: cassandra_version.startswith('4')
 
 - name: Get all keyspaces
   shell: cqlsh --username "{{ cassandra_admin_user }}" --password "{{ cassandra_admin_pwd }}" --execute "DESC KEYSPACES"
