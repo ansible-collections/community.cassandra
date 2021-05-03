@@ -245,7 +245,7 @@
     connect_timeout: 60
     debug: yes
     additional_args:
-      request_timeout: 31
+      request-timeout: 31
   register: cqlsh
 
 - name: Test cmd with single quote
