@@ -330,7 +330,7 @@ def main():
         result['cmd'] = cmd
 
     if rc != 0:
-        module.fail_json(**result)
+        module.fail_json(msg="module execution failed", **result)
     else:
         result['changed'] = True
         try:

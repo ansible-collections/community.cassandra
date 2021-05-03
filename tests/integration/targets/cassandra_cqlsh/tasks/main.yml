@@ -223,7 +223,7 @@
 - assert:
     that:
       - "cqlsh.failed"
-      - "'SyntaxException: line 1:0 no viable alternative' in cqlsh.msg"
+      - "cqlsh.msg == 'module execution failed'"
 
 - name: Test additional no-colour flag
   community.cassandra.cassandra_cqlsh:
