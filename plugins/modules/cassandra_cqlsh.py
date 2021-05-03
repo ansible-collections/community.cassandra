@@ -309,7 +309,7 @@ def main():
         result['cmd'] = cmd
 
     if rc != 0:
-        module.fail_json(msg=err.strip())
+        module.fail_json(**result)
     else:
         result['changed'] = True
         try:
