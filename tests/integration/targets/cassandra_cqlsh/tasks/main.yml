@@ -225,7 +225,7 @@
       - "cqlsh.failed"
       - "'SyntaxException: line 1:0 no viable alternative' in cqlsh.msg"
 
-- name: Test additional args with encoding
+- name: Test additional no-colour flag
   community.cassandra.cassandra_cqlsh:
     username: "{{ cassandra_admin_user }}"
     password: "{{ cassandra_admin_pwd }}"
@@ -235,6 +235,17 @@
     debug: yes
     additional_args:
       no-color: True
+  register: cqlsh
+
+- name: Test additional request_timeout flag
+  community.cassandra.cassandra_cqlsh:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    execute: "SELECT json * FROM test.test"
+    connect_timeout: 60
+    debug: yes
+    additional_args:
+      request_timeout: 31
   register: cqlsh
 
 - name: Test cmd with single quote
