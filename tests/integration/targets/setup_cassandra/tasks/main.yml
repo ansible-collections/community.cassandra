@@ -217,6 +217,20 @@
   with_items:
     - { "host": "0.0.0.0", "port": 9042 }
     - { "host": "127.0.0.1", "port": 7199 }
+  register: cassandra_ports
+  ignore_errors: yes
+
+- name: Read the logfile if wait_for task timed out
+  shell: ls -lh /var/log/cassandra/ && cat /var/log/cassandra/system.log
+  when:
+    - cassandra_port.items.0.failed is defined
+    - cassandra_ports.items.0.failed
+
+- name: End play if wait_for task failed
+  meta: end_play
+  when:
+    - cassandra_port.items.0.failed is defined
+    - cassandra_ports.items.0.failed
 
 - name: Get current python
   shell: python --version && pip --version
