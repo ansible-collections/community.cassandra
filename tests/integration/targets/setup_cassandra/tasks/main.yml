@@ -220,6 +220,9 @@
   register: cassandra_ports
   ignore_errors: yes
 
+- debug:
+    var: cassandra_ports
+
 - name: Read the logfile if wait_for task timed out
   shell: ls -lh /var/log/cassandra/ && cat /var/log/cassandra/system.log
   when:
