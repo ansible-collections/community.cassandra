@@ -226,13 +226,13 @@
 - name: Read the logfile if wait_for task timed out
   shell: ls -lh /var/log/cassandra/ && cat /var/log/cassandra/system.log
   when:
-    - cassandra_port.failed is defined
+    - cassandra_ports.failed is defined
     - cassandra_ports.failed
 
 - name: End play if wait_for task failed
   meta: end_play
   when:
-    - cassandra_port.failed is defined
+    - cassandra_ports.failed is defined
     - cassandra_ports.failed
 
 - name: Get current python
