@@ -240,7 +240,10 @@
   register: current_python
   when: ansible_os_family == "Debian"
 
-- name: Upgrade setuptools
+- name: Upgrade pip libs
   pip:
-    name: setuptools
+    name: "{{ item }}"
     extra_args: "--upgrade"
+  with_items:
+    - pip
+    - setuptools
