@@ -239,3 +239,8 @@
   shell: python --version && pip --version
   register: current_python
   when: ansible_os_family == "Debian"
+
+- name: Upgrade setuptools
+  pip:
+    name: setuptools
+    extra_args: "--upgrade"
