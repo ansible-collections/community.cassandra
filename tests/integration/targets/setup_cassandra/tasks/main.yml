@@ -246,4 +246,5 @@
     extra_args: "--upgrade"
   with_items:
     - pip
+    - typing
     - setuptools
