@@ -240,11 +240,10 @@
   register: current_python
   when: ansible_os_family == "Debian"
 
-- name: Upgrade pip libs
+- name: Upgrade pip libs to 20.3.4 for py2.7
   pip:
-    name: "{{ item }}"
+    name: pip==20.3.4
     extra_args: "--upgrade"
-  with_items:
-    - pip
-    - typing==3.7.4.3
-    - setuptools==56.1.0
+  when:
+    - ansible_os_family == 'RedHat'
+    - ansible_distribution_major_version == "7"
