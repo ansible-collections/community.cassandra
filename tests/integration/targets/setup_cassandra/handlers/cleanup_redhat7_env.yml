@@ -2,3 +2,7 @@
   yum:
     name: "{{ cassandra_yum_pkg }}"
     state: absent
+
+- name: Downgrade pip
+  pip:
+    name: pip==8.1.2
