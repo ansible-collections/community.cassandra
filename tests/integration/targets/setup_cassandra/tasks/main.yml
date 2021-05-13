@@ -246,5 +246,5 @@
     extra_args: "--upgrade"
   with_items:
     - pip
-    - typing
+    - typing==3.7.4.3
     - setuptools
