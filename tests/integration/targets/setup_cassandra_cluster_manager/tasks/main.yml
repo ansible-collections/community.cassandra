@@ -27,6 +27,10 @@
 - meta: end_play
   when: cassandra_version.startswith('4')
 
+- name: Install required_packages
+  package:
+    name: "{{ required_packages }}"
+
 - name: Ensure Cassandra service from setup_cassandra isn't running
   service:
     name: "{{ cassandra_service }}"
