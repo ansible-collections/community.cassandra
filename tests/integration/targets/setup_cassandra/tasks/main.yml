@@ -93,7 +93,11 @@
   when: ansible_os_family == 'Debian'
 
 - name: Install python-apt
-  shell: apt -y install python-apt
+  shell: |
+    apt clean
+    apt autoclean
+    apt update
+    apt -y install python-apt
   when: ansible_os_family == 'Debian'
 
 - name: Setup Cassandra apt repo
