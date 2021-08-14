@@ -11,3 +11,12 @@
   package:
     name: "{{ cassandra_packages }}"
     state: present
+
+# https://issues.apache.org/jira/browse/CASSANDRA-16822?orderby=created+DESC%2C+priority+DESC%2C+updated+DESC
+- name: Install clqshlib - bug - ImportError - No module named cqlshlib
+  shell: cp -r /usr/lib/python3.6/site-packages/cqlshlib /usr/lib/python2.7/site-packages/cqlshlib
+  when:
+    - ansible_os_family == 'RedHat'
+    - ansible_distribution_major_version == "7"
+    - "cassandra_version.startswith('4') or cassandra_version.startswith('3')"
+  notify: redhat_remove_cassandra
