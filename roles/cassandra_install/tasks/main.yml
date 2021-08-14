@@ -19,4 +19,3 @@
     - ansible_os_family == 'RedHat'
     - ansible_distribution_major_version == "7"
     - "cassandra_version.startswith('4') or cassandra_version.startswith('3')"
-  notify: redhat_remove_cassandra
