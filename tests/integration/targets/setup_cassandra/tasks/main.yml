@@ -252,3 +252,11 @@
     - ansible_os_family == 'RedHat'
     - ansible_distribution_major_version == "7"
   notify: redhat_remove_cassandra
+
+- name: Install clqshlib - bug - ImportError - No module named cqlshlib
+  shell: cp -r /usr/lib/python3.6/site-packages/cqlshlib /usr/lib/python2.7/site-packages/cqlshlib
+  when:
+    - ansible_os_family == 'RedHat'
+    - ansible_distribution_major_version == "7"
+    - "cassandra_version.startswith('4') or cassandra_version.startswith('3')"
+  notify: redhat_remove_cassandra
