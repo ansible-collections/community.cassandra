@@ -186,7 +186,7 @@ def drop_keyspace(session, keyspace):
 
 def get_keyspace_config(module, cluster, keyspace):
     cql = get_keyspace(cluster, keyspace)
-    dict_regexp = re.compile(r'{([\S\s]*)}')
+    dict_regexp = re.compile(r'{(.*)}')
     durable_writes_regexp = re.compile('DURABLE_WRITES = (True|False);')
     repl_settings = re.search(dict_regexp, cql).group(0)
     try:
