@@ -11,10 +11,10 @@ DOCUMENTATION = '''
 ---
 module: cassandra_thrift
 author: Rhys Campbell (@rhysmeister)
-short_description: Enabled or disables the Thrift server.
+short_description: Enables or disables the Thrift server.
 requirements: [ nodetool ]
 description:
-    Enabled or disables the Thrift server.
+    Enables or disables the Thrift server.
 
 extends_documentation_fragment:
   - community.cassandra.nodetool_module_options

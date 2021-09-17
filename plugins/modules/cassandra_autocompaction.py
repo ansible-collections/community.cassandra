@@ -11,10 +11,10 @@ DOCUMENTATION = '''
 ---
 module: cassandra_autocompaction
 author: Rhys Campbell (@rhysmeister)
-short_description: Enabled or disables autocompaction.
+short_description: Enables or disables autocompaction.
 requirements: [ nodetool ]
 description:
-    - Enabled or disables autocompaction.
+    - Enables or disables autocompaction.
 
 extends_documentation_fragment:
   - community.cassandra.nodetool_module_options
