@@ -11,6 +11,43 @@ As this is an independent Collection, it can be released on it's own release cad
 
 If you like this collection please give us a rating on [Ansible Galaxy](https://galaxy.ansible.com/community/cassandra).
 
+## Collection contents
+
+### Roles
+
+These roles prepare servers with Debian-based and RHEL-based distributions to run Cassandra.
+
+- `cassandra_firewall`- Manage the firewall on Cassandra nodes.
+- `cassandra_install`- Install Cassandra.
+- `cassandra_linux`- Configure Linux OS Settings for Cassandra.
+- `cassandra_repository`- Configures a package repository for Cassandra on Debian and RedHat based platforms.
+
+#### Modules
+
+- `cassandra_autocompaction`- Enables or disables autocompaction.
+- `cassandra_backup`- Enables or disables incremental backup.
+- `cassandra_binary`- Enables or disables the binary protocol.
+- `cassandra_cleanup`- Runs cleanup on a Cassandra node.
+- `cassandra_compactionthreshold`- Sets the compaction threshold.
+- `cassandra_compactionthroughput`- Sets the compaction throughput.
+- `cassandra_cqlsh`- Run cql commands via the clqsh shell.
+- `cassandra_drain`- Drains a Cassandra node.
+- `cassandra_flush`- Flushes one or more tables from the memtable to SSTables on disk.
+- `cassandra_gossip`- Enables or disables gossip.
+- `cassandra_handoff`- Enables or disables the storing of future hints on the current node.
+- `cassandra_interdcstreamthroughput`- Sets the inter-dc stream throughput.
+- `cassandra_keyspace`- Manage keyspaces on your Cassandra cluster.
+- `cassandra_role`- Manage roles on your Cassandra Cluster.
+- `cassandra_schema`- Validates the schema version as seen from the node.
+- `cassandra_status`- Validates the status of the cluster as seen from the node.
+- `cassandra_stopdaemon`- Stops the Cassandra daemon.
+- `cassandra_streamthroughput`- Sets the stream throughput.
+- `cassandra_table`- Create or drop tables on a Cassandra Keyspace.
+- `cassandra_thrift`- Enables or disables the Thrift server.
+- `cassandra_traceprobability`- Sets the trace probability.
+- `cassandra_upgradesstables`- Upgrade SSTables which are not on the current Cassandra version.
+- `cassandra_verify`- Checks the data checksum for one or more tables.
+
 ## GitHub workflow
 
 * Maintainers would be members of this GitHub Repo.

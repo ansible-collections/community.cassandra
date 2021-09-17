@@ -11,10 +11,10 @@ DOCUMENTATION = '''
 ---
 module: cassandra_stopdaemon
 author: Rhys Campbell (@rhysmeister)
-short_description: Stops cassandra daemon.
+short_description: Stops the Cassandra daemon.
 requirements: [ nodetool ]
 description:
-    - Stops cassandra daemon.
+    - Stops the Cassandra daemon.
 
 extends_documentation_fragment:
   - community.cassandra.nodetool_module_options

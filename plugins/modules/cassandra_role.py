@@ -8,7 +8,7 @@ from __future__ import absolute_import, division, print_function
 DOCUMENTATION = r'''
 ---
 module: cassandra_role
-short_description: Manage roles on your Cassandra cluster
+short_description: Manage roles on your Cassandra cluster.
 description: Manage roles on your Cassandra Cluster.
 author: Rhys Campbell (@rhysmeister)
 options:
