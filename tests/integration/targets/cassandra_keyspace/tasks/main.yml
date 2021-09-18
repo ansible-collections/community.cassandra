@@ -347,6 +347,22 @@
       - "'rhys2' not in mykeyspace.stdout"
       - "drop_rhys2.changed == True"
 
+- name: Test cassandra_keyspace module regex
+  block:
+    - name: Create a testregex keyspace
+      community.cassandra.cassandra_keyspace:
+        name: testregex_keyspace
+        state: present
+
+    - name: Create table with brackets for regex testing
+      # Colons had to be escaped to avoid mapping yaml values
+      shell: cqlsh --execute "CREATE TABLE testregex_keyspace.tablewithbrackets (groupid uuid, containinggroupid uuid, PRIMARY KEY (groupid, containinggroupid)) WITH CLUSTERING ORDER BY (containinggroupid ASC) AND caching = {'keys'{{ ":" }} 'ALL', 'rows_per_partition'{{ ":" }} 'NONE'}"
+
+    - name: Rerun cassandra_keyspace command
+      community.cassandra.cassandra_keyspace:
+        name: testregex_keyspace
+        state: present
+
 - name: Multi DC Tests - Temp Skip on Cassandra 4.0
   block:
     - name: Create keyspace with several data centres
