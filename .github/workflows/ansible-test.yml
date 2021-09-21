@@ -70,7 +70,7 @@ jobs:
         working-directory: ansible_collections/community/cassandra
     strategy:
       matrix:
-        python_version: ["3.6"]
+        python_version: ["3.8"]
         ansible_version:
           - stable-2.11
           - devel
@@ -91,10 +91,10 @@ jobs:
         with:
           path: ansible_collections/community/cassandra
 
-      - name: Set up Python ${{ matrix.test_scenario.python_version }}
+      - name: Set up Python ${{ matrix.python_version }}
         uses: actions/setup-python@v1
         with:
-          python-version: ${{ matrix.test_scenario.python_version }}
+          python-version: ${{ matrix.python_version }}
 
       - name: Install ansible-base (devel)
         uses: nick-invision/retry@v2
@@ -129,7 +129,7 @@ jobs:
         working-directory: ansible_collections/community/cassandra
     strategy:
       matrix:
-        python_version: ["3.6"]
+        python_version: ["3.8"]
         ansible_version:
           - stable-2.11
           - devel
@@ -150,10 +150,10 @@ jobs:
         with:
           path: ansible_collections/community/cassandra
 
-      - name: Set up Python ${{ matrix.test_scenario.python_version }}
+      - name: Set up Python ${{ matrix.python_version }}
         uses: actions/setup-python@v1
         with:
-          python-version: ${{ matrix.test_scenario.python_version }}
+          python-version: ${{ matrix.python_version }}
 
       - name: Install ansible-base (devel)
         uses: nick-invision/retry@v2
@@ -188,7 +188,7 @@ jobs:
         working-directory: ansible_collections/community/cassandra
     strategy:
       matrix:
-        python_version: ["3.6"]
+        python_version: ["3.8"]
         ansible_version:
           - stable-2.11
           - devel
@@ -209,10 +209,10 @@ jobs:
         with:
           path: ansible_collections/community/cassandra
 
-      - name: Set up Python ${{ matrix.test_scenario.python_version }}
+      - name: Set up Python ${{ matrix.python_version }}
         uses: actions/setup-python@v1
         with:
-          python-version: ${{ matrix.test_scenario.python_version }}
+          python-version: ${{ matrix.python_version }}
 
       - name: Install ansible-base (devel)
         uses: nick-invision/retry@v2
