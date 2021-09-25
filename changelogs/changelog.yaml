@@ -13,3 +13,12 @@ releases:
         - Remove cassandra_dba role.
         - Add missing metadata to existing roles.
       release_date: '2021-04-21'
+  1.0.6:
+    changes:
+      release_summary: "Maintenance release"
+      bugfixes:
+        - Improve regex in cassandra_keyspace module - PR160.
+        - Fix import error in cassandra_cqlsh after 311x upgrade - PR158.
+      minor_changes:
+        - Various minor module documentation improvements PR161.
+        - Add additional_args parameter to cassandra_cqlsh module PR149.
