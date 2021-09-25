@@ -17,10 +17,10 @@ jobs:
         with:
           path: ansible_collections/community/cassandra
 
-      - name: Set up Python 3.6
+      - name: Set up Python 3.8
         uses: actions/setup-python@v1
         with:
-          python-version: 3.6
+          python-version: 3.8
 
       - name: Upgrade pip (https://github.com/pypa/pip/issues/7626)
         run: pip install pip --upgrade
