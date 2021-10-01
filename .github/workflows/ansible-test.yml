@@ -137,7 +137,7 @@ jobs:
           - package_version: "22x"
             tar_version: "2.2.19"
         test_scenario:
-          - docker_image: default
+          - docker_image: ubuntu2004
             python_version: "3.6"
             ansible_test_options: ""
           - docker_image: centos7
