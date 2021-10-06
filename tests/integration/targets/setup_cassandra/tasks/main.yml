@@ -72,6 +72,7 @@
   yum:
     name: "{{ cassandra_yum_pkg }}"
     state: present
+    disable_gpg_check: yes  # TODO - TEMP DIsable until bug fixed "Invalid GPG Key from https://www.apache.org/dist/cassandra/KEYS: unknown public key algorithm 22 at 2"
   when: ansible_os_family == 'RedHat'
   notify:
     - redhat_remove_cassandra
