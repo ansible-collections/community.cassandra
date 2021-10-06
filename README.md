@@ -7,7 +7,7 @@
 
 This collection called `cassandra` aims at providing all Ansible modules allowing to interact with Apache Cassandra.
 
-As this is an independent Collection, it can be released on it's own release cadance.
+As this is an independent Collection, it can be released on it's own release cadance. 
 
 If you like this collection please give us a rating on [Ansible Galaxy](https://galaxy.ansible.com/community/cassandra).
 
