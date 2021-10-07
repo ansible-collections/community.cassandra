@@ -73,6 +73,7 @@ jobs:
         python_version: ["3.8"]
         ansible_version:
           - stable-2.11
+          - stable-2.12
           - devel
         cassandra_version:
           - package_version: "311x"
@@ -132,6 +133,7 @@ jobs:
         python_version: ["3.8"]
         ansible_version:
           - stable-2.11
+          - stable-2.12
           - devel
         cassandra_version:
           - package_version: "22x"
@@ -191,6 +193,7 @@ jobs:
         python_version: ["3.8"]
         ansible_version:
           - stable-2.11
+          - stable-2.12
           - devel
         cassandra_version:
           - package_version: "40x"
