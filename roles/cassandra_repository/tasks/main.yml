@@ -15,10 +15,18 @@
     state: present
   when: ansible_os_family == "Debian"
 
+- set_fact:
+    validate_certs: true
+  when:
+    - "ansible_distribution == 'Ubuntu'"
+    - "ansible_distribution_version == '16.04'"
+
+
 - name: Add apt key for Cassandra repository (Debian & Ubuntu)
   apt_key:
     url: https://www.apache.org/dist/cassandra/KEYS
     state: present
+    validate_certs: "{{ validate_certs | default(true) }}"
   when: ansible_os_family == "Debian"
 
 - name: Ensure Cassandra apt repository exists (Debian & Ubuntu)
