@@ -52,6 +52,14 @@
   include_vars:
     file: "{{ ansible_os_family }}.yml"
 
+- name: Update libgnutls30 package for Debian 16.04
+  apt:
+    name: libgnutls30
+    state: present
+  when:
+    - ansible_os_family == "Debian"
+    - ansible_distribution_major_version == 16
+
 - name: Install OpenJDK package
   yum:
     name: "{{ openjdk }}"
