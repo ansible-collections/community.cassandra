@@ -11,3 +11,5 @@ cassandra_service: cassandra  # Service from setup_cassandra. We don't want this
 required_packages:
   - zip
   - unzip
+  - gcc
+  - build-essential
