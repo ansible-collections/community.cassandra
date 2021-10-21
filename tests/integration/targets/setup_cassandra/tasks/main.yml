@@ -70,6 +70,12 @@
     state: present
   when: ansible_os_family == 'RedHat'
 
+- name: Install openjdk-8-jre-headless on Debian
+  apt:
+    name: openjdk-8-jre-headless
+    state: present
+  when: ansible_os_family == 'Debian'
+
 - name: Setup Cassandra yum repo
   yum_repository:
     name: "{{ cassandra_yum.name }}"
