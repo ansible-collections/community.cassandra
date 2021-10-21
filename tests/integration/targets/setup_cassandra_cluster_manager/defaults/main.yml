@@ -8,8 +8,15 @@ ant_download: "https://www-eu.apache.org/dist//ant/binaries/apache-ant-{{ ant_ve
 cassandra_version: 3.11.10  # Released version from http://archive.apache.org/dist/cassandra/
 cassandra_nodes: 3
 cassandra_service: cassandra  # Service from setup_cassandra. We don't want this running for the cluster tests
-required_packages:
-  - zip
-  - unzip
+debian_packages:
   - gcc
   - build-essential
+  - zip
+  - unzip
+redhat_packages:
+  - gcc
+  - gcc-c++
+  - make
+  - zip
+  - unzip
+required_packages: "{{ debian_packages if ansible_os_family == 'Debian' else redhat_packages if ansible_os_family == 'RedHat' else [] }}"
