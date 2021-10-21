@@ -52,9 +52,9 @@
   include_vars:
     file: "{{ ansible_os_family }}.yml"
 
- - name: Ensure sudo is available
-   package:
-     name: sudo
+- name: Ensure sudo is available
+  package:
+    name: sudo
 
 - name: Update libgnutls30 package for Debian 16.04
   apt:
