@@ -22,10 +22,10 @@
   include_vars:
     file: "{{ ansible_os_family }}.yml"
 
-- name: Packages needed for cassandra-driver
-  package:
-    name: "{{ packages_for_cass_driver }}"
-  when: "cassandra_version.startswith('4') == False"
+#- name: Packages needed for cassandra-driver
+#  package:
+#    name: "{{ packages_for_cass_driver }}"
+#  when: "cassandra_version.startswith('4') == False"
 
 # This should go into a cassandra_driver dependency
 - name: Ensure epel is available

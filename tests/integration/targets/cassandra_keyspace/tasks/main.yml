@@ -27,10 +27,10 @@
     name: epel-release
   when: ansible_os_family == "RedHat"
 
-- name: Packages needed for cassandra-driver
-  package:
-    name: "{{ packages_for_cass_driver }}"
-  when: "cassandra_version.startswith('4') == False"
+#- name: Packages needed for cassandra-driver
+#  package:
+#    name: "{{ packages_for_cass_driver }}"
+#  when: "cassandra_version.startswith('4') == False"
 
 - name: Install cassandra-driver
   pip:

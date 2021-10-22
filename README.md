@@ -48,6 +48,12 @@ These roles prepare servers with Debian-based and RHEL-based distributions to ru
 - `cassandra_upgradesstables`- Upgrade SSTables which are not on the current Cassandra version.
 - `cassandra_verify`- Checks the data checksum for one or more tables.
 
+## Supported Cassandra Versions
+
+* 4.0.X
+* 3.11.X
+* ~~2.2.X~~ Dropped on 21.10.2021.
+
 ## GitHub workflow
 
 * Maintainers would be members of this GitHub Repo.
