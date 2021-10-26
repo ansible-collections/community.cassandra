@@ -20,12 +20,12 @@
 - meta: end_play
   when: ansible_os_family not in  ['RedHat', 'Debian' ]
 
-- debug:
-    msg: "Skipping test on Cassandra 4"
-  when: cassandra_version.startswith('4')
+#- debug:
+#    msg: "Skipping test on Cassandra 4"
+#  when: cassandra_version.startswith('4')
 
-- meta: end_play
-  when: cassandra_version.startswith('4')
+#- meta: end_play
+#  when: cassandra_version.startswith('4')
 
 - name: Install required_packages
   package:
