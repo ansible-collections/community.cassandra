@@ -143,6 +143,8 @@
   when:
     - "cassandra_version.startswith('4')"
     - ansible_os_family == "RedHat"
+  async: 60
+  poll: 1 # Try to fix BlockingIOError: [Errno 11] write could not complete without blocking error - https://github.com/ansible-collections/community.cassandra/runs/4008919476?check_suite_focus=true
 
 - name: Set Snitch to PropertyFileSnitch
   lineinfile:
@@ -152,6 +154,8 @@
   when:
     - "cassandra_version.startswith('4')"
     - ansible_os_family == "Debian"
+  async: 60
+  poll: 1
 
 - name: Add DC Names - Required for 4.0 cassandra-topology.properties
   copy:

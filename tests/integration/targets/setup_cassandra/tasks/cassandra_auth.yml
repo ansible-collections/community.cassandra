@@ -23,12 +23,16 @@
     path: "{{ cassandra_yml_file }}"
     regexp: "{{ cassandra_regexp }}"
     line: "{{ cassandra_authenticator }}"
+  async: 60
+  poll: 1
 
 - name: Set authorizer in cassandra.yml
   lineinfile:
     path: "{{ cassandra_yml_file }}"
     regexp: "{{ cassandra_regexp_auth }}"
     line: "{{ cassandra_authorizer}}"
+  async: 60
+  poll: 1
 
 - name: Add lines for nodetool auth to cassandra-env.sh
   blockinfile:
@@ -37,6 +41,8 @@
     block: |
       JVM_OPTS="$JVM_OPTS -Djava.security.auth.login.config=$CASSANDRA_HOME/cassandra-jaas.config"
       JVM_OPTS="$JVM_OPTS -Dcassandra.jmx.authorizer=org.apache.cassandra.auth.jmx.AuthorizationProxy"
+  async: 60
+  poll: 1
 
 #- name: Create password file
 #  tempfile:
@@ -52,6 +58,8 @@
     path:  "{{ cassandra_env_file }}"
     regexp: '^if \[ \"\$LOCAL_JMX\" \=*'
     line: 'if [ "$LOCAL_JMX" = "no" ]; then'
+  async: 60
+  poll: 1
 
 - name: Set jmx password file
   copy:
@@ -79,7 +87,9 @@
       JVM_OPTS="$JVM_OPTS -Dcom.sun.management.jmxremote.authenticate=true"
       JVM_OPTS="$JVM_OPTS -Dcom.sun.management.jmxremote.password.file=/etc/cassandra/jmxremote.password"
       JVM_OPTS="$JVM_OPTS -Dcom.sun.management.jmxremote.access.file=/etc/cassandra/jmxremote.access"
-
+  async: 60
+  poll: 1
+  
 - name: Restart cassandra
   service:
     name: "{{ cassandra_service }}"

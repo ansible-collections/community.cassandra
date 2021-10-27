@@ -121,7 +121,7 @@ jobs:
 
       - name: Upload Coverage data
         run: tests/coverage.sh
- 
+
   integration_40x:
     needs: integration_matrix
     runs-on: ubuntu-20.04
@@ -137,7 +137,7 @@ jobs:
           - devel
         cassandra_version:
           - package_version: "40x"
-            tar_version: "4.0-rc1"
+            tar_version: "4.0.0"
         test_scenario:
           - docker_image: default
             python_version: "3.6"
