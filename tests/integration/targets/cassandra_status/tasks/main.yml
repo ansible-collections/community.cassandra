@@ -35,7 +35,7 @@
           - "rhys.cluster_status['datacenter1']['up'] | length == 3"
 
     - name: Stop node2
-      shell: "sudo -E -u cassandra bash -c \"ccm node2 stop\""
+      shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd | mandatory }} node2 stop\""
       become_user: cassandra
       args:
         warn: false
@@ -65,7 +65,7 @@
           - "'127.0.0.2' not in rhys.cluster_status['datacenter1']['up']"
 
     - name: Start node2
-      shell: "sudo -E -u cassandra bash -c \"ccm node2 start &\""
+      shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd | mandatory }} node2 start &\""
       become_user: cassandra
       args:
         warn: false
@@ -96,7 +96,7 @@
           - "rhys.msg == 'All nodes are in an UP/NORMAL state'"
 
     - name: Bring down node3
-      shell: "sudo -E -u cassandra bash -c \"ccm node3 stop\""
+      shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd | mandatory }} node3 stop\""
       become_user: cassandra
       args:
         warn: false
@@ -140,7 +140,7 @@
           - "rhys.failed == True"
   always:
     - name: Cleanup any ccm stuff
-      shell: "sudo -E -u cassandra bash -c \"ccm stop test && ccm remove test > /dev/null\""
+      shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd | mandatory }} stop test && ccm remove test > /dev/null\""
       become_user: cassandra
       args:
         warn: false
