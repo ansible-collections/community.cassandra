@@ -20,7 +20,8 @@
 - meta: end_play
   when: ansible_os_family not in  ['RedHat', 'Debian' ]
 
-- shell: python -c "import fcntl; fcntl.fcntl(1, fcntl.F_SETFL, 0)" # https://github.com/travis-ci/travis-ci/issues/8920
+- shell: /usr/bin/python -c "import fcntl; fcntl.fcntl(1, fcntl.F_SETFL, 0)" # https://github.com/travis-ci/travis-ci/issues/8920
+  ignore_errors: yes
 
 #- debug:
 #    msg: "Skipping test on Cassandra 4"
