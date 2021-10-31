@@ -170,8 +170,19 @@
     CASSANDRA_HOME: "/home/cassandra"
     PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ant/bin
 
-- name: Add nodes to the Cassandra cluster
-  shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd }} populate -n {{ cassandra_nodes }}\""
+#- name: Add nodes to the Cassandra cluster
+#  shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd }} populate -n {{ cassandra_nodes }}\""
+#  become_user: cassandra
+#  args:
+#    warn: false
+#    chdir: /home/cassandra
+#  environment:
+#    CCM_CONFIG_DIR: "/home/cassandra/config"
+#    CASSANDRA_HOME: "/home/cassandra"
+#    PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ant
+
+- name: Add nodes to the Cassandra Cluster
+  shell: "sudo -E -u cassandra bash -c '{{ ccm_cmd }} add {{ item.node }} -i {{ item.ip }} -j {{ item.port }} -b --data-center={{ item.dc }} --remote-debug-port {{ item.debug_port }} {{ item.args }}'"
   become_user: cassandra
   args:
     warn: false
@@ -180,9 +191,25 @@
     CCM_CONFIG_DIR: "/home/cassandra/config"
     CASSANDRA_HOME: "/home/cassandra"
     PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ant
+  with_items: "{{ cassandra_nodes }}"
+
+- name: Update endpoint_snitch
+  lineinfile:
+    path: "/home/cassandra/config/test/{{ item.node }}/conf/cassandra.yaml"
+    regexp: "^endpoint_snitch"
+    line: "endpoint_snitch: GossipingPropertyFileSnitch"
+  with_items: "{{ cassandra_nodes }}"
+
+- name: Update rack info
+  copy:
+    content: |
+      dc={{ item.dc }}
+      rack=rack1
+    dest: /home/cassandra/config/test/{{ item.node }}/conf/cassandra-rackdc.properties
+  with_items: "{{ cassandra_nodes }}"
 
 - name: Start the ccm cluster
-  shell: sudo -E -u cassandra bash -c "{{ ccm_cmd }} start"
+  shell: sudo -E -u cassandra bash -c "{{ ccm_cmd }} start --root"
   become_user: cassandra
   args:
     warn: false
@@ -191,6 +218,7 @@
     CCM_CONFIG_DIR: "/home/cassandra/config"
     CASSANDRA_HOME: "/home/cassandra"
     PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ant/bin
+    CCM_CLUSTER_START_DEFAULT_TIMEOUT: 600
 
 - name: Get cluster status
   shell: sudo -E -u cassandra bash -c "{{ ccm_cmd }} status"
@@ -198,21 +226,14 @@
   args:
     warn: false
     chdir: /home/cassandra
+  register: cluster_status
   environment:
     CCM_CONFIG_DIR: "/home/cassandra/config"
     CASSANDRA_HOME: "/home/cassandra"
     PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ant/bin
 
-- name: Get output of node1 status
-  shell: sudo -E -u cassandra bash -c "{{ ccm_cmd }} node1 status"
-  become_user: cassandra
-  args:
-    warn: false
-    chdir: /home/cassandra
-  environment:
-    CCM_CONFIG_DIR: "/home/cassandra/config"
-    CASSANDRA_HOME: "/home/cassandra"
-    PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ant/bin
+- debug:
+    msg: "{{ cluster_status.stdout }}"
 
 - name: Set nodetool path
   copy:
@@ -221,3 +242,9 @@
       export PATH="$PATH:/home/cassandra/config/repository/{{ cassandra_version }}/bin/"
     owner: cassandra
     group: users
+
+- name: Wait for the cql port to become active
+  wait_for:
+    port: 9042
+    host: "{{ item.ip }}"
+  with_items: "{{ cassandra_nodes }}"
