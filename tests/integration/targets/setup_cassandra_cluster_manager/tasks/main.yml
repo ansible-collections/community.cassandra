@@ -199,6 +199,8 @@
     regexp: "^endpoint_snitch"
     line: "endpoint_snitch: GossipingPropertyFileSnitch"
   with_items: "{{ cassandra_nodes }}"
+  async: 60
+  poll: 1
 
 - name: Update rack info
   copy:
