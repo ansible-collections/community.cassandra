@@ -252,4 +252,6 @@
   wait_for:
     port: 9042
     host: "{{ item.ip }}"
+    delay: 30
+    timeout: 600
   with_items: "{{ cassandra_nodes }}"
