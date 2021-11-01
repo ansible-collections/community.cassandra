@@ -191,8 +191,6 @@
       # default for unknown nodes
       default=DC1:r1
   when: "cassandra_version.startswith('4')"
-  async: 60
-  poll: 1
 
 - name: Adjust heap size
   lineinfile:
@@ -210,8 +208,6 @@
     group: root
     mode: 0755
   when: ansible_os_family == "RedHat"
-  async: 60
-  poll: 1
 
 - name: Reload systemd
   systemd:
