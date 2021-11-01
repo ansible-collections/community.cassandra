@@ -191,12 +191,16 @@
       # default for unknown nodes
       default=DC1:r1
   when: "cassandra_version.startswith('4')"
+  async: 60
+  poll: 1
 
 - name: Adjust heap size
   lineinfile:
     path: "{{ cassandra_env_file }}"
     regexp: "^MAX_HEAP_SIZE="
     line: "MAX_HEAP_SIZE=256M"
+  async: 60
+  poll: 1
 
 - name: Replace default cassandra init script - RedHat 7
   copy:
@@ -206,6 +210,8 @@
     group: root
     mode: 0755
   when: ansible_os_family == "RedHat"
+  async: 60
+  poll: 1
 
 - name: Reload systemd
   systemd:
@@ -237,6 +243,8 @@
   when:
     - cassandra_ports.failed is defined
     - cassandra_ports.failed
+  async: 60
+  poll: 1
 
 - name: End play if wait_for task failed
   meta: end_play
@@ -248,6 +256,8 @@
   shell: python --version && pip --version
   register: current_python
   when: ansible_os_family == "Debian"
+  async: 60
+  poll: 1
 
 - name: Upgrade pip libs to 20.3.4 for py2.7
   pip:
@@ -265,3 +275,5 @@
     - ansible_distribution_major_version == "7"
     - "cassandra_version.startswith('4') or cassandra_version.startswith('3')"
   notify: redhat_remove_cassandra
+  async: 60
+  poll: 1
