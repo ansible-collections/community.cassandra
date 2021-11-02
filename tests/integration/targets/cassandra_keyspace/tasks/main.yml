@@ -562,7 +562,7 @@
     - name: Assert multi_dc_keyspace exists
       assert:
         that:
-          - "'CREATE KEYSPACE multidc_keyspace WITH replication = {\\'class\\': \\'NetworkTopologyStrategy\\'' in mykeyspace.stdout"
+          - "'CREATE KEYSPACE multi_dc_keyspace WITH replication = {\\'class\\': \\'NetworkTopologyStrategy\\'' in mykeyspace.stdout"
           - "'\\'marlow\\': \\'3\\'' in mykeyspace.stdout"
           - "'\\'zurich\\': \\'3\\'' in mykeyspace.stdout"
           - "'\\'london\\': \\'3\\'' in mykeyspace.stdout"
