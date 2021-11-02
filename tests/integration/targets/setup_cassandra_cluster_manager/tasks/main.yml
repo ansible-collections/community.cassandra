@@ -213,8 +213,12 @@
     dest: /home/cassandra/config/test/{{ item.node }}/conf/cassandra-rackdc.properties
   with_items: "{{ cassandra_nodes }}"
 
+- set_fact:
+    cassandra_node_delay: 120
+  when: ansible_os_family == "RedHat"
+
 - name: Start the ccm cluster
-  shell: sudo -E -u cassandra bash -c "{{ ccm_cmd }} start --root"
+  shell: sudo -E -u cassandra bash -c "{{ ccm_cmd }} start  --root"
   become_user: cassandra
   args:
     warn: false
@@ -224,6 +228,9 @@
     CASSANDRA_HOME: "/home/cassandra"
     PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ant/bin
     CCM_CLUSTER_START_DEFAULT_TIMEOUT: 600
+  #with_items: "{{ cassandra_nodes }}"
+  #loop_control:
+  #  pause: "{{ cassandra_node_delay }}"
 
 - name: Get cluster status
   shell: sudo -E -u cassandra bash -c "{{ ccm_cmd }} status"
