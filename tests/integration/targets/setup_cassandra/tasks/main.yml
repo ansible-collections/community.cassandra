@@ -143,8 +143,7 @@
   when:
     - "cassandra_version.startswith('4')"
     - ansible_os_family == "RedHat"
-  async: 60
-  poll: 1 # Try to fix BlockingIOError: [Errno 11] write could not complete without blocking error - https://github.com/ansible-collections/community.cassandra/runs/4008919476?check_suite_focus=true
+  no_log: yes
 
 - name: Set Snitch to PropertyFileSnitch
   lineinfile:
@@ -154,8 +153,7 @@
   when:
     - "cassandra_version.startswith('4')"
     - ansible_os_family == "Debian"
-  async: 60
-  poll: 1
+  no_log: yes
 
 - name: Add DC Names - Required for 4.0 cassandra-topology.properties
   copy:
@@ -197,8 +195,7 @@
     path: "{{ cassandra_env_file }}"
     regexp: "^MAX_HEAP_SIZE="
     line: "MAX_HEAP_SIZE=256M"
-  async: 60
-  poll: 1
+  no_log: yes
 
 - name: Replace default cassandra init script - RedHat 7
   copy:
@@ -239,8 +236,7 @@
   when:
     - cassandra_ports.failed is defined
     - cassandra_ports.failed
-  async: 60
-  poll: 1
+  no_log: yes
 
 - name: End play if wait_for task failed
   meta: end_play
@@ -252,8 +248,7 @@
   shell: python --version && pip --version
   register: current_python
   when: ansible_os_family == "Debian"
-  async: 60
-  poll: 1
+  no_log: yes
 
 - name: Upgrade pip libs to 20.3.4 for py2.7
   pip:
@@ -271,5 +266,4 @@
     - ansible_distribution_major_version == "7"
     - "cassandra_version.startswith('4') or cassandra_version.startswith('3')"
   notify: redhat_remove_cassandra
-  async: 60
-  poll: 1
+  no_log: yes
