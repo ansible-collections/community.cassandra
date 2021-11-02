@@ -386,16 +386,16 @@
 
     - name: Get output of DESC KEYSPACE multidc_keyspace
       shell: cqlsh --execute "DESC KEYSPACE multidc_keyspace"
-      register: multiple_dcs
+      register: mykeyspace
 
     - name: Assert multidc_keyspace exists
       assert:
         that:
-          - "'CREATE KEYSPACE multidc_keyspace WITH replication = {\\'class\\': \\'NetworkTopologyStrategy\\'' in multiple_dcs.stdout"
-          - "'\\'london\\': \\'3\\'' in multiple_dcs.stdout"
-          - "'\\'zurich\\': \\'1\\'' in multiple_dcs.stdout"
-          - "'\\'tokyo\\': \\'1\\'' in multiple_dcs.stdout"
-          - "'\\'new_york\\': \\'2\\'' in multiple_dcs.stdout"
+          - "'CREATE KEYSPACE multidc_keyspace WITH replication = {\\'class\\': \\'NetworkTopologyStrategy\\'' in mykeyspace.stdout"
+          - "'\\'london\\': \\'3\\'' in mykeyspace.stdout"
+          - "'\\'zurich\\': \\'3\\'' in mykeyspace.stdout"
+          - "'\\'tokyo\\': \\'1\\'' in mykeyspace.stdout"
+          - "'\\'new_york\\': \\'2\\'' in mykeyspace.stdout"
           - "multiple_dcs.changed == True"
 
     - name: Add a dc to multidc_keyspace
@@ -412,17 +412,17 @@
 
     - name: Get output of DESC KEYSPACE multidc_keyspace
       shell: cqlsh --execute "DESC KEYSPACE multidc_keyspace"
-      register: multiple_dcs
+      register: mykeyspace
 
     - name: Assert multidc_keyspace has an amsterdam dc
       assert:
         that:
-          - "'CREATE KEYSPACE multidc_keyspace WITH replication = {\\'class\\': \\'NetworkTopologyStrategy\\'' in multiple_dcs.stdout"
-          - "'\\'london\\': \\'3\\'' in multiple_dcs.stdout"
-          - "'\\'zurich\\': \\'1\\'' in multiple_dcs.stdout"
-          - "'\\'tokyo\\': \\'1\\'' in multiple_dcs.stdout"
-          - "'\\'new_york\\': \\'2\\'' in multiple_dcs.stdout"
-          - "'\\'amsterdam\\': \\'3\\'' in multiple_dcs.stdout"
+          - "'CREATE KEYSPACE multidc_keyspace WITH replication = {\\'class\\': \\'NetworkTopologyStrategy\\'' in mykeyspace.stdout"
+          - "'\\'london\\': \\'3\\'' in mykeyspace.stdout"
+          - "'\\'zurich\\': \\'1\\'' in mykeyspace.stdout"
+          - "'\\'tokyo\\': \\'1\\'' in mykeyspace.stdout"
+          - "'\\'new_york\\': \\'2\\'' in mykeyspace.stdout"
+          - "'\\'amsterdam\\': \\'3\\'' in mykeyspace.stdout"
           - "multiple_dcs.changed == True"
 
     - name: Remove amsterdam from multidc_keyspace
@@ -438,17 +438,17 @@
 
     - name: Get output of DESC KEYSPACE multidc_keyspace
       shell: cqlsh --execute "DESC KEYSPACE multidc_keyspace"
-      register: multiple_dcs
+      register: mykeyspace
 
     - name: Assert amsterdam dc has been removed
       assert:
         that:
-          - "'CREATE KEYSPACE multidc_keyspace WITH replication = {\\'class\\': \\'NetworkTopologyStrategy\\'' in multiple_dcs.stdout"
-          - "'\\'london\\': \\'3\\'' in multiple_dcs.stdout"
-          - "'\\'zurich\\': \\'1\\'' in multiple_dcs.stdout"
-          - "'\\'tokyo\\': \\'1\\'' in multiple_dcs.stdout"
-          - "'\\'new_york\\': \\'2\\'' in multiple_dcs.stdout"
-          - "'\\'amsterdam\\': \\'3\\'' not in multiple_dcs.stdout"
+          - "'CREATE KEYSPACE multidc_keyspace WITH replication = {\\'class\\': \\'NetworkTopologyStrategy\\'' in mykeyspace.stdout"
+          - "'\\'london\\': \\'3\\'' in mykeyspace.stdout"
+          - "'\\'zurich\\': \\'1\\'' in mykeyspace.stdout"
+          - "'\\'tokyo\\': \\'1\\'' in mykeyspace.stdout"
+          - "'\\'new_york\\': \\'2\\'' in mykeyspace.stdout"
+          - "'\\'amsterdam\\': \\'3\\'' not in mykeyspace.stdout"
           - "multiple_dcs.changed == True"
 
     - name: Remove london from multidc_keyspace
@@ -463,16 +463,16 @@
 
     - name: Get output of DESC KEYSPACE multidc_keyspace
       shell: cqlsh --execute "DESC KEYSPACE multidc_keyspace"
-      register: multiple_dcs
+      register: mykeyspace
 
     - name: Assert london dc has been removed
       assert:
         that:
-          - "'CREATE KEYSPACE multidc_keyspace WITH replication = {\\'class\\': \\'NetworkTopologyStrategy\\'' in multiple_dcs.stdout"
-          - "'london' not in multiple_dcs.stdout"
-          - "'\\'zurich\\': \\'1\\'' in multiple_dcs.stdout"
-          - "'\\'tokyo\\': \\'1\\'' in multiple_dcs.stdout"
-          - "'\\'new_york\\': \\'2\\'' in multiple_dcs.stdout"
+          - "'CREATE KEYSPACE multidc_keyspace WITH replication = {\\'class\\': \\'NetworkTopologyStrategy\\'' in mykeyspace.stdout"
+          - "'london' not in mykeyspace.stdout"
+          - "'\\'zurich\\': \\'3\\'' in mykeyspace.stdout"
+          - "'\\'tokyo\\': \\'1\\'' in mykeyspace.stdout"
+          - "'\\'new_york\\': \\'2\\'' in mykeyspace.stdout"
           - "multiple_dcs.changed == True"
 
     - name: Change tokyo replication factor to 3
@@ -487,15 +487,15 @@
 
     - name: Get output of DESC KEYSPACE multidc_keyspace
       shell: cqlsh --execute "DESC KEYSPACE multidc_keyspace"
-      register: multiple_dcs
+      register: mykeyspace
 
     - name: Assert tokyo rf is now 3 in keyspace definition
       assert:
         that:
-          - "'CREATE KEYSPACE multidc_keyspace WITH replication = {\\'class\\': \\'NetworkTopologyStrategy\\'' in multiple_dcs.stdout"
-          - "'\\'zurich\\': \\'3\\'' in multiple_dcs.stdout"
-          - "'\\'tokyo\\': \\'3\\'' in multiple_dcs.stdout"
-          - "'\\'new_york\\': \\'2\\'' in multiple_dcs.stdout"
+          - "'CREATE KEYSPACE multidc_keyspace WITH replication = {\\'class\\': \\'NetworkTopologyStrategy\\'' in mykeyspace.stdout"
+          - "'\\'zurich\\': \\'3\\'' in mykeyspace.stdout"
+          - "'\\'tokyo\\': \\'3\\'' in mykeyspace.stdout"
+          - "'\\'new_york\\': \\'2\\'' in mykeyspace.stdout"
           - "multiple_dcs.changed == True"
 
     - name: Drop multidc_keyspace
@@ -512,7 +512,7 @@
       assert:
         that:
           - "multidc_keyspace.changed == True"
-          - "'multidc_keyspace' not in multiple_dcs.stdout"
+          - "'multidc_keyspace' not in mykeyspace.stdout"
 
     #- include_tasks: ../../setup_cassandra/tasks/cassandra_auth.yml
     #  when: cassandra_auth_tests == True
