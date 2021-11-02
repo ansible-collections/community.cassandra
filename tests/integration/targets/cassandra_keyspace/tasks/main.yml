@@ -419,7 +419,7 @@
         that:
           - "'CREATE KEYSPACE multidc_keyspace WITH replication = {\\'class\\': \\'NetworkTopologyStrategy\\'' in mykeyspace.stdout"
           - "'\\'london\\': \\'3\\'' in mykeyspace.stdout"
-          - "'\\'zurich\\': \\'1\\'' in mykeyspace.stdout"
+          - "'\\'zurich\\': \\'3\\'' in mykeyspace.stdout"
           - "'\\'tokyo\\': \\'1\\'' in mykeyspace.stdout"
           - "'\\'new_york\\': \\'2\\'' in mykeyspace.stdout"
           - "'\\'amsterdam\\': \\'3\\'' in mykeyspace.stdout"
@@ -445,7 +445,7 @@
         that:
           - "'CREATE KEYSPACE multidc_keyspace WITH replication = {\\'class\\': \\'NetworkTopologyStrategy\\'' in mykeyspace.stdout"
           - "'\\'london\\': \\'3\\'' in mykeyspace.stdout"
-          - "'\\'zurich\\': \\'1\\'' in mykeyspace.stdout"
+          - "'\\'zurich\\': \\'3\\'' in mykeyspace.stdout"
           - "'\\'tokyo\\': \\'1\\'' in mykeyspace.stdout"
           - "'\\'new_york\\': \\'2\\'' in mykeyspace.stdout"
           - "'\\'amsterdam\\': \\'3\\'' not in mykeyspace.stdout"
