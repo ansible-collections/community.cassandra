@@ -20,16 +20,6 @@
 - meta: end_play
   when: ansible_os_family not in  ['RedHat', 'Debian' ]
 
-- shell: /usr/bin/python -c "import fcntl; fcntl.fcntl(1, fcntl.F_SETFL, 0)" # https://github.com/travis-ci/travis-ci/issues/8920
-  ignore_errors: yes
-
-#- debug:
-#    msg: "Skipping test on Cassandra 4"
-#  when: cassandra_version.startswith('4')
-
-#- meta: end_play
-#  when: cassandra_version.startswith('4')
-
 - name: Install required_packages
   package:
     name: "{{ required_packages }}"
@@ -227,9 +217,6 @@
     CASSANDRA_HOME: "/home/cassandra"
     PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ant/bin
     CCM_CLUSTER_START_DEFAULT_TIMEOUT: 600
-  #with_items: "{{ cassandra_nodes }}"
-  #loop_control:
-  #  pause: "{{ cassandra_node_delay }}"
 
 - name: Get cluster status
   shell: sudo -E -u cassandra bash -c "{{ ccm_cmd }} status"

@@ -128,12 +128,10 @@
       paris: 1
       new_york: 2
   register: multiple_dcs
-  #when: "cassandra_version.startswith('4') == False"   # https://issues.apache.org/jira/browse/CASSANDRA-12681?attachmentSortBy=dateTime
 
 - name: Get output of DESC KEYSPACE mykeyspace 2
   shell: cqlsh --execute "DESC KEYSPACE mykeyspace"
   register: mykeyspace
-  #when: "cassandra_version.startswith('4') == False"   # https://issues.apache.org/jira/browse/CASSANDRA-12681?attachmentSortBy=dateTime
 
 - name: Assert mykeyspace exists 2
   assert:
@@ -143,7 +141,6 @@
       - "'\\'london\\': \\'3\\'' in mykeyspace.stdout"
       - "'\\'paris\\': \\'1\\'' in mykeyspace.stdout"
       - "multiple_dcs.changed == True"
-  #when: "cassandra_version.startswith('4') == False"   # https://issues.apache.org/jira/browse/CASSANDRA-12681?attachmentSortBy=dateTime
 
 - name: Run multi-dc keyspace create again
   community.cassandra.cassandra_keyspace:
@@ -154,13 +151,11 @@
       paris: 1
       new_york: 2
   register: multiple_dcs
-  #when: "cassandra_version.startswith('4') == False"   # https://issues.apache.org/jira/browse/CASSANDRA-12681?attachmentSortBy=dateTime
 
 - name: Assert multi-dc keyspace not changed
   assert:
     that:
       - "multiple_dcs.changed == False"
-  #when: "cassandra_version.startswith('4') == False"   # https://issues.apache.org/jira/browse/CASSANDRA-12681?attachmentSortBy=dateTime
 
 - name: Drop keyspace with check_mode = True
   community.cassandra.cassandra_keyspace:
@@ -168,38 +163,32 @@
     state: absent
   check_mode: yes
   register: drop_check
-  #when: "cassandra_version.startswith('4') == False"   # https://issues.apache.org/jira/browse/CASSANDRA-12681?attachmentSortBy=dateTime
 
 - name: Get output of DESC KEYSPACES
   shell: cqlsh --execute "DESC KEYSPACES"
   register: mykeyspace
-  #when: "cassandra_version.startswith('4') == False"   # https://issues.apache.org/jira/browse/CASSANDRA-12681?attachmentSortBy=dateTime
 
 - name: Assert mykeyspace still exists
   assert:
     that:
       - "'mykeyspace' in mykeyspace.stdout"
       - "drop_check.changed == True"
-  #when: "cassandra_version.startswith('4') == False"   # https://issues.apache.org/jira/browse/CASSANDRA-12681?attachmentSortBy=dateTime
 
 - name: Drop multi-dc keyspace
   community.cassandra.cassandra_keyspace:
     name: mykeyspace
     state: absent
   register: drop_multidc
-  #when: "cassandra_version.startswith('4') == False"   # https://issues.apache.org/jira/browse/CASSANDRA-12681?attachmentSortBy=dateTime
 
 - name: Get output of DESC KEYSPACES
   shell: cqlsh --execute "DESC KEYSPACES"
   register: mykeyspace
-  #when: "cassandra_version.startswith('4') == False"   # https://issues.apache.org/jira/browse/CASSANDRA-12681?attachmentSortBy=dateTime
 
 - name: Assert mykeyspace has now been dropped
   assert:
     that:
       - "'mykeyspace' not in mykeyspace.stdout"
       - "drop_multidc.changed == True"
-  #when: "cassandra_version.startswith('4') == False"   # https://issues.apache.org/jira/browse/CASSANDRA-12681?attachmentSortBy=dateTime
 
 - name: Create keyspace in check mode
   community.cassandra.cassandra_keyspace:
@@ -227,12 +216,10 @@
       paris: 1
       new_york: 1
   register: rhys
-  #when: "cassandra_version.startswith('4') == False"   # https://issues.apache.org/jira/browse/CASSANDRA-12681?attachmentSortBy=dateTime
 
 - name: Get output of DESC KEYSPACE rhys
   shell: cqlsh --execute "DESC KEYSPACE rhys"
   register: mykeyspace
-  #when: "cassandra_version.startswith('4') == False"   # https://issues.apache.org/jira/browse/CASSANDRA-12681?attachmentSortBy=dateTime
 
 - name: Assert that rhys keyspace has been created
   assert:
@@ -242,26 +229,22 @@
       - "'\\'new_york\\': \\'1\\'' in mykeyspace.stdout"
       - "'\\'paris\\': \\'1\\'' in mykeyspace.stdout"
       - "'CREATE KEYSPACE rhys WITH replication = {\\'class\\': \\'NetworkTopologyStrategy\\'' in mykeyspace.stdout"
-  #when: "cassandra_version.startswith('4') == False"   # https://issues.apache.org/jira/browse/CASSANDRA-12681?attachmentSortBy=dateTime
 
 - name: Drop keyspace rhys
   community.cassandra.cassandra_keyspace:
     name: rhys
     state: absent
   register: drop_rhys
-  #when: "cassandra_version.startswith('4') == False"   # https://issues.apache.org/jira/browse/CASSANDRA-12681?attachmentSortBy=dateTime
 
 - name: Get output of DESC KEYSPACES
   shell: cqlsh --execute "DESC KEYSPACES"
   register: mykeyspace
-  #when: "cassandra_version.startswith('4') == False"   # https://issues.apache.org/jira/browse/CASSANDRA-12681?attachmentSortBy=dateTime
 
 - name: Assert rhys has now been dropped
   assert:
     that:
       - "'rhys' not in mykeyspace.stdout"
       - "drop_rhys.changed == True"
-  when: "cassandra_version.startswith('4') == False"   # https://issues.apache.org/jira/browse/CASSANDRA-12681?attachmentSortBy=dateTime
 
 # SimpleStrategy alter tests
 - name: Create a rhys2 keyspace
@@ -568,4 +551,3 @@
           - "'\\'london\\': \\'3\\'' in mykeyspace.stdout"
           - "'\\'new_york\\': \\'3\\'' in mykeyspace.stdout"
           - "multiple_dcs.changed == True"
-  #when: "cassandra_version.startswith('4') == False"   # https://issues.apache.org/jira/browse/CASSANDRA-12681?attachmentSortBy=dateTime
