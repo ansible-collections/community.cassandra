@@ -238,7 +238,10 @@
   assert:
     that:
       - "rhys.changed == True"
-      - "'\\nCREATE KEYSPACE rhys WITH replication = {\\'class\\': \\'NetworkTopologyStrategy\\', \\'london\\': \\'2\\', \\'paris\\': \\'1\\', \\'new_york\\': \\'1\\'}  AND durable_writes = true;' == mykeyspace.stdout"
+      - "\\'london\\': \\'2\\' in mykeyspace.stdout"
+      - "\\'new_york\\': \\'1\\' in mykeyspace.stdout"
+      - "\\'paris\\': \\'1\\' in mykeyspace.stdout"
+      - "'CREATE KEYSPACE rhys WITH replication = {\\'class\\': \\'NetworkTopologyStrategy\\'' in mykeyspace.stdout"
   #when: "cassandra_version.startswith('4') == False"   # https://issues.apache.org/jira/browse/CASSANDRA-12681?attachmentSortBy=dateTime
 
 - name: Drop keyspace rhys
@@ -388,7 +391,11 @@
     - name: Assert multidc_keyspace exists
       assert:
         that:
-          - "'\\nCREATE KEYSPACE multidc_keyspace WITH replication = {\\'class\\': \\'NetworkTopologyStrategy\\', \\'london\\': \\'3\\', \\'new_york\\': \\'2\\', \\'tokyo\\': \\'1\\', \\'zurich\\': \\'3\\'}  AND durable_writes = true;' == mykeyspace.stdout"
+          - "'CREATE KEYSPACE multidc_keyspace WITH replication = {\\'class\\': \\'NetworkTopologyStrategy\\'' in mykeyspace.stdout"
+          - "\\'london\\': \\'3\\' in multiple_dcs.stdout"
+          - "\\'zurich\\': \\'1\\' in multiple_dcs.stdout"
+          - "\\'tokyo\\': \\'1\\' in multiple_dcs.stdout"
+          - "\\'new_york\\': \\'2\\' in multiple_dcs.stdout"
           - "multiple_dcs.changed == True"
 
     - name: Add a dc to multidc_keyspace
@@ -410,7 +417,12 @@
     - name: Assert multidc_keyspace has an amsterdam dc
       assert:
         that:
-          - "'\\nCREATE KEYSPACE multidc_keyspace WITH replication = {\\'class\\': \\'NetworkTopologyStrategy\\', \\'amsterdam\\': \\'3\\', \\'london\\': \\'3\\', \\'new_york\\': \\'2\\', \\'tokyo\\': \\'1\\', \\'zurich\\': \\'3\\'}  AND durable_writes = true;' == mykeyspace.stdout"
+          - "'CREATE KEYSPACE multidc_keyspace WITH replication = {\\'class\\': \\'NetworkTopologyStrategy\\'' in mykeyspace.stdout"
+          - "\\'london\\': \\'3\\' in multiple_dcs.stdout"
+          - "\\'zurich\\': \\'1\\' in multiple_dcs.stdout"
+          - "\\'tokyo\\': \\'1\\' in multiple_dcs.stdout"
+          - "\\'new_york\\': \\'2\\' in multiple_dcs.stdout"
+          - "\\'amsterdam\\': \\'3\\' in multiple_dcs.stdout"
           - "multiple_dcs.changed == True"
 
     - name: Remove amsterdam from multidc_keyspace
@@ -431,7 +443,12 @@
     - name: Assert amsterdam dc has been removed
       assert:
         that:
-          - "'\\nCREATE KEYSPACE multidc_keyspace WITH replication = {\\'class\\': \\'NetworkTopologyStrategy\\', \\'london\\': \\'3\\', \\'new_york\\': \\'2\\', \\'tokyo\\': \\'1\\', \\'zurich\\': \\'3\\'}  AND durable_writes = true;' == mykeyspace.stdout"
+          - "'CREATE KEYSPACE multidc_keyspace WITH replication = {\\'class\\': \\'NetworkTopologyStrategy\\'' in mykeyspace.stdout"
+          - "\\'london\\': \\'3\\' in multiple_dcs.stdout"
+          - "\\'zurich\\': \\'1\\' in multiple_dcs.stdout"
+          - "\\'tokyo\\': \\'1\\' in multiple_dcs.stdout"
+          - "\\'new_york\\': \\'2\\' in multiple_dcs.stdout"
+          - "\\'amsterdam\\': \\'3\\' not in multiple_dcs.stdout"
           - "multiple_dcs.changed == True"
 
     - name: Remove london from multidc_keyspace
@@ -451,7 +468,12 @@
     - name: Assert london dc has been removed
       assert:
         that:
-          - "'\\nCREATE KEYSPACE multidc_keyspace WITH replication = {\\'class\\': \\'NetworkTopologyStrategy\\', \\'new_york\\': \\'2\\', \\'tokyo\\': \\'1\\', \\'zurich\\': \\'3\\'}  AND durable_writes = true;' == mykeyspace.stdout"
+          - "'CREATE KEYSPACE multidc_keyspace WITH replication = {\\'class\\': \\'NetworkTopologyStrategy\\'' in mykeyspace.stdout"
+          - "'london' not in multiple_dcs.stdout"
+          - "\\'zurich\\': \\'1\\' in multiple_dcs.stdout"
+          - "\\'tokyo\\': \\'1\\' in multiple_dcs.stdout"
+          - "\\'new_york\\': \\'2\\' in multiple_dcs.stdout"
+          - "'amsterdam' in multiple_dcs.stdout"
           - "multiple_dcs.changed == True"
 
     - name: Change tokyo replication factor to 3
@@ -471,7 +493,10 @@
     - name: Assert tokyo rf is now 3 in keyspace definition
       assert:
         that:
-          - "'\\nCREATE KEYSPACE multidc_keyspace WITH replication = {\\'class\\': \\'NetworkTopologyStrategy\\', \\'new_york\\': \\'2\\', \\'tokyo\\': \\'3\\', \\'zurich\\': \\'3\\'}  AND durable_writes = true;' == mykeyspace.stdout"
+          - "'CREATE KEYSPACE multidc_keyspace WITH replication = {\\'class\\': \\'NetworkTopologyStrategy\\'' in mykeyspace.stdout"
+          - "\\'zurich\\': \\'3\\' in multiple_dcs.stdout"
+          - "\\'tokyo\\': \\'3\\' in multiple_dcs.stdout"
+          - "\\'new_york\\': \\'2\\' in multiple_dcs.stdout"
           - "multiple_dcs.changed == True"
 
     - name: Drop multidc_keyspace
@@ -538,6 +563,10 @@
     - name: Assert multi_dc_keyspace exists
       assert:
         that:
-          - "'\\nCREATE KEYSPACE multi_dc_keyspace WITH replication = {\\'class\\': \\'NetworkTopologyStrategy\\', \\'london\\': \\'3\\', \\'marlow\\': \\'3\\', \\'new_york\\': \\'3\\', \\'zurich\\': \\'3\\'}  AND durable_writes = true;' == mykeyspace.stdout"
+          - "'CREATE KEYSPACE multidc_keyspace WITH replication = {\\'class\\': \\'NetworkTopologyStrategy\\'' in mykeyspace.stdout"
+          - "\\'marlow\\': \\'3\\' in multiple_dcs.stdout"
+          - "\\'zurich\\': \\'3\\' in multiple_dcs.stdout"
+          - "\\'london\\': \\'3\\' in multiple_dcs.stdout"
+          - "\\'new_york\\': \\'3\\' in multiple_dcs.stdout"
           - "multiple_dcs.changed == True"
   #when: "cassandra_version.startswith('4') == False"   # https://issues.apache.org/jira/browse/CASSANDRA-12681?attachmentSortBy=dateTime
