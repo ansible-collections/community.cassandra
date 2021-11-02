@@ -238,7 +238,7 @@
   assert:
     that:
       - "rhys.changed == True"
-      - "'\\nCREATE KEYSPACE rhys WITH replication = {\\'class\\': \\'NetworkTopologyStrategy\\', \\'london\\': \\'2\\', \\'new_york\\': \\'1\\', \\'paris\\': \\'1\\'}  AND durable_writes = true;' == mykeyspace.stdout"
+      - "'\\nCREATE KEYSPACE rhys WITH replication = {\\'class\\': \\'NetworkTopologyStrategy\\', \\'london\\': \\'2\\', \\'paris\\': \\'1\\', \\'new_york\\': \\'1\\'}  AND durable_writes = true;' == mykeyspace.stdout"
   #when: "cassandra_version.startswith('4') == False"   # https://issues.apache.org/jira/browse/CASSANDRA-12681?attachmentSortBy=dateTime
 
 - name: Drop keyspace rhys
