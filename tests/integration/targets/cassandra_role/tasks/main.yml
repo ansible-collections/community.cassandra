@@ -219,24 +219,7 @@
     - mykeyspace2
     - mykeyspace3
 
-- name: Create keyspaces with Network topology
-  cassandra_keyspace:
-    name: "{{ item }}"
-    state: present
-    data_centres:
-      london: 3
-      paris: 3
-      tokyo: 1
-      new_york: 1
-    login_user: "{{ cassandra_admin_user }}"
-    login_password: "{{ cassandra_admin_pwd }}"
-  with_items:
-    - mykeyspace4
-    - mykeyspace5
-    - mykeyspace6
-  when: "cassandra_version.startswith('4') == False"
-
-- name: Create keyspaces for 4.0 - Until issue fixed with NetworkTopology
+- name: Create keyspaces for 4.0
   cassandra_keyspace:
     name: "{{ item }}"
     state: present
@@ -246,7 +229,6 @@
     - mykeyspace4
     - mykeyspace5
     - mykeyspace6
-  when: cassandra_version.startswith('4')
 
 - name: Get all keyspaces
   shell: cqlsh --username "{{ cassandra_admin_user }}" --password "{{ cassandra_admin_pwd }}" --execute "DESC KEYSPACES"
