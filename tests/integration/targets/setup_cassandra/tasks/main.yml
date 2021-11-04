@@ -115,26 +115,6 @@
   when: ansible_os_family == 'Debian'
   notify: debian_remove_cassandra
 
-#- name: Add DC Names  - Required for 4.0 cassandra-rackdc.properties
-#  copy:
-#    dest: /etc/cassandra/cassandra-rackdc.properties
-#    owner: cassandra
-#    group: cassandra
-#    mode: 0644
-#    content: |
-#      dc=dc1
-#      rack=rack1
-#
-#      dc=london
-#      dc=zurich
-#      dc=tokyo
-#      dc=new_york
-#      dc=marlow
-#      dc=rome
-#      dc=beijing
-#      dc=singapore
-#      dc=amsterdam
-#  when: "cassandra_version.startswith('4')"
 - name: Set Snitch to PropertyFileSnitch
   lineinfile:
     path: /etc/cassandra/conf/cassandra.yaml
@@ -154,41 +134,6 @@
     - "cassandra_version.startswith('4')"
     - ansible_os_family == "Debian"
   no_log: yes
-
-- name: Add DC Names - Required for 4.0 cassandra-topology.properties
-  copy:
-    dest: /etc/cassandra/cassandra-topology.properties
-    owner: cassandra
-    group: cassandra
-    mode: 0644
-    content: |
-      # Cassandra Node IP=Data Center:Rack
-      192.168.1.100=DC1:RAC1
-      192.168.2.200=DC2:RAC2
-
-      10.0.0.10=london:RAC1
-      10.0.0.11=zurich:RAC1
-      10.0.0.12=tokyo:RAC1
-      10.0.0.13=new_york:RAC1
-      10.0.0.14=marlow:RAC1
-      10.0.0.15=rome:RAC1
-      10.0.0.16=beijing:RAC1
-      10.0.0.17=singapore:RAC1
-      10.0.0.18=amsterdam:RAC1
-
-      10.20.114.10=DC2:RAC1
-      10.20.114.11=DC2:RAC1
-
-      10.21.119.13=DC3:RAC1
-      10.21.119.10=DC3:RAC1
-
-      10.0.0.13=DC1:RAC2
-      10.21.119.14=DC3:RAC2
-      10.20.114.15=DC2:RAC2
-
-      # default for unknown nodes
-      default=DC1:r1
-  when: "cassandra_version.startswith('4')"
 
 - name: Adjust heap size
   lineinfile:
@@ -264,6 +209,5 @@
   when:
     - ansible_os_family == 'RedHat'
     - ansible_distribution_major_version == "7"
-    - "cassandra_version.startswith('4') or cassandra_version.startswith('3')"
   notify: redhat_remove_cassandra
   no_log: yes
