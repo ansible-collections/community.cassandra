@@ -1,6 +1,6 @@
 # The cassandra_version var should be set to one
 # of the dirs in https://downloads.apache.org/cassandra/redhat/
-cassandra_version: "311x"
+cassandra_version: "40x"
 openjdk: java-1.8.0-openjdk
 
 cassandra_yum:

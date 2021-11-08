@@ -5,7 +5,7 @@ pip_packages:
   - psutil==5.7.0
 ant_version: "1.10.12"
 ant_download: "https://www-eu.apache.org/dist//ant/binaries/apache-ant-{{ ant_version }}-bin.tar.gz"
-cassandra_version: 4.0.0  # Released version from http://archive.apache.org/dist/cassandra/
+cassandra_version: 4.0.1  # Released version from http://archive.apache.org/dist/cassandra/
 cassandra_nodes:  # Changes in 4.0 means we need to add nodes to certain DCs for some stuff to work
   - dc: "london"  # 5 seeds because of this https://github.com/ibmcb/cbtool/issues/59
     node: "london1"
