@@ -38,6 +38,7 @@
   package:
     name: "{{ ntp_packages }}"
     state: present
+  retries: 3
 
 - name: Ensure ntp service starts
   service:

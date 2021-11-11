@@ -2,14 +2,17 @@
   apt_key:
     url: https://adoptopenjdk.jfrog.io/adoptopenjdk/api/gpg/key/public
     state: present
+  retries: 3
 
 - name: Add repo for OpenJDK (Debian & Ubuntu)
   apt_repository:
     repo: "deb https://adoptopenjdk.jfrog.io/adoptopenjdk/deb/ {{ ansible_distribution_release }} main"
     state: present
     filename: "openjdk-1.8"
+  retries: 3
 
 - name: Install OpenJDK (Debian & Ubuntu)
   apt:
     name: adoptopenjdk-8-hotspot
     state: present
+  retries: 3

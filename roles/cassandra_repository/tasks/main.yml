@@ -7,18 +7,22 @@
       baseurl: "https://www.apache.org/dist/cassandra/redhat/{{ cassandra_version }}/"
       gpgcheck: 1
       gpgkey: "https://www.apache.org/dist/cassandra/KEYS"
+  retries: 3
   when: ansible_os_family == "RedHat"
+
 
 - name: Install debian packages (Debian & Ubuntu)
   apt:
     name: "{{ debian_packages }}"
     state: present
+  retries: 3
   when: ansible_os_family == "Debian"
 
 - name: Add apt key for Cassandra repository (Debian & Ubuntu)
   apt_key:
     url: https://www.apache.org/dist/cassandra/KEYS
     state: present
+  retries: 3
   when: ansible_os_family == "Debian"
 
 - name: Ensure Cassandra apt repository exists (Debian & Ubuntu)
@@ -26,4 +30,5 @@
     repo: "deb http://www.apache.org/dist/cassandra/debian {{ cassandra_version }} main"
     state: present
     filename: "cassandra-{{ cassandra_version }}"
+  retries: 3
   when: ansible_os_family == "Debian"

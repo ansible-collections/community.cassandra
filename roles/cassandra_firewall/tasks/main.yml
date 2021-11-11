@@ -8,6 +8,7 @@
   package:
     name: "{{ firewalld_packages }}"
     state: present
+  retries: 3
 
 - name: Ensure firewalld service is started
   service:

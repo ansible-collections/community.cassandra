@@ -11,6 +11,7 @@
   package:
     name: "{{ cassandra_packages }}"
     state: present
+  retries: 3
 
 # https://issues.apache.org/jira/browse/CASSANDRA-16822?orderby=created+DESC%2C+priority+DESC%2C+updated+DESC
 - name: Install clqshlib - bug - ImportError - No module named cqlshlib
