@@ -18,6 +18,13 @@
   retries: 3
   when: ansible_os_family == "Debian"
 
+- set_fact:
+    validate_certs: true
+  when:
+    - "ansible_distribution == 'Ubuntu'"
+    - "ansible_distribution_version == '16.04'"
+
+
 - name: Add apt key for Cassandra repository (Debian & Ubuntu)
   apt_key:
     url: https://www.apache.org/dist/cassandra/KEYS
