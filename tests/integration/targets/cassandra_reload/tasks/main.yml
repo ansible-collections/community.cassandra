@@ -117,4 +117,3 @@
     that:
       - "triggers.msg == 'nodetool triggers executed successfully'"
       - "triggers.changed == True"
-

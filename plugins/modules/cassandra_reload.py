@@ -25,7 +25,8 @@ options:
   reload:
     description:
       - Object type to reload.
-    type: raw
+    type: str
+    required: true
     choices:
       - localschema
       - seeds
@@ -68,18 +69,21 @@ from ansible_collections.community.cassandra.plugins.module_utils.cassandra_comm
 
 
 def main():
+    reload_choices = ['localschema', 
+                      'seeds', 
+                      'ssl', 
+                      'triggers']
     argument_spec = cassandra_common_argument_spec()
     argument_spec.update(
-        reload=dict(type='raw', default=None, required=False)
+        reload=dict(type='str', choices=reload_choices, required=True)
     )
     module = AnsibleModule(
         argument_spec=argument_spec,
         supports_check_mode=False,
     )
 
-
     cmd = "reload{0}".format(module.params['reload'])
-    n = NodeToolCommandKeyspaceTable(module, cmd)
+    n = NodeToolCommandSimple(module, cmd)
 
     rc = None
     out = ''
