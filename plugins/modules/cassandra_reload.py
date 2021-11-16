@@ -69,9 +69,9 @@ from ansible_collections.community.cassandra.plugins.module_utils.cassandra_comm
 
 
 def main():
-    reload_choices = ['localschema', 
-                      'seeds', 
-                      'ssl', 
+    reload_choices = ['localschema',
+                      'seeds',
+                      'ssl',
                       'triggers']
     argument_spec = cassandra_common_argument_spec()
     argument_spec.update(
