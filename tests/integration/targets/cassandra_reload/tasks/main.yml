@@ -63,7 +63,7 @@
 
 - assert:
     that:
-      - "triggers.msg == 'nodetool triggers executed successfully'"
+      - "triggers.msg == 'nodetool reloadtriggers executed successfully'"
       - "triggers.changed == True"
 
 # Same tests with auth
@@ -124,5 +124,5 @@
 
 - assert:
     that:
-      - "triggers.msg == 'nodetool triggers executed successfully'"
+      - "triggers.msg == 'nodetool reloadtriggers executed successfully'"
       - "triggers.changed == True"
