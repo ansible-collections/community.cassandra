@@ -87,14 +87,14 @@
     debug: true
   register: seeds
   when:
-    - "cassandra_version.startswith('3') is False"
+    - "cassandra_version.startswith('4') | int >= 4"
 
 - assert:
     that:
       - "seeds.msg == 'nodetool reloadseeds executed successfully'"
       - "seeds.changed == True"
   when:
-    - "cassandra_version.startswith('3') is False"
+    - "cassandra_version.startswith('4') | int >= 4"
 
 - name: Reload the ssl certs
   community.cassandra.cassandra_reload:
