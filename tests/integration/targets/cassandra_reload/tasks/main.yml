@@ -47,11 +47,13 @@
     reload: ssl
     debug: true
   register: ssl
+  when: cassandra_version[0] | int >= 4
 
 - assert:
     that:
       - "ssl.msg == 'nodetool reloadssl executed successfully'"
       - "ssl.changed == True"
+  when: cassandra_version[0] | int >= 4
 
 - name: Reload the triggers
   community.cassandra.cassandra_reload:
@@ -104,11 +106,13 @@
     reload: ssl
     debug: true
   register: ssl
+  when: cassandra_version[0] | int >= 4
 
 - assert:
     that:
       - "ssl.msg == 'nodetool reloadssl executed successfully'"
       - "ssl.changed == True"
+  when: cassandra_version[0] | int >= 4
 
 - name: Reload the triggers
   community.cassandra.cassandra_reload:
