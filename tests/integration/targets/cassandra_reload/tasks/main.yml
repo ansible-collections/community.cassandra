@@ -1,0 +1,128 @@
+# test code for the cassandra_gossip module
+# (c) 2019,  Rhys Campbell <rhys.james.campbell@googlemail.com>
+
+# This file is part of Ansible
+#
+# Ansible is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Ansible is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
+
+# ===========================================================
+
+- name: Reload the local schema
+  community.cassandra.cassandra_reload:
+    reload: localschema
+    debug: true
+  register: localschema
+
+- assert:
+    that:
+      - "localschema.msg == 'nodetool reloadlocalschema executed successfully'"
+      - "localschema.changed == True"
+
+- name: Reload the seeds
+  community.cassandra.cassandra_reload:
+    reload: seeds
+    debug: true
+  register: seeds
+  when: cassandra_version[0] | int >= 4
+
+- assert:
+    that:
+      - "seeds.msg == 'nodetool reloadseeds executed successfully'"
+      - "seeds.changed == True"
+  when: cassandra_version[0] | int >= 4
+
+- name: Reload the ssl certs
+  community.cassandra.cassandra_reload:
+    reload: ssl
+    debug: true
+  register: ssl
+  when: cassandra_version[0] | int >= 4
+
+- assert:
+    that:
+      - "ssl.msg == 'nodetool reloadssl executed successfully'"
+      - "ssl.changed == True"
+  when: cassandra_version[0] | int >= 4
+
+- name: Reload the triggers
+  community.cassandra.cassandra_reload:
+    reload: triggers
+    debug: true
+  register: triggers
+
+- assert:
+    that:
+      - "triggers.msg == 'nodetool reloadtriggers executed successfully'"
+      - "triggers.changed == True"
+
+# Same tests with auth
+- include_tasks: ../../setup_cassandra/tasks/cassandra_auth.yml
+  when: cassandra_auth_tests == True
+
+- name: Reload the local schema
+  community.cassandra.cassandra_reload:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    reload: localschema
+    debug: true
+  register: localschema
+
+- assert:
+    that:
+      - "localschema.msg == 'nodetool reloadlocalschema executed successfully'"
+      - "localschema.changed == True"
+
+- name: Reload the seeds
+  community.cassandra.cassandra_reload:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    reload: seeds
+    debug: true
+  register: seeds
+  when: cassandra_version[0] | int >= 4
+
+- assert:
+    that:
+      - "seeds.msg == 'nodetool reloadseeds executed successfully'"
+      - "seeds.changed == True"
+  when: cassandra_version[0] | int >= 4
+
+
+- name: Reload the ssl certs
+  community.cassandra.cassandra_reload:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    reload: ssl
+    debug: true
+  register: ssl
+  when: cassandra_version[0] | int >= 4
+
+- assert:
+    that:
+      - "ssl.msg == 'nodetool reloadssl executed successfully'"
+      - "ssl.changed == True"
+  when: cassandra_version[0] | int >= 4
+
+- name: Reload the triggers
+  community.cassandra.cassandra_reload:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    reload: triggers
+    debug: true
+  register: triggers
+
+- assert:
+    that:
+      - "triggers.msg == 'nodetool reloadtriggers executed successfully'"
+      - "triggers.changed == True"
