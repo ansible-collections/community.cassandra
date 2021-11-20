@@ -22,3 +22,10 @@ releases:
       minor_changes:
         - Various minor module documentation improvements PR161.
         - Add additional_args parameter to cassandra_cqlsh module PR149.
+  1.1.0:
+    changes:
+      release_summary: Adds new module cassandra_reload and provides a few minor fixes.
+      minor_changes:
+       - 183 - Adds new module cassandra_reload.
+       - 182 - Add retries to network related tasks in all roles.
+       - A bunch of other PRs addressed issues in the integration test code related to Cassandra 4.0.
