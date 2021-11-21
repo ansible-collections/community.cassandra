@@ -1,5 +1,5 @@
-# test code for the cassandra_binary module
-# (c) 2019,  Rhys Campbell <rhys.james.campbell@googlemail.com>
+# test code for the cassandra_compaction module
+# (c) 2021,  Rhys Campbell <rhyscampbell@bluewin.ch>
 
 # This file is part of Ansible
 #
@@ -23,21 +23,21 @@
 
 - name: Assert compaction is not running 1
   assert:
-    that: "'pending tasks: 0' == binary_status.stdout"
+    that: "'pending tasks: 0' == compaction_status.stdout"
 
 - name: Run compaction (check mode)
-  community.cassandra.cassandra_binary:
+  community.cassandra.cassandra_compact:
     compact: yes
     debug: true
   check_mode: yes
 
 - name: Run compaction
-  community.cassandra.cassandra_binary:
+  community.cassandra.cassandra_compact:
     compact: yes
     debug: true
 
 - name: Get compactionstats status 2
-  shell: nodetool -h 127.0.0.1 statusbinary
+  shell: nodetool -h 127.0.0.1 compactionstats
   register: compaction_status
 
 - name: Assert compaction is not running 2
@@ -45,18 +45,18 @@
     that: "'pending tasks: 0' == compaction_status.stdout"
 
 - name: Stop compaction (check mode)
-  community.cassandra.cassandra_binary:
+  community.cassandra.cassandra_compact:
     compact: no
     debug: true
   check_mode: yes
 
 - name: Stop compaction with module
-  community.cassandra.cassandra_binary:
+  community.cassandra.cassandra_compact:
     compact: no
     debug: true
 
 - name: Get compactionstats status 3
-  shell: nodetool -h 127.0.0.1 statusbinary
+  shell: nodetool -h 127.0.0.1 compactionstats
   register: compaction_status
 
 - name: Assert compaction is not running 3
@@ -77,12 +77,12 @@
 
 - name: Get compact status 4
   shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 compactionstats
-  register: compact_status
+  register: compaction_status
   when: cassandra_auth_tests == True
 
 - name: Assert compaction is not running 4
   assert:
-    that: "'pending tasks: 0' == binary_status.stdout"
+    that: "'pending tasks: 0' == compaction_status.stdout"
   when: cassandra_auth_tests == True
 
 - name: Stop compaction using password file

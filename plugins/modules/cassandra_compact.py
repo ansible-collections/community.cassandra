@@ -26,7 +26,6 @@ options:
       - The required status
     type: bool
     default: true
-    required: true
 '''
 
 EXAMPLES = '''
@@ -58,7 +57,7 @@ from ansible_collections.community.cassandra.plugins.module_utils.cassandra_comm
 def main():
     argument_spec = cassandra_common_argument_spec()
     argument_spec.update(
-        compact=dict(required=True, default=True, type='bool')
+        compact=dict(default=True, type='bool')
     )
     module = AnsibleModule(
         argument_spec=argument_spec,
