@@ -123,7 +123,7 @@
 
 - name: Test incorrect nodetool_path handling
   community.cassandra.cassandra_compact:
-    comnpact: yes
+    compact: yes
     nodetool_path: /tmp
     debug: true
   register: nodetool_path_error
