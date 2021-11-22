@@ -35,7 +35,7 @@
 - assert:
     that:
       - compaction_check_mode.changed
-      - compaction_check_mode.msg = 'compaction started (check mode)'
+      - "compaction_check_mode.msg == 'compaction started (check mode)'"
 
 - name: Run compaction
   community.cassandra.cassandra_compact:
@@ -46,7 +46,7 @@
 - assert:
     that:
       - compaction.changed
-      - compaction.msg = 'compaction started'
+      - "compaction.msg == 'compaction started'"
 
 - name: Get compactionstats status 2
   shell: nodetool -h 127.0.0.1 compactionstats
@@ -66,7 +66,7 @@
 - assert:
     that:
       - compaction_check_mode.changed == False
-      - compaction_check_mode.msg == 'compaction is not running'
+      - "compaction_check_mode.msg == 'compaction is not running'"
 
 - name: Stop compaction with module
   community.cassandra.cassandra_compact:
@@ -77,7 +77,7 @@
 - assert:
     that:
       - compaction.changed == False
-      - compaction.msg == 'compaction is not running'
+      - "compaction.msg == 'compaction is not running'"
 
 - name: Get compactionstats status 3
   shell: nodetool -h 127.0.0.1 compactionstats
@@ -102,7 +102,7 @@
 - assert:
     that:
       - compaction.changed
-      - compaction.msg = 'compaction started'
+      - "compaction.msg == 'compaction started'"
 
 - name: Get compact status 4
   shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 compactionstats
@@ -126,7 +126,7 @@
 - assert:
     that:
       - compaction.changed
-      - compaction.msg = 'compaction started (check mode)'
+      - "compaction.msg == 'compaction started (check mode)'"
 
 - name: Get compaction status 5
   shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 compactionstats
