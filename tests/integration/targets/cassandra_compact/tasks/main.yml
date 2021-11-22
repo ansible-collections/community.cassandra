@@ -30,11 +30,23 @@
     compact: yes
     debug: true
   check_mode: yes
+  register: compaction_check_mode
+
+- assert:
+    that:
+      - compaction_check_mode.changed
+      - compaction_check_mode.msg = 'compaction started (check mode)'
 
 - name: Run compaction
   community.cassandra.cassandra_compact:
     compact: yes
     debug: true
+  register: compaction
+
+- assert:
+    that:
+      - compaction.changed
+      - compaction.msg = 'compaction started'
 
 - name: Get compactionstats status 2
   shell: nodetool -h 127.0.0.1 compactionstats
@@ -49,11 +61,23 @@
     compact: no
     debug: true
   check_mode: yes
+  register: compaction_check_mode
+
+- assert:
+    that:
+      - compaction_check_mode.changed == False
+      - compaction_check_mode.msg == 'compaction is not running'
 
 - name: Stop compaction with module
   community.cassandra.cassandra_compact:
     compact: no
     debug: true
+  register: compaction
+
+- assert:
+    that:
+      - compaction.changed == False
+      - compaction.msg == 'compaction is not running'
 
 - name: Get compactionstats status 3
   shell: nodetool -h 127.0.0.1 compactionstats
@@ -72,8 +96,13 @@
     username: "{{ cassandra_admin_user }}"
     password: "{{ cassandra_admin_pwd }}"
     debug: true
-  register: compact_status
+  register: compaction
   when: cassandra_auth_tests == True
+
+- assert:
+    that:
+      - compaction.changed
+      - compaction.msg = 'compaction started'
 
 - name: Get compact status 4
   shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 compactionstats
@@ -91,8 +120,13 @@
     username: "{{ cassandra_admin_user }}"
     password_file: /etc/cassandra/jmxremote.password
     debug: true
-  register: compact_status
+  register: compaction
   when: cassandra_auth_tests == True
+
+- assert:
+    that:
+      - compaction.changed
+      - compaction.msg = 'compaction started (check mode)'
 
 - name: Get compaction status 5
   shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 compactionstats

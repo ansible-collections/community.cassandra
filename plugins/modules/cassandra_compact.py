@@ -88,47 +88,53 @@ def main():
 
         if rc != 0:
             module.fail_json(name=status_cmd,
-                             msg="status command failed", **result)
+                             msg="{0} command failed".format(status_cmd), **result)
         if module.check_mode:
             if out != status_inactive:
-                module.exit_json(changed=True, msg="check mode", **result)
+                module.exit_json(changed=True, msg="compaction stopped (check mode)", **result)
             else:
-                module.exit_json(changed=False, msg="check mode", **result)
+                module.exit_json(changed=False, msg="compaction is not running", **result)
         if out != status_inactive:
             (rc, out, err) = n.disable_command()
+            result['msg'] = "compaction stopped"
+            result['changed'] = True
             if module.params['debug']:
                 if out:
                     result['stdout'] = out
                 if err:
                     result['stderr'] = err
-        if rc != 0:
-            module.fail_json(name=disable_cmd,
-                             msg="stop command failed", **result)
+            if rc != 0:
+                module.fail_json(name=disable_cmd,
+                                 msg="{0} command failed".format(disable_cmd), **result)
         else:
-            result['changed'] = True
+            result['msg'] = "compaction is not running"
+            result['changed'] = False
 
     elif module.params['compact'] is True:
 
         if rc != 0:
             module.fail_json(name=status_cmd,
-                             msg="compactionstats command failed", **result)
+                             msg="{0} command failed".format(status_cmd), **result)
         if module.check_mode:
             if out == status_inactive:
-                module.exit_json(changed=True, msg="check mode", **result)
+                module.exit_json(changed=True, msg="compaction started (check mode)", **result)
             else:
-                module.exit_json(changed=False, msg="check mode", **result)
+                module.exit_json(changed=False, msg="compaction is already running", **result)
         if out == status_inactive:
             (rc, out, err) = n.enable_command()
+            result['msg'] = "compaction started"
+            result['changed'] = True
             if module.params['debug']:
                 if out:
                     result['stdout'] = out
                 if err:
                     result['stderr'] = err
-        if rc is not None and rc != 0:
-            module.fail_json(name=enable_cmd,
-                             msg="compact command failed", **result)
+            if rc is not None and rc != 0:
+                module.fail_json(name=enable_cmd,
+                                 msg="{0} command failed".format(enable_cmd), **result)
         else:
-            result['changed'] = True
+            result['msg'] = "compaction is already running"
+            result['changed'] = False
 
     module.exit_json(**result)
 
