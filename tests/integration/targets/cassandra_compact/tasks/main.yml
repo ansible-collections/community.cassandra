@@ -125,8 +125,8 @@
 
 - assert:
     that:
-      - compaction.changed
-      - "compaction.msg == 'compaction started (check mode)'"
+      - compaction.changed == False
+      - "compaction.msg == 'compaction is not running'"
 
 - name: Get compaction status 5
   shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 compactionstats
