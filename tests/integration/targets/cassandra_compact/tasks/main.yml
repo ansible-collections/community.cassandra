@@ -1,0 +1,171 @@
+# test code for the cassandra_compaction module
+# (c) 2021,  Rhys Campbell <rhyscampbell@bluewin.ch>
+
+# This file is part of Ansible
+#
+# Ansible is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Ansible is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
+
+# ===========================================================
+- name: Get compactionstats status 1
+  shell: nodetool -h 127.0.0.1 compactionstats
+  register: compaction_status
+
+- name: Assert compaction is not running 1
+  assert:
+    that: "'pending tasks: 0' == compaction_status.stdout"
+
+- name: Run compaction (check mode)
+  community.cassandra.cassandra_compact:
+    compact: yes
+    debug: true
+  check_mode: yes
+  register: compaction_check_mode
+
+- assert:
+    that:
+      - compaction_check_mode.changed
+      - "compaction_check_mode.msg == 'compaction started (check mode)'"
+
+- name: Run compaction
+  community.cassandra.cassandra_compact:
+    compact: yes
+    debug: true
+  register: compaction
+
+- assert:
+    that:
+      - compaction.changed
+      - "compaction.msg == 'compaction started'"
+
+- name: Get compactionstats status 2
+  shell: nodetool -h 127.0.0.1 compactionstats
+  register: compaction_status
+
+- name: Assert compaction is not running 2
+  assert:
+    that: "'pending tasks: 0' == compaction_status.stdout"
+
+- name: Stop compaction (check mode)
+  community.cassandra.cassandra_compact:
+    compact: no
+    debug: true
+  check_mode: yes
+  register: compaction_check_mode
+
+- assert:
+    that:
+      - compaction_check_mode.changed == False
+      - "compaction_check_mode.msg == 'compaction is not running'"
+
+- name: Stop compaction with module
+  community.cassandra.cassandra_compact:
+    compact: no
+    debug: true
+  register: compaction
+
+- assert:
+    that:
+      - compaction.changed == False
+      - "compaction.msg == 'compaction is not running'"
+
+- name: Get compactionstats status 3
+  shell: nodetool -h 127.0.0.1 compactionstats
+  register: compaction_status
+
+- name: Assert compaction is not running 3
+  assert:
+    that: "'pending tasks: 0' == compaction_status.stdout"
+
+- include_tasks: ../../setup_cassandra/tasks/cassandra_auth.yml
+  when: cassandra_auth_tests == True
+
+- name: Turn on compaction with auth
+  community.cassandra.cassandra_compact:
+    compact: "yes"
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    debug: true
+  register: compaction
+  when: cassandra_auth_tests == True
+
+- assert:
+    that:
+      - compaction.changed
+      - "compaction.msg == 'compaction started'"
+
+- name: Get compact status 4
+  shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 compactionstats
+  register: compaction_status
+  when: cassandra_auth_tests == True
+
+- name: Assert compaction is not running 4
+  assert:
+    that: "'pending tasks: 0' == compaction_status.stdout"
+  when: cassandra_auth_tests == True
+
+- name: Stop compaction using password file
+  community.cassandra.cassandra_compact:
+    compact: false
+    username: "{{ cassandra_admin_user }}"
+    password_file: /etc/cassandra/jmxremote.password
+    debug: true
+  register: compaction
+  when: cassandra_auth_tests == True
+
+- assert:
+    that:
+      - compaction.changed == False
+      - "compaction.msg == 'compaction is not running'"
+
+- name: Get compaction status 5
+  shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 compactionstats
+  register: compaction_status
+  when: cassandra_auth_tests == True
+
+- name: Assert compaction is not running 4
+  assert:
+    that: "'pending tasks: 0' == compaction_status.stdout"
+  when: cassandra_auth_tests == True
+
+- name: Test login failure handling
+  community.cassandra.cassandra_compact:
+    compact: no
+    username: "{{ cassandra_admin_user }}"
+    password: XXXXXXXXXXXXXXXXXXXXX
+    debug: true
+  register: login_status
+  ignore_errors: true
+  when: cassandra_auth_tests == True
+
+- name: Assert failed login
+  assert:
+    that:
+      - login_status.failed == True
+      - "'Invalid username or password' in login_status.stderr"
+  when: cassandra_auth_tests == True
+
+- name: Test incorrect nodetool_path handling
+  community.cassandra.cassandra_compact:
+    compact: yes
+    nodetool_path: /tmp
+    debug: true
+  register: nodetool_path_error
+  ignore_errors: true
+  when: cassandra_auth_tests == True
+
+- name: Assert no such file
+  assert:
+    that:
+      - nodetool_path_error.failed == True
+      - "'No such file or directory' in nodetool_path_error.msg"
