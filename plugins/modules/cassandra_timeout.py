@@ -42,6 +42,7 @@ options:
       - internodeuser
       - internodestreaminguser
       - misc
+    default: read
 '''
 
 EXAMPLES = '''
