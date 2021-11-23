@@ -73,3 +73,6 @@
     that:
       - "result.stdout == 'Current timeout for type {{ item }}: 0 ms'"
 
+- pause:
+    seconds: 1
+
