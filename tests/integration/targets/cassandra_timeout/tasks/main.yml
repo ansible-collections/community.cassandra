@@ -55,7 +55,7 @@
 - assert:
     that: 
       - "timeout.changed == False"
-      - "timeoutmsg == 'read timeout unchanged'"
+      - "timeout.msg == 'read timeout unchanged'"
 
 - name: Set timeout to 0 (check mode)
   community.cassandra.cassandra_timeout:
