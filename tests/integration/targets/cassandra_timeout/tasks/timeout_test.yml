@@ -73,6 +73,11 @@
     that:
       - "result.stdout == 'Current timeout for type {{ item }}: 0 ms'"
 
-- pause:
-    seconds: 1
+- name: Return timneout to something high otherwise we mess up later tests
+  community.cassandra.cassandra_timeout:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    timeout: 5000
+    timeout_type: "{{ item }}"
+    
 
