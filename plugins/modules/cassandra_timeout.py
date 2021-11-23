@@ -46,12 +46,12 @@ options:
 
 EXAMPLES = '''
 - name: Set read timeout to 1000 ms
-  community.cassandra.cassandra_timeout
+  community.cassandra.cassandra_timeout:
     timeout: 1000
     timeout_type: read
 
 - name: Disable write timeout
-  community.cassandra.cassandra_timeout
+  community.cassandra.cassandra_timeout:
     timeout: 0
     timeout_type: write
 '''
@@ -89,8 +89,8 @@ def main():
 
     timeout = module.params['timeout']
     timeout_type = module.params['timeout_type']
-    set_cmd = "settimeout {0}".format(timeout)
-    get_cmd = "getinterdcstreamthroughput"
+    set_cmd = "settimeout {0} {1}".format(timeout_type, timeout)
+    get_cmd = "gettimeout {0}".format(timeout_type)
 
     n = NodeToolGetSetCommand(module, get_cmd, set_cmd)
 
