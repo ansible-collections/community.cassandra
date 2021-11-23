@@ -98,12 +98,12 @@
 - name: Test various timeout settings in block
   block:
 
-    - name: Set {{ item }} timeout with module
+    - name: "Set {{ item }} timeout with module"
       community.cassandra.cassandra_timeout:
         username: "{{ cassandra_admin_user }}"
         password: "{{ cassandra_admin_pwd }}"
         timeout: 15999
-        timeout_type: {{ item }}
+        timeout_type: "{{ item }}"
         debug: true
       register: result
 
@@ -112,7 +112,7 @@
           - result.changed
           - "result.msg ='{{ item }} timeout changed'"
 
-    - name: Get {{ item }} timeout
+    - name: "Get {{ item }} timeout"
       shell: nodetool -h 127.0.0.1 gettimeout {{ item }}
       register: result
 
@@ -164,7 +164,7 @@
           - result.changed
           - "result.msg == '{{ item }} timeout changed'"
 
-    - name: Get {{ item }} timeout
+    - name: "Get {{ item }} timeout"
       shell: nodetool -h 127.0.0.1 gettimeout {{ item }}
       register: result
 

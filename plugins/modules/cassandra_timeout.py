@@ -74,7 +74,7 @@ from ansible_collections.community.cassandra.plugins.module_utils.cassandra_comm
 
 def main():
 
-    timeout_type_choices = ['read', 'range', 'write', 'counterwrite', 'cascontention', 'truncate', 
+    timeout_type_choices = ['read', 'range', 'write', 'counterwrite', 'cascontention', 'truncate',
                             'internodeconnect', 'internodeuser', 'internodestreaminguser', 'misc']
 
     argument_spec = cassandra_common_argument_spec()
@@ -91,7 +91,6 @@ def main():
     timeout_type = module.params['timeout_type']
     set_cmd = "settimeout {0}".format(timeout)
     get_cmd = "getinterdcstreamthroughput"
-    
 
     n = NodeToolGetSetCommand(module, get_cmd, set_cmd)
 
