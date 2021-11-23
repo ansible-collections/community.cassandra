@@ -19,7 +19,7 @@
 
 - name: Assert timeout is 15999 ms
   assert:
-    that: "'Current timeout for type read: 15999 ms' == result.stdout"
+    that: "'Current timeout for type {{ item }}: 15999 ms' == result.stdout"
 
 - name: Set throughput to 15999 again
   community.cassandra.cassandra_timeout:
