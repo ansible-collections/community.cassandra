@@ -70,12 +70,20 @@
       - timeout.changed
       - "timeout.msg == 'read timeout changed'"
 
+- name: Get read timeout - Should still be 15000
+  shell: nodetool -h 127.0.0.1 gettimeout read
+  register: timeout
+
+- name: Ensure timeout is 15000
+  assert:
+    that:
+      - "timeout.stdout == 'Current timeout for type read: 15000 ms'"
+
 - name: Set timeout to 0 
   community.cassandra.cassandra_timeout:
     timeout: 0
     timeout_type: read
     debug: true
-  check_mode: yes
   register: timeout  
 
 - assert:
