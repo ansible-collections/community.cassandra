@@ -35,7 +35,7 @@
 - assert:
     that: 
       - read.changed
-      - "read.msg ='read timeout changed'"
+      - "read.msg == 'read timeout changed'"
 
 - name: Get read timeout
   shell: nodetool -h 127.0.0.1 gettimeout read
@@ -55,7 +55,7 @@
 - assert:
     that: 
       - "read.changed == False"
-      - "read.msg ='read timeout unchanged'"
+      - "read.msg == 'read timeout unchanged'"
 
 - name: Set timeout to 0 (check mode)
   community.cassandra.cassandra_timeout:
@@ -68,7 +68,7 @@
 - assert:
     that:
       - timeout.changed
-      - "timeout.msg = 'read timeout changed'"
+      - "timeout.msg == 'read timeout changed'"
 
 - name: Set timeout to 0 
   community.cassandra.cassandra_timeout:
