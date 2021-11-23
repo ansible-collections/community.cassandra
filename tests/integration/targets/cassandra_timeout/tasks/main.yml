@@ -112,7 +112,7 @@
 
 - name: Test various timeout settings in loop
   include_tasks: timeout_test.yml
-  with_items: "{{ cassandra_3_timeouts if cassandra_versuib.startswith('3') else cassandra_4_timeouts }}"
+  with_items: "{{ cassandra_3_timeouts if cassandra_version.startswith('3') else cassandra_4_timeouts }}"
 
 
 - name: Test login failure handling

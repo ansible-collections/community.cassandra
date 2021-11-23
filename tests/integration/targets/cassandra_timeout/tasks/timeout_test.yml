@@ -79,5 +79,3 @@
     password: "{{ cassandra_admin_pwd }}"
     timeout: 5000
     timeout_type: "{{ item }}"
-    
-
