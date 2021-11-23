@@ -19,6 +19,3 @@ cassandra_4_timeouts:
   - internodeuser
   - internodestreaminguser
   - misc
-
-
-  read, range, write, counterwrite, cascontention, truncate, internodeconnect, internodeuser, internodestreaminguser, misc
