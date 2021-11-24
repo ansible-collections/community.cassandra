@@ -1,0 +1,149 @@
+# test code for the cassandra_timeout module
+# (c) 2021,  Rhys Campbell <rhyscampbell@bluewin.ch
+
+# This file is part of Ansible
+#
+# Ansible is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Ansible is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
+
+# ===========================================================
+- name: Get read timeout
+  shell: nodetool -h 127.0.0.1 gettimeout read
+  register: read
+
+- name: Assert starting status of timeout read
+  assert:
+    that: "'Current timeout for type read: 5000 ms' == read.stdout"
+
+- name: Increase read timeout with module
+  community.cassandra.cassandra_timeout:
+    timeout: 15000
+    timeout_type: read
+    debug: true
+  register: read
+
+- assert:
+    that: 
+      - read.changed
+      - "read.msg == 'read timeout changed'"
+
+- name: Get read timeout
+  shell: nodetool -h 127.0.0.1 gettimeout read
+  register: timeout
+
+- name: Assert timeout is 15000 ms
+  assert:
+    that: "'Current timeout for type read: 15000 ms' == timeout.stdout"
+
+- name: Set throughput to 15000 again
+  community.cassandra.cassandra_timeout:
+    timeout: 15000
+    timeout_type: read
+    debug: true
+  register: timeout
+
+- assert:
+    that: 
+      - "timeout.changed == False"
+      - "timeout.msg == 'read timeout unchanged'"
+
+- name: Set timeout to 0 (check mode)
+  community.cassandra.cassandra_timeout:
+    timeout: 0
+    timeout_type: read
+    debug: true
+  check_mode: yes
+  register: timeout
+
+- assert:
+    that:
+      - timeout.changed
+      - "timeout.msg == 'read timeout changed'"
+
+- name: Get read timeout - Should still be 15000
+  shell: nodetool -h 127.0.0.1 gettimeout read
+  register: timeout
+
+- name: Ensure timeout is 15000
+  assert:
+    that:
+      - "timeout.stdout == 'Current timeout for type read: 15000 ms'"
+
+- name: Set timeout to 0 
+  community.cassandra.cassandra_timeout:
+    timeout: 0
+    timeout_type: read
+    debug: true
+  register: timeout  
+
+- assert:
+    that:
+      - timeout.changed
+      - "timeout.msg == 'read timeout changed'"
+
+- name: Get read timeout
+  shell: nodetool -h 127.0.0.1 gettimeout read
+  register: timeout
+
+- name: Ensure timeout is 0
+  assert:
+    that:
+      - "timeout.stdout == 'Current timeout for type read: 0 ms'"
+
+- name: Return timeout to something high otherwise we mess up later tests
+  community.cassandra.cassandra_timeout:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    timeout: 5000
+    timeout_type: read
+
+- include_tasks: ../../setup_cassandra/tasks/cassandra_auth.yml
+  when: cassandra_auth_tests == True
+
+- name: Test various timeout settings in loop
+  include_tasks: timeout_test.yml
+  with_items: "{{ cassandra_3_timeouts if cassandra_version.startswith('3') else cassandra_4_timeouts }}"
+
+
+- name: Test login failure handling
+  community.cassandra.cassandra_timeout:
+    timeout: 1000
+    timeout_type: read
+    username: "{{ cassandra_admin_user }}"
+    password: XXXXXXXXXXXXXXXXXXXXX
+    debug: true
+  register: login_status
+  ignore_errors: true
+  when: cassandra_auth_tests == True
+
+- name: Assert failed login
+  assert:
+    that:
+      - login_status.failed == True
+      - "'Invalid username or password' in login_status.stderr"
+  when: cassandra_auth_tests == True
+
+- name: Test incorrect nodetool_path handling
+  community.cassandra.cassandra_timeout:
+    timeout: 1000
+    timeout_type: read
+    nodetool_path: /tmp
+    debug: true
+  register: nodetool_path_error
+  ignore_errors: true
+  when: cassandra_auth_tests == True
+
+- name: Assert no such file
+  assert:
+    that:
+      - "'No such file or directory' in nodetool_path_error.msg"

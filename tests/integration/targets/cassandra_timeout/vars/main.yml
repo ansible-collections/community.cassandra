@@ -1,0 +1,21 @@
+cassandra_auth_tests: True
+cassandra_3_timeouts:
+  - read
+  - range
+  - write
+  - counterwrite
+  - cascontention
+  - truncate
+  #- streamingsocket
+  - misc
+cassandra_4_timeouts:
+  - read
+  - range
+  - write
+  - counterwrite
+  - cascontention
+  - truncate
+  - internodeconnect
+  - internodeuser
+  - internodestreaminguser
+  - misc

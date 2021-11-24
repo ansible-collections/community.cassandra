@@ -1,0 +1,81 @@
+---   
+- name: "Set {{ item }} timeout with module"
+  community.cassandra.cassandra_timeout:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    timeout: 15999
+    timeout_type: "{{ item }}"
+    debug: true
+  register: result
+
+- assert:
+    that: 
+      - result.changed
+      - "result.msg == '{{ item }} timeout changed'"
+
+- name: "Get {{ item }} timeout"
+  shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 gettimeout {{ item }}
+  register: result
+
+- name: Assert timeout is 15999 ms
+  assert:
+    that: "'Current timeout for type {{ item }}: 15999 ms' == result.stdout"
+
+- name: Set throughput to 15999 again
+  community.cassandra.cassandra_timeout:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    timeout: 15999
+    timeout_type: "{{ item }}"
+    debug: true
+  register: result
+
+- assert:
+    that: 
+      - "result.changed == False"
+      - "result.msg == '{{ item }} timeout unchanged'"
+
+- name: Set timeout to 0 (check mode)
+  community.cassandra.cassandra_timeout:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    timeout: 0
+    timeout_type: "{{ item }}"
+    debug: true
+  check_mode: yes
+  register: result
+
+- assert:
+    that:
+      - result.changed
+      - "result.msg == '{{ item }} timeout changed'"
+
+- name: Set timeout to 100
+  community.cassandra.cassandra_timeout:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    timeout: 100
+    timeout_type: "{{ item }}"
+    debug: true
+  register: result
+
+- assert:
+    that:
+      - result.changed
+      - "result.msg == '{{ item }} timeout changed'"
+
+- name: "Get {{ item }} timeout"
+  shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 gettimeout {{ item }}
+  register: result
+
+- name: Ensure timeout is 100
+  assert:
+    that:
+      - "result.stdout == 'Current timeout for type {{ item }}: 100 ms'"
+
+- name: Return timeout to something high otherwise we mess up later tests
+  community.cassandra.cassandra_timeout:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    timeout: 5000
+    timeout_type: "{{ item }}"
