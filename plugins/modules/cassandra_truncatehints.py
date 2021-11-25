@@ -19,8 +19,6 @@ description:
 
 extends_documentation_fragment:
   - community.cassandra.nodetool_module_options
-
-options:
 '''
 
 EXAMPLES = '''
