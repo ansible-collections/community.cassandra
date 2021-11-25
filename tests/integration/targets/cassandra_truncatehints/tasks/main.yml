@@ -1,0 +1,73 @@
+# test code for the cassandra_truncatehints module
+# (c) 2021,  Rhys Campbell <rhys.james.campbell@googlemail.com>
+
+# This file is part of Ansible
+#
+# Ansible is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Ansible is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
+
+# ===========================================================
+
+- name: Truncate hints the node
+  community.cassandra.cassandra_truncatehints:
+    debug: true
+  register: truncate
+
+- assert:
+    that:
+      - "truncate.msg == 'nodetool truncatehints executed successfully'"
+      - "truncate.changed == True"
+
+- include_tasks: ../../setup_cassandra/tasks/cassandra_auth.yml
+  when: cassandra_auth_tests == True
+
+- name: Truncate hints with auth
+  community.cassandra.cassandra_truncatehints:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    debug: true
+  register: truncate
+
+- assert:
+    that:
+      - "truncate.msg == 'nodetool truncatehints executed successfully'"
+      - "truncate.changed == True"
+
+- name: Test login failure handling
+  community.cassandra.cassandra_truncatehints:
+    username: "{{ cassandra_admin_user }}"
+    password: XXXXXXXXXXXXXXXXXXXXX
+    debug: true
+  register: login_status
+  ignore_errors: yes
+  when: cassandra_auth_tests == True
+
+- name: Assert failed login
+  assert:
+    that:
+      - login_status.failed == True
+      - "'Invalid username or password' in login_status.stderr"
+  when: cassandra_auth_tests == True
+
+- name: Test incorrect nodetool_path handling
+  community.cassandra.cassandra_truncatehints:
+    nodetool_path: /tmp
+    debug: true
+  register: nodetool_path_error
+  ignore_errors: true
+  when: cassandra_auth_tests == True
+
+- name: Assert no such file
+  assert:
+    that:
+      - "'No such file or directory' in nodetool_path_error.msg"

@@ -1,4 +1,4 @@
-# test code for the cassandra_gossip module
+# test code for the cassandra_flush module
 # (c) 2019,  Rhys Campbell <rhys.james.campbell@googlemail.com>
 
 # This file is part of Ansible
