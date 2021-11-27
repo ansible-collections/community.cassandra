@@ -167,7 +167,7 @@ def fullqueryconfig_diff(config_dict, module):
     diff = False
     if config_dict['enabled'] != module.params['state']:
         diff = True
-    for k in config_dict.keys():
+    for k in config_dict.keys().remove('enabled'):
         if config_dict[k] != module.params[k]:
             diff = True
             break
@@ -204,7 +204,6 @@ def main():
     additional_args += " --roll-cycle {0}".format(module.params['roll_cycle'])
     additional_args += " --path {0}".format(module.params['log_dir'])
     
-    # TODO Need to create this class
     n = NodeTool4PairCommand(module, 
                              status_cmd, 
                              enable_cmd, 
