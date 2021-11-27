@@ -167,7 +167,7 @@ def fullqueryconfig_diff(config_dict, module):
     diff = False
     if config_dict['enabled'] != module.params['state']:
         diff = True
-    for k in config_dict.keys().remove('enabled'):
+    for k in list(config_dict.keys()).remove('enabled'):
         if config_dict[k] != module.params[k]:
             diff = True
             break
