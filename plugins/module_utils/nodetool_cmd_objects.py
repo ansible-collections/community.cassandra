@@ -131,6 +131,34 @@ class NodeTool3PairCommand(NodeToolCmd):
     def disable_command(self):
         return self.nodetool_cmd(self.disable_cmd)
 
+class NodeTool4PairCommand(NodeToolCmd):
+
+    """
+    Inherits from the NodeToolCmd class. Adds the following methods;
+
+        - status_command
+        - enable_command
+        - disable_command
+        - reset_command
+
+    Additional args also added to enable command method
+    """
+
+    def __init__(self, module, status_cmd, enable_cmd, disable_cmd, reset_cmd, additional_args):
+        NodeToolCmd.__init__(self, module)
+        self.status_cmd = status_cmd
+        self.enable_cmd = enable_cmd
+        self.disable_cmd = disable_cmd
+
+    def status_command(self):
+        return self.nodetool_cmd(self.status_cmd)
+
+    def enable_command(self):
+        return self.nodetool_cmd(self.enable_cmd)
+
+    def disable_command(self):
+        return self.nodetool_cmd(self.disable_cmd)
+
 
 class NodeToolGetSetCommand(NodeToolCmd):
 

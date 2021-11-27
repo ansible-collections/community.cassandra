@@ -1,0 +1,136 @@
+# test code for the cassandra_gossip module
+# (c) 2019,  Rhys Campbell <rhys.james.campbell@googlemail.com>
+
+# This file is part of Ansible
+#
+# Ansible is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Ansible is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
+
+# ===========================================================
+- name: Get fql status 1
+  shell: nodetool -h 127.0.0.1 getfullquerylog | grep enabled
+  register: fql_status
+
+- name: Assert fql is not running 1
+  assert:
+    that: "'false' in fql_status.stdout"
+
+- name: Turn on fql with module (check mode)
+  community.cassandra.cassandra_fullquerylog:
+    state: "enabled"
+    debug: yes
+  check_mode: yes
+  register: fql
+
+- assert:
+    that:
+      - fql.changed
+
+- name: Turn on fql with module
+  community.cassandra.cassandra_fullquerylog:
+    state: "enabled"
+    debug: yes
+
+- assert:
+    that:
+      - fql.changed
+
+- name: Get fql status 1
+  shell: nodetool -h 127.0.0.1 getfullquerylog | grep enabled
+  register: fql_status
+
+- name: Assert fql is not running 1
+  assert:
+    that: "'true' in fql_status.stdout"
+
+- name: Turn off fql with module (check mode)
+  community.cassandra.cassandra_fullquerylog:
+    state: "disabled"
+    debug: yes
+  check_mode: yes
+  register: fql
+
+- assert:
+    that:
+      - fql.changed
+
+- name: Turn off fql with module
+  community.cassandra.cassandra_fullquerylog:
+    state: "disabled"
+    debug: yes
+  check_mode: no
+  register: fql
+
+- assert:
+    that:
+      - fql.changed
+
+- name: Assert fql is not running 1
+  assert:
+    that: "'false' in fql_status.stdout"
+
+- name: Run reset check mode
+  community.cassandra.cassandra_fullquerylog:
+    state: "reset"
+    debug: yes
+  check_mode: yes
+  register: fql
+
+- assert:
+    that:
+      - fql.changed
+
+- name: Run reset
+  community.cassandra.cassandra_fullquerylog:
+    state: "reset"
+    debug: yes
+  check_mode: no
+  register: fql
+
+- assert:
+    that:
+      - fql.changed
+
+#- include_tasks: ../../setup_cassandra/tasks/cassandra_auth.yml
+ # when: cassandra_auth_tests == True
+
+#- name: Test login failure handling
+#  community.cassandra.cassandra_gossip:
+#    state: "disabled"
+#    username: "{{ cassandra_admin_user }}"
+#    password: XXXXXXXXXXXXXXXXXXXXX
+#    debug: yes
+#  register: login_status
+#  ignore_errors: true
+#  when: cassandra_auth_tests == True
+
+#- name: Assert failed login
+#  assert:
+#    that:
+#      - login_status.failed == True
+#      - "'Invalid username or password' in login_status.stderr"
+#  when: cassandra_auth_tests == True
+
+#- name: Test incorrect nodetool_path handling
+#  community.cassandra.cassandra_gossip:
+#    state: "enabled"
+ #   nodetool_path: /tmp
+ #   debug: yes
+ # register: nodetool_path_error
+ # ignore_errors: true
+ # when: cassandra_auth_tests == True
+
+#- name: Assert no such file
+#  assert:
+#    that:
+#      - "'No such file or directory' in nodetool_path_error.msg"
