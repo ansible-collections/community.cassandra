@@ -17,6 +17,11 @@
 # along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
 
 # ===========================================================
+- name: fql feature only from Cassandra 4.0 onwards
+  meta: end_play
+  when: cassandra_version[0] | int < 4
+
+
 - name: Get fql status 1
   shell: nodetool -h 127.0.0.1 getfullquerylog | grep enabled
   register: fql_status
