@@ -166,6 +166,7 @@ class NodeTool4PairCommand(NodeToolCmd):
     def reset_command(self):
         return self.nodetool_cmd(self.reset_cmd)
 
+
 class NodeToolGetSetCommand(NodeToolCmd):
 
     """

@@ -104,7 +104,8 @@ fullquerylog_config:
   description: The config of the full query log feature.
   returned: success
   type: dict
-  sample: { 'max_queue_weight': 268435456, 'max_log_size': 17179869184, 'enabled': True, 'roll_cycle': 'HOURLY', 'archive_command': None, 'log_dir': None, 'max_archive_retries': 10, 'block': True}
+  sample: { 'max_queue_weight': 268435456, 'max_log_size': 17179869184, 'enabled': True, 'roll_cycle': 'HOURLY',\
+      'archive_command': None, 'log_dir': None, 'max_archive_retries': 10, 'block': True}
 '''
 
 from ansible.module_utils.basic import AnsibleModule, load_platform_subclass
@@ -171,6 +172,7 @@ def fullqueryconfig_diff(config_dict, module):
     if config_dict['enabled'] != module.params['state']:
         diff = True
     myList = list(config_dict.keys())
+    myList.remove('enabled')
     for k in myList:
         if k == 'block':
             if config_dict[k] == module.params['blocking']:
