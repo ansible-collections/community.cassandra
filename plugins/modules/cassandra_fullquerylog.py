@@ -263,8 +263,6 @@ def main():
             module.fail_json(name=status_cmd,
                              msg="status command failed", **result)
         if module.check_mode:
-            result['fullquerylog_config'] = fullquerylog_config
-            module.exit_json(**result)
             if fullqueryconfig_diff(fullquerylog_config, module):
                 result['changed'] = True
                 result['msg'] = "check mode"
