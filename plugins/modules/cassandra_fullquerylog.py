@@ -167,7 +167,9 @@ def fullqueryconfig_diff(config_dict, module):
     diff = False
     if config_dict['enabled'] != module.params['state']:
         diff = True
-    for k in list(config_dict.keys()).remove('enabled'):
+    myList = list(config_dict.keys())
+    myList.remove('enabled')
+    for k in myList:
         if config_dict[k] != module.params[k]:
             diff = True
             break
@@ -232,7 +234,7 @@ def main():
             module.fail_json(name=status_cmd,
                              msg="status command failed", **result)
         if module.check_mode:
-            if fullqueryconfig_diff(fullquerylog_config , module):
+            if fullqueryconfig_diff(fullquerylog_config, module):
                 result['changed'] = True
                 result['msg'] = "check mode"
                 result['fullquerylog_config'] = fullquerylog_config
