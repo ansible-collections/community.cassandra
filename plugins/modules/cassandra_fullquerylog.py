@@ -36,7 +36,7 @@ options:
       - "reset"
     default: "enabled"
   log_dir:
-    description: 
+    description:
       - The log directory.
     type: str
   archive_command:
@@ -58,6 +58,8 @@ options:
       - If the queue is full whether to block producers or drop samples.
     type: bool
     default: yes
+    aliases:
+      - "block"
   max_log_size:
     description:
       - How many bytes of log data to store before dropping segments.
@@ -69,11 +71,10 @@ options:
     type: int
     default: 268435456
   max_archive_retries:
-    description: 
+    description:
       - Max number of archive retries.
     type: int
     default: 10
-    
 '''
 
 EXAMPLES = '''
@@ -171,6 +172,8 @@ def fullqueryconfig_diff(config_dict, module):
         diff = True
     myList = list(config_dict.keys())
     myList.remove('enabled')
+    myList.remove('block')
+    myList.append('blocking')
     for k in myList:
         if config_dict[k] != module.params[k]:
             diff = True
@@ -213,7 +216,7 @@ def main():
                              enable_cmd,
                              disable_cmd,
                              reset_cmd,
-                             additional_args) 
+                             additional_args)
 
     rc = None
     out = ''

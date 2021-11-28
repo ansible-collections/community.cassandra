@@ -131,6 +131,7 @@ class NodeTool3PairCommand(NodeToolCmd):
     def disable_command(self):
         return self.nodetool_cmd(self.disable_cmd)
 
+
 class NodeTool4PairCommand(NodeToolCmd):
 
     """
@@ -149,16 +150,21 @@ class NodeTool4PairCommand(NodeToolCmd):
         self.status_cmd = status_cmd
         self.enable_cmd = enable_cmd
         self.disable_cmd = disable_cmd
+        self.reset_cmd = reset_cmd
+        self.additional_args = additional_args
 
     def status_command(self):
         return self.nodetool_cmd(self.status_cmd)
 
     def enable_command(self):
+        cmd = "{0} {1}".format(self.enable_cmd, self.additional_args)
         return self.nodetool_cmd(self.enable_cmd)
 
     def disable_command(self):
         return self.nodetool_cmd(self.disable_cmd)
 
+    def reset_command(self):
+        return self.nodetool_cmd(self.reset_cmd)
 
 class NodeToolGetSetCommand(NodeToolCmd):
 
