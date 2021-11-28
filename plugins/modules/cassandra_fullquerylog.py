@@ -171,11 +171,12 @@ def fullqueryconfig_diff(config_dict, module):
     if config_dict['enabled'] != module.params['state']:
         diff = True
     myList = list(config_dict.keys())
-    myList.remove('enabled')
-    myList.remove('block')
-    myList.append('blocking')
     for k in myList:
-        if config_dict[k] != module.params[k]:
+        if k == 'block':
+            if config_dict[k] == module.params['blocking']:
+                diff = True
+                break
+        elif config_dict[k] != module.params[k]:
             diff = True
             break
     return diff
