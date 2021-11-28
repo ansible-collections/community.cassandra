@@ -52,13 +52,14 @@ options:
       - "MINUTELY"
       - "HOURLY"
       - "DAILY"
+    default: "HOURLY"
   blocking:
     description:
       - If the queue is full whether to block producers or drop samples.
     type: bool
     default: yes
   max_log_size:
-    descirption:
+    description:
       - How many bytes of log data to store before dropping segments.
     type: int
     default: 17179869184
@@ -97,7 +98,7 @@ RETURN = '''
 msg:
   description: A short description of what the module did.
   returned: always
-  tyope: str
+  type: str
 fullquerylog_config:
   description: The config of the full query log feature.
   returned: success
@@ -131,13 +132,13 @@ def parse_getfullquerylog(nodetool_output):
 
     Is transformed to...
 
-    { 'max_queue_weight': 268435456, 
-      'max_log_size': 17179869184, 
-      'enabled': True, 
-      'roll_cycle': 'HOURLY', 
-      'archive_command': None, 
-      'log_dir': None, 
-      'max_archive_retries': 10, 
+    { 'max_queue_weight': 268435456,
+      'max_log_size': 17179869184,
+      'enabled': True,
+      'roll_cycle': 'HOURLY',
+      'archive_command': None,
+      'log_dir': None,
+      'max_archive_retries': 10,
       'block': True}
 
     """
@@ -159,6 +160,7 @@ def parse_getfullquerylog(nodetool_output):
             d[config_pair[0]] = None
     return d
 
+
 def fullqueryconfig_diff(config_dict, module):
     """
     Compare requested state from module with the actual config
@@ -174,16 +176,16 @@ def fullqueryconfig_diff(config_dict, module):
             diff = True
             break
     return diff
-    
+
 
 def main():
     argument_spec = cassandra_common_argument_spec()
     argument_spec.update(
-        state=dict(required=True, choices=['enabled', 'disabled']),
+        state=dict(type='str', choices=['enabled', 'disabled', 'reset'], default='enabled'),
         log_dir=dict(type='str'),
         archive_command=dict(type='str'),
         roll_cycle=dict(type='str', choices=['MINUTELY', 'HOURLY', 'DAILY'], default='HOURLY'),
-        blocking=dict(type='bool', default=True),
+        blocking=dict(type='bool', default=True, aliases=['block']),
         max_log_size=dict(type='int', default=17179869184),
         max_queue_weight=dict(type='int', default=268435456),
         max_archive_retries=dict(type='int', default=10),
@@ -205,12 +207,12 @@ def main():
     additional_args += " --max-queue-weight {0}".format(module.params['max_queue_weight'])
     additional_args += " --roll-cycle {0}".format(module.params['roll_cycle'])
     additional_args += " --path {0}".format(module.params['log_dir'])
-    
-    n = NodeTool4PairCommand(module, 
-                             status_cmd, 
-                             enable_cmd, 
-                             disable_cmd, 
-                             reset_cmd, 
+
+    n = NodeTool4PairCommand(module,
+                             status_cmd,
+                             enable_cmd,
+                             disable_cmd,
+                             reset_cmd,
                              additional_args) 
 
     rc = None
@@ -293,7 +295,7 @@ def main():
         if module.check_mode:
             module.exit_json(changed=True, msg="resetfullquerylog succeeded check mode", **result)
         else:
-            (rc, out, err) = n.reset_command()  
+            (rc, out, err) = n.reset_command()
             if module.params['debug']:
                 if out:
                     result['stdout'] = out
