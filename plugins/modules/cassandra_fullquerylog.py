@@ -155,16 +155,17 @@ def parse_getfullquerylog(nodetool_output):
 
     for line in nodetool_output.split('\n'):
         config_pair = line.split()
-        if config_pair[0] in bool_list:
-            cast_function = bool
-        elif config_pair[0] in int_list:
-            cast_function = int
-        else:
-            cast_function = str
-        try:
-            d[config_pair[0]] = cast_function(config_pair[1])
-        except IndexError:
-            d[config_pair[0]] = None
+        if len(config_pair) > 0:
+            if config_pair[0] in bool_list:
+                cast_function = bool
+            elif config_pair[0] in int_list:
+                cast_function = int
+            else:
+                cast_function = str
+            try:
+                d[config_pair[0]] = cast_function(config_pair[1])
+            except IndexError:
+                d[config_pair[0]] = None
     return d
 
 
