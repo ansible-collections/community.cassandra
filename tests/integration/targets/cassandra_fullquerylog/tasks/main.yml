@@ -257,7 +257,8 @@
     username: "{{ cassandra_admin_user }}"
     password: "{{ cassandra_admin_pwd }}"
     state: "enabled"
-    archive_command: /path/to/script.sh %path
+    archive_command: "/path/to/script.sh %path"
+    debug: yes
   register: fql
 
 - assert:
@@ -279,6 +280,7 @@
     state: "enabled"
     archive_command: /path/to/script.sh %path
     roll_cycle: "DAILY"
+    debug: yes
   register: fql
 
 - assert:
@@ -301,6 +303,7 @@
     archive_command: /path/to/script.sh %path
     roll_cycle: "DAILY"
     blocking: no
+    debug: yes
   register: fql
 
 - assert:
@@ -324,6 +327,7 @@
     roll_cycle: "DAILY"
     blocking: no
     max_log_size: 9999999999
+    debug: yes
   register: fql
 
 - assert:
@@ -348,6 +352,7 @@
     blocking: no
     max_log_size: 9999999999
     max_queue_weight: 8888
+    debug: yes
   register: fql
 
 - assert:
@@ -373,6 +378,7 @@
     max_log_size: 9999999999
     max_queue_weight: 8888
     max_archive_retries: 101
+    debug: yes
   register: fql
 
 - assert:
@@ -386,6 +392,3 @@
 - name: Assert fql max_archive_retries
   assert:
     that: "'101' in fql_status.stdout"
-
-
-
