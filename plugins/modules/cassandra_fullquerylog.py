@@ -282,25 +282,28 @@ def main():
                 result['msg'] = "check mode"
                 result['fullquerylog_config'] = fullquerylog_config
             else:
-                if fullquerylog_config['enabled'] is False:
-                    (rc, out, err) = n.enable_command()
-                    if module.params['debug']:
-                        if out:
-                            result['stdout'] = out
-                        if err:
-                            result['stderr'] = err
-                    if rc is not None and rc != 0:
-                        module.fail_json(name=enable_cmd,
-                                         msg="enable command failed", **result)
                 result['changed'] = False
                 result['msg'] = "check mode"
                 result['fullquerylog_config'] = fullquerylog_config
         else:
-            result['changed'] = True
-            result['msg'] = 'fullquerylog reconfigured'
-            result['fullquerylog_config'] = fullquerylog_config
+            if fullqueryconfig_diff(fullquerylog_config, module):
+                (rc, out, err) = n.enable_command()
+                if module.params['debug']:
+                    if out:
+                        result['stdout'] = out
+                    if err:
+                        result['stderr'] = err
+                if rc is not None and rc != 0:
+                    module.fail_json(name=enable_cmd,
+                                        msg="enable command failed", **result)
+                result['changed'] = True
+                result['msg'] = 'fullquerylog reconfigured'
+                result['fullquerylog_config'] = fullquerylog_config
+            else:
+                result['changed'] = False
+                result['msg'] = 'fullquerylog state unchanged'
+                result['fullquerylog_config'] = fullquerylog_config
     elif module.params['state'] == "reset":
-
         if rc != 0:
             module.fail_json(name=reset_cmd,
                              msg="resetfullquerylog command failed", **result)
