@@ -75,6 +75,11 @@ options:
       - Max number of archive retries.
     type: int
     default: 10
+  debug:
+    description:
+      - Enable extra debug output.
+    type: bool
+    default: False
 '''
 
 EXAMPLES = '''
@@ -195,6 +200,7 @@ def main():
         max_log_size=dict(type='int', default=17179869184),
         max_queue_weight=dict(type='int', default=268435456),
         max_archive_retries=dict(type='int', default=10),
+        debug=dict(type='bool', default=False),
     )
     module = AnsibleModule(
         argument_spec=argument_spec,
@@ -276,19 +282,19 @@ def main():
                 result['msg'] = "check mode"
                 result['fullquerylog_config'] = fullquerylog_config
             else:
+                if fullquerylog_config['enabled'] is False:
+                    (rc, out, err) = n.enable_command()
+                    if module.params['debug']:
+                    if out:
+                        result['stdout'] = out
+                    if err:
+                        result['stderr'] = err
+                    if rc is not None and rc != 0:
+                        module.fail_json(name=enable_cmd,
+                                        msg="enable command failed", **result)
                 result['changed'] = False
                 result['msg'] = "check mode"
                 result['fullquerylog_config'] = fullquerylog_config
-        if fullquerylog_config['enabled'] is False:
-            (rc, out, err) = n.enable_command()
-            if module.params['debug']:
-                if out:
-                    result['stdout'] = out
-                if err:
-                    result['stderr'] = err
-        if rc is not None and rc != 0:
-            module.fail_json(name=enable_cmd,
-                             msg="enable command failed", **result)
         else:
             result['changed'] = True
             result['msg'] = 'fullquerylog reconfigured'
