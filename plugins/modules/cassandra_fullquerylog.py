@@ -236,7 +236,7 @@ def main():
     additional_args += " --max-log-size {0}".format(module.params['max_log_size'])
     additional_args += " --max-queue-weight {0}".format(module.params['max_queue_weight'])
     additional_args += " --roll-cycle {0}".format(module.params['roll_cycle'])
-    additional_args += " --path {0}".format(escape_param(module.params['log_dir'])()
+    additional_args += " --path {0}".format(escape_param(module.params['log_dir']))
 
     n = NodeTool4PairCommand(module,
                              status_cmd,
