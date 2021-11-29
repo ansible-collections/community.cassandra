@@ -115,11 +115,28 @@ fullquerylog_config:
 
 from ansible.module_utils.basic import AnsibleModule, load_platform_subclass
 import socket
+import shlex
+import pipes
 __metaclass__ = type
 
 
 from ansible_collections.community.cassandra.plugins.module_utils.nodetool_cmd_objects import NodeToolCmd, NodeTool4PairCommand
 from ansible_collections.community.cassandra.plugins.module_utils.cassandra_common_options import cassandra_common_argument_spec
+
+
+def escape_param(param):
+    '''
+    Escapes the given parameter
+    @param - The parameter to escape
+    '''
+    escaped = None
+    if hasattr(shlex, 'quote'):
+        escaped = shlex.quote(param)
+    elif hasattr(pipes, 'quote'):
+        escaped = pipes.quote(param)
+    else:
+        escaped = "'" + param.replace("'", "'\\''") + "'"
+    return escaped
 
 
 # TODO - This could go in a shared fucntion file and be unit tested
@@ -213,13 +230,13 @@ def main():
     disable_cmd = 'disablefullquerylog'
     reset_cmd = 'resetfullquerylog'
 
-    additional_args = "--archive-command {0}".format(module.params['archive_command'])
-    additional_args += " --blocking {0}".format(module.params['blocking'])
+    additional_args = "--archive-command {0}".format(escape_param(module.params['archive_command']))
+    additional_args += " --blocking {0}".format(escape_param(module.params['blocking']))
     additional_args += " --max-archive-retries {0}".format(module.params['max_archive_retries'])
     additional_args += " --max-log-size {0}".format(module.params['max_log_size'])
     additional_args += " --max-queue-weight {0}".format(module.params['max_queue_weight'])
     additional_args += " --roll-cycle {0}".format(module.params['roll_cycle'])
-    additional_args += " --path {0}".format(module.params['log_dir'])
+    additional_args += " --path {0}".format(escape_param(module.params['log_dir'])()
 
     n = NodeTool4PairCommand(module,
                              status_cmd,
