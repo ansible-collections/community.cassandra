@@ -291,7 +291,7 @@ def main():
                             result['stderr'] = err
                     if rc is not None and rc != 0:
                         module.fail_json(name=enable_cmd,
-                                        msg="enable command failed", **result)
+                                         msg="enable command failed", **result)
                 result['changed'] = False
                 result['msg'] = "check mode"
                 result['fullquerylog_config'] = fullquerylog_config
