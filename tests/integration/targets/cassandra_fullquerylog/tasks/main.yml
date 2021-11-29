@@ -113,36 +113,139 @@
     that:
       - fql.changed
 
-#- include_tasks: ../../setup_cassandra/tasks/cassandra_auth.yml
- # when: cassandra_auth_tests == True
+- include_tasks: ../../setup_cassandra/tasks/cassandra_auth.yml
+  when: cassandra_auth_tests == True
 
-#- name: Test login failure handling
-#  community.cassandra.cassandra_gossip:
-#    state: "disabled"
-#    username: "{{ cassandra_admin_user }}"
-#    password: XXXXXXXXXXXXXXXXXXXXX
-#    debug: yes
-#  register: login_status
-#  ignore_errors: true
-#  when: cassandra_auth_tests == True
+- name: Get fql status
+  shell: nodetool -h 127.0.0.1 -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} getfullquerylog | grep enabled
+  register: fql_status
 
-#- name: Assert failed login
-#  assert:
-#    that:
-#      - login_status.failed == True
-#      - "'Invalid username or password' in login_status.stderr"
-#  when: cassandra_auth_tests == True
+- name: Assert fql is not running
+  assert:
+    that: "'false' in fql_status.stdout"
 
-#- name: Test incorrect nodetool_path handling
-#  community.cassandra.cassandra_gossip:
-#    state: "enabled"
- #   nodetool_path: /tmp
- #   debug: yes
- # register: nodetool_path_error
- # ignore_errors: true
- # when: cassandra_auth_tests == True
+- name: Turn on fql with module (check mode)
+  community.cassandra.cassandra_fullquerylog:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    state: "enabled"
+    log_dir: "/var/log/cassandra/fql"
+    debug: yes
+  check_mode: yes
+  register: fql
 
-#- name: Assert no such file
-#  assert:
-#    that:
-#      - "'No such file or directory' in nodetool_path_error.msg"
+- assert:
+    that:
+      - fql.changed
+
+- name: Turn on fql with module
+  community.cassandra.cassandra_fullquerylog:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    state: "enabled"
+    log_dir: "/var/log/cassandra/fql"
+    debug: yes
+  register: fql
+
+- assert:
+    that:
+      - fql.changed
+
+- name: Get fql status
+  shell: nodetool -h 127.0.0.1 -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} getfullquerylog | grep enabled
+  register: fql_status
+
+- name: Assert fql is running
+  assert:
+    that: "'true' in fql_status.stdout"
+
+- name: Turn off fql with module (check mode)
+  community.cassandra.cassandra_fullquerylog:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    state: "disabled"
+    debug: yes
+  check_mode: yes
+  register: fql
+
+- assert:
+    that:
+      - fql.changed
+
+- name: Turn off fql with module
+  community.cassandra.cassandra_fullquerylog:
+    state: "disabled"
+    debug: yes
+  check_mode: no
+  register: fql
+
+- assert:
+    that:
+      - fql.changed
+
+- name: Get fql status
+  shell: nodetool -h 127.0.0.1 -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} getfullquerylog | grep enabled
+  register: fql_status
+
+- name: Assert fql is not running
+  assert:
+    that: "'false' in fql_status.stdout"
+
+- name: Run reset check mode
+  community.cassandra.cassandra_fullquerylog:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    state: "reset"
+    debug: yes
+  check_mode: yes
+  register: fql
+
+- assert:
+    that:
+      - fql.changed
+
+- name: Run reset
+  community.cassandra.cassandra_fullquerylog:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    state: "reset"
+    debug: yes
+  check_mode: no
+  register: fql
+
+- assert:
+    that:
+      - fql.changed
+
+- name: Test login failure handling
+  community.cassandra.cassandra_fullquerylog:
+    state: "disabled"
+    username: "{{ cassandra_admin_user }}"
+    password: XXXXXXXXXXXXXXXXXXXXX
+    debug: yes
+  register: login_status
+  ignore_errors: true
+  when: cassandra_auth_tests == True
+
+- name: Assert failed login
+  assert:
+    that:
+      - login_status.failed == True
+      - "'Invalid username or password' in login_status.stderr"
+  when: cassandra_auth_tests == True
+
+- name: Test incorrect nodetool_path handling
+  community.cassandra.cassandra_fullquerylog:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    state: "disabled"
+    nodetool_path: /tmp
+    debug: yes
+  register: nodetool_path_error
+  ignore_errors: true
+  when: cassandra_auth_tests == True
+
+- name: Assert no such file
+  assert:
+    that:
+      - "'No such file or directory' in nodetool_path_error.msg"
