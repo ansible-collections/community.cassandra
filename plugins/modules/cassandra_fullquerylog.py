@@ -285,10 +285,10 @@ def main():
                 if fullquerylog_config['enabled'] is False:
                     (rc, out, err) = n.enable_command()
                     if module.params['debug']:
-                    if out:
-                        result['stdout'] = out
-                    if err:
-                        result['stderr'] = err
+                        if out:
+                            result['stdout'] = out
+                        if err:
+                            result['stderr'] = err
                     if rc is not None and rc != 0:
                         module.fail_json(name=enable_cmd,
                                         msg="enable command failed", **result)
