@@ -158,7 +158,7 @@ class NodeTool4PairCommand(NodeToolCmd):
 
     def enable_command(self):
         cmd = "{0} {1}".format(self.enable_cmd, self.additional_args)
-        return self.nodetool_cmd(self.enable_cmd)
+        return self.nodetool_cmd(self.cmd)
 
     def disable_command(self):
         return self.nodetool_cmd(self.disable_cmd)
