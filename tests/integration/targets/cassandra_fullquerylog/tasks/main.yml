@@ -33,6 +33,7 @@
 - name: Turn on fql with module (check mode)
   community.cassandra.cassandra_fullquerylog:
     state: "enabled"
+    log_dir: "/var/log/cassandra/fql"
     debug: yes
   check_mode: yes
   register: fql
@@ -44,6 +45,7 @@
 - name: Turn on fql with module
   community.cassandra.cassandra_fullquerylog:
     state: "enabled"
+    log_dir: "/var/log/cassandra/fql"
     debug: yes
   register: fql
 
