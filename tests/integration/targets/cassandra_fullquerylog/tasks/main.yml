@@ -251,3 +251,141 @@
   assert:
     that:
       - "'No such file or directory' in nodetool_path_error.msg"
+
+- name: Set archive command 
+  community.cassandra.cassandra_fullquerylog:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    state: "enabled"
+    archive_command: /path/to/script.sh %path
+  register: fql
+
+- assert:
+    that:
+      - fql.changed
+
+- name: Get fql status
+  shell: nodetool -h 127.0.0.1 -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} getfullquerylog | grep archive_command
+  register: fql_status
+
+- name: Assert archive cmd is set
+  assert:
+    that: "'/path/to/script.sh %path' in fql_status.stdout"
+
+- name: Set roll_cycle
+  community.cassandra.cassandra_fullquerylog:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    state: "enabled"
+    archive_command: /path/to/script.sh %path
+    roll_cycle: "DAILY"
+  register: fql
+
+- assert:
+    that:
+      - fql.changed
+
+- name: Get fql status
+  shell: nodetool -h 127.0.0.1 -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} getfullquerylog | grep roll
+  register: fql_status
+
+- name: Assert roll_cycle is changed
+  assert:
+    that: "'DAILY' in fql_status.stdout"
+
+- name: Turn off blocking
+  community.cassandra.cassandra_fullquerylog:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    state: "enabled"
+    archive_command: /path/to/script.sh %path
+    roll_cycle: "DAILY"
+    blocking: no
+  register: fql
+
+- assert:
+    that:
+      - fql.changed
+
+- name: Get fql status
+  shell: nodetool -h 127.0.0.1 -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} getfullquerylog | grep block
+  register: fql_status
+
+- name: Assert blocking is off
+  assert:
+    that: "'false' in fql_status.stdout"
+
+- name: Set max_log_size
+  community.cassandra.cassandra_fullquerylog:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    state: "enabled"
+    archive_command: /path/to/script.sh %path
+    roll_cycle: "DAILY"
+    blocking: no
+    max_log_size: 9999999999
+  register: fql
+
+- assert:
+    that:
+      - fql.changed
+
+- name: Get fql status
+  shell: nodetool -h 127.0.0.1 -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} getfullquerylog | grep max_log_size
+  register: fql_status
+
+- name: Assert fql max_weight
+  assert:
+    that: "'9999999999' in fql_status.stdout"
+
+- name: Set max_queue_weight
+  community.cassandra.cassandra_fullquerylog:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    state: "enabled"
+    archive_command: /path/to/script.sh %path
+    roll_cycle: "DAILY"
+    blocking: no
+    max_log_size: 9999999999
+    max_queue_weight: 8888
+  register: fql
+
+- assert:
+    that:
+      - fql.changed
+
+- name: Get fql status
+  shell: nodetool -h 127.0.0.1 -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} getfullquerylog | grep max_queue_weight
+  register: fql_status
+
+- name: Assert fql max_queue_weight
+  assert:
+    that: "'8888' in fql_status.stdout"
+
+- name: Set max_archive_retries
+  community.cassandra.cassandra_fullquerylog:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    state: "enabled"
+    archive_command: /path/to/script.sh %path
+    roll_cycle: "DAILY"
+    blocking: no
+    max_log_size: 9999999999
+    max_queue_weight: 8888
+    max_archive_retries: 101
+  register: fql
+
+- assert:
+    that:
+      - fql.changed
+
+- name: Get fql status
+  shell: nodetool -h 127.0.0.1 -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} getfullquerylog | grep max_archive_retries
+  register: fql_status
+
+- name: Assert fql max_archive_retries
+  assert:
+    that: "'101' in fql_status.stdout"
+
+
+
