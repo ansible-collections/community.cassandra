@@ -225,9 +225,7 @@ def main():
     module = AnsibleModule(
         argument_spec=argument_spec,
         supports_check_mode=True,
-        required_if=[
-            ('state', 'enabled', ('log_dir'), True),
-        ]
+        required_if=[('state', 'enabled', ('log_dir'))]
     )
 
     status_cmd = 'getfullquerylog'
