@@ -230,7 +230,7 @@ def main():
     disable_cmd = 'disablefullquerylog'
     reset_cmd = 'resetfullquerylog'
 
-    additional_args = "--archive-command \"{0}\"".format(escape_param(module.params['archive_command']))
+    additional_args = "--archive-command '{0}'".format(escape_param(module.params['archive_command']))
     additional_args += " --blocking {0}".format(str(module.params['blocking']))
     additional_args += " --max-archive-retries {0}".format(module.params['max_archive_retries'])
     additional_args += " --max-log-size {0}".format(module.params['max_log_size'])
@@ -259,6 +259,7 @@ def main():
             result['stdout'] = out
         if err:
             result['stderr'] = err
+        result['additional_args'] = additional_args
 
     if module.params['state'] == "disabled":
 
