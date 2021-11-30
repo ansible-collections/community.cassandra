@@ -39,6 +39,8 @@ options:
     description:
       - The log directory.
     type: str
+    aliases:
+      - "path"
   archive_command:
     description:
       - Command that will handle archiving rolled full query log files.
@@ -211,7 +213,7 @@ def main():
     argument_spec = cassandra_common_argument_spec()
     argument_spec.update(
         state=dict(type='str', choices=['enabled', 'disabled', 'reset'], default='enabled'),
-        log_dir=dict(type='str'),
+        log_dir=dict(type='str', aliases=['path']),
         archive_command=dict(type='str'),
         roll_cycle=dict(type='str', choices=['MINUTELY', 'HOURLY', 'DAILY'], default='HOURLY'),
         blocking=dict(type='bool', default=True, aliases=['block']),
@@ -223,6 +225,9 @@ def main():
     module = AnsibleModule(
         argument_spec=argument_spec,
         supports_check_mode=True,
+        required_if=[
+            ('state', 'enabled', ('log_dir'), True),
+        ]
     )
 
     status_cmd = 'getfullquerylog'
