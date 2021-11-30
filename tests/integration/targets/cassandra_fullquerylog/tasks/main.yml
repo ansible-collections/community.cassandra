@@ -1,5 +1,5 @@
-# test code for the cassandra_gossip module
-# (c) 2019,  Rhys Campbell <rhys.james.campbell@googlemail.com>
+# test code for the cassandra_fullquerylog module
+# (c) 2021,  Rhys Campbell <rhyscampbell@bluewin.ch>
 
 # This file is part of Ansible
 #
@@ -274,6 +274,13 @@
   assert:
     that: "'/path/to/script.sh %path' in fql_status.stdout"
 
+- name: Run reset
+  community.cassandra.cassandra_fullquerylog:    
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    state: "reset"
+    debug: yes
+
 - name: Set roll_cycle
   community.cassandra.cassandra_fullquerylog:
     username: "{{ cassandra_admin_user }}"
@@ -296,6 +303,13 @@
 - name: Assert roll_cycle is changed
   assert:
     that: "'DAILY' in fql_status.stdout"
+
+- name: Run reset
+  community.cassandra.cassandra_fullquerylog:    
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    state: "reset"
+    debug: yes
 
 - name: Turn off blocking
   community.cassandra.cassandra_fullquerylog:
@@ -320,6 +334,13 @@
 - name: Assert blocking is off
   assert:
     that: "'false' in fql_status.stdout"
+
+- name: Run reset
+  community.cassandra.cassandra_fullquerylog:    
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    state: "reset"
+    debug: yes
 
 - name: Set max_log_size
   community.cassandra.cassandra_fullquerylog:
@@ -346,6 +367,13 @@
   assert:
     that: "'9999999999' in fql_status.stdout"
 
+- name: Run reset
+  community.cassandra.cassandra_fullquerylog:    
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    state: "reset"
+    debug: yes
+
 - name: Set max_queue_weight
   community.cassandra.cassandra_fullquerylog:
     username: "{{ cassandra_admin_user }}"
@@ -371,6 +399,13 @@
 - name: Assert fql max_queue_weight
   assert:
     that: "'8888' in fql_status.stdout"
+
+- name: Run reset
+  community.cassandra.cassandra_fullquerylog:    
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    state: "reset"
+    debug: yes
 
 - name: Set max_archive_retries
   community.cassandra.cassandra_fullquerylog:
