@@ -17,6 +17,10 @@
 # along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
 
 # ===========================================================
+- name: Module only supported from Cassandra 4
+  meta: 'end_play'
+  when: cassandra_version[0] | int >= 4
+
 - name: Set ReadStage - default should not change
   community.cassandra.cassandra_concurrency:
     concurrency_stage: ReadStage
