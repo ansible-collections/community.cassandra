@@ -20,19 +20,19 @@
 - name: Set ReadStage - default should not change
   community.cassandra.cassandra_concurrency:
     concurrency_stage: ReadStage
-    value: 1
+    value: 32
     debug: yes
   register: aes
 
 - assert:
     that:
       - "aes.changed == False"
-      - "aes.msg == 'Configured value is already 1'"
+      - "aes.msg == 'Configured value is already 32'"
 
 - name: Set ReadStage - check mode
   community.cassandra.cassandra_concurrency:
     concurrency_stage: ReadStage
-    value: 2
+    value: 34
     debug: yes
   check_mode: yes
   register: aes
@@ -40,31 +40,31 @@
 - assert:
     that:
       - "aes.changed"
-      - "aes.msg == 'default/ReadStage updated to 2'"
+      - "aes.msg == 'default/ReadStage updated to 34'"
 
 - name: Set ReadStage - should change
   community.cassandra.cassandra_concurrency:
     concurrency_stage: ReadStage
-    value: 2
+    value: 34
     debug: yes
   register: aes
   
 - assert:
     that:
       - "aes.changed"
-      - "aes.msg == 'default/ReadStage updated to 2'"
+      - "aes.msg == 'default/ReadStage updated to 34'"
 
 - name: Set ReadStage - should not change
   community.cassandra.cassandra_concurrency:
     concurrency_stage: ReadStage
-    value: 2
+    value: 34
     debug: yes
   register: aes
   
 - assert:
     that:
       - "aes.changed == False"
-      - "aes.msg == 'Configured value is already 2'"
+      - "aes.msg == 'Configured value is already 34'"
 
 #- include_tasks: ../../setup_cassandra/tasks/cassandra_auth.yml
 #  when: cassandra_auth_tests == True
