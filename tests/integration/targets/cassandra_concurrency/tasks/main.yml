@@ -1,0 +1,142 @@
+# test code for the cassandra_concurrency module
+# (c) 2021,  Rhys Campbell <rhyscampbell@bluewin.ch>
+
+# This file is part of Ansible
+#
+# Ansible is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Ansible is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
+
+# ===========================================================
+- name: Set AntiEntropyStage - default should not change
+  community.cassandra.cassandra_concurrency:
+    concurrency_stage: AntiEntropyStage
+    value: 1
+    debug: yes
+  register: aes
+
+- assert:
+    that:
+      - "aes.changed == False"
+      - "aes.msg == 'Configured value is already 1'"
+
+- name: Set AntiEntropyStage - check mode
+  community.cassandra.cassandra_concurrency:
+    concurrency_stage: AntiEntropyStage
+    value: 2
+    debug: yes
+  check_mode: yes
+  register: aes
+  
+- assert:
+    that:
+      - "aes.changed"
+      - "aes.msg == 'default/AntiEntropyStage updated to 2'"
+
+- name: Set AntiEntropyStage - should change
+  community.cassandra.cassandra_concurrency:
+    concurrency_stage: AntiEntropyStage
+    value: 2
+    debug: yes
+  register: aes
+  
+- assert:
+    that:
+      - "aes.changed"
+      - "aes.msg == 'default/AntiEntropyStage updated to 2'"
+
+- name: Set AntiEntropyStage - should not change
+  community.cassandra.cassandra_concurrency:
+    concurrency_stage: AntiEntropyStage
+    value: 2
+    debug: yes
+  register: aes
+  
+- assert:
+    that:
+      - "aes.changed == False"
+      - "aes.msg == 'Configured value is already 2'"
+
+#- include_tasks: ../../setup_cassandra/tasks/cassandra_auth.yml
+#  when: cassandra_auth_tests == True
+
+#- name: Set streamthroughput 300MB when auth is enabled
+#  community.cassandra.cassandra_streamthroughput:
+#    value: 300
+#    username: "{{ cassandra_admin_user }}"
+#    password: "{{ cassandra_admin_pwd }}"
+#    debug: yes
+#  register: streamthroughput
+#  when: cassandra_auth_tests == True
+
+#- name: Get streamthroughput auth 1
+#  shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 getstreamthroughput
+#  register: streamthroughput
+#  when: cassandra_auth_tests == True
+
+#- name: Assert streamthroughput is 300MB
+#  assert:
+#    that:
+#      - "'Current stream throughput: 300 Mb/s' == streamthroughput.stdout"
+#      - streamthroughput.changed == True
+
+#- name: Set back to 200MB using the pw file option
+#  community.cassandra.cassandra_streamthroughput:
+#    value:  200
+#    username: "{{ cassandra_admin_user }}"
+#    password_file: /etc/cassandra/jmxremote.password
+#    debug: yes
+#  register: streamthroughput
+#  when: cassandra_auth_tests == True
+
+#- name: Get streamthroughput auth 2
+#  shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 getstreamthroughput
+#  register: streamthroughput
+#  when: cassandra_auth_tests == True
+
+#- name: Assert streamthroughput is again 200MB
+#  assert:
+#    that:
+#      - "'Current stream throughput: 200 Mb/s' == streamthroughput.stdout"
+#      - streamthroughput.changed == True
+#  when: cassandra_auth_tests == True
+
+#- name: Test login failure handling
+#  community.cassandra.cassandra_streamthroughput:
+#    value: 128
+#    username: "{{ cassandra_admin_user }}"
+#    password: XXXXXXXXXXXXXXXXXXXXX
+#    debug: yes
+#  register: login_status
+#  ignore_errors: true
+#  when: cassandra_auth_tests == True
+
+#- name: Assert failed login
+#  assert:
+#    that:
+#      - login_status.failed == True
+#      - "'Invalid username or password' in login_status.stderr"
+#  when: cassandra_auth_tests == True
+
+#- name: Test incorrect nodetool_path handling
+#  community.cassandra.cassandra_streamthroughput:
+#    value: 128
+#    nodetool_path: /tmp
+#    debug: yes
+#  register: nodetool_path_error
+#  ignore_errors: true
+#  when: cassandra_auth_tests == True
+
+#- name: Assert no such file
+#  assert:
+#    that:
+#      - "'No such file or directory' in nodetool_path_error.msg"
