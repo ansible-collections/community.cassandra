@@ -31,10 +31,11 @@ options:
       - "default"
       - "compactors"
       - "viewbuilders"
+    default: "default"
   concurrency_stage:
     description:
-      - The processing stage:
-      - Only relevent when concurrency_type is "default"
+      - The processing stage
+      - Only relevent when concurrency_type is default
     type: str
     choices:
       - "AntiEntropyStage"
@@ -143,9 +144,9 @@ def main():
 
     if module.params['debug']:
         if out:
-            result['stdout'] = out
+          result['stdout'] = out
         if err:
-            result['stderr'] = err
+          result['stderr'] = err
     
     current_value = out.split()[-1:][0]
 
@@ -165,7 +166,10 @@ def main():
     else:
         if module.check_mode:
             result['changed'] = True
-            result['msg'] = "{0} updated to {1}".format(concurrency_type, value)
+            if concurrency_type != "default":
+              result['msg'] = "{0} updated to {1}".format(concurrency_type, value)
+            else:
+              result['msg'] = "{0}/{1} updated to {2}".format(concurrency_type, concurrency_stage, value)
         else:
             (rc, out, err) = n.set_command()
             out = out.strip()
