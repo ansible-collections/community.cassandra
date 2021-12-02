@@ -129,8 +129,8 @@ def main():
       get_cmd = "{0}{1}".format("getconcurrent", concurrency_type)
       set_cmd = "{0}{1} -- {2}".format("setconcurrent", concurrency_type, value)
     else:
-      get_cmd = "{0} {1} -- ".format("getconcurrency", concurrency_stage)
-      set_cmd = "{0} {1} -- {2}".format("setconcurrency", concurrency_stage, value)
+      get_cmd = "{0} -- {1} ".format("getconcurrency", concurrency_stage)
+      set_cmd = "{0} -- {1} {2}".format("setconcurrency", concurrency_stage, value)
 
     n = NodeToolGetSetCommand(module, get_cmd, set_cmd)
 
