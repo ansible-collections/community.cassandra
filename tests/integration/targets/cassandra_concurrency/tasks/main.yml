@@ -17,9 +17,9 @@
 # along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
 
 # ===========================================================
-- name: Set AntiEntropyStage - default should not change
+- name: Set ReadStage - default should not change
   community.cassandra.cassandra_concurrency:
-    concurrency_stage: AntiEntropyStage
+    concurrency_stage: ReadStage
     value: 1
     debug: yes
   register: aes
@@ -29,9 +29,9 @@
       - "aes.changed == False"
       - "aes.msg == 'Configured value is already 1'"
 
-- name: Set AntiEntropyStage - check mode
+- name: Set ReadStage - check mode
   community.cassandra.cassandra_concurrency:
-    concurrency_stage: AntiEntropyStage
+    concurrency_stage: ReadStage
     value: 2
     debug: yes
   check_mode: yes
@@ -40,11 +40,11 @@
 - assert:
     that:
       - "aes.changed"
-      - "aes.msg == 'default/AntiEntropyStage updated to 2'"
+      - "aes.msg == 'default/ReadStage updated to 2'"
 
-- name: Set AntiEntropyStage - should change
+- name: Set ReadStage - should change
   community.cassandra.cassandra_concurrency:
-    concurrency_stage: AntiEntropyStage
+    concurrency_stage: ReadStage
     value: 2
     debug: yes
   register: aes
@@ -52,11 +52,11 @@
 - assert:
     that:
       - "aes.changed"
-      - "aes.msg == 'default/AntiEntropyStage updated to 2'"
+      - "aes.msg == 'default/ReadStage updated to 2'"
 
-- name: Set AntiEntropyStage - should not change
+- name: Set ReadStage - should not change
   community.cassandra.cassandra_concurrency:
-    concurrency_stage: AntiEntropyStage
+    concurrency_stage: ReadStage
     value: 2
     debug: yes
   register: aes

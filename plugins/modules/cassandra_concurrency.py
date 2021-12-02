@@ -104,7 +104,7 @@ def main():
       "ReadStage",
       "RequestResponseStage",
       "TracingStage",
-      "ViewMutationStage"     
+      "ViewMutationStage"
     ]
 
     argument_spec = cassandra_common_argument_spec()
@@ -116,9 +116,7 @@ def main():
     module = AnsibleModule(
         argument_spec=argument_spec,
         supports_check_mode=True,
-        required_if=[
-          ["concurrency_type", "default", ["concurrency_stage"]]
-        ]
+        required_if=[["concurrency_type", "default", ["concurrency_stage"]]]
     )
 
     concurrency_type = module.params['concurrency_type']
@@ -147,7 +145,7 @@ def main():
           result['stdout'] = out
         if err:
           result['stderr'] = err
-    
+
     current_value = out.split()[-1:][0]
 
     # Matches the last int in the output
