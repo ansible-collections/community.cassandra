@@ -93,18 +93,18 @@ from ansible_collections.community.cassandra.plugins.module_utils.cassandra_comm
 def main():
 
     cs_choices = [
-      "AntiEntropyStage",
-      "CounterMutationStage",
-      "GossipStage",
-      "ImmediateStage",
-      "InternalResponseStage",
-      "MigrationStage",
-      "MiscStage",
-      "MutationStage",
-      "ReadStage",
-      "RequestResponseStage",
-      "TracingStage",
-      "ViewMutationStage"
+        "AntiEntropyStage",
+        "CounterMutationStage",
+        "GossipStage",
+        "ImmediateStage",
+        "InternalResponseStage",
+        "MigrationStage",
+        "MiscStage",
+        "MutationStage",
+        "ReadStage",
+        "RequestResponseStage",
+        "TracingStage",
+        "ViewMutationStage"
     ]
 
     argument_spec = cassandra_common_argument_spec()
@@ -124,11 +124,11 @@ def main():
     value = module.params['value']
 
     if concurrency_type != "default":
-      get_cmd = "{0}{1}".format("getconcurrent", concurrency_type)
-      set_cmd = "{0}{1} -- {2}".format("setconcurrent", concurrency_type, value)
+        get_cmd = "{0}{1}".format("getconcurrent", concurrency_type)
+        set_cmd = "{0}{1} -- {2}".format("setconcurrent", concurrency_type, value)
     else:
-      get_cmd = "{0} -- {1} ".format("getconcurrency", concurrency_stage)
-      set_cmd = "{0} -- {1} {2}".format("setconcurrency", concurrency_stage, value)
+        get_cmd = "{0} -- {1} ".format("getconcurrency", concurrency_stage)
+        set_cmd = "{0} -- {1} {2}".format("setconcurrency", concurrency_stage, value)
 
     n = NodeToolGetSetCommand(module, get_cmd, set_cmd)
 
@@ -142,9 +142,9 @@ def main():
 
     if module.params['debug']:
         if out:
-          result['stdout'] = out
+            result['stdout'] = out
         if err:
-          result['stderr'] = err
+            result['stderr'] = err
 
     current_value = out.split()[-1:][0]
 
@@ -165,9 +165,9 @@ def main():
         if module.check_mode:
             result['changed'] = True
             if concurrency_type != "default":
-              result['msg'] = "{0} updated to {1}".format(concurrency_type, value)
+                result['msg'] = "{0} updated to {1}".format(concurrency_type, value)
             else:
-              result['msg'] = "{0}/{1} updated to {2}".format(concurrency_type, concurrency_stage, value)
+              r esult['msg'] = "{0}/{1} updated to {2}".format(concurrency_type, concurrency_stage, value)
         else:
             (rc, out, err) = n.set_command()
             out = out.strip()
@@ -183,9 +183,9 @@ def main():
             else:
                 result['changed'] = True
                 if concurrency_type != "default":
-                  result['msg'] = "{0} updated to {1}".format(concurrency_type, value)
+                    result['msg'] = "{0} updated to {1}".format(concurrency_type, value)
                 else:
-                  result['msg'] = "{0}/{1} updated to {2}".format(concurrency_type, concurrency_stage, value)
+                    result['msg'] = "{0}/{1} updated to {2}".format(concurrency_type, concurrency_stage, value)
 
     module.exit_json(**result)
 
