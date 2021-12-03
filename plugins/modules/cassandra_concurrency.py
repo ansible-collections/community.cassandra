@@ -167,7 +167,7 @@ def main():
             if concurrency_type != "default":
                 result['msg'] = "{0} updated to {1}".format(concurrency_type, value)
             else:
-              r esult['msg'] = "{0}/{1} updated to {2}".format(concurrency_type, concurrency_stage, value)
+                result['msg'] = "{0}/{1} updated to {2}".format(concurrency_type, concurrency_stage, value)
         else:
             (rc, out, err) = n.set_command()
             out = out.strip()
