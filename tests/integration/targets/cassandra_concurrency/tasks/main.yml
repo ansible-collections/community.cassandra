@@ -80,7 +80,7 @@
 - assert:
     that:
       - "c.changed == False"
-      - "aes.msg == 'Configured value is already 2'"
+      - "c.msg == 'Configured value is already 2'"
 
 - name: Test concurrency_type compactors - check mode should change
   community.cassandra.cassandra_concurrency:
@@ -92,7 +92,7 @@
 - assert:
     that:
       - "c.changed"
-      - "aes.msg == 'compactors updated to 4'"
+      - "c.msg == 'compactors updated to 4'"
 
 - name: Test concurrency_type compactors - should change
   community.cassandra.cassandra_concurrency:
@@ -103,7 +103,7 @@
 - assert:
     that:
       - "c.changed"
-      - "aes.msg == 'compactors updated to 4'"
+      - "c.msg == 'compactors updated to 4'"
 
 - name: Test concurrency_type compactors - should not change
   community.cassandra.cassandra_concurrency:
@@ -114,7 +114,8 @@
 - assert:
     that:
       - "c.changed == False"
-      - "aes.msg == 'Configured value is already 4'"
+      - "c.msg == 'Configured value is already 4'"
+
 # Test viewbuilders
 - name: Test concurrency_type viewbuilders - default should not change
   community.cassandra.cassandra_concurrency:
@@ -125,7 +126,7 @@
 - assert:
     that:
       - "c.changed == False"
-      - "aes.msg == 'Configured value is already 1'"
+      - "c.msg == 'Configured value is already 1'"
 
 - name: Test concurrency_type viewbuilders - check mode should change
   community.cassandra.cassandra_concurrency:
@@ -137,7 +138,7 @@
 - assert:
     that:
       - "c.changed"
-      - "aes.msg == 'viewbuilders updated to 2'"
+      - "c.msg == 'viewbuilders updated to 2'"
 
 - name: Test concurrency_type viewbuilders - should change
   community.cassandra.cassandra_concurrency:
@@ -148,7 +149,7 @@
 - assert:
     that:
       - "c.changed"
-      - "aes.msg == 'viewbuilders updated to 2'"
+      - "c.msg == 'viewbuilders updated to 2'"
 
 - name: Test concurrency_type viewbuilders - should not change
   community.cassandra.cassandra_concurrency:
@@ -159,8 +160,7 @@
 - assert:
     that:
       - "c.changed == False"
-      - "aes.msg == 'Configured value is already 2'"
-
+      - "c.msg == 'Configured value is already 2'"
 
 #- include_tasks: ../../setup_cassandra/tasks/cassandra_auth.yml
 #  when: cassandra_auth_tests == True
