@@ -70,29 +70,104 @@
       - "aes.changed == False"
       - "aes.msg == 'Configured value is already 34'"
 
+# Test compactors
+- name: Test concurrency_type compactors - default should not change
+  community.cassandra.cassandra_concurrency:
+    concurrency_type: "compactors"
+    value: 2
+  register: c
+
+- assert:
+    that:
+      - "c.changed == False"
+      - "aes.msg == 'Configured value is already 2'"
+
+- name: Test concurrency_type compactors - check mode should change
+  community.cassandra.cassandra_concurrency:
+    concurrency_type: "compactors"
+    value: 4
+  check_mode: yes
+  register: c
+
+- assert:
+    that:
+      - "c.changed"
+      - "aes.msg == 'compactors updated to 4'"
+
+- name: Test concurrency_type compactors - should change
+  community.cassandra.cassandra_concurrency:
+    concurrency_type: "compactors"
+    value: 4
+  register: c
+
+- assert:
+    that:
+      - "c.changed"
+      - "aes.msg == 'compactors updated to 4'"
+
+- name: Test concurrency_type compactors - should not change
+  community.cassandra.cassandra_concurrency:
+    concurrency_type: "compactors"
+    value: 4
+  register: c
+
+- assert:
+    that:
+      - "c.changed == False"
+      - "aes.msg == 'Configured value is already 4'"
+# Test viewbuilders
+- name: Test concurrency_type viewbuilders - default should not change
+  community.cassandra.cassandra_concurrency:
+    concurrency_type: "viewbuilders"
+    value: 1
+  register: c
+
+- assert:
+    that:
+      - "c.changed == False"
+      - "aes.msg == 'Configured value is already 1'"
+
+- name: Test concurrency_type viewbuilders - check mode should change
+  community.cassandra.cassandra_concurrency:
+    concurrency_type: "viewbuilders"
+    value: 2
+  check_mode: yes
+  register: c
+
+- assert:
+    that:
+      - "c.changed"
+      - "aes.msg == 'viewbuilders updated to 2'"
+
+- name: Test concurrency_type viewbuilders - should change
+  community.cassandra.cassandra_concurrency:
+    concurrency_type: "viewbuilders"
+    value: 2
+  register: c
+
+- assert:
+    that:
+      - "c.changed"
+      - "aes.msg == 'viewbuilders updated to 2'"
+
+- name: Test concurrency_type viewbuilders - should not change
+  community.cassandra.cassandra_concurrency:
+    concurrency_type: "viewbuilders"
+    value: 2
+  register: c
+
+- assert:
+    that:
+      - "c.changed == False"
+      - "aes.msg == 'Configured value is already 2'"
+
+
 #- include_tasks: ../../setup_cassandra/tasks/cassandra_auth.yml
 #  when: cassandra_auth_tests == True
+# Repeat tests of above with auth
 
-#- name: Set streamthroughput 300MB when auth is enabled
-#  community.cassandra.cassandra_streamthroughput:
-#    value: 300
-#    username: "{{ cassandra_admin_user }}"
-#    password: "{{ cassandra_admin_pwd }}"
-#    debug: yes
-#  register: streamthroughput
-#  when: cassandra_auth_tests == True
 
-#- name: Get streamthroughput auth 1
-#  shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 getstreamthroughput
-#  register: streamthroughput
-#  when: cassandra_auth_tests == True
-
-#- name: Assert streamthroughput is 300MB
-#  assert:
-#    that:
-#      - "'Current stream throughput: 300 Mb/s' == streamthroughput.stdout"
-#      - streamthroughput.changed == True
-
+# Standard tests
 #- name: Set back to 200MB using the pw file option
 #  community.cassandra.cassandra_streamthroughput:
 #    value:  200
@@ -100,18 +175,6 @@
 #    password_file: /etc/cassandra/jmxremote.password
 #    debug: yes
 #  register: streamthroughput
-#  when: cassandra_auth_tests == True
-
-#- name: Get streamthroughput auth 2
-#  shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 getstreamthroughput
-#  register: streamthroughput
-#  when: cassandra_auth_tests == True
-
-#- name: Assert streamthroughput is again 200MB
-#  assert:
-#    that:
-#      - "'Current stream throughput: 200 Mb/s' == streamthroughput.stdout"
-#      - streamthroughput.changed == True
 #  when: cassandra_auth_tests == True
 
 #- name: Test login failure handling
