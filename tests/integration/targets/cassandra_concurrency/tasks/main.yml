@@ -168,6 +168,8 @@
 # Repeat tests of above with auth
 - name: Set ReadStage - default should not change
   community.cassandra.cassandra_concurrency:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_password }}"
     concurrency_stage: ReadStage
     value: 32
     debug: yes
@@ -180,6 +182,8 @@
 
 - name: Set ReadStage - check mode
   community.cassandra.cassandra_concurrency:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_password }}"
     concurrency_stage: ReadStage
     value: 34
     debug: yes
@@ -193,6 +197,8 @@
 
 - name: Set ReadStage - should change
   community.cassandra.cassandra_concurrency:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_password }}"
     concurrency_stage: ReadStage
     value: 34
     debug: yes
@@ -205,6 +211,8 @@
 
 - name: Set ReadStage - should not change
   community.cassandra.cassandra_concurrency:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_password }}"
     concurrency_stage: ReadStage
     value: 34
     debug: yes
