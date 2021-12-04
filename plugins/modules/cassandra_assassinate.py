@@ -18,7 +18,6 @@ description:
   - Run the assassinate command against a node.
   - Forcefully removes a dead node without re-replicating any data.
   - It is a last resort tool if you cannot successfully use nodetool removenode.
-  - By default the module will tail the Cassandra log and confirm the operation has succeeded.
 
 extends_documentation_fragment:
   - community.cassandra.nodetool_module_options

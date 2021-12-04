@@ -48,7 +48,7 @@
 - name: Test login failure handling
   community.cassandra.cassandra_assassinate:
     username: "{{ cassandra_admin_user }}"
-    password: "{{ cassandra_admin_pwd }}"
+    password: XXXXXXXXXXXXX
     ip_address: 192.168.0.1
     debug: true
   register: login_status
