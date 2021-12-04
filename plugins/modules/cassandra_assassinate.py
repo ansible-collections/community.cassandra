@@ -29,21 +29,11 @@ options:
       - IP Address of endpoint to assassinate.
     type: str
     required: yes
-  tail_log:
+  debug:
     description:
-      - Whether to check the tail of the log for a entry confirming the assassinate.
+      - Add additional debug output.
     type: bool
-    default: true
-  cassandra_log:
-    description:
-      - Cassandra log to tail for the Finished assassinating log entry.
-    type: str
-    default: /var/log/cassandra/system.log
-  tail_lines:
-    description:
-      - Number of lines to tail the log.
-    type: int
-    default: 100
+    default: false
 '''
 
 EXAMPLES = '''
@@ -73,8 +63,7 @@ def main():
     argument_spec = cassandra_common_argument_spec()
     argument_spec.update(
         ip_address=dict(type='str', default=None, required=True),
-        tail_log=dict(type='bool', default=True),
-        cassandra_log=dict(type='str', default="/var/log/cassandra/system.log")
+        debug=dict(type='bool', default=False),
     )
     module = AnsibleModule(
         argument_spec=argument_spec,
@@ -82,9 +71,6 @@ def main():
     )
 
     ip_address = module.params['ip_address']
-    tail_log = module.params['tail_log']
-    cassandra_log = module.params['cassandra_log']
-
     cmd = 'assassinate -- {0}'.format(ip_address)
 
     n = NodeToolCommandKeyspaceTable(module, cmd)
@@ -104,29 +90,12 @@ def main():
             result['stderr'] = err
 
     if rc == 0:
-      output  = None
-          if tail_log:  # confirm that the Cassandra log file contains a success entry for the cmd
-              cmd = [
-                "grep",
-                "-E",
-                "Finished assassinating /{0}".format(ip_address),
-                cassandra_log
-              ]
-              output = subprocess.run(cmd, shell=True, capture_output=True)
-              if output.returncode == 0:
-                  result['changed'] = True
-                  result['msg'] = "nodetool assassinate executed successfully: {0}".format(output)
-                  module.exit_json(**result)
-              else:
-                  tail_failed = "nodetool assassinate did not execute successfully: {0}".format(output.stderr)
-                  module.fail_json(msg=tail_failed)
-          else:
-              result['changed'] = True
-              result['msg'] = "nodetool assassinate executed successfully: {0}".format(output.stdout)
-              module.exit_json(**result)
-      else:
-          result['msg'] = "nodetool assassinate did not execute successfully"
-          module.fail_json(**result)
+        result['changed'] = True
+        result['msg'] = "nodetool assassinate executed successfully for endpoint: {0}".format(ip_address)
+        module.exit_json(**result)
+    else:
+        result['msg'] = "nodetool assassinate did not execute successfully rc: {0}".format(rc)
+        module.fail_json(**result)
 
 
 if __name__ == '__main__':
