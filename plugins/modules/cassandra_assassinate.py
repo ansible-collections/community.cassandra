@@ -16,7 +16,7 @@ requirements:
   - nodetool
 description:
   - Run the assassinate command against a node.
-  - Forcefully removes a dead node without re-replicating any data. 
+  - Forcefully removes a dead node without re-replicating any data.
   - It is a last resort tool if you cannot successfully use nodetool removenode.
   - By default the module will tail the Cassandra log and confirm the operation has succeeded.
 
@@ -55,14 +55,14 @@ import subprocess
 __metaclass__ = type
 
 
-from ansible_collections.community.cassandra.plugins.module_utils.nodetool_cmd_objects import NodeToolCmd, NodeToolCommandKeyspaceTable
+from ansible_collections.community.cassandra.plugins.module_utils.nodetool_cmd_objects import NodeToolCmd, NodeToolCommandSimple
 from ansible_collections.community.cassandra.plugins.module_utils.cassandra_common_options import cassandra_common_argument_spec
 
 
 def main():
     argument_spec = cassandra_common_argument_spec()
     argument_spec.update(
-        ip_address=dict(type='str', default=None, required=True),
+        ip_address=dict(type='str', required=True),
         debug=dict(type='bool', default=False),
     )
     module = AnsibleModule(
@@ -73,7 +73,7 @@ def main():
     ip_address = module.params['ip_address']
     cmd = 'assassinate -- {0}'.format(ip_address)
 
-    n = NodeToolCommandKeyspaceTable(module, cmd)
+    n = NodeToolCommandSimple(module, cmd)
 
     rc = None
     out = ''
