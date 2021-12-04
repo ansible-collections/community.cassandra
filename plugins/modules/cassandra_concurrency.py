@@ -152,7 +152,7 @@ def main():
         if current_value.isdigit():
             current_value = int(current_value)
         else:
-          raise IndexError
+            raise IndexError
     except IndexError as ie:
         module.fail_json(msg="Failure parsing {0} output: {1}".format(get_cmd, str(ie)), **result)
 
