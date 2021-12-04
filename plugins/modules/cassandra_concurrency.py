@@ -146,14 +146,16 @@ def main():
         if err:
             result['stderr'] = err
 
-    current_value = out.split()[-1:][0]
 
     # Matches the last int in the output
-    current_value = out.split()[-1:][0]
-    if current_value.isdigit():
-        current_value = int(current_value)
-    else:
-        module.fail_json(msg="Failure parsing {0} output".format(get_cmd), **result)
+    try:
+        current_value = out.split()[-1:][0]
+        if current_value.isdigit():
+            current_value = int(current_value)
+        else:
+          raise IndexError
+    except IndexError as ie:
+        module.fail_json(msg="Failure parsing {0} output: {1}".format(get_cmd, str(ie)), **result)
 
     if current_value == value:
         if rc != 0:
