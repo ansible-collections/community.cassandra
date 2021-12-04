@@ -26,7 +26,7 @@
 
 - assert:
     that:
-      - "'nodetool assassinate executed successfully: Finished assassinating /192.168.0.1:7000' assass.msg"
+      - "'nodetool assassinate executed successfully: Finished assassinating /192.168.0.1:7000' in assass.msg"
       - "assass.changed == True"
 
 - include_tasks: ../../setup_cassandra/tasks/cassandra_auth.yml
@@ -42,7 +42,7 @@
 
 - assert:
     that:
-      - "'nodetool assassinate executed successfully: Finished assassinating /192.168.0.1:7000' assass.msg"
+      - "'nodetool assassinate executed successfully: Finished assassinating /192.168.0.1:7000' in assass.msg"
       - "assass.changed == True"
 
 - name: Test login failure handling
