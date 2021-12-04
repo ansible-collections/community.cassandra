@@ -20,13 +20,13 @@
 
 - name: Assassinate the node
   community.cassandra.cassandra_assassinate:
-    ip_address: 127.0.0.1
+    ip_address: 192.168.0.1
     debug: true
   register: assass
 
 - assert:
     that:
-      - "'nodetool assassinate executed successfully: Finished assassinating /127.0.0.1:7000' assass.msg"
+      - "'nodetool assassinate executed successfully: Finished assassinating /192.168.0.1:7000' assass.msg"
       - "assass.changed == True"
 
 - include_tasks: ../../setup_cassandra/tasks/cassandra_auth.yml
@@ -36,20 +36,20 @@
   community.cassandra.cassandra_assassinate:
     username: "{{ cassandra_admin_user }}"
     password: "{{ cassandra_admin_pwd }}"
-    ip_address: 127.0.0.1
+    ip_address: 192.168.0.1
     debug: true
   register: assass
 
 - assert:
     that:
-      - "'nodetool assassinate executed successfully: Finished assassinating /127.0.0.1:7000' assass.msg"
+      - "'nodetool assassinate executed successfully: Finished assassinating /192.168.0.1:7000' assass.msg"
       - "assass.changed == True"
 
 - name: Test login failure handling
   community.cassandra.cassandra_assassinate:
     username: "{{ cassandra_admin_user }}"
     password: "{{ cassandra_admin_pwd }}"
-    ip_address: 127.0.0.1
+    ip_address: 192.168.0.1
     debug: true
   register: login_status
   ignore_errors: yes
@@ -66,7 +66,7 @@
   community.cassandra.cassandra_assassinate:
     username: "{{ cassandra_admin_user }}"
     password: "{{ cassandra_admin_pwd }}"
-    ip_address: 127.0.0.1
+    ip_address: 192.168.0.1
     nodetool_path: /tmp
     debug: true
   register: nodetool_path_error
