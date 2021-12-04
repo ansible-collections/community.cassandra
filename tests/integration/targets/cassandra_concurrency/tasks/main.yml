@@ -169,7 +169,7 @@
 - name: Set ReadStage - default should not change
   community.cassandra.cassandra_concurrency:
     username: "{{ cassandra_admin_user }}"
-    password: "{{ cassandra_admin_password }}"
+    password: "{{ cassandra_admin_pwd }}"
     concurrency_stage: ReadStage
     value: 32
     debug: yes
@@ -183,7 +183,7 @@
 - name: Set ReadStage - check mode
   community.cassandra.cassandra_concurrency:
     username: "{{ cassandra_admin_user }}"
-    password: "{{ cassandra_admin_password }}"
+    password: "{{ cassandra_admin_pwd }}"
     concurrency_stage: ReadStage
     value: 34
     debug: yes
@@ -198,7 +198,7 @@
 - name: Set ReadStage - should change
   community.cassandra.cassandra_concurrency:
     username: "{{ cassandra_admin_user }}"
-    password: "{{ cassandra_admin_password }}"
+    password: "{{ cassandra_admin_pwd }}"
     concurrency_stage: ReadStage
     value: 34
     debug: yes
@@ -212,7 +212,7 @@
 - name: Set ReadStage - should not change
   community.cassandra.cassandra_concurrency:
     username: "{{ cassandra_admin_user }}"
-    password: "{{ cassandra_admin_password }}"
+    password: "{{ cassandra_admin_pwd }}"
     concurrency_stage: ReadStage
     value: 34
     debug: yes
@@ -227,7 +227,7 @@
 - name: Test concurrency_type compactors - default should not change
   community.cassandra.cassandra_concurrency:
     username: "{{ cassandra_admin_user }}"
-    password: "{{ cassandra_admin_password }}"
+    password: "{{ cassandra_admin_pwd }}"
     concurrency_type: "compactors"
     value: 2
   register: c
@@ -240,7 +240,7 @@
 - name: Test concurrency_type compactors - check mode should change
   community.cassandra.cassandra_concurrency:
     username: "{{ cassandra_admin_user }}"
-    password: "{{ cassandra_admin_password }}"
+    password: "{{ cassandra_admin_pwd }}"
     concurrency_type: "compactors"
     value: 4
   check_mode: yes
@@ -254,7 +254,7 @@
 - name: Test concurrency_type compactors - should change
   community.cassandra.cassandra_concurrency:
     username: "{{ cassandra_admin_user }}"
-    password: "{{ cassandra_admin_password }}"
+    password: "{{ cassandra_admin_pwd }}"
     concurrency_type: "compactors"
     value: 4
   register: c
@@ -267,7 +267,7 @@
 - name: Test concurrency_type compactors - should not change
   community.cassandra.cassandra_concurrency:
     username: "{{ cassandra_admin_user }}"
-    password: "{{ cassandra_admin_password }}"
+    password: "{{ cassandra_admin_pwd }}"
     concurrency_type: "compactors"
     value: 4
   register: c
@@ -281,7 +281,7 @@
 - name: Test concurrency_type viewbuilders - default should not change
   community.cassandra.cassandra_concurrency:
     username: "{{ cassandra_admin_user }}"
-    password: "{{ cassandra_admin_password }}"
+    password: "{{ cassandra_admin_pwd }}"
     concurrency_type: "viewbuilders"
     value: 1
   register: c
@@ -294,7 +294,7 @@
 - name: Test concurrency_type viewbuilders - check mode should change
   community.cassandra.cassandra_concurrency:
     username: "{{ cassandra_admin_user }}"
-    password: "{{ cassandra_admin_password }}"
+    password: "{{ cassandra_admin_pwd }}"
     concurrency_type: "viewbuilders"
     value: 2
   check_mode: yes
@@ -308,7 +308,7 @@
 - name: Test concurrency_type viewbuilders - should change
   community.cassandra.cassandra_concurrency:
     username: "{{ cassandra_admin_user }}"
-    password: "{{ cassandra_admin_password }}"
+    password: "{{ cassandra_admin_pwd }}"
     concurrency_type: "viewbuilders"
     value: 2
   register: c
@@ -321,7 +321,7 @@
 - name: Test concurrency_type viewbuilders - should not change
   community.cassandra.cassandra_concurrency:
     username: "{{ cassandra_admin_user }}"
-    password: "{{ cassandra_admin_password }}"
+    password: "{{ cassandra_admin_pwd }}"
     concurrency_type: "viewbuilders"
     value: 2
   register: c
