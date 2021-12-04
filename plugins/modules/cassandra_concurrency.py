@@ -146,7 +146,6 @@ def main():
         if err:
             result['stderr'] = err
 
-
     # Matches the last int in the output
     try:
         current_value = out.split()[-1:][0]
@@ -158,7 +157,7 @@ def main():
         module.fail_json(msg="Failure parsing {0} output: {1}".format(get_cmd, str(ie)), **result)
 
     if current_value == value:
-        if rc != 0:
+        if rc != 0:  # should probably move this above
             result['changed'] = False
             module.fail_json(name=get_cmd,
                              msg="get command failed", **result)
