@@ -88,7 +88,7 @@ def main():
             result['stderr'] = err
 
     if rc == 0:
-        result['changed'] == True
+        result['changed'] = True
         result['msg'] = "decommission command succeeded"
         module.exit_json(**result)
     else:
