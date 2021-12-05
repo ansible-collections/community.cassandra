@@ -9,7 +9,7 @@ from __future__ import absolute_import, division, print_function
 
 DOCUMENTATION = '''
 ---
-module: cassandra_decomission
+module: cassandra_decommission
 author: Rhys Campbell (@rhysmeister)
 short_description: Deactivates a node by streaming its data to another node.
 requirements:
@@ -29,8 +29,8 @@ options:
 '''
 
 EXAMPLES = '''
-- name: Decomission a node
-  community.cassandra.cassandra_decomission:
+- name: Decommission a node
+  community.cassandra.cassandra_decommission:
 '''
 
 RETURN = '''
@@ -88,11 +88,10 @@ def main():
             result['stderr'] = err
 
     if rc == 0:
-        result['msg'] = "decomission command succeeded"
-        result['rc'] = rc
-        module.fail_json(**result)
+        result['msg'] = "decommission command succeeded"
+        module.exit_json(**result)
     else:
-        result['msg'] = "decomission command failed"
+        result['msg'] = "decommission command failed"
         result['rc'] = rc
         module.fail_json(**result)
 

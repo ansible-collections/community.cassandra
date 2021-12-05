@@ -1,4 +1,4 @@
-# test code for the cassandra_decomission module
+# test code for the cassandra_decommission module
 # (c) 2021,  Rhys Campbell <rhyscampbell@bluewin.ch>
 
 # This file is part of Ansible
@@ -18,22 +18,22 @@
 
 # ===========================================================
 
-- name: Run module tests for cassandra_decomission
+- name: Run module tests for cassandra_decommission
   block:
     # ccm created nodes seem to number the jmx ports 7100, 7200, 7300 usw
     - name: Execute module against the first ccm node
-      community.cassandra.cassandra_decomission:
+      community.cassandra.cassandra_decommission:
         host: 127.0.0.1
         port: 7100
         nodetool_path: /home/cassandra/config/repository/{{ cassandra_version }}/bin
         debug: yes
       register: rhys
 
-    - name: Assert decomission successful
+    - name: Assert decommission successful
       assert:
         that:
           - rhys.changed
-          - "rhys.msg == 'decomission command succeeded'"
+          - "rhys.msg == 'decommission command succeeded'"
 
 # TODO - Add tests with auth
 #- include_tasks: ../../setup_cassandra/tasks/cassandra_auth.yml
