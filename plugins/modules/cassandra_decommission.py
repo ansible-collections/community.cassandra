@@ -16,6 +16,7 @@ requirements:
   - nodetool
 description:
     - Deactivates a node by streaming its data to another node.
+    - Uses the nodetool ring command to determine if the node is still in the cluster.
 
 extends_documentation_fragment:
   - community.cassandra.nodetool_module_options

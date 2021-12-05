@@ -57,7 +57,7 @@
     - name: Confirm that node has been decommissioned
       assert:
         that:
-          - "'127.0.0.1' in nodetool.stdout"
+          - "'127.0.0.1' not in nodetool.stdout"
 
 # TODO - Add tests with auth
 #- include_tasks: ../../setup_cassandra/tasks/cassandra_auth.yml
