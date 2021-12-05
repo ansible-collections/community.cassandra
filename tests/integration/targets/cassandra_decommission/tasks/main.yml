@@ -20,6 +20,10 @@
 
 - name: Run module tests for cassandra_decommission
   block:
+
+    - name: Get info
+      shell: nodetool -h 127.0.0.1 --port 7100 info
+
     # ccm created nodes seem to number the jmx ports 7100, 7200, 7300 usw
     - name: Execute module against the first ccm node
       community.cassandra.cassandra_decommission:
@@ -34,6 +38,9 @@
         that:
           - rhys.changed
           - "rhys.msg == 'decommission command succeeded'"
+
+    - name: Get info
+      shell: nodetool -h 127.0.0.1 --port 7100 info
 
     - name: Run module again
       community.cassandra.cassandra_decommission:
