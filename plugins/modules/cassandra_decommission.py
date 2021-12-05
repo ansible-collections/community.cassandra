@@ -17,6 +17,7 @@ requirements:
 description:
     - Deactivates a node by streaming its data to another node.
     - Uses the nodetool ring command to determine if the node is still in the cluster.
+    - To ensure correct function of this module please use the ip address of the node in the host parameter.
 
 extends_documentation_fragment:
   - community.cassandra.nodetool_module_options
@@ -63,7 +64,7 @@ def main():
     )
     module = AnsibleModule(
         argument_spec=argument_spec,
-        supports_check_mode=False,
+        supports_check_mode=True,
     )
 
     debug = module.params['debug']
@@ -92,21 +93,25 @@ def main():
         if module.params['host'] in out:  # host is still in ring
             cmd = "decommission"
             n = NodeToolCommandSimple(module, cmd)
-            (rc, out, err) = n.run_command()
-            out = out.strip()
-            err = err.strip()
-            if module.params['debug']:
-                if out:
-                    result['stdout'] = out
-                if err:
-                    result['stderr'] = err
-            if rc == 0:
-                result['changed'] = True
-                result['msg'] = "decommission command succeeded"
+            if not module.params['check_mode']:
+                (rc, out, err) = n.run_command()
+                out = out.strip()
+                err = err.strip()
+                if module.params['debug']:
+                    if out:
+                        result['stdout'] = out
+                    if err:
+                        result['stderr'] = err
+                if rc == 0:
+                    result['changed'] = True
+                    result['msg'] = "decommission command succeeded"
+                else:
+                    result['msg'] = "decommission command failed"
+                    result['rc'] = rc
+                    module.fail_json(**result)
             else:
-                result['msg'] = "decommission command failed"
-                result['rc'] = rc
-                module.fail_json(**result)
+                  result['changed'] = True
+                  result['msg'] = "decommission command succeeded"              
         else:
             result['changed'] = False
             result['msg'] = "Node appears to be already decommissioned"
