@@ -69,7 +69,7 @@ def main():
 
     result = {}
 
-    cmd = "decomission"
+    cmd = "decommission"
 
     rc = None
     out = ''
