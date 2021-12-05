@@ -67,7 +67,6 @@ def main():
 
     debug = module.params['debug']
 
-
     result = {}
 
     cmd = "decomission"
@@ -77,7 +76,7 @@ def main():
     err = ''
     result = {}
 
-    n = NodeToolCommandSimple(cmd)
+    n = NodeToolCommandSimple(module, cmd)
 
     (rc, out, err) = n.run_command()
     out = out.strip()
