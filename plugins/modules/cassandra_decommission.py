@@ -111,7 +111,7 @@ def main():
                     module.fail_json(**result)
             else:
                 result['changed'] = True
-                result['msg'] = "decommission command succeeded"          
+                result['msg'] = "decommission command succeeded"
         else:
             result['changed'] = False
             result['msg'] = "Node appears to be already decommissioned"

@@ -28,6 +28,7 @@
         port: 7100
         nodetool_path: /home/cassandra/config/repository/{{ cassandra_version }}/bin
         debug: yes
+      check_mode: yes
       register: rhys
 
     - name: Assert decommission successful
