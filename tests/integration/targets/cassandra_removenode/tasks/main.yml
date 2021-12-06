@@ -1,0 +1,126 @@
+# test code for the cassandra_removenode module
+# (c) 2021,  Rhys Campbell <rhyscampbell@bluewin.ch>
+
+# This file is part of Ansible
+#
+# Ansible is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Ansible is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
+
+# ===========================================================
+
+- name: Run module tests for cassandra_removenode
+  block:
+
+    # ccm created nodes seem to number the jmx ports 7100, 7200, 7300 usw
+    - name: Execute module with dodgy uuid host_id
+      community.cassandra.cassandra_removenode:
+        host: 127.0.0.1
+        port: 7100
+        host_id: "XXXXXXXXXXXXXX"
+        nodetool_path: /home/cassandra/config/repository/{{ cassandra_version }}/bin
+        debug: yes
+      ignore_errors: yes
+      register: rhys
+
+    - name: Assert decommission successful
+      assert:
+        that:
+          - rhys.failed
+          - "rhys.msg == 'host_id is not a valid uuid'"
+
+    - name: Get host_id of node listening on 127.0.0.1
+      shell: nodetool status --port 7100 | grep 127.0.0.1 | tr -s ' ' | cut -d ' ' -f7
+      register: nodetool
+
+    - name: Execute module against the first ccm node - Should fail
+      community.cassandra.cassandra_removenode:
+        host: 127.0.0.1
+        port: 7100
+        host_id: "{{ nodetool.stdout }}"
+        nodetool_path: /home/cassandra/config/repository/{{ cassandra_version }}/bin
+        debug: yes
+      ignore_errors: yes
+      register: rhys
+
+    - name: Assert module has failed
+      assert:
+        that:
+          - rhys.failed
+          - "rhys.msg == 'removenode command failed'"
+
+    - name: Execute module with fake uuid
+      community.cassandra.cassandra_removenode:
+        host: 127.0.0.1
+        port: 7100
+        host_id: "a37f4602-xxxx-xxxx-b61f-0edebc05bab0"
+        nodetool_path: /home/cassandra/config/repository/{{ cassandra_version }}/bin
+        debug: yes
+      ignore_errors: yes
+      register: rhys
+
+    - name: Assert module has failed
+      assert:
+        that:
+          - rhys.failed
+          - "rhys.msg == 'host_id does not exist in the cluster'"
+
+    - name: Get host_id of node listening on 127.0.0.2
+      shell: nodetool status --port 7100 | grep 127.0.0.2 | tr -s ' ' | cut -d ' ' -f7
+      register: nodetool
+
+    - name: Execute module against node 2  check mode
+      community.cassandra.cassandra_removenode:
+        host: 127.0.0.1
+        port: 7100
+        host_id: "{{ nodetool.stdout }}"
+        nodetool_path: /home/cassandra/config/repository/{{ cassandra_version }}/bin
+        debug: yes
+      check_mode: yes
+      register: rhys
+
+    - assert:
+        that:
+          - rhys.changed
+          - "rhys.msg == 'removenode command succeeded'"
+
+    - name: Get status
+      shell: nodetool status --port 7100 
+      register: nodetool
+
+    - name: Verifiy that check mode works and the host id is stil in the cluster
+      assert:
+        that:
+          - "'127.0.0.2' in nodetool.stdout"
+
+    - name: Execute module against node 2 
+      community.cassandra.cassandra_removenode:
+        host: 127.0.0.1
+        port: 7100
+        host_id: "{{ nodetool.stdout }}"
+        nodetool_path: /home/cassandra/config/repository/{{ cassandra_version }}/bin
+        debug: yes
+      check_mode: yes
+      register: rhys
+
+    - assert:
+        that:
+          - rhys.changed
+          - "rhys.msg == 'removenode command succeeded'"
+
+    - name: Verifiy that 127.0.0.2
+      assert:
+        that:
+          - "'127.0.0.2' in nodetool.stdout"
+# TODO - Add tests with auth
+#- include_tasks: ../../setup_cassandra/tasks/cassandra_auth.yml
+#  when: cassandra_auth_tests == True
