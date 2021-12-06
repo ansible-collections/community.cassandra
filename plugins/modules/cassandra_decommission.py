@@ -93,7 +93,7 @@ def main():
         if module.params['host'] in out:  # host is still in ring
             cmd = "decommission"
             n = NodeToolCommandSimple(module, cmd)
-            if not module.params['check_mode']:
+            if not module.check_mode:
                 (rc, out, err) = n.run_command()
                 out = out.strip()
                 err = err.strip()
@@ -110,8 +110,8 @@ def main():
                     result['rc'] = rc
                     module.fail_json(**result)
             else:
-                  result['changed'] = True
-                  result['msg'] = "decommission command succeeded"              
+                result['changed'] = True
+                result['msg'] = "decommission command succeeded"          
         else:
             result['changed'] = False
             result['msg'] = "Node appears to be already decommissioned"
