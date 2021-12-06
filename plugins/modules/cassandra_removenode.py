@@ -24,7 +24,7 @@ extends_documentation_fragment:
 
 options:
   host_id:
-    description: 
+    description:
       - Host Id of the node to rmeove.
     type: str
     required: true

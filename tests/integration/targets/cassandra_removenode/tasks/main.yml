@@ -62,7 +62,7 @@
       community.cassandra.cassandra_removenode:
         host: 127.0.0.1
         port: 7100
-        host_id: "a37f4602-xxxx-xxxx-b61f-0edebc05bab0"
+        host_id: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
         nodetool_path: /home/cassandra/config/repository/{{ cassandra_version }}/bin
         debug: yes
       ignore_errors: yes
