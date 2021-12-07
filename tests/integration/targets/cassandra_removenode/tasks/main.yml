@@ -100,7 +100,7 @@
     - name: Verifiy that check mode works and the host id is still in the cluster
       assert:
         that:
-          - "'127.0.0.2' in nodetool.stdout_status"
+          - "'127.0.0.2' in nodetool_status.stdout"
 
     - name: Execute module against node 2 
       community.cassandra.cassandra_removenode:
@@ -120,7 +120,22 @@
     - name: Verifiy that 127.0.0.2
       assert:
         that:
-          - "'127.0.0.2' not  in nodetool.stdout"
+          - "'127.0.0.2' not in nodetool.stdout"
+
+    - name: Run module with same host_id again
+      community.cassandra.cassandra_removenode:
+        host: 127.0.0.1
+        port: 7100
+        host_id: "{{ nodetool.stdout }}"
+        nodetool_path: /home/cassandra/config/repository/{{ cassandra_version }}/bin
+        debug: yes
+      check_mode: yes
+      register: rhys
+
+    - assert:
+        that:
+          - rhys.changed == False
+          - "rhys.msg == 'host_id does not exist in the cluster'"
 # TODO - Add tests with auth
 #- include_tasks: ../../setup_cassandra/tasks/cassandra_auth.yml
 #  when: cassandra_auth_tests == True
