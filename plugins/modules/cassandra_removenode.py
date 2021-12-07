@@ -93,6 +93,7 @@ def main():
     )
 
     host_id = module.params['host_id']
+    force = module.params['force']
     if not valid_uuid(host_id):
         module.fail_json(msg="host_id is not a valid uuid")
 
@@ -118,7 +119,10 @@ def main():
 
     if rc == 0:
         if host_id in out:  # host is still in ring
-            cmd = "removenode -- {0}".format(host_id)
+            if force:
+                cmd = "removenode -- force {0}".format(host_id)
+            else:
+                cmd = "removenode -- {0}".format(host_id)
             n = NodeToolCommandSimple(module, cmd)
             if not module.check_mode:
                 (rc, out, err) = n.run_command()
