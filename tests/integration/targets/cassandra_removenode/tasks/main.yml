@@ -78,7 +78,7 @@
       shell: nodetool status --port 7100 | grep 127.0.0.2 | tr -s ' ' | cut -d ' ' -f7
       register: nodetool
 
-    - name: Execute module against node 2  check mode
+    - name: Remove node 2 - check mode
       community.cassandra.cassandra_removenode:
         host: 127.0.0.1
         port: 7100
@@ -102,14 +102,14 @@
         that:
           - "'127.0.0.2' in nodetool_status.stdout"
 
-    - name: Execute module against node 2 
+    - name: Remove node 2 
       community.cassandra.cassandra_removenode:
         host: 127.0.0.1
         port: 7100
         host_id: "{{ nodetool.stdout }}"
         nodetool_path: /home/cassandra/config/repository/{{ cassandra_version }}/bin
         debug: yes
-      check_mode: yes
+      check_mode: no
       register: rhys
 
     - assert:
@@ -130,7 +130,6 @@
         force: yes
         nodetool_path: /home/cassandra/config/repository/{{ cassandra_version }}/bin
         debug: yes
-      check_mode: yes
 
     - name: Run module with same host_id again - should be absent and result in no change
       community.cassandra.cassandra_removenode:
@@ -139,7 +138,6 @@
         host_id: "{{ nodetool.stdout }}"
         nodetool_path: /home/cassandra/config/repository/{{ cassandra_version }}/bin
         debug: yes
-      check_mode: yes
 
     - assert:
         that:
