@@ -78,6 +78,17 @@
       shell: nodetool status --port 7100 | grep 127.0.0.2 | tr -s ' ' | cut -d ' ' -f7
       register: nodetool
 
+    - name: Kill node 2
+      community.cassandra.cassandra_stopdaemon:
+        host: 127.0.0.2
+        port: 7200
+        
+    - name: Wait for node 2 cassandra to shutdown
+      wait_for:
+        host: 127.0.0.2
+        port: 7200
+        state: "drained"
+
     - name: Remove node 2 - check mode
       community.cassandra.cassandra_removenode:
         host: 127.0.0.1
