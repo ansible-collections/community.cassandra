@@ -68,10 +68,10 @@
       ignore_errors: yes
       register: rhys
 
-    - name: Assert module has failed
+    - name: Assert module has performed no action
       assert:
         that:
-          - rhys.failed
+          - rhys.changed == False
           - "rhys.msg == 'host_id does not exist in the cluster'"
 
     - name: Get host_id of node listening on 127.0.0.2
