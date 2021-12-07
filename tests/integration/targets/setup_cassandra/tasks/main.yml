@@ -17,6 +17,10 @@
 # along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
 
 # ============================================================
+- name: Install required packages
+  package:
+    name: "{{ required_packages }}"
+
 - name: Get Original Python
   shell: python --version
   register: original_python
