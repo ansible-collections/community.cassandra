@@ -95,12 +95,12 @@
 
     - name: Get status
       shell: nodetool status --port 7100 
-      register: nodetool
+      register: nodetool_status
 
-    - name: Verifiy that check mode works and the host id is stil in the cluster
+    - name: Verifiy that check mode works and the host id is still in the cluster
       assert:
         that:
-          - "'127.0.0.2' in nodetool.stdout"
+          - "'127.0.0.2' in nodetool.stdout_status"
 
     - name: Execute module against node 2 
       community.cassandra.cassandra_removenode:
@@ -120,7 +120,7 @@
     - name: Verifiy that 127.0.0.2
       assert:
         that:
-          - "'127.0.0.2' in nodetool.stdout"
+          - "'127.0.0.2' not  in nodetool.stdout"
 # TODO - Add tests with auth
 #- include_tasks: ../../setup_cassandra/tasks/cassandra_auth.yml
 #  when: cassandra_auth_tests == True
