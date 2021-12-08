@@ -155,6 +155,7 @@
         host_id: "{{ nodetool.stdout }}"
         nodetool_path: /home/cassandra/config/repository/{{ cassandra_version }}/bin
         debug: yes
+      register: rhys
 
     - assert:
         that:
