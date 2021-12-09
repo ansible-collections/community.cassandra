@@ -185,7 +185,6 @@
   when:
     - cassandra_ports.failed is defined
     - cassandra_ports.failed
-  no_log: yes
 
 - name: End play if wait_for task failed
   meta: end_play
