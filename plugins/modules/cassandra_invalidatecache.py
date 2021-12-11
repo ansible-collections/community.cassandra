@@ -85,7 +85,7 @@ def main():
     )
 
     cache = module.params['cache']
-    
+
     cmd = 'invalidate{0}cache'.format(cache)
 
     n = NodeToolCommandSimple(module, cmd)
@@ -98,6 +98,7 @@ def main():
     (rc, out, err) = n.run_command()
     out = out.strip()
     err = err.strip()
+
     if module.params['debug']:
         if out:
             result['stdout'] = out
