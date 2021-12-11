@@ -144,7 +144,7 @@ def main():
 
         cache = module.params['cache']
         cmd = 'invalidate{0}cache'.format(cache)
-        cache_info = parse_cache_info(out)
+        cache_info = parse_cache_info(out, module)
 
         if cache == "key" and cache_info['key'] > 0 or cache == "row" and cache_info['row'] > 0 \
               or cache == "counter" and cache_info['counter'] > 0:
