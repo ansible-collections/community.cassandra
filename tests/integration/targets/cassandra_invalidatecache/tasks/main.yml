@@ -18,6 +18,18 @@
 
 # ===========================================================
 
+- name: Invalidate the counter cache - check mode
+  community.cassandra.cassandra_invalidatecache:
+    cache: counter
+    debug: true
+  register: assass
+  check_mode: yes
+
+- assert:
+    that:
+      - "assass.msg == 'The counter cache is empty'"
+      - "assass.changed == False"
+
 - name: Invalidate the counter cache
   community.cassandra.cassandra_invalidatecache:
     cache: counter
@@ -26,7 +38,19 @@
 
 - assert:
     that:
-      - "assass.msg == 'The counter cache was invalidated'"
+      - "assass.msg == 'The counter cache is empty'"
+      - "assass.changed == False"
+
+- name: Invalidate the key cache - check mode
+  community.cassandra.cassandra_invalidatecache:
+    cache: key
+    debug: true
+  register: assass
+  check_mode: yes
+
+- assert:
+    that:
+      - "assass.msg == 'The key cache was invalidated'"
       - "assass.changed == True"
 
 - name: Invalidate the key cache
@@ -40,16 +64,51 @@
       - "assass.msg == 'The key cache was invalidated'"
       - "assass.changed == True"
 
-- name: Invalidate the row cache
+- name: Invalidate the key cache - should now be empty
   community.cassandra.cassandra_invalidatecache:
-    cache: row
+    cache: key
     debug: true
   register: assass
 
 - assert:
     that:
-      - "assass.msg == 'The row cache was invalidated'"
+      - "assass.msg == 'The key cache is empty'"
+      - "assass.changed == False"
+
+- name: Invalidate the row cache - check mode
+  community.cassandra.cassandra_invalidatecache:
+    cache: row
+    debug: true
+  register: assass
+  check_mode: yes
+
+- assert:
+    that:
+      - "assass.msg == 'The row cache is empty'"
       - "assass.changed == True"
+
+- name: Invalidate the counter cache - check mode
+  community.cassandra.cassandra_invalidatecache:
+    cache: counter
+    debug: true
+  register: assass
+  check_mode: yes
+
+- assert:
+    that:
+      - "assass.msg == 'The counter cache is empty'"
+      - "assass.changed == False"
+
+- name: Invalidate the counter cache 
+  community.cassandra.cassandra_invalidatecache:
+    cache: counter
+    debug: true
+  register: assass
+
+- assert:
+    that:
+      - "assass.msg == 'The counter cache is empty'"
+      - "assass.changed == False"
 
 - include_tasks: ../../setup_cassandra/tasks/cassandra_auth.yml
   when: cassandra_auth_tests == True
@@ -64,8 +123,8 @@
 
 - assert:
     that:
-      - "assass.msg == 'The counter cache was invalidated'"
-      - "assass.changed == True"
+      - "assass.msg == 'The counter cache is empty'"
+      - "assass.changed == TFalse"
 
 - name: Invalidate the key cache
   community.cassandra.cassandra_invalidatecache:
@@ -77,8 +136,8 @@
 
 - assert:
     that:
-      - "assass.msg == 'The key cache was invalidated'"
-      - "assass.changed == True"
+      - "assass.msg == 'The key cache is empty'"
+      - "assass.changed == False"
 
 - name: Invalidate the row cache
   community.cassandra.cassandra_invalidatecache:
@@ -90,8 +149,8 @@
 
 - assert:
     that:
-      - "assass.msg == 'The row cache was invalidated'"
-      - "assass.changed == True"
+      - "assass.msg == 'The row cache is empty'"
+      - "assass.changed == False"
 
 - name: Test login failure handling
   community.cassandra.cassandra_invalidatecache:
