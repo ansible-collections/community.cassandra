@@ -146,8 +146,8 @@ def main():
         cmd = 'invalidate{0}cache'.format(cache)
         cache_info = parse_cache_info(out, module)
 
-        if cache == "key" and cache_info['key'] > 0 or cache == "row" and cache_info['row'] > 0 \
-              or cache == "counter" and cache_info['counter'] > 0:
+        if cache == "key" and cache_info['key_cache_entries'] > 0 or cache == "row" and cache_info['row_cache_entries'] > 0 \
+              or cache == "counter" and cache_info['counter_cache_entries'] > 0:
             n = NodeToolCommandSimple(module, cmd)
 
             rc = None
