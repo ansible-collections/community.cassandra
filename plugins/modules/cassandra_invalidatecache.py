@@ -105,7 +105,7 @@ def parse_cache_info(info, module):
     row_cache_entries = p.search(info).group(0).split()[-1:]
     p = re.compile(r"Counter Cache .*: entries \d+")
     counter_cache_entries = p.search(info).group(0).split()[-1:]
-    if key_cache_entries is None or row_cache_entries  is None or counter_cache_entries is None:
+    if key_cache_entries is None or row_cache_entries is None or counter_cache_entries is None:
         module.fail_json(msg="Unable to get cache info")
     return {"key_cache_entries": key_cache_entries,
             "row_cache_entries": row_cache_entries,
@@ -147,7 +147,7 @@ def main():
         cache_info = parse_cache_info(out, module)
 
         if cache == "key" and cache_info['key_cache_entries'] > 0 or cache == "row" and cache_info['row_cache_entries'] > 0 \
-              or cache == "counter" and cache_info['counter_cache_entries'] > 0:
+            or cache == "counter" and cache_info['counter_cache_entries'] > 0:
             n = NodeToolCommandSimple(module, cmd)
 
             rc = None
