@@ -99,17 +99,18 @@ def parse_cache_info(info: str, module):
 
     TODO - This should be placed into common code and unit tested
     """
-    p = re.compile("Key Cache .*: entries \d+")
+    p = re.compile(r"Key Cache .*: entries \d+")
     key_cache_entries = p.search(info).group(0).split()[-1:]
-    p = re.compile("Row Cache .*: entries \d+")
+    p = re.compile(r"Row Cache .*: entries \d+")
     row_cache_entries = p.search(info).group(0).split()[-1:]
-    p = re.compile("Counter Cache .*: entries \d+")
+    p = re.compile(r"Counter Cache .*: entries \d+")
     counter_cache_entries = p.search(info).group(0).split()[-1:]
     if key_cache_entries is None or row_cache_entries  is None or counter_cache_entries is None:
         module.fail_json(msg="Unable to get cache info")
     return {"key_cache_entries": key_cache_entries,
             "row_cache_entries": row_cache_entries,
             "counter_cache_entries": counter_cache_entries}
+
 
 def main():
 
@@ -145,8 +146,7 @@ def main():
         cmd = 'invalidate{0}cache'.format(cache)
         cache_info = parse_cache_info(out)
 
-        if cache == "key" and cache_info['key'] > 0 \
-          or cache == "row" and cache_info['row'] > 0 \
+        if cache == "key" and cache_info['key'] > 0 or cache == "row" and cache_info['row'] > 0 \
               or cache == "counter" and cache_info['counter'] > 0:
             n = NodeToolCommandSimple(module, cmd)
 
@@ -182,7 +182,7 @@ def main():
             result['changed'] = False
     else:
         result['msg'] = "Failed getting cache info"
-        module.fail_json(**result)    
+        module.fail_json(**result)
 
 
 if __name__ == '__main__':
