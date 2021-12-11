@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-# 2019 Rhys Campbell <rhys.james.campbell@googlemail.com>
+# 2021 Rhys Campbell <rhyscampbell@bluewin.ch>
 # https://github.com/rhysmeister
 # GNU General Public License v3.0+
 # (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
@@ -9,28 +9,35 @@ from __future__ import absolute_import, division, print_function
 
 DOCUMENTATION = '''
 ---
-module: cassandra_streamthroughput
+module: cassandra_concurrency
 author: Rhys Campbell (@rhysmeister)
-short_description: Sets the stream throughput.
+short_description: Manage concurrency parameters on the Cassandra node.
 requirements: [ nodetool ]
 description:
-    - Sets the stream throughput.
+    - Manage concurrency parameters on the Cassandra node.
+    - Set maximum concurrency for processing stage.
+    - Set number of concurrent compactors.
+    - Set the number of concurrent view builders in the system.
 
 extends_documentation_fragment:
   - community.cassandra.nodetool_module_options
 
 options:
+  concurrency_type:
+    description:
+      - Type of concurrency to manage.
+    type: str
   value:
     description:
-      - MB value to set stream throughput to.
+      - Number of threads / maximum concurrency.
     type: int
     required: True
 '''
 
 EXAMPLES = '''
-- name: Set throughput to 200
-  community.cassandra.cassandra_streamthroughput:
-    value: 200
+- name: Set concurrency for processing stage
+  community.cassandra.cassandra_concurrency:
+    value: 8
 '''
 
 RETURN = '''
