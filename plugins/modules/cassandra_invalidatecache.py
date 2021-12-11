@@ -70,10 +70,10 @@ from ansible_collections.community.cassandra.plugins.module_utils.nodetool_cmd_o
 from ansible_collections.community.cassandra.plugins.module_utils.cassandra_common_options import cassandra_common_argument_spec
 
 
-def parse_cache_info(info: str, module):
+def parse_cache_info(info, module):
     """
     This function parses the output from the nodetool  info command
-    in order to return the cache info, i.e. 
+    in order to return the cache info, i.e.
     'ID                     : f4ee490c-df8e-4a8d-9236-320903697fbf
     Gossip active          : true
     Native Transport active: true
