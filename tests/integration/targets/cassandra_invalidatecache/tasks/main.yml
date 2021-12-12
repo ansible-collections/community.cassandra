@@ -126,7 +126,7 @@
 - assert:
     that:
       - "assass.msg == 'The counter cache is empty'"
-      - "assass.changed == TFalse"
+      - "assass.changed == False"
 
 - name: Invalidate the key cache
   community.cassandra.cassandra_invalidatecache:
