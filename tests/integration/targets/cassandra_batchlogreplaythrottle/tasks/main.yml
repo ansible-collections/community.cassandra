@@ -17,8 +17,10 @@
 # along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
 
 # ===========================================================
+- name: fql feature only from Cassandra 4.0 onwards
+  meta: end_play
+  when: cassandra_version[0] | int < 4
 
-# C* 4.0 has updated the default to 64MB
 - name: Set batchlogreplaythrottle with module - Ensure we start from 1024
   community.cassandra.cassandra_batchlogreplaythrottle:
     value: 1024
