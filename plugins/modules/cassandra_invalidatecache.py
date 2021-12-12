@@ -165,8 +165,6 @@ def main():
                 (rc, out, err) = n.run_command()
             else:
                 rc = 0
-                out = None
-                err = None
             out = out.strip()
             err = err.strip()
 
