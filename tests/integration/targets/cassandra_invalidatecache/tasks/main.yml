@@ -1,0 +1,230 @@
+# test code for the cassandra_invalidatecache module
+# (c) 2021,  Rhys Campbell <rhyscampbell@bluewin.ch>
+
+# This file is part of Ansible
+#
+# Ansible is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Ansible is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
+
+# ===========================================================
+
+- name: Invalidate the counter cache - check mode
+  community.cassandra.cassandra_invalidatecache:
+    cache: counter
+    debug: true
+  register: assass
+  check_mode: yes
+
+- assert:
+    that:
+      - "assass.msg == 'The counter cache is empty'"
+      - "assass.changed == False"
+
+- name: Invalidate the counter cache
+  community.cassandra.cassandra_invalidatecache:
+    cache: counter
+    debug: true
+  register: assass
+
+- assert:
+    that:
+      - "assass.msg == 'The counter cache is empty'"
+      - "assass.changed == False"
+
+- name: Invalidate the key cache - check mode
+  community.cassandra.cassandra_invalidatecache:
+    cache: key
+    debug: true
+    fake_counter: yes
+  register: assass
+  check_mode: yes
+
+- assert:
+    that:
+      - "assass.msg == 'The key cache was invalidated'"
+      - "assass.changed == True"
+
+- name: Invalidate the key cache
+  community.cassandra.cassandra_invalidatecache:
+    cache: key
+    debug: true
+    fake_counter: yes
+  register: assass
+
+- assert:
+    that:
+      - "assass.msg == 'The key cache was invalidated'"
+      - "assass.changed == True"
+
+- name: Invalidate the key cache - should now be empty
+  community.cassandra.cassandra_invalidatecache:
+    cache: key
+    debug: true
+  register: assass
+
+- assert:
+    that:
+      - "assass.msg == 'The key cache is empty'"
+      - "assass.changed == False"
+
+- name: Invalidate the row cache - check mode
+  community.cassandra.cassandra_invalidatecache:
+    cache: row
+    debug: true
+  register: assass
+  check_mode: yes
+
+- assert:
+    that:
+      - "assass.msg == 'The row cache is empty'"
+      - "assass.changed == False"
+
+- name: Invalidate the counter cache - check mode
+  community.cassandra.cassandra_invalidatecache:
+    cache: counter
+    debug: true
+  register: assass
+  check_mode: yes
+
+- assert:
+    that:
+      - "assass.msg == 'The counter cache is empty'"
+      - "assass.changed == False"
+
+- name: Invalidate the counter cache 
+  community.cassandra.cassandra_invalidatecache:
+    cache: counter
+    debug: true
+  register: assass
+
+- assert:
+    that:
+      - "assass.msg == 'The counter cache is empty'"
+      - "assass.changed == False"
+
+- include_tasks: ../../setup_cassandra/tasks/cassandra_auth.yml
+  when: cassandra_auth_tests == True
+
+- name: Invalidate the counter cache
+  community.cassandra.cassandra_invalidatecache:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    cache: counter
+    debug: true
+  register: assass
+
+- assert:
+    that:
+      - "assass.msg == 'The counter cache is empty'"
+      - "assass.changed == False"
+
+- name: Invalidate the key cache
+  community.cassandra.cassandra_invalidatecache:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    cache: key
+    debug: true
+  register: assass
+
+- assert:
+    that:
+      - "assass.msg == 'The key cache was invalidated'"
+      - "assass.changed == True"
+
+- name: Invalidate the row cache
+  community.cassandra.cassandra_invalidatecache:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    cache: row
+    debug: true
+  register: assass
+
+- assert:
+    that:
+      - "assass.msg == 'The row cache is empty'"
+      - "assass.changed == False"
+
+- name: Invalidate the counter cache
+  community.cassandra.cassandra_invalidatecache:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    cache: counter
+    debug: true
+    fake_counter: yes
+  register: assass
+
+- assert:
+    that:
+      - "assass.msg == 'The counter cache was invalidated'"
+      - "assass.changed"
+
+- name: Invalidate the key cache
+  community.cassandra.cassandra_invalidatecache:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    cache: key
+    debug: true
+    fake_counter: yes
+  register: assass
+
+- assert:
+    that:
+      - "assass.msg == 'The key cache was invalidated'"
+      - "assass.changed"
+
+- name: Invalidate the row cache
+  community.cassandra.cassandra_invalidatecache:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    cache: row
+    debug: true
+    fake_counter: yes
+  register: assass
+
+- assert:
+    that:
+      - "assass.msg == 'The row cache was invalidated'"
+      - "assass.changed"
+
+- name: Test login failure handling
+  community.cassandra.cassandra_invalidatecache:
+    username: "{{ cassandra_admin_user }}"
+    password: XXXXXXXXXXXXX
+    cache: counter
+    debug: true
+  register: login_status
+  ignore_errors: yes
+  when: cassandra_auth_tests == True
+
+- name: Assert failed login
+  assert:
+    that:
+      - login_status.failed == True
+      - "'Invalid username or password' in login_status.stderr"
+  when: cassandra_auth_tests == True
+
+- name: Test incorrect nodetool_path handling
+  community.cassandra.cassandra_invalidatecache:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    cache: counter
+    nodetool_path: /tmp
+    debug: true
+  register: nodetool_path_error
+  ignore_errors: true
+  when: cassandra_auth_tests == True
+
+- name: Assert no such file
+  assert:
+    that:
+      - "'No such file or directory' in nodetool_path_error.msg"
