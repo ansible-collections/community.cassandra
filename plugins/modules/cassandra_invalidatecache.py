@@ -179,7 +179,6 @@ def main():
             if rc == 0:
                 result['changed'] = True
                 result['msg'] = "The {0} cache was invalidated".format(cache)
-                module.exit_json(**result)
             else:
                 result['msg'] = "Failed invalidating the {0} cache".format(cache)
                 module.fail_json(**result)
@@ -190,6 +189,7 @@ def main():
         result['msg'] = "Failed getting cache info"
         module.fail_json(**result)
 
+    module.exit_json(**result)
 
 if __name__ == '__main__':
     main()
