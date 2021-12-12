@@ -87,10 +87,14 @@ def main():
             result['changed'] = False
             module.fail_json(name=get_cmd,
                              msg="{0} command failed".format(get_cmd), **result)
+        else:
+            result['changed'] = False
+            result['msg'] = "Batch log replay throttle is already {0} KB/s".format(value)
     else:
 
         if module.check_mode:
             result['changed'] = True
+            result['msg'] = "Batch log replay throttle updated"
         else:
             (rc, out, err) = n.set_command()
             out = out.strip()
@@ -105,6 +109,7 @@ def main():
                                  msg="{0} command failed".format(set_cmd), **result)
             else:
                 result['changed'] = True
+                result['msg'] = "Batch log replay throttle updated"
 
     module.exit_json(**result)
 
