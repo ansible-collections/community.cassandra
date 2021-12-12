@@ -109,7 +109,7 @@ def parse_cache_info(info, module):
         row_cache_entries = int(p.search(info).group(0).split()[-1:])
         p = re.compile(r"Counter Cache .*: entries \d+")
         counter_cache_entries = int(p.search(info).group(0).split()[-1:])
-    except Exception as excep
+    except Exception as excep:
         module.fail_json(msg="Error parsing info output: {0}".format(excep))
     if key_cache_entries is None or row_cache_entries is None or counter_cache_entries is None:
         module.fail_json(msg="Unable to get cache info")
