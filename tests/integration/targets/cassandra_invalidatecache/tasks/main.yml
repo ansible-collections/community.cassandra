@@ -138,7 +138,7 @@
 
 - assert:
     that:
-      - "assass.msg == 'The key cache is empty'"
+      - "assass.msg == 'The key cache was invalidated'"
       - "assass.changed == False"
 
 - name: Invalidate the row cache
