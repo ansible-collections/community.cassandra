@@ -153,7 +153,7 @@ def main():
         cache_info = parse_cache_info(out, module)
 
         if cache == "key" and cache_info['key_cache_entries'] > 0 or cache == "row" and cache_info['row_cache_entries'] > 0 \
-            or cache == "counter" and cache_info['counter_cache_entries'] > 0:
+                or cache == "counter" and cache_info['counter_cache_entries'] > 0:
             n = NodeToolCommandSimple(module, cmd)
 
             rc = None
