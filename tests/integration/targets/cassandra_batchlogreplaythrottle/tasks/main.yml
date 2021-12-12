@@ -1,0 +1,182 @@
+# test code for the cassandra_batchlogreplaythrottle module
+# (c) 2021,  Rhys Campbell <rhyscampbell@blueiwn.ch>
+
+# This file is part of Ansible
+#
+# Ansible is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Ansible is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
+
+# ===========================================================
+
+# C* 4.0 has updated the default to 64MB
+- name: Set batchlogreplaythrottle with module - Ensure we start from 1024
+  community.cassandra.cassandra_batchlogreplaythrottle:
+    value: 1024
+    debug: yes
+
+- name: Get incremental backup status 1
+  shell: nodetool -h 127.0.0.1 getbatchlogreplaythrottle
+  register: batchlogreplaythrottle
+
+- name: Assert starting status of batchlogreplaythrottle
+  assert:
+    that: "'Batchlog replay throttle: 1024 KB/s' == batchlogreplaythrottle.stdout"
+
+- name: Set batchlogreplaythrottle with module
+  community.cassandra.cassandra_batchlogreplaythrottle:
+    value: 2048
+    debug: yes
+
+- name: Get batchlogreplaythrottle
+  shell: nodetool -h 127.0.0.1 getbatchlogreplaythrottle
+  register: batchlogreplaythrottle
+
+- name: Assert batchlogreplaythrottle is 2048
+  assert:
+    that: "'Batchlog replay throttle: 2048 KB/s' == batchlogreplaythrottle.stdout"
+
+- name: Set throughput to 4092
+  community.cassandra.cassandra_batchlogreplaythrottle:
+    value: 4092
+    debug: yes
+
+- name: Get batchlogreplaythrottle
+  shell: nodetool -h 127.0.0.1 getbatchlogreplaythrottle
+  register: batchlogreplaythrottle
+
+- name: Assert batchlogreplaythrottle is 4092 KB/s
+  assert:
+    that: "'Batchlog replay throttle: 4092 KB/s' == batchlogreplaythrottle.stdout"
+
+- name: Test module with check_mode = true
+  community.cassandra.cassandra_batchlogreplaythrottle:
+    value: 1024
+    debug: yes
+  check_mode: true
+  register: batchlogreplaythrottle
+
+- name: Assert batchlogreplaythrottle has changed (check_mode)
+  assert:
+    that: batchlogreplaythrottle.changed == True
+
+- name: Get batchlogreplaythrottle
+  shell: nodetool -h 127.0.0.1 getbatchlogreplaythrottle
+  register: batchlogreplaythrottle
+
+- name: Assert batchlogreplaythrottle is still 4092 KB/s'
+  assert:
+    that: "'Batchlog replay throttle: 4092 KB/s' == batchlogreplaythrottle.stdout"
+
+- name: Set batchlogreplaythrottle back to 1024 KB/s
+  community.cassandra.cassandra_batchlogreplaythrottle:
+    value: 1024
+    debug: yes
+
+- name: Get batchlogreplaythrottle
+  shell: nodetool -h 127.0.0.1 getbatchlogreplaythrottle
+  register: batchlogreplaythrottle
+
+- name: Assert batchlogreplaythrottle is again 1024 KB/s
+  assert:
+    that: "'Batchlog replay throttle: 1024 KB/s' == batchlogreplaythrottle.stdout"
+
+- name: Set batchlogreplaythrottle 1024 KB/s should not change
+  community.cassandra.cassandra_batchlogreplaythrottle:
+    value: 1024
+    debug: yes
+  register: module_nochange
+
+- name: Get batchlogreplaythrottle
+  shell: nodetool -h 127.0.0.1 getbatchlogreplaythrottle
+  register: batchlogreplaythrottle
+
+- name: Assert batchlogreplaythrottle is still 1024 KB/s and module reports no change
+  assert:
+    that:
+      - "'Batchlog replay throttle: 1024 KB/s' == batchlogreplaythrottle.stdout"
+      - module_nochange.changed == False
+
+- include_tasks: ../../setup_cassandra/tasks/cassandra_auth.yml
+  when: cassandra_auth_tests == True
+
+- name: Set batchlogreplaythrottle 2048 KB/s when auth is enabled
+  community.cassandra.cassandra_batchlogreplaythrottle:
+    value: 2048
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    debug: yes
+  register: batchlogreplaythrottle
+  when: cassandra_auth_tests == True
+
+- name: Get batchlogreplaythrottle auth 1
+  shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 getbatchlogreplaythrottle
+  register: batchlogreplaythrottle
+  when: cassandra_auth_tests == True
+
+- name: Assert batchlogreplaythrottle is again 2048 KB/s
+  assert:
+    that:
+      - "'Batchlog replay throttle: 2048 KB/s' == batchlogreplaythrottle.stdout"
+      - batchlogreplaythrottle.changed == True
+
+- name: Set back to 1024 KB/s using the pw file option
+  community.cassandra.cassandra_batchlogreplaythrottle:
+    value:  1024
+    username: "{{ cassandra_admin_user }}"
+    password_file: /etc/cassandra/jmxremote.password
+    debug: yes
+  register: batchlogreplaythrottle
+  when: cassandra_auth_tests == True
+
+- name: Get batchlogreplaythrottle auth 2
+  shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 getbatchlogreplaythrottle
+  register: batchlogreplaythrottle
+  when: cassandra_auth_tests == True
+
+- name: Assert batchlogreplaythrottle is again 1024 KB/s 
+  assert:
+    that:
+      - "'Batchlog replay throttle: 1024 KB/s' == batchlogreplaythrottle.stdout"
+      - batchlogreplaythrottle.changed == True
+  when: cassandra_auth_tests == True
+
+- name: Test login failure handling
+  community.cassandra.cassandra_batchlogreplaythrottle:
+    value: 128
+    username: "{{ cassandra_admin_user }}"
+    password: XXXXXXXXXXXXXXXXXXXXX
+    debug: yes
+  register: login_status
+  ignore_errors: true
+  when: cassandra_auth_tests == True
+
+- name: Assert failed login
+  assert:
+    that:
+      - login_status.failed == True
+      - "'Invalid username or password' in login_status.stderr"
+  when: cassandra_auth_tests == True
+
+- name: Test incorrect nodetool_path handling
+  community.cassandra.cassandra_batchlogreplaythrottle:
+    value: 128
+    nodetool_path: /tmp
+    debug: yes
+  register: nodetool_path_error
+  ignore_errors: true
+  when: cassandra_auth_tests == True
+
+- name: Assert no such file
+  assert:
+    that:
+      - "'No such file or directory' in nodetool_path_error.msg"
