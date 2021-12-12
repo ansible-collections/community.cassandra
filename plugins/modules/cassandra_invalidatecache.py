@@ -99,12 +99,18 @@ def parse_cache_info(info, module):
 
     TODO - This should be placed into common code and unit tested
     """
-    p = re.compile(r"Key Cache .*: entries \d+")
-    key_cache_entries = p.search(info).group(0).split()[-1:]
-    p = re.compile(r"Row Cache .*: entries \d+")
-    row_cache_entries = p.search(info).group(0).split()[-1:]
-    p = re.compile(r"Counter Cache .*: entries \d+")
-    counter_cache_entries = p.search(info).group(0).split()[-1:]
+    key_cache_entries = None
+    row_cache_entries = None
+    counter_cache_entries = None
+    try:
+        p = re.compile(r"Key Cache .*: entries \d+")
+        key_cache_entries = int(p.search(info).group(0).split()[-1:])
+        p = re.compile(r"Row Cache .*: entries \d+")
+        row_cache_entries = int(p.search(info).group(0).split()[-1:])
+        p = re.compile(r"Counter Cache .*: entries \d+")
+        counter_cache_entries = int(p.search(info).group(0).split()[-1:])
+    except Exception as excep
+        module.fail_json(msg="Error parsing info output: {0}".format(excep))
     if key_cache_entries is None or row_cache_entries is None or counter_cache_entries is None:
         module.fail_json(msg="Unable to get cache info")
     return {"key_cache_entries": key_cache_entries,
