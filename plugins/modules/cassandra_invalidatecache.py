@@ -36,6 +36,12 @@ options:
       - Add additional debug output.
     type: bool
     default: false
+  fake_counter:
+    description:
+      - Fake the counter results so the module wil execute the appropriate invalid cache command.
+      - Intended for internal testing use only.
+    type: bool
+    default: false
 '''
 
 EXAMPLES = '''
@@ -70,7 +76,7 @@ from ansible_collections.community.cassandra.plugins.module_utils.nodetool_cmd_o
 from ansible_collections.community.cassandra.plugins.module_utils.cassandra_common_options import cassandra_common_argument_spec
 
 
-def parse_cache_info(info, module):
+def parse_cache_info(info, module, fake_counter):
     """
     This function parses the output from the nodetool  info command
     in order to return the cache info, i.e.
@@ -103,12 +109,17 @@ def parse_cache_info(info, module):
     row_cache_entries = None
     counter_cache_entries = None
     try:
-        p = re.compile(r"Key Cache .*: entries \d+")
-        key_cache_entries = int(p.search(info).group(0).split()[-1:][0])
-        p = re.compile(r"Row Cache .*: entries \d+")
-        row_cache_entries = int(p.search(info).group(0).split()[-1:][0])
-        p = re.compile(r"Counter Cache .*: entries \d+")
-        counter_cache_entries = int(p.search(info).group(0).split()[-1:][0])
+        if fake_counter:
+            key_cache_entries = 100
+            row_cache_entries = 100
+            counter_cache_entries = 100
+        else:
+            p = re.compile(r"Key Cache .*: entries \d+")
+            key_cache_entries = int(p.search(info).group(0).split()[-1:][0])
+            p = re.compile(r"Row Cache .*: entries \d+")
+            row_cache_entries = int(p.search(info).group(0).split()[-1:][0])
+            p = re.compile(r"Counter Cache .*: entries \d+")
+            counter_cache_entries = int(p.search(info).group(0).split()[-1:][0])
     except Exception as excep:
         module.fail_json(msg="Error parsing info output: {0}".format(excep))
     if key_cache_entries is None or row_cache_entries is None or counter_cache_entries is None:
@@ -126,6 +137,7 @@ def main():
     argument_spec.update(
         cache=dict(type='str', required=True, choices=cache_choices),
         debug=dict(type='bool', default=False),
+        fake_counter=dict(type='bool', default=False)
     )
     module = AnsibleModule(
         argument_spec=argument_spec,
@@ -150,7 +162,8 @@ def main():
 
         cache = module.params['cache']
         cmd = 'invalidate{0}cache'.format(cache)
-        cache_info = parse_cache_info(out, module)
+        fake_counter = module.params['fake_counter']
+        cache_info = parse_cache_info(out, module, fake_counter)
 
         if cache == "key" and cache_info['key_cache_entries'] > 0 or cache == "row" and cache_info['row_cache_entries'] > 0 \
                 or cache == "counter" and cache_info['counter_cache_entries'] > 0:

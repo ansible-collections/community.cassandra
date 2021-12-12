@@ -45,6 +45,7 @@
   community.cassandra.cassandra_invalidatecache:
     cache: key
     debug: true
+    fake_counter: yes
   register: assass
   check_mode: yes
 
@@ -57,6 +58,7 @@
   community.cassandra.cassandra_invalidatecache:
     cache: key
     debug: true
+    fake_counter: yes
   register: assass
 
 - assert:
@@ -151,6 +153,48 @@
     that:
       - "assass.msg == 'The row cache is empty'"
       - "assass.changed == False"
+
+- name: Invalidate the counter cache
+  community.cassandra.cassandra_invalidatecache:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    cache: counter
+    debug: true
+    fake_counter: yes
+  register: assass
+
+- assert:
+    that:
+      - "assass.msg == 'The counter cache was invalidated'"
+      - "assass.changed"
+
+- name: Invalidate the key cache
+  community.cassandra.cassandra_invalidatecache:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    cache: key
+    debug: true
+    fake_counter: yes
+  register: assass
+
+- assert:
+    that:
+      - "assass.msg == 'The key cache was invalidated'"
+      - "assass.changed"
+
+- name: Invalidate the row cache
+  community.cassandra.cassandra_invalidatecache:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    cache: row
+    debug: true
+    fake_counter: yes
+  register: assass
+
+- assert:
+    that:
+      - "assass.msg == 'The row cache was invalidated'"
+      - "assass.changed"
 
 - name: Test login failure handling
   community.cassandra.cassandra_invalidatecache:
