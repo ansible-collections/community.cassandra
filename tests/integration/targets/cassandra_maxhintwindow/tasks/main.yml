@@ -17,7 +17,11 @@
 # along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
 
 # ===========================================================
-- name: Set maxhintwindow with module - Ensure we start from 1024
+- name: feature only from Cassandra 4.0 onwards
+  meta: end_play
+  when: cassandra_version[0] | int < 4
+
+- name: Set maxhintwindow with module - Ensure we start from 10800000
   community.cassandra.cassandra_maxhintwindow:
     value: 10800000
     debug: yes
