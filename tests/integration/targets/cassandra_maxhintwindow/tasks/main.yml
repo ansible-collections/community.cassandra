@@ -94,7 +94,7 @@
 
 - name: Set maxhintwindow 10800000 ms should not change
   community.cassandra.cassandra_maxhintwindow:
-    value: 1024
+    value: 10800000
     debug: yes
   register: module_nochange
 
