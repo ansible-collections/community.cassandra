@@ -88,9 +88,9 @@
   shell: nodetool -h 127.0.0.1 getmaxhintwindow
   register: maxhintwindow
 
-- name: Assert maxhintwindow is again 40800000 ms
+- name: Assert maxhintwindow is again 10800000 ms
   assert:
-    that: "'Current max hint window: 40800000 ms' == maxhintwindow.stdout"
+    that: "'Current max hint window: 10800000 ms' == maxhintwindow.stdout"
 
 - name: Set maxhintwindow 10800000 ms should not change
   community.cassandra.cassandra_maxhintwindow:
