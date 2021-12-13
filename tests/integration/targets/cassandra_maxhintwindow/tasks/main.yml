@@ -18,7 +18,7 @@
 
 # ===========================================================
 - name: Set maxhintwindow with module - Ensure we start from 1024
-  community.cassandra.cassandra_maxhintwindow
+  community.cassandra.cassandra_maxhintwindow:
     value: 10800000
     debug: yes
 
