@@ -1,0 +1,180 @@
+# test code for the cassandra_maxhintwindow module
+# (c) 2021,  Rhys Campbell <rhyscampbell@blueiwn.ch>
+
+# This file is part of Ansible
+#
+# Ansible is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Ansible is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
+
+# ===========================================================
+- name: Set maxhintwindow with module - Ensure we start from 1024
+  community.cassandra.cassandra_maxhintwindow
+    value: 10800000
+    debug: yes
+
+- name: Get incremental backup status 1
+  shell: nodetool -h 127.0.0.1 getmaxhintwindow
+  register: maxhintwindow
+
+- name: Assert starting status of maxhintwindow
+  assert:
+    that: "'Current max hint window: 10800000 ms' == maxhintwindow.stdout"
+
+- name: Set maxhintwindow with module
+  community.cassandra.cassandra_maxhintwindow:
+    value: 20800000
+    debug: yes
+
+- name: Get maxhintwindow
+  shell: nodetool -h 127.0.0.1 getmaxhintwindow
+  register: maxhintwindow
+
+- name: Assert maxhintwindow is 20800000
+  assert:
+    that: "'Current max hint window: 20800000 ms' == maxhintwindow.stdout"
+
+- name: Set throughput to 40800000
+  community.cassandra.cassandra_maxhintwindow:
+    value: 40800000
+    debug: yes
+
+- name: Get maxhintwindow
+  shell: nodetool -h 127.0.0.1 getmaxhintwindow
+  register: maxhintwindow
+
+- name: Assert maxhintwindow is 40800000 ms
+  assert:
+    that: "'Current max hint window: 40800000 ms' == maxhintwindow.stdout"
+
+- name: Test module with check_mode = true
+  community.cassandra.cassandra_maxhintwindow:
+    value: 10800000
+    debug: yes
+  check_mode: true
+  register: maxhintwindow
+
+- name: Assert maxhintwindow has changed (check_mode)
+  assert:
+    that: maxhintwindow.changed == True
+
+- name: Get maxhintwindow
+  shell: nodetool -h 127.0.0.1 getmaxhintwindow
+  register: maxhintwindow
+
+- name: Assert maxhintwindow is still 40800000 ms'
+  assert:
+    that: "'Current max hint window: 40800000 ms' == maxhintwindow.stdout"
+
+- name: Set maxhintwindow back to 10800000 ms
+  community.cassandra.cassandra_maxhintwindow:
+    value: 10800000
+    debug: yes
+
+- name: Get maxhintwindow
+  shell: nodetool -h 127.0.0.1 getmaxhintwindow
+  register: maxhintwindow
+
+- name: Assert maxhintwindow is again 40800000 ms
+  assert:
+    that: "'Current max hint window: 40800000 ms' == maxhintwindow.stdout"
+
+- name: Set maxhintwindow 10800000 ms should not change
+  community.cassandra.cassandra_maxhintwindow:
+    value: 1024
+    debug: yes
+  register: module_nochange
+
+- name: Get maxhintwindow
+  shell: nodetool -h 127.0.0.1 getmaxhintwindow
+  register: maxhintwindow
+
+- name: Assert maxhintwindow is still 10800000 ms and module reports no change
+  assert:
+    that:
+      - "'Current max hint window: 10800000 ms' == maxhintwindow.stdout"
+      - module_nochange.changed == False
+
+- include_tasks: ../../setup_cassandra/tasks/cassandra_auth.yml
+  when: cassandra_auth_tests == True
+
+- name: Set maxhintwindow 2048 KB/s when auth is enabled
+  community.cassandra.cassandra_maxhintwindow:
+    value: 20800000 
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    debug: yes
+  register: maxhintwindow
+  when: cassandra_auth_tests == True
+
+- name: Get maxhintwindow auth 1
+  shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 getmaxhintwindow
+  register: maxhintwindow
+  when: cassandra_auth_tests == True
+
+- name: Assert maxhintwindow is again 20800000 ms
+  assert:
+    that:
+      - "'Current max hint window: 20800000 ms' == maxhintwindow.stdout"
+      - maxhintwindow.changed == True
+
+- name: Set back to 10800000 ms using the pw file option
+  community.cassandra.cassandra_maxhintwindow:
+    value: 10800000
+    username: "{{ cassandra_admin_user }}"
+    password_file: /etc/cassandra/jmxremote.password
+    debug: yes
+  register: maxhintwindow
+  when: cassandra_auth_tests == True
+
+- name: Get maxhintwindow auth 2
+  shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 getmaxhintwindow
+  register: maxhintwindow
+  when: cassandra_auth_tests == True
+
+- name: Assert maxhintwindow is again  10800000 ms
+  assert:
+    that:
+      - "'BCurrent max hint window: 10800000 ms' == maxhintwindow.stdout"
+      - maxhintwindow.changed == True
+  when: cassandra_auth_tests == True
+
+- name: Test login failure handling
+  community.cassandra.cassandra_maxhintwindow:
+    value: 128
+    username: "{{ cassandra_admin_user }}"
+    password: XXXXXXXXXXXXXXXXXXXXX
+    debug: yes
+  register: login_status
+  ignore_errors: true
+  when: cassandra_auth_tests == True
+
+- name: Assert failed login
+  assert:
+    that:
+      - login_status.failed == True
+      - "'Invalid username or password' in login_status.stderr"
+  when: cassandra_auth_tests == True
+
+- name: Test incorrect nodetool_path handling
+  community.cassandra.cassandra_maxhintwindow:
+    value: 128
+    nodetool_path: /tmp
+    debug: yes
+  register: nodetool_path_error
+  ignore_errors: true
+  when: cassandra_auth_tests == True
+
+- name: Assert no such file
+  assert:
+    that:
+      - "'No such file or directory' in nodetool_path_error.msg"
