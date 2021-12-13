@@ -148,13 +148,13 @@
 - name: Assert maxhintwindow is again  10800000 ms
   assert:
     that:
-      - "'BCurrent max hint window: 10800000 ms' == maxhintwindow.stdout"
+      - "'Current max hint window: 10800000 ms' == maxhintwindow.stdout"
       - maxhintwindow.changed == True
   when: cassandra_auth_tests == True
 
 - name: Test login failure handling
   community.cassandra.cassandra_maxhintwindow:
-    value: 128
+    value: 12800000
     username: "{{ cassandra_admin_user }}"
     password: XXXXXXXXXXXXXXXXXXXXX
     debug: yes
@@ -171,7 +171,7 @@
 
 - name: Test incorrect nodetool_path handling
   community.cassandra.cassandra_maxhintwindow:
-    value: 128
+    value: 12800000
     nodetool_path: /tmp
     debug: yes
   register: nodetool_path_error
