@@ -17,7 +17,7 @@
 # along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
 
 # ===========================================================
-- name: fql feature only from Cassandra 4.0 onwards
+- name: feature only from Cassandra 4.0 onwards
   meta: end_play
   when: cassandra_version[0] | int < 4
 
