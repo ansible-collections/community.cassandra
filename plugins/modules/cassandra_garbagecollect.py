@@ -84,13 +84,14 @@ class NodeToolCommand(NodeToolCmd):
         self.table = module.params['table']
         self.granularity = module.params['granularity']
         self.jobs = module.params['jobs']
-        cmd = "{0} --granularity {1} --jobs {2}".format(self.granularity,
-                                                        self.jobs) 
+        cmd = "{0} --granularity {1} --jobs {2}".format(cmd,
+                                                        self.granularity,
+                                                        self.jobs)
         if self.keyspace is not None:
             cmd = "{0} {1}".format(cmd, self.keyspace)
         if self.table is not None:
             cmd = "{0} {1}".format(cmd, self.table)
-        
+
         self.cmd = cmd
 
     def run_command(self):
@@ -102,7 +103,7 @@ def main():
     argument_spec.update(
         keyspace=dict(type='str', no_log=False),
         table=dict(type='str'),
-        granularity=dict(type='int', default="ROW", choices=["ROW", "CELL"]),
+        granularity=dict(type='str', default="ROW", choices=["ROW", "CELL"]),
         jobs=dict(type='int', default=2)
     )
     module = AnsibleModule(
