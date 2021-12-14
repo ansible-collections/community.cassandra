@@ -54,7 +54,7 @@
 
 - name: garbagecollect the node / system keyspace
   community.cassandra.cassandra_garbagecollect:
-    keypsace: "system"
+    keyspace: "system"
     granularity: "CELL"
     jobs: 2
     debug: yes
@@ -136,7 +136,7 @@
       - "garbagecollect.msg == 'nodetool garbagecollect executed successfully'"
       - "garbagecollect.changed == True"
 
-- name: Run garbagecollect against system_auth/roles (list)
+- name: Run garbagecollect against system_auth/roles
   community.cassandra.cassandra_garbagecollect:
     username: "{{ cassandra_admin_user }}"
     password: "{{ cassandra_admin_pwd }}"
@@ -150,7 +150,7 @@
       - "garbagecollect.msg == 'nodetool garbagecollect executed successfully'"
       - "garbagecollect.changed == True"
 
-- name: Run garbagecollect against role_permissions 
+- name: Run garbagecollect against role_permissions / 0 jobs (max)
   community.cassandra.cassandra_garbagecollect:
     username: "{{ cassandra_admin_user }}"
     password: "{{ cassandra_admin_pwd }}"
@@ -165,7 +165,7 @@
       - "garbagecollect.msg == 'nodetool garbagecollect executed successfully'"
       - "garbagecollect.changed == True"
 
-- name: Run against system_auth / role_members / CELL granularity
+- name: Run against system_auth / role_members / CELL granularity / 2 jobs
   community.cassandra.cassandra_garbagecollect:
     username: "{{ cassandra_admin_user }}"
     password: "{{ cassandra_admin_pwd }}"
@@ -181,12 +181,13 @@
       - "garbagecollect.msg == 'nodetool garbagecollect executed successfully'"
       - "garbagecollect.changed == True"
 
-- name: Run against system_auth / role_members / CELL granularity
+- name: Run against system_auth / role_members / CELL granularity / 0 jobs (max)
   community.cassandra.cassandra_garbagecollect:
     username: "{{ cassandra_admin_user }}"
     password: "{{ cassandra_admin_pwd }}"
     keyspace: system_auth
     table: role_members
+    grantularity: "CELL"
     jobs: 0
     debug: yes
   register: garbagecollect
