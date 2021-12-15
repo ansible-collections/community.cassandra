@@ -171,7 +171,7 @@
     password: "{{ cassandra_admin_pwd }}"
     keyspace: system_auth
     table: role_members
-    grantularity: "CELL"
+    granularity: "CELL"
     jobs: 2
     debug: yes
   register: garbagecollect
@@ -187,7 +187,7 @@
     password: "{{ cassandra_admin_pwd }}"
     keyspace: system_auth
     table: role_members
-    grantularity: "CELL"
+    granularity: "CELL"
     jobs: 0
     debug: yes
   register: garbagecollect
