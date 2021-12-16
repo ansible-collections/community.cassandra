@@ -1,0 +1,198 @@
+# test code for the cassandra_garbagecollect module
+# (c) 2022,  Rhys Campbell <rhyscampbell@bluewin.ch>
+
+# This file is part of Ansible
+#
+# Ansible is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Ansible is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
+
+# ===========================================================
+
+- name: garbagecollect the node
+  community.cassandra.cassandra_garbagecollect:
+    debug: yes
+  register: garbagecollect
+
+- assert:
+    that:
+      - "garbagecollect.msg == 'nodetool garbagecollect executed successfully'"
+      - "garbagecollect.changed == True"
+
+- name: garbagecollect the node
+  community.cassandra.cassandra_garbagecollect:
+    granularity: "ROW"
+    jobs: 0
+    debug: yes
+  register: garbagecollect
+
+- assert:
+    that:
+      - "garbagecollect.msg == 'nodetool garbagecollect executed successfully'"
+      - "garbagecollect.changed == True"
+
+- name: garbagecollect the node
+  community.cassandra.cassandra_garbagecollect:
+    granularity: "CELL"
+    jobs: 0
+    debug: yes
+  register: garbagecollect
+
+- assert:
+    that:
+      - "garbagecollect.msg == 'nodetool garbagecollect executed successfully'"
+      - "garbagecollect.changed == True"
+
+- name: garbagecollect the node / system keyspace
+  community.cassandra.cassandra_garbagecollect:
+    keyspace: "system"
+    granularity: "CELL"
+    jobs: 2
+    debug: yes
+  register: garbagecollect
+
+- assert:
+    that:
+      - "garbagecollect.msg == 'nodetool garbagecollect executed successfully'"
+      - "garbagecollect.changed == True"
+
+- include_tasks: ../../setup_cassandra/tasks/cassandra_auth.yml
+  when: cassandra_auth_tests == True
+
+- name: Run garbagecollect with auth
+  community.cassandra.cassandra_garbagecollect:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    debug: yes
+  register: garbagecollect
+
+- assert:
+    that:
+      - "garbagecollect.msg == 'nodetool garbagecollect executed successfully'"
+      - "garbagecollect.changed == True"
+
+- name: Test login failure handling
+  community.cassandra.cassandra_garbagecollect:
+    username: "{{ cassandra_admin_user }}"
+    password: XXXXXXXXXXXXXXXXXXXXX
+    debug: yes
+  register: login_status
+  ignore_errors: yes
+  when: cassandra_auth_tests == True
+
+- name: Assert failed login
+  assert:
+    that:
+      - login_status.failed == True
+      - "'Invalid username or password' in login_status.stderr"
+  when: cassandra_auth_tests == True
+
+- name: Test incorrect nodetool_path handling
+  community.cassandra.cassandra_garbagecollect:
+    nodetool_path: /tmp
+    debug: yes
+  register: nodetool_path_error
+  ignore_errors: true
+  when: cassandra_auth_tests == True
+
+- name: Assert no such file
+  assert:
+    that:
+      - "'No such file or directory' in nodetool_path_error.msg"
+
+- name: Run garbagecollect against system_auth keyspace
+  community.cassandra.cassandra_garbagecollect:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    keyspace: system_auth
+    debug: yes
+  register: garbagecollect
+
+- assert:
+    that:
+      - "garbagecollect.msg == 'nodetool garbagecollect executed successfully'"
+      - "garbagecollect.changed == True"
+
+- name: Run garbagecollect against system_auth/roles (str)
+  community.cassandra.cassandra_garbagecollect:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    keyspace: system_auth
+    table: roles
+    debug: yes
+  register: garbagecollect
+
+- assert:
+    that:
+      - "garbagecollect.msg == 'nodetool garbagecollect executed successfully'"
+      - "garbagecollect.changed == True"
+
+- name: Run garbagecollect against system_auth/roles
+  community.cassandra.cassandra_garbagecollect:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    keyspace: system_auth
+    table: roles
+    debug: yes
+  register: garbagecollect
+
+- assert:
+    that:
+      - "garbagecollect.msg == 'nodetool garbagecollect executed successfully'"
+      - "garbagecollect.changed == True"
+
+- name: Run garbagecollect against role_permissions / 0 jobs (max)
+  community.cassandra.cassandra_garbagecollect:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    keyspace: system_auth
+    table: role_permissions
+    jobs: 0
+    debug: yes
+  register: garbagecollect
+
+- assert:
+    that:
+      - "garbagecollect.msg == 'nodetool garbagecollect executed successfully'"
+      - "garbagecollect.changed == True"
+
+- name: Run against system_auth / role_members / CELL granularity / 2 jobs
+  community.cassandra.cassandra_garbagecollect:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    keyspace: system_auth
+    table: role_members
+    granularity: "CELL"
+    jobs: 2
+    debug: yes
+  register: garbagecollect
+
+- assert:
+    that:
+      - "garbagecollect.msg == 'nodetool garbagecollect executed successfully'"
+      - "garbagecollect.changed == True"
+
+- name: Run against system_auth / role_members / CELL granularity / 0 jobs (max)
+  community.cassandra.cassandra_garbagecollect:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    keyspace: system_auth
+    table: role_members
+    granularity: "CELL"
+    jobs: 0
+    debug: yes
+  register: garbagecollect
+
+- assert:
+    that:
+      - "garbagecollect.msg == 'nodetool garbagecollect executed successfully'"
+      - "garbagecollect.changed == True"
