@@ -1,0 +1,60 @@
+# test code for the cassandra_role module
+# (c) 2022,  Rhys Campbell <rhyscampbell@bluewin.ch>
+
+# This file is part of Ansible
+#
+# Ansible is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Ansible is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
+
+# ===========================================================
+
+- name: Create keyspace for tests
+  cassandra_keyspace:
+    name: test_keyspace
+    state: present
+    login_user: "{{ cassandra_admin_user }}"
+    login_password: "{{ cassandra_admin_pwd }}"
+
+- name: Create a test role - 1st run
+  community.cassandra.cassandra_role:
+    name: test_role
+    password: p4ssw0rd
+    login: true
+    keyspace_permissions:
+      test_keyspace:
+        - "ALL PERMISSIONS"
+    state: present
+    login_user: "{{ cassandra_admin_user }}"
+    login_password: "{{ cassandra_admin_pwd }}"
+  register: first_run
+
+- assert:
+    that:
+      - first_run.changed
+
+- name: Create a test role - second run
+  community.cassandra.cassandra_role:
+    name: test_role
+    password: p4ssw0rd
+    login: true
+    keyspace_permissions:
+      test_keyspace:
+        - "ALL PERMISSIONS"
+    state: present
+    login_user: "{{ cassandra_admin_user }}"
+    login_password: "{{ cassandra_admin_pwd }}"
+  register: second_run
+
+- assert:
+    that:
+      - second_run.changed == False
