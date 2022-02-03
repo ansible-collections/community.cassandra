@@ -60,3 +60,21 @@
 - assert:
     that:
       - second_run.changed == False
+
+- name: Create a test role - third run
+  community.cassandra.cassandra_role:
+    name: test_role
+    password: p4ssw0rd
+    login: true
+    keyspace_permissions:
+      test_keyspace:
+        - "SELECT"
+    state: present
+    login_user: "{{ cassandra_admin_user }}"
+    login_password: "{{ cassandra_admin_pwd }}"
+    debug: yes
+  register: third_run
+
+- assert:
+    that:
+      - third_run.changed == False

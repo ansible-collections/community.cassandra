@@ -501,7 +501,7 @@ def build_role_permissions(session,
             # This is for the case when the keyspace permission has not been provided
             if permission['resource'].startswith('<keyspace') \
                     and permission['role'] == role \
-                    and permission['resource'].split(' ')[1].replace('>', '') not in keyspace_permissions.keys(): 
+                    and permission['resource'].split(' ')[1].replace('>', '') not in keyspace_permissions.keys():
                 cql = revoke_permission(session,
                                         permission['permission'],
                                         role,
