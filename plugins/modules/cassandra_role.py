@@ -600,7 +600,7 @@ def main():
                           auth_provider=auth_provider)
         session = cluster.connect()
     except AuthenticationFailed as auth_failed:
-        module.fail_json(msg="Authentication failed: {0}".format(excep))
+        module.fail_json(msg="Authentication failed: {0}".format(auth_failed))
     except Exception as excep:
         module.fail_json(msg="Error connecting to cluster: {0}".format(excep))
 
