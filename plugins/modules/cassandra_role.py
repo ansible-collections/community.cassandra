@@ -462,7 +462,7 @@ def build_role_permissions(session,
                 perms_dict['temp'].add("{0} {1} {2}".format(permission, keyspace, bool))
 
                 if bool:
-                    pass  # permission is alreay
+                    pass  # permission is already assigned
                 else:
                     cql = grant_permission(session,
                                            permission,
@@ -501,7 +501,8 @@ def build_role_permissions(session,
             if permission['resource'].startswith('<keyspace') \
                     and permission['role'] == role \
                     and permission['resource'].split(' ')[1].replace('>', '') \
-                    not in keyspace_permissions.keys():
+                    not in keyspace_permissions.keys() \
+                    and "ALL PERMISSIONS" not in keyspace_permissions[keyspace]:
                 cql = revoke_permission(session,
                                         permission['permission'],
                                         role,
@@ -603,6 +604,8 @@ def main():
         module.fail_json(msg="Authentication failed: {0}".format(auth_failed))
     except Exception as excep:
         module.fail_json(msg="Error connecting to cluster: {0}".format(excep))
+
+    has_role_changed = False
 
     try:
         if debug:
