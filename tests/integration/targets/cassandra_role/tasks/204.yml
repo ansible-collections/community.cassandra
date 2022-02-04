@@ -25,7 +25,7 @@
     login_user: "{{ cassandra_admin_user }}"
     login_password: "{{ cassandra_admin_pwd }}"
 
-- name: Create a test role - 1st run
+- name: Create a test role - first run
   community.cassandra.cassandra_role:
     name: test_role
     password: p4ssw0rd
@@ -61,7 +61,7 @@
     that:
       - second_run.changed == False
 
-- name: Create a test role - third run
+- name: Create a test role - third run - check mode
   community.cassandra.cassandra_role:
     name: test_role
     password: p4ssw0rd
@@ -73,8 +73,103 @@
     login_user: "{{ cassandra_admin_user }}"
     login_password: "{{ cassandra_admin_pwd }}"
     debug: yes
+  check_mode: yes
   register: third_run
 
 - assert:
     that:
-      - third_run.changed == False
+      - third_run.changed
+
+- name: Create a test role - fourth run
+  community.cassandra.cassandra_role:
+    name: test_role
+    password: p4ssw0rd
+    login: true
+    keyspace_permissions:
+      test_keyspace:
+        - "SELECT"
+    state: present
+    login_user: "{{ cassandra_admin_user }}"
+    login_password: "{{ cassandra_admin_pwd }}"
+    debug: yes
+  register: fourth_run
+
+- assert:
+    that:
+      - fourth_run.changed
+
+- name: Create a test role - fifth run
+  community.cassandra.cassandra_role:
+    name: test_role
+    password: p4ssw0rd
+    login: true
+    keyspace_permissions:
+      test_keyspace:
+        - "SELECT"
+    state: present
+    login_user: "{{ cassandra_admin_user }}"
+    login_password: "{{ cassandra_admin_pwd }}"
+    debug: yes
+  register: fifth_run
+
+- assert:
+    that:
+      - fifth_run.changed == False
+
+- name: Create a test role - sixth run - check mode
+  community.cassandra.cassandra_role:
+    name: test_role
+    password: p4ssw0rd
+    login: true
+    keyspace_permissions:
+      test_keyspace:
+        - "SELECT"
+        - "MODIFY"
+    state: present
+    login_user: "{{ cassandra_admin_user }}"
+    login_password: "{{ cassandra_admin_pwd }}"
+    debug: yes
+  check_mode: yes
+  register: sixth_run
+
+- assert:
+    that:
+      - sixth_run.changed
+
+- name: Create a test role - seventh run
+  community.cassandra.cassandra_role:
+    name: test_role
+    password: p4ssw0rd
+    login: true
+    keyspace_permissions:
+      test_keyspace:
+        - "SELECT"
+        - "MODIFY"
+    state: present
+    login_user: "{{ cassandra_admin_user }}"
+    login_password: "{{ cassandra_admin_pwd }}"
+    debug: yes
+  register: sixth_run
+
+- assert:
+    that:
+      - seventh_run.changed
+
+- name: Create a test role - eighth run
+  community.cassandra.cassandra_role:
+    name: test_role
+    password: p4ssw0rd
+    login: true
+    keyspace_permissions:
+      test_keyspace:
+        - "SELECT"
+        - "MODIFY"
+    state: present
+    login_user: "{{ cassandra_admin_user }}"
+    login_password: "{{ cassandra_admin_pwd }}"
+    debug: yes
+  register: eighth_run
+
+- assert:
+    that:
+      - eighth_run.changed == False
