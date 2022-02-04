@@ -149,7 +149,7 @@
     login_user: "{{ cassandra_admin_user }}"
     login_password: "{{ cassandra_admin_pwd }}"
     debug: yes
-  register: sixth_run
+  register: seventh_run
 
 - assert:
     that:
