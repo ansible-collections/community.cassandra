@@ -43,7 +43,7 @@
     that:
       - first_run.changed
       - first_run.cql == "CREATE ROLE test_role WITH SUPERUSER = False AND LOGIN = True AND PASSWORD = '********' "
-      - "first_run.permissions.grant.0 == "GRANT ALL PERMISSIONS ON KEYSPACE test_keyspace TO test_role"
+      - "first_run.permissions.grant.0 == 'GRANT ALL PERMISSIONS ON KEYSPACE test_keyspace TO test_role'"
       - "{{ first_run.permissions.grant | length }} == 1"
       - "{{ first_run.permissions.revoke | length }} == 0"
 
