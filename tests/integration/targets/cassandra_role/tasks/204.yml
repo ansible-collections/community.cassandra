@@ -1,0 +1,193 @@
+# test code for the cassandra_role module
+# (c) 2022,  Rhys Campbell <rhyscampbell@bluewin.ch>
+
+# This file is part of Ansible
+#
+# Ansible is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Ansible is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
+
+# ===========================================================
+
+- name: Create keyspace for tests
+  cassandra_keyspace:
+    name: test_keyspace
+    state: present
+    login_user: "{{ cassandra_admin_user }}"
+    login_password: "{{ cassandra_admin_pwd }}"
+
+- name: Create a test role - first run
+  community.cassandra.cassandra_role:
+    name: test_role
+    password: p4ssw0rd
+    login: true
+    keyspace_permissions:
+      test_keyspace:
+        - "ALL PERMISSIONS"
+    state: present
+    login_user: "{{ cassandra_admin_user }}"
+    login_password: "{{ cassandra_admin_pwd }}"
+    debug: yes
+  register: first_run
+
+- assert:
+    that:
+      - first_run.changed
+      - first_run.cql == "CREATE ROLE test_role WITH SUPERUSER = False AND LOGIN = True AND PASSWORD = '********' "
+      - "first_run.permissions.grant.0 == 'GRANT ALL PERMISSIONS ON KEYSPACE test_keyspace TO test_role'"
+      - "{{ first_run.permissions.grant | length }} == 1"
+      - "{{ first_run.permissions.revoke | length }} == 0"
+
+- name: Create a test role - second run
+  community.cassandra.cassandra_role:
+    name: test_role
+    password: p4ssw0rd
+    login: true
+    keyspace_permissions:
+      test_keyspace:
+        - "ALL PERMISSIONS"
+    state: present
+    login_user: "{{ cassandra_admin_user }}"
+    login_password: "{{ cassandra_admin_pwd }}"
+    debug: yes
+  register: second_run
+
+- assert:
+    that:
+      - second_run.changed == False
+      - second_run.permissions is not defined
+
+- name: Create a test role - third run - check mode
+  community.cassandra.cassandra_role:
+    name: test_role
+    password: p4ssw0rd
+    login: true
+    keyspace_permissions:
+      test_keyspace:
+        - "SELECT"
+    state: present
+    login_user: "{{ cassandra_admin_user }}"
+    login_password: "{{ cassandra_admin_pwd }}"
+    debug: yes
+  check_mode: yes
+  register: third_run
+
+- assert:
+    that:
+      - third_run.changed
+      - "{{ third_run.permissions.revoke | length }} == 5"
+      - "{{ third_run.permissions.grant | length }} == 0"
+
+- name: Create a test role - fourth run
+  community.cassandra.cassandra_role:
+    name: test_role
+    password: p4ssw0rd
+    login: true
+    keyspace_permissions:
+      test_keyspace:
+        - "SELECT"
+    state: present
+    login_user: "{{ cassandra_admin_user }}"
+    login_password: "{{ cassandra_admin_pwd }}"
+    debug: yes
+  register: fourth_run
+
+- assert:
+    that:
+      - fourth_run.changed
+      - "{{ fourth_run.permissions.revoke | length }} == 5"
+      - "{{ fourth_run.permissions.grant | length }} == 0"
+
+
+- name: Create a test role - fifth run
+  community.cassandra.cassandra_role:
+    name: test_role
+    password: p4ssw0rd
+    login: true
+    keyspace_permissions:
+      test_keyspace:
+        - "SELECT"
+    state: present
+    login_user: "{{ cassandra_admin_user }}"
+    login_password: "{{ cassandra_admin_pwd }}"
+    debug: yes
+  register: fifth_run
+
+- assert:
+    that:
+      - fifth_run.changed == False
+      - fifth_run.permissions is not defined
+
+- name: Create a test role - sixth run - check mode
+  community.cassandra.cassandra_role:
+    name: test_role
+    password: p4ssw0rd
+    login: true
+    keyspace_permissions:
+      test_keyspace:
+        - "SELECT"
+        - "MODIFY"
+    state: present
+    login_user: "{{ cassandra_admin_user }}"
+    login_password: "{{ cassandra_admin_pwd }}"
+    debug: yes
+  check_mode: yes
+  register: sixth_run
+
+- assert:
+    that:
+      - sixth_run.changed
+      - "{{ sixth_run.permissions.revoke | length }} == 0"
+      - "{{ sixth_run.permissions.grant | length }} == 1"
+      - "sixth_run.permissions.grant.0 == 'GRANT MODIFY ON KEYSPACE test_keyspace TO test_role'"
+
+- name: Create a test role - seventh run
+  community.cassandra.cassandra_role:
+    name: test_role
+    password: p4ssw0rd
+    login: true
+    keyspace_permissions:
+      test_keyspace:
+        - "SELECT"
+        - "MODIFY"
+    state: present
+    login_user: "{{ cassandra_admin_user }}"
+    login_password: "{{ cassandra_admin_pwd }}"
+    debug: yes
+  register: seventh_run
+
+- assert:
+    that:
+      - seventh_run.changed
+      - "{{ seventh_run.permissions.revoke | length }} == 0"
+      - "{{ seventh_run.permissions.grant | length }} == 1"
+      - "seventh_run.permissions.grant.0 == 'GRANT MODIFY ON KEYSPACE test_keyspace TO test_role'"
+
+- name: Create a test role - eighth run
+  community.cassandra.cassandra_role:
+    name: test_role
+    password: p4ssw0rd
+    login: true
+    keyspace_permissions:
+      test_keyspace:
+        - "SELECT"
+        - "MODIFY"
+    state: present
+    login_user: "{{ cassandra_admin_user }}"
+    login_password: "{{ cassandra_admin_pwd }}"
+    debug: yes
+  register: eighth_run
+
+- assert:
+    that:
+      - eighth_run.changed == False
+      - eighth_run.permissions is not defined

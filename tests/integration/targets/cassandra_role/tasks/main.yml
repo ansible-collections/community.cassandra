@@ -658,3 +658,6 @@
       - "'<keyspace mykeyspace6> |     SELECT' in complex.stdout"
       - "'rw_role |        <all keyspaces> |     SELECT' in complex.stdout"
       - "'rw_role |        <all keyspaces> |     MODIFY' in complex.stdout"
+
+- name: Import tasks for issue 204
+  import_tasks: 204.yml
