@@ -29,3 +29,33 @@ releases:
        - 183 - Adds new module cassandra_reload.
        - 182 - Add retries to network related tasks in all roles.
        - A bunch of other PRs addressed issues in the integration test code related to Cassandra 4.0.
+  1.2.0:
+    changes:
+      release_summary: Adds several new modules and a minor bug fixes.
+      bugfixes:
+        - 204 - Fix cassandra_role keyspace idempotency bug.
+      modules:
+        - name: cassandra_garbagecollect
+          description: #198
+        - name: cassandra_maxhintwindow
+          description: #197
+        - name: cassandra_batchlogreplaythrottle
+          description: #196
+        - name: cassandra_invalidatecache
+          description: #195
+        - name: cassandra_removenode
+          description: #193
+        - name: cassandra_decommission
+          description: #192
+        - name: cassandra_assassinate
+          description: #191
+        - name: cassandra_concurrency
+          description: #189
+        - name: cassandra_fullquerylog
+          description: #188
+        - name: cassandra_truncatehints
+          description: #187
+        - name: cassandra_timeout
+          description: #186
+        - name: cassandra_compact
+          description: #185
