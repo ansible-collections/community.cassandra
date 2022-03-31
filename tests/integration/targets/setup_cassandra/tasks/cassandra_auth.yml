@@ -48,7 +48,7 @@
 #  register: pwd_file TO REMOVE
 
 #- name: Set password in pwd file
-#  shell: "echo {{ cassandra_admin_pwd }} > {{ pwd_file.path }}" TO REMOVE
+#  ansible.builtin.shell: "echo {{ cassandra_admin_pwd }} > {{ pwd_file.path }}" TO REMOVE
 
 - name: Activate local jmx
   lineinfile:

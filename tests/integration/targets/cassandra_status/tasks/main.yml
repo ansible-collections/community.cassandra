@@ -47,7 +47,7 @@
           - "rhys.cluster_status['marlow']['up'] | length == 1"
 
     - name: Stop marlow1
-      shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd | mandatory }} marlow1 stop\""
+      ansible.builtin.shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd | mandatory }} marlow1 stop\""
       become_user: cassandra
       args:
         warn: false
@@ -77,7 +77,7 @@
           - "'127.0.0.8' not in rhys.cluster_status['marlow']['up']"
 
     - name: Start node2
-      shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd | mandatory }} marlow1 start &\""
+      ansible.builtin.shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd | mandatory }} marlow1 start &\""
       become_user: cassandra
       args:
         warn: false
@@ -108,7 +108,7 @@
           - "rhys.msg == 'All nodes are in an UP/NORMAL state'"
 
     - name: Bring down london2
-      shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd | mandatory }} london2 stop\""
+      ansible.builtin.shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd | mandatory }} london2 stop\""
       become_user: cassandra
       args:
         warn: false
@@ -152,7 +152,7 @@
           - "rhys.failed == True"
   always:
     - name: Cleanup any ccm stuff
-      shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd | mandatory }} stop test && ccm remove test > /dev/null\""
+      ansible.builtin.shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd | mandatory }} stop test && ccm remove test > /dev/null\""
       become_user: cassandra
       args:
         warn: false

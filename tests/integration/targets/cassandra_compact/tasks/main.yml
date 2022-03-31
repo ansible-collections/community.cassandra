@@ -18,7 +18,7 @@
 
 # ===========================================================
 - name: Get compactionstats status 1
-  shell: nodetool -h 127.0.0.1 compactionstats
+  ansible.builtin.shell: nodetool -h 127.0.0.1 compactionstats
   register: compaction_status
 
 - name: Assert compaction is not running 1
@@ -49,7 +49,7 @@
       - "compaction.msg == 'compaction started'"
 
 - name: Get compactionstats status 2
-  shell: nodetool -h 127.0.0.1 compactionstats
+  ansible.builtin.shell: nodetool -h 127.0.0.1 compactionstats
   register: compaction_status
 
 - name: Assert compaction is not running 2
@@ -80,7 +80,7 @@
       - "compaction.msg == 'compaction is not running'"
 
 - name: Get compactionstats status 3
-  shell: nodetool -h 127.0.0.1 compactionstats
+  ansible.builtin.shell: nodetool -h 127.0.0.1 compactionstats
   register: compaction_status
 
 - name: Assert compaction is not running 3
@@ -105,7 +105,7 @@
       - "compaction.msg == 'compaction started'"
 
 - name: Get compact status 4
-  shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 compactionstats
+  ansible.builtin.shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 compactionstats
   register: compaction_status
   when: cassandra_auth_tests == True
 
@@ -129,7 +129,7 @@
       - "compaction.msg == 'compaction is not running'"
 
 - name: Get compaction status 5
-  shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 compactionstats
+  ansible.builtin.shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 compactionstats
   register: compaction_status
   when: cassandra_auth_tests == True
 

@@ -27,7 +27,7 @@
     debug: yes
 
 - name: Get incremental backup status 1
-  shell: nodetool -h 127.0.0.1 getbatchlogreplaythrottle
+  ansible.builtin.shell: nodetool -h 127.0.0.1 getbatchlogreplaythrottle
   register: batchlogreplaythrottle
 
 - name: Assert starting status of batchlogreplaythrottle
@@ -40,7 +40,7 @@
     debug: yes
 
 - name: Get batchlogreplaythrottle
-  shell: nodetool -h 127.0.0.1 getbatchlogreplaythrottle
+  ansible.builtin.shell: nodetool -h 127.0.0.1 getbatchlogreplaythrottle
   register: batchlogreplaythrottle
 
 - name: Assert batchlogreplaythrottle is 2048
@@ -53,7 +53,7 @@
     debug: yes
 
 - name: Get batchlogreplaythrottle
-  shell: nodetool -h 127.0.0.1 getbatchlogreplaythrottle
+  ansible.builtin.shell: nodetool -h 127.0.0.1 getbatchlogreplaythrottle
   register: batchlogreplaythrottle
 
 - name: Assert batchlogreplaythrottle is 4092 KB/s
@@ -72,7 +72,7 @@
     that: batchlogreplaythrottle.changed == True
 
 - name: Get batchlogreplaythrottle
-  shell: nodetool -h 127.0.0.1 getbatchlogreplaythrottle
+  ansible.builtin.shell: nodetool -h 127.0.0.1 getbatchlogreplaythrottle
   register: batchlogreplaythrottle
 
 - name: Assert batchlogreplaythrottle is still 4092 KB/s'
@@ -85,7 +85,7 @@
     debug: yes
 
 - name: Get batchlogreplaythrottle
-  shell: nodetool -h 127.0.0.1 getbatchlogreplaythrottle
+  ansible.builtin.shell: nodetool -h 127.0.0.1 getbatchlogreplaythrottle
   register: batchlogreplaythrottle
 
 - name: Assert batchlogreplaythrottle is again 1024 KB/s
@@ -99,7 +99,7 @@
   register: module_nochange
 
 - name: Get batchlogreplaythrottle
-  shell: nodetool -h 127.0.0.1 getbatchlogreplaythrottle
+  ansible.builtin.shell: nodetool -h 127.0.0.1 getbatchlogreplaythrottle
   register: batchlogreplaythrottle
 
 - name: Assert batchlogreplaythrottle is still 1024 KB/s and module reports no change
@@ -121,7 +121,7 @@
   when: cassandra_auth_tests == True
 
 - name: Get batchlogreplaythrottle auth 1
-  shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 getbatchlogreplaythrottle
+  ansible.builtin.shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 getbatchlogreplaythrottle
   register: batchlogreplaythrottle
   when: cassandra_auth_tests == True
 
@@ -141,7 +141,7 @@
   when: cassandra_auth_tests == True
 
 - name: Get batchlogreplaythrottle auth 2
-  shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 getbatchlogreplaythrottle
+  ansible.builtin.shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 getbatchlogreplaythrottle
   register: batchlogreplaythrottle
   when: cassandra_auth_tests == True
 

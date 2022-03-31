@@ -15,7 +15,7 @@
 
 # https://issues.apache.org/jira/browse/CASSANDRA-16822?orderby=created+DESC%2C+priority+DESC%2C+updated+DESC
 - name: Install clqshlib - bug - ImportError - No module named cqlshlib
-  shell: cp -r /usr/lib/python3.6/site-packages/cqlshlib /usr/lib/python2.7/site-packages/cqlshlib
+  ansible.builtin.shell: cp -r /usr/lib/python3.6/site-packages/cqlshlib /usr/lib/python2.7/site-packages/cqlshlib
   args:
     creates: /usr/lib/python2.7/site-packages/cqlshlib
   when:

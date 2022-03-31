@@ -18,7 +18,7 @@
 
 # ===========================================================
 - name: Get traceprobability
-  shell: nodetool -h 127.0.0.1 gettraceprobability
+  ansible.builtin.shell: nodetool -h 127.0.0.1 gettraceprobability
   register: traceprobability
 
 - name: Assert starting status of traceprobability
@@ -31,7 +31,7 @@
     debug: yes
 
 - name: Get traceprobability
-  shell: nodetool -h 127.0.0.1 gettraceprobability
+  ansible.builtin.shell: nodetool -h 127.0.0.1 gettraceprobability
   register: traceprobability
 
 - name: Assert traceprobability is 0.1
@@ -44,7 +44,7 @@
     debug: yes
 
 - name: Get traceprobability
-  shell: nodetool -h 127.0.0.1 gettraceprobability
+  ansible.builtin.shell: nodetool -h 127.0.0.1 gettraceprobability
   register: traceprobability
 
 - name: Assert traceprobability is 0.9
@@ -63,7 +63,7 @@
     that: traceprobability.changed == True
 
 - name: Get traceprobability
-  shell: nodetool -h 127.0.0.1 gettraceprobability
+  ansible.builtin.shell: nodetool -h 127.0.0.1 gettraceprobability
   register: traceprobability
 
 - name: Assert traceprobability is still 0.9
@@ -76,7 +76,7 @@
     debug: yes
 
 - name: Get traceprobability
-  shell: nodetool -h 127.0.0.1 gettraceprobability
+  ansible.builtin.shell: nodetool -h 127.0.0.1 gettraceprobability
   register: traceprobability
 
 - name: Assert traceprobability is 0.0
@@ -90,7 +90,7 @@
   register: module_nochange
 
 - name: Get traceprobability
-  shell: nodetool -h 127.0.0.1 gettraceprobability
+  ansible.builtin.shell: nodetool -h 127.0.0.1 gettraceprobability
   register: traceprobability
 
 - name: Assert traceprobability is still 0.0 and module reports no change
@@ -112,7 +112,7 @@
   when: cassandra_auth_tests == True
 
 - name: Get traceprobability auth 1
-  shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 gettraceprobability
+  ansible.builtin.shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 gettraceprobability
   register: traceprobability
   when: cassandra_auth_tests == True
 
@@ -132,7 +132,7 @@
   when: cassandra_auth_tests == True
 
 - name: Get traceprobability auth 2
-  shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 gettraceprobability
+  ansible.builtin.shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 gettraceprobability
   register: traceprobability
   when: cassandra_auth_tests == True
 

@@ -109,7 +109,7 @@
   check_mode: yes
 
 - name: Get output of list roles
-  shell: cqlsh --username "{{ cassandra_admin_user }}" --password "{{ cassandra_admin_pwd }}" --execute "LIST ROLES"
+  ansible.builtin.shell: cqlsh --username "{{ cassandra_admin_user }}" --password "{{ cassandra_admin_pwd }}" --execute "LIST ROLES"
   register: myrole
 
 - name: Assert app_user exists in output
@@ -150,7 +150,7 @@
       - "absent.changed == True"
 
 - name: Get output of list roles
-  shell: cqlsh --username "{{ cassandra_admin_user }}" --password "{{ cassandra_admin_pwd }}" --execute "LIST ROLES"
+  ansible.builtin.shell: cqlsh --username "{{ cassandra_admin_user }}" --password "{{ cassandra_admin_pwd }}" --execute "LIST ROLES"
   register: myrole
 
 - name: Assert app_user does not exist
@@ -176,7 +176,7 @@
       - "myrole.role == 'app_user'"
 
 - name: Get output of list roles - app_user should not exist
-  shell: cqlsh --username "{{ cassandra_admin_user }}" --password "{{ cassandra_admin_pwd }}" --execute "LIST ROLES"
+  ansible.builtin.shell: cqlsh --username "{{ cassandra_admin_user }}" --password "{{ cassandra_admin_pwd }}" --execute "LIST ROLES"
   register: myrole
 
 - name: Assert app_user does not exist
@@ -226,7 +226,7 @@
     - mykeyspace6
 
 - name: Get all keyspaces
-  shell: cqlsh --username "{{ cassandra_admin_user }}" --password "{{ cassandra_admin_pwd }}" --execute "DESC KEYSPACES"
+  ansible.builtin.shell: cqlsh --username "{{ cassandra_admin_user }}" --password "{{ cassandra_admin_pwd }}" --execute "DESC KEYSPACES"
   register: keyspaces
 
 - name: Ensure that keyspaces exist
@@ -274,7 +274,7 @@
       - "app_user_multi_keyspace.role == 'app_user_multi_keyspace'"
 
 - name: Get output of list roles
-  shell: cqlsh --username "{{ cassandra_admin_user }}" --password "{{ cassandra_admin_pwd }}" --execute "LIST ROLES"
+  ansible.builtin.shell: cqlsh --username "{{ cassandra_admin_user }}" --password "{{ cassandra_admin_pwd }}" --execute "LIST ROLES"
   register: myrole
 
 - name: Assert app_user_multi_keyspace exists
@@ -283,7 +283,7 @@
       - "'app_user_multi_keyspace' in myrole.stdout"
 
 - name: Get output of list permissions
-  shell: cqlsh --username "{{ cassandra_admin_user }}" --password "{{ cassandra_admin_pwd }}" --execute "LIST ALL PERMISSIONS OF cassandra"
+  ansible.builtin.shell: cqlsh --username "{{ cassandra_admin_user }}" --password "{{ cassandra_admin_pwd }}" --execute "LIST ALL PERMISSIONS OF cassandra"
   register: myperms
 
 # - name: Validate assigned keyspace permissions TODO
@@ -321,7 +321,7 @@
     that: "read_only_user.changed == True"
 
 - name: Get output of list permissions for read_only user
-  shell: cqlsh --username "{{ cassandra_admin_user }}" --password "{{ cassandra_admin_pwd }}" --execute "LIST ALL PERMISSIONS OF read_only"
+  ansible.builtin.shell: cqlsh --username "{{ cassandra_admin_user }}" --password "{{ cassandra_admin_pwd }}" --execute "LIST ALL PERMISSIONS OF read_only"
   register: read_only_user_perms
 
 - name: Assert that all keyspaces select permissions exists
@@ -347,7 +347,7 @@
     that: "read_only_user.changed == True"
 
 - name: Get output of list permissions for read_only user
-  shell: cqlsh --username "{{ cassandra_admin_user }}" --password "{{ cassandra_admin_pwd }}" --execute "LIST ALL PERMISSIONS OF read_only"
+  ansible.builtin.shell: cqlsh --username "{{ cassandra_admin_user }}" --password "{{ cassandra_admin_pwd }}" --execute "LIST ALL PERMISSIONS OF read_only"
   register: read_only_user_perms
 
 - name: Assert that all keyspaces select permissions does not exist
@@ -368,7 +368,7 @@
   register: read_only_user
 
 - name: Get output of list permissions for read_only user
-  shell: cqlsh --username "{{ cassandra_admin_user }}" --password "{{ cassandra_admin_pwd }}" --execute "LIST ALL PERMISSIONS OF read_only"
+  ansible.builtin.shell: cqlsh --username "{{ cassandra_admin_user }}" --password "{{ cassandra_admin_pwd }}" --execute "LIST ALL PERMISSIONS OF read_only"
   register: read_only_user_perms
 
 - name: read_only role should now have no permissions
@@ -396,7 +396,7 @@
     login_password: "{{ cassandra_admin_pwd }}"
 
 - name: Get output of list permissions for rw_role
-  shell: cqlsh --username "{{ cassandra_admin_user }}" --password "{{ cassandra_admin_pwd }}" --execute "LIST ALL PERMISSIONS OF rw_role"
+  ansible.builtin.shell: cqlsh --username "{{ cassandra_admin_user }}" --password "{{ cassandra_admin_pwd }}" --execute "LIST ALL PERMISSIONS OF rw_role"
   register: rw_role_perms
 
 - name: rw_role role permissions test
@@ -428,7 +428,7 @@
       # TODO Check permissions grant and revoke statement
 
 - name: Get output of list permissions for rw_role
-  shell: cqlsh --username "{{ cassandra_admin_user }}" --password "{{ cassandra_admin_pwd }}" --execute "LIST ALL PERMISSIONS OF myapp"
+  ansible.builtin.shell: cqlsh --username "{{ cassandra_admin_user }}" --password "{{ cassandra_admin_pwd }}" --execute "LIST ALL PERMISSIONS OF myapp"
   register: rw_role_user_perms
 
 - name: rw_role role permissions test
@@ -462,7 +462,7 @@
       - "'roles' not in myapp.keys()"
 
 - name: Get output of list permissions for rw_role
-  shell: cqlsh --username "{{ cassandra_admin_user }}" --password "{{ cassandra_admin_pwd }}" --execute "LIST ALL PERMISSIONS OF myapp"
+  ansible.builtin.shell: cqlsh --username "{{ cassandra_admin_user }}" --password "{{ cassandra_admin_pwd }}" --execute "LIST ALL PERMISSIONS OF myapp"
   register: rw_role_user_perms
 
 - name: rw_role role permissions test
@@ -496,7 +496,7 @@
       - "'roles' not in myapp.keys()"
 
 - name: Get output of list permissions for rw_role
-  shell: cqlsh --username "{{ cassandra_admin_user }}" --password "{{ cassandra_admin_pwd }}" --execute "LIST ALL PERMISSIONS OF myapp"
+  ansible.builtin.shell: cqlsh --username "{{ cassandra_admin_user }}" --password "{{ cassandra_admin_pwd }}" --execute "LIST ALL PERMISSIONS OF myapp"
   register: rw_role_user_perms
 
 - name: rw_role role permissions test BLAH
@@ -530,7 +530,7 @@
       - "'roles' not in myapp.keys()"
 
 - name: Get output of list permissions for rw_role
-  shell: cqlsh --username "{{ cassandra_admin_user }}" --password "{{ cassandra_admin_pwd }}" --execute "LIST ALL PERMISSIONS OF myapp"
+  ansible.builtin.shell: cqlsh --username "{{ cassandra_admin_user }}" --password "{{ cassandra_admin_pwd }}" --execute "LIST ALL PERMISSIONS OF myapp"
   register: rw_role_user_perms
 
 - name: rw_role role permissions test
@@ -576,7 +576,7 @@
 
 
 - name: Get output of list permissions for rw_role
-  shell: cqlsh --username "{{ cassandra_admin_user }}" --password "{{ cassandra_admin_pwd }}" --execute "LIST ALL PERMISSIONS OF complex"
+  ansible.builtin.shell: cqlsh --username "{{ cassandra_admin_user }}" --password "{{ cassandra_admin_pwd }}" --execute "LIST ALL PERMISSIONS OF complex"
   register: complex
 
 - name: complex role permissions test
@@ -631,10 +631,10 @@
       - "'roles' in complex.keys()"
 
 - name: Test complex user
-  shell: cqlsh --username complex --password secret --execute "DESC KEYSPACES"
+  ansible.builtin.shell: cqlsh --username complex --password secret --execute "DESC KEYSPACES"
 
 - name: Get output of list permissions for rw_role
-  shell: cqlsh --username "{{ cassandra_admin_user }}" --password "{{ cassandra_admin_pwd }}" --execute "LIST ALL PERMISSIONS OF complex"
+  ansible.builtin.shell: cqlsh --username "{{ cassandra_admin_user }}" --password "{{ cassandra_admin_pwd }}" --execute "LIST ALL PERMISSIONS OF complex"
   register: complex
 
 # Dropped permissions checked with not in
