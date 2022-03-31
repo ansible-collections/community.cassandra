@@ -61,7 +61,7 @@
       - "create_users.cql == 'CREATE TABLE myapp.users ( id uuid, username text, encrypted_password blob, first_name text, last_name text, dob date, PRIMARY KEY (username))'"
 
 - name: Get output of DESC KEYSPACE myapp
-  shell: "cqlsh -u  {{ cassandra_admin_user }} -p {{ cassandra_admin_pwd }} --execute 'DESC KEYSPACE myapp'"
+  ansible.builtin.shell: "cqlsh -u  {{ cassandra_admin_user }} -p {{ cassandra_admin_pwd }} --execute 'DESC KEYSPACE myapp'"
   register: myapp
 
 - assert:
@@ -102,7 +102,7 @@
       - "drop_users.cql == 'DROP TABLE myapp.users'"
 
 - name: Get output of DESC KEYSPACE myapp
-  shell: "cqlsh -u  {{ cassandra_admin_user }} -p {{ cassandra_admin_pwd }} --execute 'DESC KEYSPACE myapp'"
+  ansible.builtin.shell: "cqlsh -u  {{ cassandra_admin_user }} -p {{ cassandra_admin_pwd }} --execute 'DESC KEYSPACE myapp'"
   register: myapp
 
 - name: Ensure myapp.users table does not exist
@@ -151,7 +151,7 @@
       - "create_users.changed == True"
 
 - name: Get output of DESC KEYSPACE myapp
-  shell: "cqlsh -u  {{ cassandra_admin_user }} -p {{ cassandra_admin_pwd }} --execute 'DESC KEYSPACE myapp'"
+  ansible.builtin.shell: "cqlsh -u  {{ cassandra_admin_user }} -p {{ cassandra_admin_pwd }} --execute 'DESC KEYSPACE myapp'"
   register: myapp
 
 - name: Check myapp.users table
@@ -554,7 +554,7 @@
       - "encoding_job_notifications.cql == 'CREATE TABLE killrvideo.encoding_job_notifications ( jobid text, status_date timestamp, etag text, newstate text, oldstate text, PRIMARY KEY (jobid, status_date, etag)) WITH CLUSTERING ORDER BY (status_date DESC, etag ASC)'"
 
 - name: Get output of DESC KEYSPACE killrvideo
-  shell: "cqlsh -u  {{ cassandra_admin_user }} -p {{ cassandra_admin_pwd }} --execute 'DESC KEYSPACE killrvideo'"
+  ansible.builtin.shell: "cqlsh -u  {{ cassandra_admin_user }} -p {{ cassandra_admin_pwd }} --execute 'DESC KEYSPACE killrvideo'"
   register: killrvideo
 
 - assert:
@@ -631,7 +631,7 @@
       - "'bloom_filter_fp_chance = 0.02' in complex_table_options.cql"
 
 - name: Get output of DESC KEYSPACE myapp
-  shell: "cqlsh -u  {{ cassandra_admin_user }} -p {{ cassandra_admin_pwd }} --execute 'DESC KEYSPACE myapp'"
+  ansible.builtin.shell: "cqlsh -u  {{ cassandra_admin_user }} -p {{ cassandra_admin_pwd }} --execute 'DESC KEYSPACE myapp'"
   register: killrvideo
 
 - assert:

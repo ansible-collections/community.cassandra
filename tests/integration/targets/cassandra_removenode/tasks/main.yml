@@ -39,7 +39,7 @@
           - "rhys.msg == 'host_id is not a valid uuid'"
 
     - name: Get host_id of node listening on 127.0.0.1
-      shell: nodetool status --port 7100 | grep 127.0.0.1 | tr -s ' ' | cut -d ' ' -f7
+      ansible.builtin.shell: nodetool status --port 7100 | grep 127.0.0.1 | tr -s ' ' | cut -d ' ' -f7
       register: nodetool
 
     - name: Execute module against the first ccm node - Should fail
@@ -75,7 +75,7 @@
           - "rhys.msg == 'host_id does not exist in the cluster'"
 
     - name: Get host_id of node listening on 127.0.0.2
-      shell: nodetool status --port 7100 | grep 127.0.0.2 | tr -s ' ' | cut -d ' ' -f7
+      ansible.builtin.shell: nodetool status --port 7100 | grep 127.0.0.2 | tr -s ' ' | cut -d ' ' -f7
       register: nodetool
 
     - name: Shutdown node 2 - listen on 127.0.0.1 7200
@@ -105,7 +105,7 @@
           - "rhys.msg == 'removenode command succeeded'"
 
     - name: Get status
-      shell: nodetool status --port 7100 
+      ansible.builtin.shell: nodetool status --port 7100 
       register: nodetool_status
 
     - name: Verifiy that check mode works and the host id is still in the cluster
@@ -183,7 +183,7 @@
 #           - "rhys.msg == 'host_id is not a valid uuid'"
 
 #     - name: Get host_id of node listening on 127.0.0.1
-#       shell: nodetool status  -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} --port 7100 | grep 127.0.0.1 | tr -s ' ' | cut -d ' ' -f7
+#       ansible.builtin.shell: nodetool status  -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} --port 7100 | grep 127.0.0.1 | tr -s ' ' | cut -d ' ' -f7
 #       register: nodetool
 
 #     - name: Execute module against the first ccm node - Should fail
@@ -223,7 +223,7 @@
 #           - "rhys.msg == 'host_id does not exist in the cluster'"
 
 #     - name: Get host_id of node listening on 127.0.0.2
-#       shell: nodetool status  -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} --port 7100 | grep 127.0.0.2 | tr -s ' ' | cut -d ' ' -f7
+#       ansible.builtin.shell: nodetool status  -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} --port 7100 | grep 127.0.0.2 | tr -s ' ' | cut -d ' ' -f7
 #       register: nodetool
 
 #     - name: Shutdown node 2 - listen on 127.0.0.1 7200
@@ -257,7 +257,7 @@
 #           - "rhys.msg == 'removenode command succeeded'"
 
 #     - name: Get status
-#       shell: nodetool status -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} --port 7100 
+#       ansible.builtin.shell: nodetool status -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} --port 7100 
 #       register: nodetool_status
 
 #     - name: Verifiy that check mode works and the host id is still in the cluster

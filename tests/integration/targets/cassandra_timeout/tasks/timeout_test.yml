@@ -14,7 +14,7 @@
       - "result.msg == '{{ item }} timeout changed'"
 
 - name: "Get {{ item }} timeout"
-  shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 gettimeout {{ item }}
+  ansible.builtin.shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 gettimeout {{ item }}
   register: result
 
 - name: Assert timeout is 15999 ms
@@ -65,7 +65,7 @@
       - "result.msg == '{{ item }} timeout changed'"
 
 - name: "Get {{ item }} timeout"
-  shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 gettimeout {{ item }}
+  ansible.builtin.shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 gettimeout {{ item }}
   register: result
 
 - name: Ensure timeout is 100

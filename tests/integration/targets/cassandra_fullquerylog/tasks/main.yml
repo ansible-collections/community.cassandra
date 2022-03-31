@@ -22,7 +22,7 @@
   when: cassandra_version[0] | int < 4
 
 - name: Get fql status
-  shell: nodetool -h 127.0.0.1 getfullquerylog | grep enabled
+  ansible.builtin.shell: nodetool -h 127.0.0.1 getfullquerylog | grep enabled
   register: fql_status
 
 - name: Assert fql is not running
@@ -53,7 +53,7 @@
       - fql.changed
 
 - name: Get fql status
-  shell: nodetool -h 127.0.0.1 getfullquerylog | grep enabled
+  ansible.builtin.shell: nodetool -h 127.0.0.1 getfullquerylog | grep enabled
   register: fql_status
 
 - name: Assert fql is running
@@ -83,7 +83,7 @@
       - fql.changed
 
 - name: Get fql status
-  shell: nodetool -h 127.0.0.1 getfullquerylog | grep enabled
+  ansible.builtin.shell: nodetool -h 127.0.0.1 getfullquerylog | grep enabled
   register: fql_status
 
 - name: Assert fql is not running
@@ -116,7 +116,7 @@
   when: cassandra_auth_tests == True
 
 - name: Get fql status
-  shell: nodetool -h 127.0.0.1 -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} getfullquerylog | grep enabled
+  ansible.builtin.shell: nodetool -h 127.0.0.1 -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} getfullquerylog | grep enabled
   register: fql_status
 
 - name: Assert fql is not running
@@ -151,7 +151,7 @@
       - fql.changed
 
 - name: Get fql status
-  shell: nodetool -h 127.0.0.1 -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} getfullquerylog | grep enabled
+  ansible.builtin.shell: nodetool -h 127.0.0.1 -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} getfullquerylog | grep enabled
   register: fql_status
 
 - name: Assert fql is running
@@ -185,7 +185,7 @@
       - fql.changed
 
 - name: Get fql status
-  shell: nodetool -h 127.0.0.1 -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} getfullquerylog | grep enabled
+  ansible.builtin.shell: nodetool -h 127.0.0.1 -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} getfullquerylog | grep enabled
   register: fql_status
 
 - name: Assert fql is not running
@@ -266,7 +266,7 @@
       - fql.changed
 
 - name: Get fql status
-  shell: nodetool -h 127.0.0.1 -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} getfullquerylog | grep archive_command
+  ansible.builtin.shell: nodetool -h 127.0.0.1 -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} getfullquerylog | grep archive_command
   register: fql_status
 
 - name: Assert archive cmd is set
@@ -296,7 +296,7 @@
       - fql.changed
 
 - name: Get fql status
-  shell: nodetool -h 127.0.0.1 -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} getfullquerylog | grep roll
+  ansible.builtin.shell: nodetool -h 127.0.0.1 -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} getfullquerylog | grep roll
   register: fql_status
 
 - name: Assert roll_cycle is changed
@@ -327,7 +327,7 @@
       - fql.changed
 
 - name: Get fql status
-  shell: nodetool -h 127.0.0.1 -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} getfullquerylog | grep block
+  ansible.builtin.shell: nodetool -h 127.0.0.1 -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} getfullquerylog | grep block
   register: fql_status
 
 - name: Assert blocking is off
@@ -359,7 +359,7 @@
       - fql.changed
 
 - name: Get fql status
-  shell: nodetool -h 127.0.0.1 -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} getfullquerylog | grep max_log_size
+  ansible.builtin.shell: nodetool -h 127.0.0.1 -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} getfullquerylog | grep max_log_size
   register: fql_status
 
 - name: Assert fql max_weight
@@ -392,7 +392,7 @@
       - fql.changed
 
 - name: Get fql status
-  shell: nodetool -h 127.0.0.1 -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} getfullquerylog | grep max_queue_weight
+  ansible.builtin.shell: nodetool -h 127.0.0.1 -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} getfullquerylog | grep max_queue_weight
   register: fql_status
 
 - name: Assert fql max_queue_weight
@@ -426,7 +426,7 @@
       - fql.changed
 
 - name: Get fql status
-  shell: nodetool -h 127.0.0.1 -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} getfullquerylog | grep max_archive_retries
+  ansible.builtin.shell: nodetool -h 127.0.0.1 -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} getfullquerylog | grep max_archive_retries
   register: fql_status
 
 - name: Assert fql max_archive_retries

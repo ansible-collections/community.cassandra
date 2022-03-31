@@ -27,7 +27,7 @@
     debug: yes
 
 - name: Get incremental backup status 1
-  shell: nodetool -h 127.0.0.1 getmaxhintwindow
+  ansible.builtin.shell: nodetool -h 127.0.0.1 getmaxhintwindow
   register: maxhintwindow
 
 - name: Assert starting status of maxhintwindow
@@ -40,7 +40,7 @@
     debug: yes
 
 - name: Get maxhintwindow
-  shell: nodetool -h 127.0.0.1 getmaxhintwindow
+  ansible.builtin.shell: nodetool -h 127.0.0.1 getmaxhintwindow
   register: maxhintwindow
 
 - name: Assert maxhintwindow is 20800000
@@ -53,7 +53,7 @@
     debug: yes
 
 - name: Get maxhintwindow
-  shell: nodetool -h 127.0.0.1 getmaxhintwindow
+  ansible.builtin.shell: nodetool -h 127.0.0.1 getmaxhintwindow
   register: maxhintwindow
 
 - name: Assert maxhintwindow is 40800000 ms
@@ -72,7 +72,7 @@
     that: maxhintwindow.changed == True
 
 - name: Get maxhintwindow
-  shell: nodetool -h 127.0.0.1 getmaxhintwindow
+  ansible.builtin.shell: nodetool -h 127.0.0.1 getmaxhintwindow
   register: maxhintwindow
 
 - name: Assert maxhintwindow is still 40800000 ms'
@@ -85,7 +85,7 @@
     debug: yes
 
 - name: Get maxhintwindow
-  shell: nodetool -h 127.0.0.1 getmaxhintwindow
+  ansible.builtin.shell: nodetool -h 127.0.0.1 getmaxhintwindow
   register: maxhintwindow
 
 - name: Assert maxhintwindow is again 10800000 ms
@@ -99,7 +99,7 @@
   register: module_nochange
 
 - name: Get maxhintwindow
-  shell: nodetool -h 127.0.0.1 getmaxhintwindow
+  ansible.builtin.shell: nodetool -h 127.0.0.1 getmaxhintwindow
   register: maxhintwindow
 
 - name: Assert maxhintwindow is still 10800000 ms and module reports no change
@@ -121,7 +121,7 @@
   when: cassandra_auth_tests == True
 
 - name: Get maxhintwindow auth 1
-  shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 getmaxhintwindow
+  ansible.builtin.shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 getmaxhintwindow
   register: maxhintwindow
   when: cassandra_auth_tests == True
 
@@ -141,7 +141,7 @@
   when: cassandra_auth_tests == True
 
 - name: Get maxhintwindow auth 2
-  shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 getmaxhintwindow
+  ansible.builtin.shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 getmaxhintwindow
   register: maxhintwindow
   when: cassandra_auth_tests == True
 

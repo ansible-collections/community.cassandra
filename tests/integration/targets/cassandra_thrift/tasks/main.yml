@@ -22,10 +22,10 @@
   when: "cassandra_version[0] | int >= 4"
 
 - name: Get Ensure thrift starts off disabled
-  shell: nodetool -h 127.0.0.1 disablethrift
+  ansible.builtin.shell: nodetool -h 127.0.0.1 disablethrift
 
 - name: Get thrift status 1
-  shell: nodetool -h 127.0.0.1 statusthrift
+  ansible.builtin.shell: nodetool -h 127.0.0.1 statusthrift
   register: thrift_status
 
 - name: Assert thrift is not running 1
@@ -44,7 +44,7 @@
     debug: yes
 
 - name: Get thrift status 2
-  shell: nodetool -h 127.0.0.1 statusthrift
+  ansible.builtin.shell: nodetool -h 127.0.0.1 statusthrift
   register: thrift_status
 
 - name: Assert thrift is running
@@ -63,7 +63,7 @@
     debug: yes
 
 - name: Get thrift status 3
-  shell: nodetool -h 127.0.0.1 statusthrift
+  ansible.builtin.shell: nodetool -h 127.0.0.1 statusthrift
   register: thrift_status
 
 - name: Assert thrift is not running 2
@@ -82,7 +82,7 @@
     that: thrift_status.changed == True
 
 - name: Get thrift status 3
-  shell: nodetool -h 127.0.0.1 statusthrift
+  ansible.builtin.shell: nodetool -h 127.0.0.1 statusthrift
   register: thrift_status
 
 - name: Assert thrift is still not running (after check_mode)
@@ -102,7 +102,7 @@
   when: cassandra_auth_tests == True
 
 - name: Get thrift status 5
-  shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 statusthrift
+  ansible.builtin.shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 statusthrift
   register: thrift_status
   when: cassandra_auth_tests == True
 
@@ -121,7 +121,7 @@
   when: cassandra_auth_tests == True
 
 - name: Get thrift status 6
-  shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 statusthrift
+  ansible.builtin.shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 statusthrift
   register: thrift_status
   when: cassandra_auth_tests == True
 

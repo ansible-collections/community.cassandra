@@ -18,7 +18,7 @@
 
 # ===========================================================
 - name: Get binary status 1
-  shell: nodetool -h 127.0.0.1 statusbinary
+  ansible.builtin.shell: nodetool -h 127.0.0.1 statusbinary
   register: binary_status
 
 - name: Assert binary is running 1
@@ -37,7 +37,7 @@
     debug: true
 
 - name: Get binary status 2
-  shell: nodetool -h 127.0.0.1 statusbinary
+  ansible.builtin.shell: nodetool -h 127.0.0.1 statusbinary
   register: binary_status
 
 - name: Assert binary is running
@@ -56,7 +56,7 @@
     debug: true
 
 - name: Get binary status 3
-  shell: nodetool -h 127.0.0.1 statusbinary
+  ansible.builtin.shell: nodetool -h 127.0.0.1 statusbinary
   register: binary_status
 
 - name: Assert binary is not running 2
@@ -75,7 +75,7 @@
     that: binary_status.changed == True
 
 - name: Get binary status 3
-  shell: nodetool -h 127.0.0.1 statusbinary
+  ansible.builtin.shell: nodetool -h 127.0.0.1 statusbinary
   register: binary_status
 
 - name: Assert binary is still not running (after check_mode)
@@ -95,7 +95,7 @@
   when: cassandra_auth_tests == True
 
 - name: Get binary status 5
-  shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 statusbinary
+  ansible.builtin.shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 statusbinary
   register: binary_status
   when: cassandra_auth_tests == True
 
@@ -114,7 +114,7 @@
   when: cassandra_auth_tests == True
 
 - name: Get binary status 6
-  shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 statusbinary
+  ansible.builtin.shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 statusbinary
   register: binary_status
   when: cassandra_auth_tests == True
 

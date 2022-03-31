@@ -75,7 +75,7 @@
     create: yes
 
 - name: Check ant setup
-  shell: source /etc/profile.d/ant.sh && echo $ANT_HOME
+  ansible.builtin.shell: source /etc/profile.d/ant.sh && echo $ANT_HOME
   args:
     executable: /bin/bash
   register: ant_setup
@@ -86,7 +86,7 @@
       - "'/usr/local/ant' in ant_setup.stdout"
 
 - name: Check ant setup
-  shell: source /etc/profile.d/ant.sh && echo $PATH
+  ansible.builtin.shell: source /etc/profile.d/ant.sh && echo $PATH
   args:
     executable: /bin/bash
   register: ant_path_setup
@@ -119,10 +119,10 @@
     name: ccm
     state: present
 
-- shell: find /usr -name ccm -ls
+- ansible.builtin.shell: find /usr -name ccm -ls
 
 - name: DEBUG - Test with PATH set
-  shell: |
+  ansible.builtin.shell: |
     which ccm && which ant
   environment:
     PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ant/bin
@@ -132,7 +132,7 @@
     ccm_cmd: /usr/local/bin/ccm
 
 - name: Test ccm executable
-  shell:  /usr/local/bin/ccm --help
+  ansible.builtin.shell:  /usr/local/bin/ccm --help
   register: ccm
   ignore_errors: yes
 
@@ -141,10 +141,9 @@
   when: "'Create a new cluster' not in ccm.stdout"
 
 - name: Cleanup any previous ccm stuff
-  shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd }} remove test > /dev/null\""
+  ansible.builtin.shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd }} remove test > /dev/null\""
   become_user: cassandra
   args:
-    warn: false
     chdir: /home/cassandra
   environment:
     CCM_CONFIG_DIR: "/home/cassandra/config"
@@ -153,10 +152,9 @@
   ignore_errors: yes
 
 - name: Install Cassandra via ccm tool
-  shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd }} create test -v {{ cassandra_version }} > /dev/null\""
+  ansible.builtin.shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd }} create test -v {{ cassandra_version }} > /dev/null\""
   become_user: cassandra
   args:
-    warn: false
     chdir: /home/cassandra
   environment:
     CCM_CONFIG_DIR: "/home/cassandra/config"
@@ -164,7 +162,7 @@
     PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ant/bin
 
 #- name: Add nodes to the Cassandra cluster
-#  shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd }} populate -n {{ cassandra_nodes }}\""
+#  ansible.builtin.shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd }} populate -n {{ cassandra_nodes }}\""
 #  become_user: cassandra
 #  args:
 #    warn: false
@@ -175,10 +173,9 @@
 #    PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ant
 
 - name: Add nodes to the Cassandra Cluster
-  shell: "sudo -E -u cassandra bash -c '{{ ccm_cmd }} add {{ item.node }} -i {{ item.ip }} -j {{ item.port }} -b --data-center={{ item.dc }} --remote-debug-port {{ item.debug_port }} {{ item.args }}'"
+  ansible.builtin.shell: "sudo -E -u cassandra bash -c '{{ ccm_cmd }} add {{ item.node }} -i {{ item.ip }} -j {{ item.port }} -b --data-center={{ item.dc }} --remote-debug-port {{ item.debug_port }} {{ item.args }}'"
   become_user: cassandra
   args:
-    warn: false
     chdir: /home/cassandra
   environment:
     CCM_CONFIG_DIR: "/home/cassandra/config"
@@ -207,10 +204,9 @@
   when: ansible_os_family == "RedHat"
 
 - name: Start the ccm cluster
-  shell: sudo -E -u cassandra bash -c "{{ ccm_cmd }} start  --root"
+  ansible.builtin.shell: sudo -E -u cassandra bash -c "{{ ccm_cmd }} start  --root"
   become_user: cassandra
   args:
-    warn: false
     chdir: /home/cassandra
   environment:
     CCM_CONFIG_DIR: "/home/cassandra/config"
@@ -219,10 +215,9 @@
     CCM_CLUSTER_START_DEFAULT_TIMEOUT: 600
 
 - name: Get cluster status
-  shell: sudo -E -u cassandra bash -c "{{ ccm_cmd }} status"
+  ansible.builtin.shell: sudo -E -u cassandra bash -c "{{ ccm_cmd }} status"
   become_user: cassandra
   args:
-    warn: false
     chdir: /home/cassandra
   register: cluster_status
   environment:

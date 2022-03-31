@@ -38,7 +38,7 @@
           - "rhys.msg == 'decommission command succeeded'"
 
     - name: Get info
-      shell: nodetool -h 127.0.0.1 --port 7100 ring
+      ansible.builtin.shell: nodetool -h 127.0.0.1 --port 7100 ring
       register: nodetool
 
     - name: Confirm that check mode works and the node is still in the ring
@@ -75,7 +75,7 @@
           - "rhys.msg == 'Node appears to be already decommissioned'"
 
     - name: Get info
-      shell: nodetool -h 127.0.0.1 --port 7100 ring
+      ansible.builtin.shell: nodetool -h 127.0.0.1 --port 7100 ring
       register: nodetool
 
     - name: Confirm that node has been decommissioned

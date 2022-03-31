@@ -18,7 +18,7 @@
 
 # ===========================================================
 - name: Get read timeout
-  shell: nodetool -h 127.0.0.1 gettimeout read
+  ansible.builtin.shell: nodetool -h 127.0.0.1 gettimeout read
   register: read
 
 - name: Assert starting status of timeout read
@@ -38,7 +38,7 @@
       - "read.msg == 'read timeout changed'"
 
 - name: Get read timeout
-  shell: nodetool -h 127.0.0.1 gettimeout read
+  ansible.builtin.shell: nodetool -h 127.0.0.1 gettimeout read
   register: timeout
 
 - name: Assert timeout is 15000 ms
@@ -71,7 +71,7 @@
       - "timeout.msg == 'read timeout changed'"
 
 - name: Get read timeout - Should still be 15000
-  shell: nodetool -h 127.0.0.1 gettimeout read
+  ansible.builtin.shell: nodetool -h 127.0.0.1 gettimeout read
   register: timeout
 
 - name: Ensure timeout is 15000
@@ -92,7 +92,7 @@
       - "timeout.msg == 'read timeout changed'"
 
 - name: Get read timeout
-  shell: nodetool -h 127.0.0.1 gettimeout read
+  ansible.builtin.shell: nodetool -h 127.0.0.1 gettimeout read
   register: timeout
 
 - name: Ensure timeout is 0

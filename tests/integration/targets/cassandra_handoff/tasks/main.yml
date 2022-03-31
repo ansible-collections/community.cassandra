@@ -25,7 +25,7 @@
     seconds: 10
 
 - name: Get handoff status 1
-  shell: nodetool -h 127.0.0.1 statushandoff
+  ansible.builtin.shell: nodetool -h 127.0.0.1 statushandoff
   register: handoff_status
 
 - name: Assert handoff is running 1
@@ -47,7 +47,7 @@
     seconds: 5
 
 - name: Get handoff status 2
-  shell: nodetool -h 127.0.0.1 statushandoff
+  ansible.builtin.shell: nodetool -h 127.0.0.1 statushandoff
   register: handoff_status
 
 - name: Assert handoff is not running
@@ -66,7 +66,7 @@
     debug: true
 
 - name: Get handoff status 3
-  shell: nodetool -h 127.0.0.1 statushandoff
+  ansible.builtin.shell: nodetool -h 127.0.0.1 statushandoff
   register: handoff_status
 
 - name: Assert handoff is running 2
@@ -85,7 +85,7 @@
     that: handoff_status.changed == True
 
 - name: Get handoff status 3
-  shell: nodetool -h 127.0.0.1 statushandoff
+  ansible.builtin.shell: nodetool -h 127.0.0.1 statushandoff
   register: handoff_status
 
 - name: Assert handoff is still running (after check_mode)
@@ -105,7 +105,7 @@
   when: cassandra_auth_tests == True
 
 - name: Get handoff status 5
-  shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 statushandoff
+  ansible.builtin.shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 statushandoff
   register: handoff_status
   when: cassandra_auth_tests == True
 
@@ -124,7 +124,7 @@
   when: cassandra_auth_tests == True
 
 - name: Get handoff status 6
-  shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 statushandoff
+  ansible.builtin.shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 statushandoff
   register: handoff_status
   when: cassandra_auth_tests == True
 

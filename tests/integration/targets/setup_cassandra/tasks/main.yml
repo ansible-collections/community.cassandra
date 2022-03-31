@@ -22,7 +22,7 @@
     name: "{{ required_packages }}"
 
 - name: Get Original Python
-  shell: python --version
+  ansible.builtin.shell: python --version
   register: original_python
   when: ansible_os_family == 'Debian'
 
@@ -83,8 +83,8 @@
 
 - name: Flip back to python 2.7 on CentOS 7
   block:
-    - shell: update-alternatives --install /usr/bin/python python /usr/bin/python2.7 1
-    - shell: update-alternatives --set python /usr/bin/python2.7
+    - ansible.builtin.shell: update-alternatives --install /usr/bin/python python /usr/bin/python2.7 1
+    - ansible.builtin.shell: update-alternatives --set python /usr/bin/python2.7
     - set_fact:
         ansible_python_interpreter: /usr/bin/python2.7
   when:
@@ -98,7 +98,7 @@
   when: ansible_os_family == 'Debian'
 
 - name: Install python-apt
-  shell: |
+  ansible.builtin.shell: |
     apt clean
     apt autoclean
     apt update
@@ -181,7 +181,7 @@
     var: cassandra_ports
 
 - name: Read the logfile if wait_for task timed out
-  shell: ls -lh /var/log/cassandra/ && cat /var/log/cassandra/system.log
+  ansible.builtin.shell: ls -lh /var/log/cassandra/ && cat /var/log/cassandra/system.log
   when:
     - cassandra_ports.failed is defined
     - cassandra_ports.failed
@@ -193,7 +193,7 @@
     - cassandra_ports.failed
 
 - name: Get current python
-  shell: python --version && pip --version
+  ansible.builtin.shell: python --version && pip --version
   register: current_python
   when: ansible_os_family == "Debian"
   no_log: yes
@@ -208,7 +208,7 @@
   notify: redhat_remove_cassandra
 
 - name: Install clqshlib - bug - ImportError - No module named cqlshlib
-  shell: cp -r /usr/lib/python3.6/site-packages/cqlshlib /usr/lib/python2.7/site-packages/cqlshlib
+  ansible.builtin.shell: cp -r /usr/lib/python3.6/site-packages/cqlshlib /usr/lib/python2.7/site-packages/cqlshlib
   when:
     - ansible_os_family == 'RedHat'
     - ansible_distribution_major_version == "7"

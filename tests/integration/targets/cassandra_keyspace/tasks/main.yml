@@ -39,7 +39,7 @@
     state: present
 
 - name: Get output of DESC KEYSPACE mykeyspace 1
-  shell: cqlsh --execute "DESC KEYSPACE mykeyspace"
+  ansible.builtin.shell: cqlsh --execute "DESC KEYSPACE mykeyspace"
   register: mykeyspace
 
 - name: Assert mykeyspace exists 1
@@ -64,7 +64,7 @@
     state: absent
 
 - name: Get output of DESC KEYSPACES 1
-  shell: cqlsh --execute "DESC KEYSPACES"
+  ansible.builtin.shell: cqlsh --execute "DESC KEYSPACES"
   register: mykeyspace
 
 - name: Assert mykeyspace does not exists 1
@@ -79,7 +79,7 @@
     state: present
 
 - name: Get output of DESC KEYSPACE mykeyspace 2
-  shell: cqlsh --execute "DESC KEYSPACE mykeyspace"
+  ansible.builtin.shell: cqlsh --execute "DESC KEYSPACE mykeyspace"
   register: mykeyspace
 
 - name: Assert mykeyspace exists 2
@@ -94,7 +94,7 @@
   register: drop_keyspace
 
 - name: Get output of DESC KEYSPACES 2
-  shell: cqlsh --execute "DESC KEYSPACES"
+  ansible.builtin.shell: cqlsh --execute "DESC KEYSPACES"
   register: mykeyspace
 
 - name: Assert mykeyspace does not exists 2
@@ -125,7 +125,7 @@
   register: multiple_dcs
 
 - name: Get output of DESC KEYSPACE mykeyspace 2
-  shell: cqlsh --execute "DESC KEYSPACE mykeyspace"
+  ansible.builtin.shell: cqlsh --execute "DESC KEYSPACE mykeyspace"
   register: mykeyspace
 
 - name: Assert mykeyspace exists 2
@@ -160,7 +160,7 @@
   register: drop_check
 
 - name: Get output of DESC KEYSPACES
-  shell: cqlsh --execute "DESC KEYSPACES"
+  ansible.builtin.shell: cqlsh --execute "DESC KEYSPACES"
   register: mykeyspace
 
 - name: Assert mykeyspace still exists
@@ -176,7 +176,7 @@
   register: drop_multidc
 
 - name: Get output of DESC KEYSPACES
-  shell: cqlsh --execute "DESC KEYSPACES"
+  ansible.builtin.shell: cqlsh --execute "DESC KEYSPACES"
   register: mykeyspace
 
 - name: Assert mykeyspace has now been dropped
@@ -193,7 +193,7 @@
   register: new_keyspace_check
 
 - name: Get output of DESC KEYSPACES
-  shell: cqlsh --execute "DESC KEYSPACES"
+  ansible.builtin.shell: cqlsh --execute "DESC KEYSPACES"
   register: mykeyspace
 
 - name: Assert that new_keyspace_check has not been created
@@ -213,7 +213,7 @@
   register: rhys
 
 - name: Get output of DESC KEYSPACE rhys
-  shell: cqlsh --execute "DESC KEYSPACE rhys"
+  ansible.builtin.shell: cqlsh --execute "DESC KEYSPACE rhys"
   register: mykeyspace
 
 - name: Assert that rhys keyspace has been created
@@ -232,7 +232,7 @@
   register: drop_rhys
 
 - name: Get output of DESC KEYSPACES
-  shell: cqlsh --execute "DESC KEYSPACES"
+  ansible.builtin.shell: cqlsh --execute "DESC KEYSPACES"
   register: mykeyspace
 
 - name: Assert rhys has now been dropped
@@ -249,7 +249,7 @@
   register: rhys2
 
 - name: Get output of DESC KEYSPACE rhys2
-  shell: cqlsh --execute "DESC KEYSPACE rhys2"
+  ansible.builtin.shell: cqlsh --execute "DESC KEYSPACE rhys2"
   register: mykeyspace
 
 - name: Assert rhys2 exists
@@ -266,7 +266,7 @@
   register: rhys2
 
 - name: Get output of DESC KEYSPACE rhys2
-  shell: cqlsh --execute "DESC KEYSPACE rhys2"
+  ansible.builtin.shell: cqlsh --execute "DESC KEYSPACE rhys2"
   register: mykeyspace
 
 - name: Assert rhys2 replication_factor change
@@ -284,7 +284,7 @@
   register: rhys2
 
 - name: Get output of DESC KEYSPACE rhys2
-  shell: cqlsh --execute "DESC KEYSPACE rhys2"
+  ansible.builtin.shell: cqlsh --execute "DESC KEYSPACE rhys2"
   register: mykeyspace
 
 - name: Assert rhys2 durable_writes change
@@ -302,7 +302,7 @@
   register: rhys2
 
 - name: Get output of DESC KEYSPACE rhys2
-  shell: cqlsh --execute "DESC KEYSPACE rhys2"
+  ansible.builtin.shell: cqlsh --execute "DESC KEYSPACE rhys2"
   register: mykeyspace
 
 - name: Assert rhys2 exists
@@ -318,7 +318,7 @@
   register: drop_rhys2
 
 - name: Get output of DESC KEYSPACES
-  shell: cqlsh --execute "DESC KEYSPACES"
+  ansible.builtin.shell: cqlsh --execute "DESC KEYSPACES"
   register: mykeyspace
 
 - name: Assert rhys2 has now been dropped
@@ -336,7 +336,7 @@
 
     - name: Create table with brackets for regex testing
       # Colons had to be escaped to avoid mapping yaml values
-      shell: cqlsh --execute "CREATE TABLE testregex_keyspace.tablewithbrackets (groupid uuid, containinggroupid uuid, PRIMARY KEY (groupid, containinggroupid)) WITH CLUSTERING ORDER BY (containinggroupid ASC) AND caching = {'keys'{{ ":" }} 'ALL', 'rows_per_partition'{{ ":" }} 'NONE'}"
+      ansible.builtin.shell: cqlsh --execute "CREATE TABLE testregex_keyspace.tablewithbrackets (groupid uuid, containinggroupid uuid, PRIMARY KEY (groupid, containinggroupid)) WITH CLUSTERING ORDER BY (containinggroupid ASC) AND caching = {'keys'{{ ":" }} 'ALL', 'rows_per_partition'{{ ":" }} 'NONE'}"
 
     - name: Rerun cassandra_keyspace command
       community.cassandra.cassandra_keyspace:
@@ -363,7 +363,7 @@
       register: multiple_dcs
 
     - name: Get output of DESC KEYSPACE multidc_keyspace
-      shell: cqlsh --execute "DESC KEYSPACE multidc_keyspace"
+      ansible.builtin.shell: cqlsh --execute "DESC KEYSPACE multidc_keyspace"
       register: mykeyspace
 
     - name: Assert multidc_keyspace exists
@@ -389,7 +389,7 @@
       register: multiple_dcs
 
     - name: Get output of DESC KEYSPACE multidc_keyspace
-      shell: cqlsh --execute "DESC KEYSPACE multidc_keyspace"
+      ansible.builtin.shell: cqlsh --execute "DESC KEYSPACE multidc_keyspace"
       register: mykeyspace
 
     - name: Assert multidc_keyspace has an amsterdam dc
@@ -415,7 +415,7 @@
       register: multiple_dcs
 
     - name: Get output of DESC KEYSPACE multidc_keyspace
-      shell: cqlsh --execute "DESC KEYSPACE multidc_keyspace"
+      ansible.builtin.shell: cqlsh --execute "DESC KEYSPACE multidc_keyspace"
       register: mykeyspace
 
     - name: Assert amsterdam dc has been removed
@@ -440,7 +440,7 @@
       register: multiple_dcs
 
     - name: Get output of DESC KEYSPACE multidc_keyspace
-      shell: cqlsh --execute "DESC KEYSPACE multidc_keyspace"
+      ansible.builtin.shell: cqlsh --execute "DESC KEYSPACE multidc_keyspace"
       register: mykeyspace
 
     - name: Assert london dc has been removed
@@ -464,7 +464,7 @@
       register: multiple_dcs
 
     - name: Get output of DESC KEYSPACE multidc_keyspace
-      shell: cqlsh --execute "DESC KEYSPACE multidc_keyspace"
+      ansible.builtin.shell: cqlsh --execute "DESC KEYSPACE multidc_keyspace"
       register: mykeyspace
 
     - name: Assert tokyo rf is now 3 in keyspace definition
@@ -483,7 +483,7 @@
       register: multidc_keyspace
 
     - name: Get output of DESC KEYSPACES
-      shell: cqlsh --execute "DESC KEYSPACES"
+      ansible.builtin.shell: cqlsh --execute "DESC KEYSPACES"
       register: mykeyspace
 
     - name: Assert that multidc_keyspace has been removed
@@ -506,8 +506,8 @@
       #when: cassandra_auth_tests == True
 
     - name: Get output of DESC KEYSPACE mykeyspace
-      #shell: "cqlsh -u  {{ cassandra_admin_user }} -p {{ cassandra_admin_pwd }} --execute 'DESC KEYSPACE mykeyspace'"
-      shell: "cqlsh --execute 'DESC KEYSPACE mykeyspace'"
+      #ansible.builtin.shell: "cqlsh -u  {{ cassandra_admin_user }} -p {{ cassandra_admin_pwd }} --execute 'DESC KEYSPACE mykeyspace'"
+      ansible.builtin.shell: "cqlsh --execute 'DESC KEYSPACE mykeyspace'"
       register: mykeyspace
       #when: cassandra_auth_tests == True
 
@@ -533,8 +533,8 @@
       register: multiple_dcs
 
     - name: Get output of DESC KEYSPACE multi_dc_keyspace
-      #shell: cqlsh  -u  {{ cassandra_admin_user }} -p {{ cassandra_admin_pwd }} --execute "DESC KEYSPACE multi_dc_keyspace"
-      shell: cqlsh  --execute "DESC KEYSPACE multi_dc_keyspace"
+      #ansible.builtin.shell: cqlsh  -u  {{ cassandra_admin_user }} -p {{ cassandra_admin_pwd }} --execute "DESC KEYSPACE multi_dc_keyspace"
+      ansible.builtin.shell: cqlsh  --execute "DESC KEYSPACE multi_dc_keyspace"
       register: mykeyspace
 
     - name: Assert multi_dc_keyspace exists

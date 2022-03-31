@@ -39,10 +39,9 @@
           - "rhys.msg == 'The cluster has reached schema consensus'"
   always:
     - name: Cleanup any ccm stuff
-      shell: "sudo -E -u cassandra bash -c \"ccm stop test && ccm remove test > /dev/null\""
+      ansible.builtin.shell: "sudo -E -u cassandra bash -c \"ccm stop test && ccm remove test > /dev/null\""
       become_user: cassandra
       args:
-        warn: false
         chdir: /home/cassandra
       environment:
         CCM_CONFIG_DIR: "/home/cassandra/config"

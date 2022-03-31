@@ -31,7 +31,7 @@ releases:
        - A bunch of other PRs addressed issues in the integration test code related to Cassandra 4.0.
   1.2.0:
     changes:
-      release_summary: Adds several new modules and a minor bug fixes.
+      release_summary: Adds many new modules and a minor bug fix.
       bugfixes:
         - 204 - Fix cassandra_role keyspace idempotency bug.
       modules:
