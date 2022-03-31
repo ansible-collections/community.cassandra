@@ -100,7 +100,7 @@
   user:
     name: cassandra
     state: present
-    ansible.builtin.shell: /bin/bash
+    shell: /bin/bash
     create_home: yes
 
 - name: Ensure dirs exist
