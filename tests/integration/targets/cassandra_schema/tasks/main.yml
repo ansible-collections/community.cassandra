@@ -42,7 +42,6 @@
       ansible.builtin.shell: "sudo -E -u cassandra bash -c \"ccm stop test && ccm remove test > /dev/null\""
       become_user: cassandra
       args:
-        warn: false
         chdir: /home/cassandra
       environment:
         CCM_CONFIG_DIR: "/home/cassandra/config"

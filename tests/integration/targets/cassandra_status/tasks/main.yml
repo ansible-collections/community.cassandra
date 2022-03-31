@@ -50,7 +50,6 @@
       ansible.builtin.shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd | mandatory }} marlow1 stop\""
       become_user: cassandra
       args:
-        warn: false
         chdir: /home/cassandra
       environment:
         CCM_CONFIG_DIR: "/home/cassandra/config"
@@ -80,7 +79,6 @@
       ansible.builtin.shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd | mandatory }} marlow1 start &\""
       become_user: cassandra
       args:
-        warn: false
         chdir: /home/cassandra
       environment:
         CCM_CONFIG_DIR: "/home/cassandra/config"
@@ -111,7 +109,6 @@
       ansible.builtin.shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd | mandatory }} london2 stop\""
       become_user: cassandra
       args:
-        warn: false
         chdir: /home/cassandra
       environment:
         CCM_CONFIG_DIR: "/home/cassandra/config"
@@ -155,7 +152,6 @@
       ansible.builtin.shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd | mandatory }} stop test && ccm remove test > /dev/null\""
       become_user: cassandra
       args:
-        warn: false
         chdir: /home/cassandra
       environment:
         CCM_CONFIG_DIR: "/home/cassandra/config"

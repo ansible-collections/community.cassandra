@@ -144,7 +144,6 @@
   ansible.builtin.shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd }} remove test > /dev/null\""
   become_user: cassandra
   args:
-    warn: false
     chdir: /home/cassandra
   environment:
     CCM_CONFIG_DIR: "/home/cassandra/config"
@@ -156,7 +155,6 @@
   ansible.builtin.shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd }} create test -v {{ cassandra_version }} > /dev/null\""
   become_user: cassandra
   args:
-    warn: false
     chdir: /home/cassandra
   environment:
     CCM_CONFIG_DIR: "/home/cassandra/config"
@@ -178,7 +176,6 @@
   ansible.builtin.shell: "sudo -E -u cassandra bash -c '{{ ccm_cmd }} add {{ item.node }} -i {{ item.ip }} -j {{ item.port }} -b --data-center={{ item.dc }} --remote-debug-port {{ item.debug_port }} {{ item.args }}'"
   become_user: cassandra
   args:
-    warn: false
     chdir: /home/cassandra
   environment:
     CCM_CONFIG_DIR: "/home/cassandra/config"
@@ -210,7 +207,6 @@
   ansible.builtin.shell: sudo -E -u cassandra bash -c "{{ ccm_cmd }} start  --root"
   become_user: cassandra
   args:
-    warn: false
     chdir: /home/cassandra
   environment:
     CCM_CONFIG_DIR: "/home/cassandra/config"
@@ -222,7 +218,6 @@
   ansible.builtin.shell: sudo -E -u cassandra bash -c "{{ ccm_cmd }} status"
   become_user: cassandra
   args:
-    warn: false
     chdir: /home/cassandra
   register: cluster_status
   environment:
