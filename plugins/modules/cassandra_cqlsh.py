@@ -306,6 +306,7 @@ def main():
     args = add_arg_to_cmd(args, "--tty", None, module.params['tty'])
     args = add_arg_to_cmd(args, "--debug", None, module.params['debug'])
     args = add_arg_to_cmd(args, "--no-compact", None, module.params['no_compact'])
+    args = add_arg_to_cmd(args, "--ssl", None, module.params['ssl'])
 
     additional_args = module.params['additional_args']
     if additional_args is not None:
