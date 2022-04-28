@@ -15,7 +15,7 @@ short_description: Manages the full query log feature.
 requirements:
   - nodetool
 description:
-    - Manages the full quers log feature.
+    - Manages the full query log feature.
     - Enable, disable or reset feature.
     - Manage configuration.
     - Supported from Cassandra 4.0 onwards.
