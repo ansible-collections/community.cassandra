@@ -18,7 +18,7 @@ description:
     - Manages the full quers log feature.
     - Enable, disable or reset feature.
     - Manage configuration.
-    - Supported from Cassandra 4.o onwards.
+    - Supported from Cassandra 4.0 onwards.
     - When state is "disabled" the value of the other configuration options are ignored.
     - The module always returns changed when state is "reset".
 
