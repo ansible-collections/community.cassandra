@@ -14,6 +14,74 @@ author: Rhys Campbell (@rhysmeister)
 short_description: "Manages the full query log feature."
 requirements:
   - nodetool
+description:
+  - "Manages the full query log feature."
+  - "Enable, disable or reset feature."
+  - "Manage configuration."
+  - "Supported from Cassandra 4.0 onwards."
+  - "When state is disabled the value of the other configuration options are ignored."
+  - "The module always returns changed when state is reset."
+
+extends_documentation_fragment:
+  - community.cassandra.nodetool_module_options
+
+options:
+  state:
+    description:
+      - The required status
+    type: str
+    choices:
+      - enabled
+      - disabled
+      - reset
+    default: enabled
+  log_dir:
+    description:
+      - The log directory.
+    type: str
+    aliases:
+      - path
+  archive_command:
+    description:
+      - Command that will handle archiving rolled full query log files.
+      - Format is "/path/to/script.sh %path" where %path will be replaced with the file to archive.
+    type: str
+  roll_cycle:
+    description:
+      - How often to roll the log file.
+    type: str
+    choices:
+      - MINUTELY
+      - HOURLY
+      - DAILY
+    default: HOURLY
+  blocking:
+    description:
+      - If the queue is full whether to block producers or drop samples.
+    type: bool
+    default: yes
+    aliases:
+      - "block"
+  max_log_size:
+    description:
+      - How many bytes of log data to store before dropping segments.
+    type: int
+    default: 17179869184
+  max_queue_weight:
+    description:
+      - Maximum number of bytes of query data to queue to disk before blocking or dropping samples.
+    type: int
+    default: 268435456
+  max_archive_retries:
+    description:
+      - Max number of archive retries.
+    type: int
+    default: 10
+  debug:
+    description:
+      - Enable extra debug output.
+    type: bool
+    default: false
 '''
 
 EXAMPLES = '''
@@ -43,7 +111,8 @@ fullquerylog_config:
   description: The config of the full query log feature.
   returned: success
   type: dict
-  sample: { 'max_queue_weight': 268435456, 'max_log_size': 17179869184, 'enabled': True, 'roll_cycle': 'HOURLY',\
+  sample: >
+    { 'max_queue_weight': 268435456, 'max_log_size': 17179869184, 'enabled': True, 'roll_cycle': 'HOURLY',
       'archive_command': None, 'log_dir': None, 'max_archive_retries': 10, 'block': True}
 '''
 
