@@ -19,8 +19,8 @@ description:
     - Enable, disable or reset feature.
     - Manage configuration.
     - Supported from Cassandra 4.0 onwards.
-    - When state is "disabled" the value of the other configuration options are ignored.
-    - The module always returns changed when state is "reset".
+    - When state is disabled the value of the other configuration options are ignored.
+    - The module always returns changed when state is reset.
 
 extends_documentation_fragment:
   - community.cassandra.nodetool_module_options
@@ -81,7 +81,7 @@ options:
     description:
       - Enable extra debug output.
     type: bool
-    default: False
+    default: false
 '''
 
 EXAMPLES = '''
