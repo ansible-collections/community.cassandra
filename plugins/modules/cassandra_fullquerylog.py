@@ -15,12 +15,12 @@ short_description: Manages the full query log feature.
 requirements:
   - nodetool
 description:
-    - Manages the full query log feature.
-    - Enable, disable or reset feature.
-    - Manage configuration.
-    - Supported from Cassandra 4.0 onwards.
-    - When state is disabled the value of the other configuration options are ignored.
-    - The module always returns changed when state is reset.
+  - Manages the full query log feature.
+  - Enable, disable or reset feature.
+  - Manage configuration.
+  - Supported from Cassandra 4.0 onwards.
+  - When state is disabled the value of the other configuration options are ignored.
+  - The module always returns changed when state is reset.
 
 extends_documentation_fragment:
   - community.cassandra.nodetool_module_options
@@ -31,16 +31,16 @@ options:
       - The required status
     type: str
     choices:
-      - "enabled"
-      - "disabled"
-      - "reset"
-    default: "enabled"
+      - enabled
+      - disabled
+      - reset
+    default: enabled
   log_dir:
     description:
       - The log directory.
     type: str
     aliases:
-      - "path"
+      - path
   archive_command:
     description:
       - Command that will handle archiving rolled full query log files.
@@ -51,10 +51,10 @@ options:
       - How often to roll the log file.
     type: str
     choices:
-      - "MINUTELY"
-      - "HOURLY"
-      - "DAILY"
-    default: "HOURLY"
+      - MINUTELY
+      - HOURLY
+      - DAILY
+    default: HOURLY
   blocking:
     description:
       - If the queue is full whether to block producers or drop samples.
