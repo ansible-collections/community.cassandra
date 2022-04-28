@@ -11,16 +11,16 @@ DOCUMENTATION = '''
 ---
 module: cassandra_fullquerylog
 author: Rhys Campbell (@rhysmeister)
-short_description: Manages the full query log feature.
+short_description: "Manages the full query log feature."
 requirements:
   - nodetool
 description:
-  - Manages the full query log feature.
-  - Enable, disable or reset feature.
-  - Manage configuration.
-  - Supported from Cassandra 4.0 onwards.
-  - When state is disabled the value of the other configuration options are ignored.
-  - The module always returns changed when state is reset.
+  - "Manages the full query log feature."
+  - "Enable, disable or reset feature."
+  - "Manage configuration."
+  - "Supported from Cassandra 4.0 onwards."
+  - "When state is disabled the value of the other configuration options are ignored."
+  - "The module always returns changed when state is reset."
 
 extends_documentation_fragment:
   - community.cassandra.nodetool_module_options
