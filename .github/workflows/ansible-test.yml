@@ -74,6 +74,7 @@ jobs:
         ansible_version:
           - stable-2.11
           - stable-2.12
+          - stable-2.13
           - devel
         cassandra_version:
           - package_version: "311x"
@@ -134,6 +135,7 @@ jobs:
         ansible_version:
           - stable-2.11
           - stable-2.12
+          - stable-2.13
           - devel
         cassandra_version:
           - package_version: "40x"
