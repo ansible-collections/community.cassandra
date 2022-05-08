@@ -14,6 +14,11 @@ jobs:
     defaults:
       run:
         working-directory: ansible_collections/community/cassandra
+    strategy:
+      matrix:
+        ansible_version:
+          - devel
+          - stable-2.13
     steps:
 
       - name: Check out code
@@ -26,12 +31,12 @@ jobs:
         with:
           python-version: 3.8
 
-      - name: Install ansible-base (devel)
+      - name: Install ansible-base (${{ matrix.ansible_version }})
         uses: nick-invision/retry@v2
         with:
           timeout_minutes: 3
           max_attempts: 3
-          command: pip install https://github.com/ansible/ansible/archive/devel.tar.gz --disable-pip-version-check
+          command: pip install https://github.com/ansible/ansible/archive/${{ matrix.ansible_version }}.tar.gz --disable-pip-version-check
 
       - name: Run sanity tests
         run: ansible-test sanity --docker -v --color --python 3.8
@@ -98,12 +103,12 @@ jobs:
         with:
           python-version: ${{ matrix.python_version }}
 
-      - name: Install ansible-base (devel)
+      - name: Install ansible-base (${{ matrix.ansible_version }})
         uses: nick-invision/retry@v2
         with:
           timeout_minutes: 3
           max_attempts: 3
-          command: pip install https://github.com/ansible/ansible/archive/devel.tar.gz --disable-pip-version-check
+          command: pip install https://github.com/ansible/ansible/archive/${{ matrix.ansible_version }}.tar.gz --disable-pip-version-check
 
       - name: Ensure cassandra versions are set to ${{ matrix.cassandra_version.package_version }} | ${{ matrix.cassandra_version.tar_version }}
         run: |
@@ -156,12 +161,12 @@ jobs:
         with:
           python-version: ${{ matrix.python_version }}
 
-      - name: Install ansible-base (devel)
+      - name: Install ansible-base (${{ matrix.ansible_version }})
         uses: nick-invision/retry@v2
         with:
           timeout_minutes: 3
           max_attempts: 3
-          command: pip install https://github.com/ansible/ansible/archive/devel.tar.gz --disable-pip-version-check
+          command: pip install https://github.com/ansible/ansible/archive/${{ matrix.ansible_version }}.tar.gz --disable-pip-version-check
 
       - name: Ensure cassandra versions are set to ${{ matrix.cassandra_version.package_version }} | ${{ matrix.cassandra_version.tar_version }}
         run: |
