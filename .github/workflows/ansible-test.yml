@@ -147,7 +147,7 @@ jobs:
           - docker_image: centos7
             python_version: "2.7"
             ansible_test_options: ""
-          - docker_image: debian9
+          - docker_image: ubuntu2004
             python_version: "3.9"
             ansible_test_options: ""
         cassandra_module: ${{ fromJson(needs.integration_matrix.outputs.matrix) }}
