@@ -77,7 +77,6 @@ jobs:
       matrix:
         python_version: ["3.8"]
         ansible_version:
-          - stable-2.11
           - stable-2.12
           - stable-2.13
           - devel
@@ -138,7 +137,6 @@ jobs:
       matrix:
         python_version: ["3.8"]
         ansible_version:
-          - stable-2.11
           - stable-2.12
           - stable-2.13
           - devel
