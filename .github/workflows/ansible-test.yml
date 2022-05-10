@@ -146,8 +146,11 @@ jobs:
           - package_version: "40x"
             tar_version: "4.0.1"
         test_scenario:
-          - docker_image: default
+          - docker_image: centos7
             python_version: "3.6"
+            ansible_test_options: ""
+          - docker_image: debian9
+            python_version: "3.9"
             ansible_test_options: ""
         cassandra_module: ${{ fromJson(needs.integration_matrix.outputs.matrix) }}
     steps:
