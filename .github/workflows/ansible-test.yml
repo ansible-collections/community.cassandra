@@ -146,7 +146,7 @@ jobs:
         test_scenario:
           - docker_image: centos7
             python_version: "2.7"
-            ansible_test_options: ""
+            ansible_test_options: "--docker-privileged"
           - docker_image: ubuntu2004
             python_version: "3.9"
             ansible_test_options: ""
