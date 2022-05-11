@@ -148,7 +148,7 @@ jobs:
             python_version: "2.7"
             ansible_test_options: "--docker-privileged"
           - docker_image: ubuntu2004
-            python_version: "3.9"
+            python_version: "3.8"
             ansible_test_options: ""
         cassandra_module: ${{ fromJson(needs.integration_matrix.outputs.matrix) }}
     steps:
