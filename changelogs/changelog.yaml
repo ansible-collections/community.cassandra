@@ -59,3 +59,10 @@ releases:
           description: #186
         - name: cassandra_compact
           description: #185
+  1.2.2:
+    changes:
+      release_summary: Maintenance release
+      bugfixes:
+        - 214 - cassandra_fullquerylog - Fix typo in documentation.
+        - 213 - cassandra_cqlsh - Missing handler for `--ssl` option for `cassandra_cqlsh`
+      
