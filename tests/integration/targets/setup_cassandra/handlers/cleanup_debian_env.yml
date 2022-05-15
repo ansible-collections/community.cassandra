@@ -3,4 +3,7 @@
     name: "{{ cassandra_deb_pkg }}"
     state: absent
 - ansible.builtin.shell: update-alternatives --install /usr/bin/python python /usr/bin/python3.6 1
+  when: "'/usr/bin/python3.6' is file"
+  
 - ansible.builtin.shell: update-alternatives --set python /usr/bin/python3.6
+  when: "'/usr/bin/python3.6' is file"

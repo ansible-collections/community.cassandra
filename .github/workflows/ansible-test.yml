@@ -14,6 +14,11 @@ jobs:
     defaults:
       run:
         working-directory: ansible_collections/community/cassandra
+    strategy:
+      matrix:
+        ansible_version:
+          - devel
+          - stable-2.13
     steps:
 
       - name: Check out code
@@ -26,12 +31,12 @@ jobs:
         with:
           python-version: 3.8
 
-      - name: Install ansible-base (devel)
+      - name: Install ansible-base (${{ matrix.ansible_version }})
         uses: nick-invision/retry@v2
         with:
           timeout_minutes: 3
           max_attempts: 3
-          command: pip install https://github.com/ansible/ansible/archive/devel.tar.gz --disable-pip-version-check
+          command: pip install https://github.com/ansible/ansible/archive/${{ matrix.ansible_version }}.tar.gz --disable-pip-version-check
 
       - name: Run sanity tests
         run: ansible-test sanity --docker -v --color --python 3.8
@@ -72,8 +77,8 @@ jobs:
       matrix:
         python_version: ["3.8"]
         ansible_version:
-          - stable-2.11
           - stable-2.12
+          - stable-2.13
           - devel
         cassandra_version:
           - package_version: "311x"
@@ -97,12 +102,12 @@ jobs:
         with:
           python-version: ${{ matrix.python_version }}
 
-      - name: Install ansible-base (devel)
+      - name: Install ansible-base (${{ matrix.ansible_version }})
         uses: nick-invision/retry@v2
         with:
           timeout_minutes: 3
           max_attempts: 3
-          command: pip install https://github.com/ansible/ansible/archive/devel.tar.gz --disable-pip-version-check
+          command: pip install https://github.com/ansible/ansible/archive/${{ matrix.ansible_version }}.tar.gz --disable-pip-version-check
 
       - name: Ensure cassandra versions are set to ${{ matrix.cassandra_version.package_version }} | ${{ matrix.cassandra_version.tar_version }}
         run: |
@@ -132,15 +137,18 @@ jobs:
       matrix:
         python_version: ["3.8"]
         ansible_version:
-          - stable-2.11
           - stable-2.12
+          - stable-2.13
           - devel
         cassandra_version:
           - package_version: "40x"
             tar_version: "4.0.1"
         test_scenario:
-          - docker_image: default
-            python_version: "3.6"
+          - docker_image: centos7
+            python_version: "2.7"
+            ansible_test_options: "--docker-privileged"
+          - docker_image: ubuntu2004
+            python_version: "3.8"
             ansible_test_options: ""
         cassandra_module: ${{ fromJson(needs.integration_matrix.outputs.matrix) }}
     steps:
@@ -154,12 +162,12 @@ jobs:
         with:
           python-version: ${{ matrix.python_version }}
 
-      - name: Install ansible-base (devel)
+      - name: Install ansible-base (${{ matrix.ansible_version }})
         uses: nick-invision/retry@v2
         with:
           timeout_minutes: 3
           max_attempts: 3
-          command: pip install https://github.com/ansible/ansible/archive/devel.tar.gz --disable-pip-version-check
+          command: pip install https://github.com/ansible/ansible/archive/${{ matrix.ansible_version }}.tar.gz --disable-pip-version-check
 
       - name: Ensure cassandra versions are set to ${{ matrix.cassandra_version.package_version }} | ${{ matrix.cassandra_version.tar_version }}
         run: |
