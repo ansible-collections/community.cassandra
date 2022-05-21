@@ -15,5 +15,5 @@ def cassandra_common_argument_spec():
         password_file=dict(type='str', no_log=True, aliases=['login_password_file']),
         port=dict(type='int', default=7199, aliases=['login_port']),
         username=dict(type='str', no_log=True, aliases=['login_user']),
-        nodetool_flags=dict(type=str, default="-Dcom.sun.jndi.rmiURLParsing=legacy"),
+        nodetool_flags=dict(type='str', default="-Dcom.sun.jndi.rmiURLParsing=legacy"),
     )
