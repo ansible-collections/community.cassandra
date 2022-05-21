@@ -23,7 +23,7 @@
     - ansible_os_family == "Debian"
 
 - name: Ensure ports for cassandra open
-  firewalld:
+  ansible.posix.firewalld:
     port: "{{ item }}"
     permanent: yes
     immediate: yes
