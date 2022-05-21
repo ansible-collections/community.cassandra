@@ -42,6 +42,11 @@ options:
     description:
       - The path to nodetool.
     type: str
+  nodetool_flags:
+    description:
+      - Flags to pass to nodetool.
+    type: str
+    default: -Dcom.sun.jndi.rmiURLParsing=legacy
   debug:
     description:
       - Enable additional debug output.

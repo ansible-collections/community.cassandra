@@ -16,6 +16,7 @@ class NodeToolCmd(object):
         self.password_file = module.params['password_file']
         self.username = module.params['username']
         self.nodetool_path = module.params['nodetool_path']
+        self.nodetool_flags = module.params['nodetool_flags']
         self.debug = module.params['debug']
         if self.host is None:
             self.host = socket.getfqdn()
@@ -29,9 +30,10 @@ class NodeToolCmd(object):
                 self.nodetool_path += '/'
         else:
             self.nodetool_path = ""
-        cmd = "{0}nodetool --host {1} --port {2}".format(self.nodetool_path,
-                                                         self.host,
-                                                         self.port)
+        cmd = "{0}nodetool {1} --host {2} --port {3}".format(self.nodetool_path,
+                                                             self.nodetool_flags,
+                                                             self.host,
+                                                             self.port)
         if self.username is not None:
             cmd += " --username {0}".format(self.username)
             if self.password_file is not None:
