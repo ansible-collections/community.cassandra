@@ -76,6 +76,13 @@ jobs:
             cd ansible_collections/community/cassandra
             pip install --requirement requirements-${pyv}.txt
 
+      - name: Install ansible.posix
+        uses: nick-invision/retry@v2
+        with:
+          timeout_minutes: 3
+          max_attempts: 3
+          command: ansible-galaxy collection install ansible.posix -p ansible_collections/
+
       - name: Add molecule location to path
         run: echo "${HOME}/.local/bin" >> $GITHUB_PATH
 
