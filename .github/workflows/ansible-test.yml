@@ -149,7 +149,7 @@ jobs:
           - devel
         cassandra_version:
           - package_version: "40x"
-            tar_version: "4.0.5"
+            tar_version: "4.0.1"
         test_scenario:
           - docker_image: centos7
             python_version: "2.7"
