@@ -26,10 +26,10 @@ jobs:
         with:
           path: ansible_collections/community/cassandra
 
-      - name: Set up Python 3.8
+      - name: Set up Python 3.9
         uses: actions/setup-python@v1
         with:
-          python-version: 3.8
+          python-version: 3.9
 
       - name: Install ansible-base (${{ matrix.ansible_version }})
         uses: nick-invision/retry@v2
@@ -39,7 +39,7 @@ jobs:
           command: pip install https://github.com/ansible/ansible/archive/${{ matrix.ansible_version }}.tar.gz --disable-pip-version-check
 
       - name: Run sanity tests
-        run: ansible-test sanity --docker -v --color --python 3.8
+        run: ansible-test sanity --docker -v --color --python 3.9
 
   integration_matrix:
     runs-on: ubuntu-20.04
@@ -75,7 +75,7 @@ jobs:
         working-directory: ansible_collections/community/cassandra
     strategy:
       matrix:
-        python_version: ["3.8"]
+        python_version: ["3.9"]
         ansible_version:
           - stable-2.12
           - stable-2.13
@@ -142,20 +142,20 @@ jobs:
         working-directory: ansible_collections/community/cassandra
     strategy:
       matrix:
-        python_version: ["3.8"]
+        python_version: ["3.9"]
         ansible_version:
           - stable-2.12
           - stable-2.13
           - devel
         cassandra_version:
           - package_version: "40x"
-            tar_version: "4.0.1"
+            tar_version: "4.0.5"
         test_scenario:
           - docker_image: centos7
             python_version: "2.7"
             ansible_test_options: "--docker-privileged"
           - docker_image: ubuntu2004
-            python_version: "3.8"
+            python_version: "3.9"
             ansible_test_options: ""
         cassandra_module: ${{ fromJson(needs.integration_matrix.outputs.matrix) }}
     steps:
