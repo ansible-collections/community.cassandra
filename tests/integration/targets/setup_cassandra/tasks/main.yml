@@ -83,7 +83,7 @@
   when: ansible_os_family == 'RedHat'
 
 - name: Install cassandra yum package
-  yum:
+  dnf:
     name: "{{ cassandra_yum_pkg }}"
     state: present
   when:
