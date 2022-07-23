@@ -149,11 +149,11 @@ jobs:
           - devel
         cassandra_version:
           - package_version: "40x"
-            tar_version: "4.0.1"
+            tar_version: "4.0.5"
         test_scenario:
-          - docker_image: centos7
-            python_version: "2.7"
-            ansible_test_options: "--docker-privileged"
+          #- docker_image: centos7
+          #  python_version: "2.7"
+          #  ansible_test_options: "--docker-privileged"
           - docker_image: ubuntu2004
             python_version: "3.9"
             ansible_test_options: ""
