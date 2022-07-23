@@ -203,12 +203,6 @@
     - cassandra_ports.failed is defined
     - cassandra_ports.failed
 
-- name: Get current python
-  ansible.builtin.shell: python --version && pip --version
-  register: current_python
-  when: ansible_os_family == "Debian"
-  no_log: yes
-
 - name: Upgrade pip libs to 20.3.4 for py2.7
   pip:
     name: pip==20.3.4
