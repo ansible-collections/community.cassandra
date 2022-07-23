@@ -91,6 +91,7 @@
   dnf:
     name: "{{ cassandra_yum_pkg }}"
     state: present
+    allowerasing: yes
   when:
     - ansible_os_family == 'RedHat'
   notify:
