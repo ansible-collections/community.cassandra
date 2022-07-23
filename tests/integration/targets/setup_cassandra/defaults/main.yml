@@ -32,3 +32,6 @@ cassandra_admin_pwd: cassandra
 # Generic Linux Packages
 required_packages:
   - "net-tools"
+
+redhat_packages:
+  - "dnf"  # switch to dnf to avoid rich dep error - https://wdoust.blogspot.com/2021/04/broken-ym-rich-dependencies.html

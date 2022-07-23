@@ -31,10 +31,10 @@
   package:
     name: "{{ required_packages }}"
 
-- name: Get Original Python
-  ansible.builtin.shell: python --version
-  register: original_python
-  when: ansible_os_family == 'Debian'
+- name: Install Redhat packages
+  package:
+    name: "{{ redhat_packages }}"
+  when: ansible_os_family == 'RedHat'
 
 - name: Start Cassandra service if it is installed
   service:
@@ -83,9 +83,10 @@
   when: ansible_os_family == 'RedHat'
 
 - name: Install cassandra yum package
-  yum:
+  dnf:
     name: "{{ cassandra_yum_pkg }}"
     state: present
+    allowerasing: yes
   when:
     - ansible_os_family == 'RedHat'
   notify:
@@ -201,12 +202,6 @@
   when:
     - cassandra_ports.failed is defined
     - cassandra_ports.failed
-
-- name: Get current python
-  ansible.builtin.shell: python --version && pip --version
-  register: current_python
-  when: ansible_os_family == "Debian"
-  no_log: yes
 
 - name: Upgrade pip libs to 20.3.4 for py2.7
   pip:
