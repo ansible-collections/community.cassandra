@@ -301,7 +301,7 @@ def create_primary_key_with_partition_key(primary_key, partition_key):
     '''
     p_key_count = len(partition_key)
     for i, val in enumerate(partition_key):
-        if not partition_key[i] == primary_key[i]:
+        if not val == primary_key[i]:
             raise ValueError("partition_key list elements do not match primary_key elements")
     pk_cql = "PRIMARY KEY ({0}))".format(", ".join(primary_key))
     if p_key_count > 0:  # Need to insert the brackets for pk
@@ -430,7 +430,7 @@ def main():
                           port=login_port,
                           auth_provider=auth_provider)
         session = cluster.connect()
-    except AuthenticationFailed as auth_failed:
+    except AuthenticationFailed as excep:
         module.fail_json(msg="Authentication failed: {0}".format(excep))
     except Exception as excep:
         module.fail_json(msg="Error connecting to cluster: {0}".format(excep))
