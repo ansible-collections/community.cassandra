@@ -50,12 +50,12 @@ cassandra_cleanup:
   type: str
 '''
 
-from ansible.module_utils.basic import AnsibleModule, load_platform_subclass
+from ansible.module_utils.basic import AnsibleModule
 import socket
 __metaclass__ = type
 
 
-from ansible_collections.community.cassandra.plugins.module_utils.nodetool_cmd_objects import NodeToolCmd, NodeToolCommandKeyspaceTableNumJobs
+from ansible_collections.community.cassandra.plugins.module_utils.nodetool_cmd_objects import NodeToolCommandKeyspaceTableNumJobs
 from ansible_collections.community.cassandra.plugins.module_utils.cassandra_common_options import cassandra_common_argument_spec
 
 

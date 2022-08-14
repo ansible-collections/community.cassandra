@@ -248,15 +248,12 @@ try:
     from cassandra.cluster import Cluster
     from cassandra.auth import PlainTextAuthProvider
     from cassandra import AuthenticationFailed
-    from cassandra.query import dict_factory
-    from cassandra import InvalidRequest
     HAS_CASSANDRA_DRIVER = True
 except Exception:
     HAS_CASSANDRA_DRIVER = False
 
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.six import binary_type, text_type
-from ansible.module_utils.six.moves import configparser
 from ansible.module_utils._text import to_native
 
 # =========================================
