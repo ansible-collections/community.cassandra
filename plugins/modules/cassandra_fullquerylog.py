@@ -116,14 +116,14 @@ fullquerylog_config:
       'archive_command': None, 'log_dir': None, 'max_archive_retries': 10, 'block': True}
 '''
 
-from ansible.module_utils.basic import AnsibleModule, load_platform_subclass
+from ansible.module_utils.basic import AnsibleModule
 import socket
 import shlex
 import pipes
 __metaclass__ = type
 
 
-from ansible_collections.community.cassandra.plugins.module_utils.nodetool_cmd_objects import NodeToolCmd, NodeTool4PairCommand
+from ansible_collections.community.cassandra.plugins.module_utils.nodetool_cmd_objects import NodeTool4PairCommand
 from ansible_collections.community.cassandra.plugins.module_utils.cassandra_common_options import cassandra_common_argument_spec
 
 

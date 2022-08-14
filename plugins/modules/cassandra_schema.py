@@ -67,7 +67,7 @@ rc:
   type: int
 '''
 
-from ansible.module_utils.basic import AnsibleModule, load_platform_subclass
+from ansible.module_utils.basic import AnsibleModule
 import socket
 import re
 import time
