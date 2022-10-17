@@ -170,6 +170,8 @@ except Exception:
 
 from ansible.module_utils.basic import AnsibleModule
 
+from ssl import SSLContext, PROTOCOL_TLS
+
 # =========================================
 # Cassandra module specific support methods
 # =========================================
@@ -530,6 +532,7 @@ def main():
         argument_spec=dict(
             login_user=dict(type='str'),
             login_password=dict(type='str', no_log=True),
+            ssl_required=dict(type='bool',default=None),
             login_host=dict(type='list', elements='str'),
             login_port=dict(type='int', default=9042),
             name=dict(type='str', required=True),
@@ -553,6 +556,7 @@ def main():
 
     login_user = module.params['login_user']
     login_password = module.params['login_password']
+    ssl_required = module.params['ssl_required']
     login_host = module.params['login_host']
     login_port = module.params['login_port']
     name = module.params['name']
@@ -589,9 +593,13 @@ def main():
                 username=login_user,
                 password=login_password
             )
+        ssl_context = None 
+        if ssl_required is not None:  
+            ssl_context = SSLContext(PROTOCOL_TLS)     
         cluster = Cluster(login_host,
                           port=login_port,
-                          auth_provider=auth_provider)
+                          auth_provider=auth_provider,
+                          ssl_context=ssl_context)
         session = cluster.connect()
     except AuthenticationFailed as auth_failed:
         module.fail_json(msg="Authentication failed: {0}".format(auth_failed))
