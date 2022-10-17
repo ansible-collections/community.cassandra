@@ -18,6 +18,9 @@ options:
   login_password:
     description: The Cassandra password to login with.
     type: str
+  ssl_required:
+    description: Uses SSL encryption if basic SSL encryption is enabled on Cassandra cluster (without client/server verification)
+    type: bool  
   login_host:
     description: The Cassandra hostname.
     type: list
