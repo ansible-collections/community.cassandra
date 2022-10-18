@@ -237,7 +237,7 @@ def main():
         argument_spec=dict(
             login_user=dict(type='str'),
             login_password=dict(type='str', no_log=True),
-            ssl_required=dict(type='bool',default=None),
+            ssl_required=dict(type='bool', default=None),
             login_host=dict(type='list', elements='str', default=None),
             login_port=dict(type='int', default=9042),
             name=dict(type='str', required=True),
