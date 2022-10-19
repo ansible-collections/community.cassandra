@@ -237,7 +237,7 @@ def main():
         argument_spec=dict(
             login_user=dict(type='str'),
             login_password=dict(type='str', no_log=True),
-            ssl_required=dict(type='bool', default=None),
+            ssl_required=dict(type='bool', default=False),
             login_host=dict(type='list', elements='str', default=None),
             login_port=dict(type='int', default=9042),
             name=dict(type='str', required=True),
@@ -291,7 +291,7 @@ def main():
                 password=login_password
             )
         ssl_context = None
-        if ssl_required is not None:
+        if ssl_required is True:
             ssl_context = SSLContext(PROTOCOL_TLS)
         cluster = Cluster(login_host,
                           port=login_port,
