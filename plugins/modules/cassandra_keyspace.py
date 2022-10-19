@@ -290,9 +290,9 @@ def main():
                 username=login_user,
                 password=login_password
             )
-        ssl_context = None 
-        if ssl_required is not None:  
-            ssl_context = SSLContext(PROTOCOL_TLS) 
+        ssl_context = None
+        if ssl_required is not None:
+            ssl_context = SSLContext(PROTOCOL_TLS)
         cluster = Cluster(login_host,
                           port=login_port,
                           auth_provider=auth_provider,
