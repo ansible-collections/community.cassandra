@@ -138,12 +138,12 @@ except Exception:
 
 from ansible.module_utils.basic import AnsibleModule
 
-try: 
+try:
     from ssl import SSLContext, PROTOCOL_TLS
     HAS_SSL_LIBRARY = True
 except Exception:
     HAS_SSL_LIBRARY = False
-    
+
 # =========================================
 # Cassandra module specific support methods
 # =========================================
@@ -258,7 +258,7 @@ def main():
                " driver. You can probably install it with pip"
                " install cassandra-driver.")
         module.fail_json(msg=msg)
-    
+
     if HAS_SSL_LIBRARY is False:
         msg = ("This module requires the SSL python"
                " library. You can probably install it with pip"

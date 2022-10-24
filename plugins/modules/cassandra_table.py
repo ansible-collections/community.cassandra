@@ -23,7 +23,7 @@ options:
   ssl:
     description: Uses SSL encryption if basic SSL encryption is enabled on Cassandra cluster (without client/server verification)
     type: bool
-    default: False  
+    default: False
   login_host:
     description: The Cassandra hostname.
     type: list
@@ -254,7 +254,7 @@ try:
 except Exception:
     HAS_CASSANDRA_DRIVER = False
 
-try: 
+try:
     from ssl import SSLContext, PROTOCOL_TLS
     HAS_SSL_LIBRARY = True
 except Exception:
@@ -396,7 +396,7 @@ def main():
                " driver. You can probably install it with pip"
                " install cassandra-driver.")
         module.fail_json(msg=msg)
-    
+
     if HAS_SSL_LIBRARY is False:
         msg = ("This module requires the SSL python"
                " library. You can probably install it with pip"
@@ -438,7 +438,7 @@ def main():
                 password=login_password
             )
         if ssl is True:
-            ssl_context = SSLContext(PROTOCOL_TLS)    
+            ssl_context = SSLContext(PROTOCOL_TLS)
         cluster = Cluster(login_host,
                           port=login_port,
                           auth_provider=auth_provider,
