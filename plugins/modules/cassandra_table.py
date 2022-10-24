@@ -20,6 +20,10 @@ options:
   login_password:
     description: The Cassandra password to login with.
     type: str
+  ssl:
+    description: Uses SSL encryption if basic SSL encryption is enabled on Cassandra cluster (without client/server verification)
+    type: bool
+    default: False  
   login_host:
     description: The Cassandra hostname.
     type: list
@@ -250,6 +254,12 @@ try:
 except Exception:
     HAS_CASSANDRA_DRIVER = False
 
+try: 
+    from ssl import SSLContext, PROTOCOL_TLS
+    HAS_SSL_LIBRARY = True
+except Exception:
+    HAS_SSL_LIBRARY = False
+
 from ansible.module_utils.basic import AnsibleModule
 
 # =========================================
@@ -365,6 +375,7 @@ def main():
         argument_spec=dict(
             login_user=dict(type='str'),
             login_password=dict(type='str', no_log=True),
+            ssl=dict(type='bool', default=False),
             login_host=dict(type='list', elements='str'),
             login_port=dict(type='int', default=9042),
             name=dict(type='str', required=True),
@@ -385,9 +396,16 @@ def main():
                " driver. You can probably install it with pip"
                " install cassandra-driver.")
         module.fail_json(msg=msg)
+    
+    if HAS_SSL_LIBRARY is False:
+        msg = ("This module requires the SSL python"
+               " library. You can probably install it with pip"
+               " install ssl.")
+        module.fail_json(msg=msg)
 
     login_user = module.params['login_user']
     login_password = module.params['login_password']
+    ssl = module.params['ssl']
     login_host = module.params['login_host']
     login_port = module.params['login_port']
     table_name = module.params['name']
@@ -419,9 +437,12 @@ def main():
                 username=login_user,
                 password=login_password
             )
+        if ssl is True:
+            ssl_context = SSLContext(PROTOCOL_TLS)    
         cluster = Cluster(login_host,
                           port=login_port,
-                          auth_provider=auth_provider)
+                          auth_provider=auth_provider,
+                          ssl_context=ssl_context)
         session = cluster.connect()
     except AuthenticationFailed as excep:
         module.fail_json(msg="Authentication failed: {0}".format(excep))

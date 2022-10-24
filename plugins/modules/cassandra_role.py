@@ -18,9 +18,10 @@ options:
   login_password:
     description: The Cassandra password to login with.
     type: str
-  ssl_required:
+  ssl:
     description: Uses SSL encryption if basic SSL encryption is enabled on Cassandra cluster (without client/server verification)
     type: bool
+    default: False
   login_host:
     description: The Cassandra hostname.
     type: list
@@ -173,7 +174,11 @@ except Exception:
 
 from ansible.module_utils.basic import AnsibleModule
 
-from ssl import SSLContext, PROTOCOL_TLS
+try: 
+    from ssl import SSLContext, PROTOCOL_TLS
+    HAS_SSL_LIBRARY = True
+except Exception:
+    HAS_SSL_LIBRARY = False
 
 # =========================================
 # Cassandra module specific support methods
@@ -535,7 +540,7 @@ def main():
         argument_spec=dict(
             login_user=dict(type='str'),
             login_password=dict(type='str', no_log=True),
-            ssl_required=dict(type='bool', default=False),
+            ssl=dict(type='bool', default=False),
             login_host=dict(type='list', elements='str'),
             login_port=dict(type='int', default=9042),
             name=dict(type='str', required=True),
@@ -556,10 +561,16 @@ def main():
                " driver. You can probably install it with pip"
                " install cassandra-driver.")
         module.fail_json(msg=msg)
+    
+    if HAS_SSL_LIBRARY is False:
+        msg = ("This module requires the SSL python"
+               " library. You can probably install it with pip"
+               " install ssl.")
+        module.fail_json(msg=msg)
 
     login_user = module.params['login_user']
     login_password = module.params['login_password']
-    ssl_required = module.params['ssl_required']
+    ssl = module.params['ssl']
     login_host = module.params['login_host']
     login_port = module.params['login_port']
     name = module.params['name']
@@ -597,7 +608,7 @@ def main():
                 password=login_password
             )
         ssl_context = None
-        if ssl_required is True:
+        if ssl is True:
             ssl_context = SSLContext(PROTOCOL_TLS)
         cluster = Cluster(login_host,
                           port=login_port,
