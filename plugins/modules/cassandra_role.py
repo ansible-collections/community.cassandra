@@ -562,7 +562,7 @@ def main():
                " install cassandra-driver.")
         module.fail_json(msg=msg)
 
-    if HAS_SSL_LIBRARY is False:
+    if HAS_SSL_LIBRARY is False and ssl is True:
         msg = ("This module requires the SSL python"
                " library. You can probably install it with pip"
                " install ssl.")
