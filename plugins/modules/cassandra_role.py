@@ -562,12 +562,6 @@ def main():
                " install cassandra-driver.")
         module.fail_json(msg=msg)
 
-    if HAS_SSL_LIBRARY is False and ssl is True:
-        msg = ("This module requires the SSL python"
-               " library. You can probably install it with pip"
-               " install ssl.")
-        module.fail_json(msg=msg)
-
     login_user = module.params['login_user']
     login_password = module.params['login_password']
     ssl = module.params['ssl']
@@ -584,6 +578,12 @@ def main():
     keyspace_permissions = module.params['keyspace_permissions']
     roles = module.params['roles']
     debug = module.params['debug']
+
+    if HAS_SSL_LIBRARY is False and ssl is True:
+        msg = ("This module requires the SSL python"
+               " library. You can probably install it with pip"
+               " install ssl.")
+        module.fail_json(msg=msg)
 
     result = dict(
         changed=False,
