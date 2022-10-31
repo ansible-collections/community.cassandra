@@ -437,7 +437,7 @@ def main():
                 username=login_user,
                 password=login_password
             )
-        ssl_context = None    
+        ssl_context = None
         if ssl is True:
             ssl_context = SSLContext(PROTOCOL_TLS)
         cluster = Cluster(login_host,
