@@ -61,6 +61,7 @@ options:
     type: list
     elements: str
     required: false
+    default: []
   clustering:
     description:
       - The clustering specification.
