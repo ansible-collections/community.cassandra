@@ -43,7 +43,7 @@
   register: nonssl_keyspace
   ignore_errors: yes  
 
-- assert: Assert non-SSL cluster keyspace creation has failed
+- assert: 
     that:
       - "'SSL: WRONG_VERSION_NUMBER' in nonssl_keyspace.msg"
 
