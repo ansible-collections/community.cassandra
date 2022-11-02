@@ -34,6 +34,19 @@
   environment:
     CASS_DRIVER_NO_CYTHON: 1
 
+# Creating a keyspace with ssl=True on a non-SSL enabled cluster should fail
+- name: Check keyspace creation on a non-SSL cluster
+  cassandra_keyspace:
+    name: nonsslapp
+    state: present
+    ssl: True
+  register: nonssl_keyspace
+  ignore_errors: yes  
+
+- assert: Assert non-SSL cluster keyspace creation has failed
+    that:
+      - "'SSL: WRONG_VERSION_NUMBER' in nonssl_keyspace.msg"
+
 - name: Create a keyspace for tests
   cassandra_keyspace:
     name: myapp
