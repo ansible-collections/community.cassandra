@@ -45,7 +45,7 @@
 
 - assert: 
     that:
-      - "'This module requires the SSL python library' in nonssl_keyspace.msg"
+      - "'SSL: WRONG_VERSION_NUMBER' in nonssl_keyspace.msg"
 
 - name: Create a keyspace for tests
   cassandra_keyspace:
