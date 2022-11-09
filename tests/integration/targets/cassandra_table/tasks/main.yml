@@ -34,10 +34,14 @@
   environment:
     CASS_DRIVER_NO_CYTHON: 1
 
+# Check that python is able to import ssl lib as internal library
 - name: Check for ssl library import
-  python_requirements_info:
-    dependencies:
-    - ssl
+  ansible.builtin.shell: python -c "import ssl"
+  register: ssl_lib_check  
+
+# - assert: 
+#     that:
+#       - "'ModuleNotFoundError' not in ssl_lib_check.msg"
 
 # Creating a keyspace with ssl=True on a non-SSL enabled cluster should fail
 - name: Check keyspace creation on a non-SSL cluster
