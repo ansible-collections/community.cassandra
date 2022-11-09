@@ -34,10 +34,6 @@
   environment:
     CASS_DRIVER_NO_CYTHON: 1
 
-- name: TESTING - Install ssl lib
-  pip:
-    name: ssl 
-
 # Creating a keyspace with ssl=True on a non-SSL enabled cluster should fail
 - name: Check keyspace creation on a non-SSL cluster
   cassandra_keyspace:
@@ -49,7 +45,7 @@
 
 - assert: 
     that:
-      - "'SSL: WRONG_VERSION_NUMBER' in nonssl_keyspace.msg"
+      - "'This module requires the SSL python library' in nonssl_keyspace.msg"
 
 - name: Create a keyspace for tests
   cassandra_keyspace:
