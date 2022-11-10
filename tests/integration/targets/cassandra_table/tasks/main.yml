@@ -36,9 +36,12 @@
 
 # Check that python is able to import ssl lib as an internal library
 - name: Check for ssl library import
-  python_requirements_info:
-    dependencies:
-    - ssl
+  shell: /usr/bin/python -c "import ssl" || /usr/bin/python3 -c "import ssl"
+  register: ssl_lib_check  
+
+- assert: 
+    that:
+      - "'ModuleNotFoundError' not in ssl_lib_check.stdout"
 
 # Creating a keyspace with ssl=True on a non-SSL enabled cluster should fail
 - name: Check keyspace creation on a non-SSL cluster
