@@ -36,12 +36,12 @@
 
 # Check that python is able to import ssl lib as an internal library
 - name: Check for ssl library import
-  ansible.builtin.shell: /usr/bin/python -c "import ssl"
+  shell: python -c "import ssl"
   register: ssl_lib_check  
 
 # - assert: 
 #     that:
-#       - "'ModuleNotFoundError' not in ssl_lib_check.msg"
+#       - "'ModuleNotFoundError' not in ssl_lib_check.stdout"
 
 # Creating a keyspace with ssl=True on a non-SSL enabled cluster should fail
 - name: Check keyspace creation on a non-SSL cluster
@@ -55,7 +55,7 @@
 - assert: 
     that:
       - "'SSL: WRONG_VERSION_NUMBER' in nonssl_keyspace.msg"
-  when: "'This module requires the SSL python library' not in nonssl_keyspace.msg"
+  when: "'This module requires the SSL python library' not in nonssl_keyspace.stdout"
 
 - name: Create a keyspace for tests
   cassandra_keyspace:
