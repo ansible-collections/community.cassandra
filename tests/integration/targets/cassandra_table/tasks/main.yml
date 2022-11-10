@@ -34,9 +34,9 @@
   environment:
     CASS_DRIVER_NO_CYTHON: 1
 
-# Check that python is able to import ssl lib as internal library
+# Check that python is able to import ssl lib as an internal library
 - name: Check for ssl library import
-  ansible.builtin.shell: python -c "import ssl"
+  ansible.builtin.shell: /usr/bin/python -c "import ssl"
   register: ssl_lib_check  
 
 # - assert: 
