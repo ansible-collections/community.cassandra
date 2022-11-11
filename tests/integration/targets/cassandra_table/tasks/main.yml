@@ -36,7 +36,7 @@
 
 # Check that python is able to import ssl lib as an internal library
 - name: Check for ssl library import
-  shell: python -c "import ssl"
+  shell: /usr/bin/python -c "import ssl" || /usr/bin/python3 -c "import ssl"
   register: ssl_lib_check  
 
 # - assert: 
