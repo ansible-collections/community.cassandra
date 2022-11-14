@@ -39,9 +39,9 @@
   shell: /usr/bin/python -c "import ssl" || /usr/bin/python3 -c "import ssl"
   register: ssl_lib_check  
 
-# - assert: 
-#     that:
-#       - "'ModuleNotFoundError' not in ssl_lib_check.stdout"
+- assert: 
+    that:
+      - "'ModuleNotFoundError' not in ssl_lib_check.stdout"
 
 # Creating a keyspace with ssl=True on a non-SSL enabled cluster should fail
 - name: Check keyspace creation on a non-SSL cluster
