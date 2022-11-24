@@ -140,24 +140,41 @@
     that:
       - "'app_user' in myrole.stdout"
 
+<<<<<<< HEAD
 - name: Create a role - non-SSL cluster
   community.cassandra.cassandra_role:
     name: non_ssl_role
+=======
+- name: Create a role (check mode) - non-SSL cluster
+  community.cassandra.cassandra_role:
+    name: no_ssl_app_user
+>>>>>>> b150da2 (Added SSL lib checks and assertions for cassandra_keyspace and cassandra_role modules tests)
     password: 'secretZHB78'
     state: present
     login: yes
     ssl: False
     login_user: "{{ cassandra_admin_user }}"
     login_password: "{{ cassandra_admin_pwd }}"
+<<<<<<< HEAD
+=======
+  check_mode: yes
+>>>>>>> b150da2 (Added SSL lib checks and assertions for cassandra_keyspace and cassandra_role modules tests)
 
 - name: Get output of list roles
   ansible.builtin.shell: cqlsh --username "{{ cassandra_admin_user }}" --password "{{ cassandra_admin_pwd }}" --execute "LIST ROLES"
   register: nonssl_myrole
 
+<<<<<<< HEAD
 - name: Assert non_ssl_role exists in output
   assert:
     that:
       - "'non_ssl_role' in nonssl_myrole.stdout"      
+=======
+- name: Assert no_ssl_app_user exists in output
+  assert:
+    that:
+      - "'no_ssl_app_user' in myrole.stdout"      
+>>>>>>> b150da2 (Added SSL lib checks and assertions for cassandra_keyspace and cassandra_role modules tests)
 
 - name: Run same create role again
   community.cassandra.cassandra_role:
