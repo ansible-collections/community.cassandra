@@ -33,6 +33,29 @@
   environment:
     CASS_DRIVER_NO_CYTHON: 1
 
+# Check that python is able to import ssl lib as an internal library
+- name: Check for ssl library import
+  shell: /usr/bin/python -c "import ssl" || /usr/bin/python3 -c "import ssl"
+  register: ssl_lib_check  
+
+- assert: 
+    that:
+      - "'ModuleNotFoundError' not in ssl_lib_check.stdout"
+
+# Creating a keyspace with ssl=True on a non-SSL enabled cluster should fail
+- name: Check keyspace creation on a non-SSL cluster
+  cassandra_keyspace:
+    name: nonsslapp
+    state: present
+    ssl: True
+  register: nonssl_keyspace
+  ignore_errors: yes  
+
+- assert: 
+    that:
+      - "'SSL: WRONG_VERSION_NUMBER' in nonssl_keyspace.msg"
+  when: "'This module requires the SSL python library' not in nonssl_keyspace.msg"    
+
 - name: Create a role - Auth is not enabled so will fail
   community.cassandra.cassandra_role:
     name: app_user
@@ -116,6 +139,26 @@
   assert:
     that:
       - "'app_user' in myrole.stdout"
+
+- name: Create a role (check mode) - non-SSL cluster
+  community.cassandra.cassandra_role:
+    name: no_ssl_app_user
+    password: 'secretZHB78'
+    state: present
+    login: yes
+    ssl: False
+    login_user: "{{ cassandra_admin_user }}"
+    login_password: "{{ cassandra_admin_pwd }}"
+  check_mode: yes
+
+- name: Get output of list roles
+  ansible.builtin.shell: cqlsh --username "{{ cassandra_admin_user }}" --password "{{ cassandra_admin_pwd }}" --execute "LIST ROLES"
+  register: nonssl_myrole
+
+- name: Assert no_ssl_app_user exists in output
+  assert:
+    that:
+      - "'no_ssl_app_user' in myrole.stdout"      
 
 - name: Run same create role again
   community.cassandra.cassandra_role:
