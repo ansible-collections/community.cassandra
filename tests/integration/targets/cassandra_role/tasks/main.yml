@@ -140,7 +140,7 @@
     that:
       - "'app_user' in myrole.stdout"
 
-- name: Create a role (check mode) - non-SSL cluster
+- name: Create a role - non-SSL cluster
   community.cassandra.cassandra_role:
     name: no_ssl_app_user
     password: 'secretZHB78'
@@ -149,7 +149,6 @@
     ssl: False
     login_user: "{{ cassandra_admin_user }}"
     login_password: "{{ cassandra_admin_pwd }}"
-  check_mode: yes
 
 - name: Get output of list roles
   ansible.builtin.shell: cqlsh --username "{{ cassandra_admin_user }}" --password "{{ cassandra_admin_pwd }}" --execute "LIST ROLES"
