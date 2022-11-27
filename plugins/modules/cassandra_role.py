@@ -188,7 +188,7 @@ except Exception:
 from ansible.module_utils.basic import AnsibleModule
 
 try:
-    from ssl import SSLContext, PROTOCOL_TLS, CERT_REQUIRED
+    from ssl import SSLContext, PROTOCOL_TLS
     import ssl as ssl_lib
     HAS_SSL_LIBRARY = True
 except Exception:
