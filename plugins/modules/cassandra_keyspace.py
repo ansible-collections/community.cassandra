@@ -28,6 +28,14 @@ options:
     description: Uses SSL encryption if basic SSL encryption is enabled on Cassandra cluster (without client/server verification)
     type: bool
     default: False
+  verify_mode:
+    description: SSL verification mode.
+    type: str
+    choices:
+      - 'CERT_NONE'
+      - 'CERT_OPTIONAL'
+      - 'CERT_REQUIRED'
+    default: 'CERT_REQUIRED'
   login_host:
     description:
       - The Cassandra hostname.
@@ -243,6 +251,12 @@ def main():
             login_user=dict(type='str'),
             login_password=dict(type='str', no_log=True),
             ssl=dict(type='bool', default=False),
+            verify_mode=dict(type='str',
+                             required=False,
+                             default='CERT_REQUIRED',
+                             choices=['CERT_NONE',
+                                      'CERT_OPTIONAL',
+                                      'CERT_REQUIRED']),
             login_host=dict(type='list', elements='str', default=None),
             login_port=dict(type='int', default=9042),
             name=dict(type='str', required=True),
@@ -304,6 +318,7 @@ def main():
         ssl_context = None
         if ssl is True:
             ssl_context = SSLContext(PROTOCOL_TLS)
+            ssl_context.verify_mode = getattr(ssl, module.params['verify_mode'])
         cluster = Cluster(login_host,
                           port=login_port,
                           auth_provider=auth_provider,
