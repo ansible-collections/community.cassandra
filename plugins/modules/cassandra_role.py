@@ -184,6 +184,7 @@ from ansible.module_utils.basic import AnsibleModule
 
 try:
     from ssl import SSLContext, PROTOCOL_TLS
+    import ssl as ssl_lib
     HAS_SSL_LIBRARY = True
 except Exception:
     HAS_SSL_LIBRARY = False
@@ -624,7 +625,7 @@ def main():
         ssl_context = None
         if ssl is True:
             ssl_context = SSLContext(PROTOCOL_TLS)
-            ssl_context.verify_mode = getattr(ssl, module.params['verify_mode'])
+            ssl_context.verify_mode = getattr(ssl_lib, module.params['verify_mode'])
         cluster = Cluster(login_host,
                           port=login_port,
                           auth_provider=auth_provider,
