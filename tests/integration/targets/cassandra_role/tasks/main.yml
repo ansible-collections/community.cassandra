@@ -157,7 +157,7 @@
 - name: Assert no_ssl_app_user exists in output
   assert:
     that:
-      - "'no_ssl_app_user' in myrole.stdout"      
+      - "'no_ssl_app_user' in nonssl_myrole.stdout"      
 
 - name: Run same create role again
   community.cassandra.cassandra_role:
