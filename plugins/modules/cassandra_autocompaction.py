@@ -64,7 +64,6 @@ cassandra_autocompaction:
 
 from ansible.module_utils.basic import AnsibleModule
 __metaclass__ = type
-import socket
 
 
 from ansible_collections.community.cassandra.plugins.module_utils.nodetool_cmd_objects import NodeTool2PairCommand

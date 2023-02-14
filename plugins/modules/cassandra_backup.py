@@ -49,7 +49,6 @@ cassandra_backup:
 '''
 
 from ansible.module_utils.basic import AnsibleModule
-import socket
 __metaclass__ = type
 
 

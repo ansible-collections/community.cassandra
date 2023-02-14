@@ -63,9 +63,7 @@ rc:
 '''
 
 from ansible.module_utils.basic import AnsibleModule
-import socket
 import re
-import time
 __metaclass__ = type
 
 
