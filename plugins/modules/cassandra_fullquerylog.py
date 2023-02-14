@@ -117,7 +117,6 @@ fullquerylog_config:
 '''
 
 from ansible.module_utils.basic import AnsibleModule
-import socket
 import shlex
 import pipes
 __metaclass__ = type

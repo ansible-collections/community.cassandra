@@ -192,9 +192,6 @@ rc:
 '''
 
 from ansible.module_utils.basic import AnsibleModule
-import socket
-import re
-import time
 import json
 __metaclass__ = type
 

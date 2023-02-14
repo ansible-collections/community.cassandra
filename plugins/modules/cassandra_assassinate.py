@@ -49,8 +49,6 @@ msg:
 '''
 
 from ansible.module_utils.basic import AnsibleModule
-import socket
-import subprocess
 __metaclass__ = type
 
 
