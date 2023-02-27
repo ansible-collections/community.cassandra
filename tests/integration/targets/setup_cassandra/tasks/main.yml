@@ -30,11 +30,13 @@
 - name: Install required packages
   package:
     name: "{{ required_packages }}"
+  retries: 3
 
 - name: Install Redhat packages
   package:
     name: "{{ redhat_packages }}"
   when: ansible_os_family == 'RedHat'
+  retries: 3
 
 - name: Start Cassandra service if it is installed
   service:
@@ -71,6 +73,7 @@
     name: "{{ openjdk }}"
     state: present
   when: ansible_os_family == 'RedHat'
+  retries: 3
 
 - name: Setup Cassandra yum repo
   yum_repository:
@@ -81,6 +84,7 @@
     gpgcheck: "{{ cassandra_yum.gpgcheck }}"
     gpgkey: "{{ cassandra_yum.gpgkey }}"
   when: ansible_os_family == 'RedHat'
+  retries: 3
 
 - name: Install cassandra yum package
   dnf:
@@ -91,6 +95,7 @@
     - ansible_os_family == 'RedHat'
   notify:
     - redhat_remove_cassandra
+  retries: 3
 
 - name: Flip back to python 2.7 on CentOS 7
   block:
@@ -107,6 +112,7 @@
     url: "{{ cassandra_deb.gpgkey }}"
     state: present
   when: ansible_os_family == 'Debian'
+  retries: 3
 
 - name: Install python-apt
   ansible.builtin.shell: |
@@ -115,12 +121,14 @@
     apt update
     apt -y install python-apt
   when: ansible_os_family == 'Debian'
+  retries: 3
 
 - name: Setup Cassandra apt repo
   apt_repository:
     repo: "{{ cassandra_deb.repo }}"
     state: present
   when: ansible_os_family == 'Debian'
+  retries: 3
 
 - name: Install cassandra deb package
   apt:
@@ -129,6 +137,7 @@
     force: yes
   when: ansible_os_family == 'Debian'
   notify: debian_remove_cassandra
+  retries: 3
 
 - name: Set Snitch to PropertyFileSnitch
   lineinfile:
@@ -211,6 +220,7 @@
     - ansible_os_family == 'RedHat'
     - ansible_distribution_major_version == "7"
   notify: redhat_remove_cassandra
+  retries: 3
 
 - name: Install clqshlib - bug - ImportError - No module named cqlshlib
   ansible.builtin.shell: cp -r /usr/lib/python3.6/site-packages/cqlshlib /usr/lib/python2.7/site-packages/cqlshlib
