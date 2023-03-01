@@ -30,6 +30,7 @@
 - name: Install required packages
   package:
     name: "{{ required_packages }}"
+  register: result
   until: result is not failed
   retries: 3
 
@@ -37,6 +38,7 @@
   package:
     name: "{{ redhat_packages }}"
   when: ansible_os_family == 'RedHat'
+  register: result
   until: result is not failed
   retries: 3
 
@@ -75,6 +77,7 @@
     name: "{{ openjdk }}"
     state: present
   when: ansible_os_family == 'RedHat'
+  register: result
   until: result is not failed
   retries: 3
 
@@ -87,6 +90,7 @@
     gpgcheck: "{{ cassandra_yum.gpgcheck }}"
     gpgkey: "{{ cassandra_yum.gpgkey }}"
   when: ansible_os_family == 'RedHat'
+  register: result
   until: result is not failed
   retries: 3
 
@@ -99,6 +103,7 @@
     - ansible_os_family == 'RedHat'
   notify:
     - redhat_remove_cassandra
+  register: result
   until: result is not failed
   retries: 3
 
@@ -117,6 +122,7 @@
     url: "{{ cassandra_deb.gpgkey }}"
     state: present
   when: ansible_os_family == 'Debian'
+  register: result
   until: result is not failed
   retries: 3
 
@@ -127,6 +133,7 @@
     apt update
     apt -y install python-apt
   when: ansible_os_family == 'Debian'
+  register: result
   until: result is not failed
   retries: 3
 
@@ -135,6 +142,7 @@
     repo: "{{ cassandra_deb.repo }}"
     state: present
   when: ansible_os_family == 'Debian'
+  register: result
   until: result is not failed
   retries: 3
 
@@ -145,6 +153,7 @@
     force: yes
   when: ansible_os_family == 'Debian'
   notify: debian_remove_cassandra
+  register: result
   until: result is not failed
   retries: 3
 
@@ -229,6 +238,7 @@
     - ansible_os_family == 'RedHat'
     - ansible_distribution_major_version == "7"
   notify: redhat_remove_cassandra
+  register: result
   until: result is not failed
   retries: 3
 
