@@ -30,12 +30,16 @@
 - name: Install required packages
   package:
     name: "{{ required_packages }}"
+  register: result
+  until: result is not failed
   retries: 3
 
 - name: Install Redhat packages
   package:
     name: "{{ redhat_packages }}"
   when: ansible_os_family == 'RedHat'
+  register: result
+  until: result is not failed
   retries: 3
 
 - name: Start Cassandra service if it is installed
@@ -73,6 +77,8 @@
     name: "{{ openjdk }}"
     state: present
   when: ansible_os_family == 'RedHat'
+  register: result
+  until: result is not failed
   retries: 3
 
 - name: Setup Cassandra yum repo
@@ -84,6 +90,8 @@
     gpgcheck: "{{ cassandra_yum.gpgcheck }}"
     gpgkey: "{{ cassandra_yum.gpgkey }}"
   when: ansible_os_family == 'RedHat'
+  register: result
+  until: result is not failed
   retries: 3
 
 - name: Install cassandra yum package
@@ -95,6 +103,8 @@
     - ansible_os_family == 'RedHat'
   notify:
     - redhat_remove_cassandra
+  register: result
+  until: result is not failed
   retries: 3
 
 - name: Flip back to python 2.7 on CentOS 7
@@ -112,6 +122,8 @@
     url: "{{ cassandra_deb.gpgkey }}"
     state: present
   when: ansible_os_family == 'Debian'
+  register: result
+  until: result is not failed
   retries: 3
 
 - name: Install python-apt
@@ -121,6 +133,8 @@
     apt update
     apt -y install python-apt
   when: ansible_os_family == 'Debian'
+  register: result
+  until: result is not failed
   retries: 3
 
 - name: Setup Cassandra apt repo
@@ -128,6 +142,8 @@
     repo: "{{ cassandra_deb.repo }}"
     state: present
   when: ansible_os_family == 'Debian'
+  register: result
+  until: result is not failed
   retries: 3
 
 - name: Install cassandra deb package
@@ -137,6 +153,8 @@
     force: yes
   when: ansible_os_family == 'Debian'
   notify: debian_remove_cassandra
+  register: result
+  until: result is not failed
   retries: 3
 
 - name: Set Snitch to PropertyFileSnitch
@@ -220,6 +238,8 @@
     - ansible_os_family == 'RedHat'
     - ansible_distribution_major_version == "7"
   notify: redhat_remove_cassandra
+  register: result
+  until: result is not failed
   retries: 3
 
 - name: Install clqshlib - bug - ImportError - No module named cqlshlib
