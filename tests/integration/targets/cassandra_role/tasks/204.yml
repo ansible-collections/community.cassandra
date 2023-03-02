@@ -42,8 +42,8 @@
 - assert:
     that:
       - first_run.changed
-      - first_run.cql == "CREATE ROLE test_role WITH SUPERUSER = False AND LOGIN = True AND PASSWORD = '********' "
-      - "first_run.permissions.grant.0 == 'GRANT ALL PERMISSIONS ON KEYSPACE test_keyspace TO test_role'"
+      - first_run.cql == "CREATE ROLE 'test_role' WITH SUPERUSER = False AND LOGIN = True AND PASSWORD = '********' "
+      - "first_run.permissions.grant.0 == \"GRANT ALL PERMISSIONS ON KEYSPACE test_keyspace TO 'test_role'\""
       - "{{ first_run.permissions.grant | length }} == 1"
       - "{{ first_run.permissions.revoke | length }} == 0"
 
@@ -148,7 +148,7 @@
       - sixth_run.changed
       - "{{ sixth_run.permissions.revoke | length }} == 0"
       - "{{ sixth_run.permissions.grant | length }} == 1"
-      - "sixth_run.permissions.grant.0 == 'GRANT MODIFY ON KEYSPACE test_keyspace TO test_role'"
+      - "sixth_run.permissions.grant.0 == \"GRANT MODIFY ON KEYSPACE test_keyspace TO 'test_role'\""
 
 - name: Create a test role - seventh run
   community.cassandra.cassandra_role:
@@ -170,7 +170,7 @@
       - seventh_run.changed
       - "{{ seventh_run.permissions.revoke | length }} == 0"
       - "{{ seventh_run.permissions.grant | length }} == 1"
-      - "seventh_run.permissions.grant.0 == 'GRANT MODIFY ON KEYSPACE test_keyspace TO test_role'"
+      - "seventh_run.permissions.grant.0 == \"GRANT MODIFY ON KEYSPACE test_keyspace TO 'test_role'\""
 
 - name: Create a test role - eighth run
   community.cassandra.cassandra_role:
