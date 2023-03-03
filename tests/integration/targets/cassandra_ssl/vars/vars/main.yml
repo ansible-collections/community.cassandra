@@ -1,3 +1,5 @@
+cassandra_admin_user: cassandra
+cassandra_admin_pwd: cassandra
 cassandra_auth_tests: True
 cassandra_nodes:  # Changes in 4.0 means we need to add nodes to certain DCs for some stuff to work
   - dc: "london"  # 5 seeds because of this https://github.com/ibmcb/cbtool/issues/59
@@ -42,7 +44,6 @@ cassandra_nodes:  # Changes in 4.0 means we need to add nodes to certain DCs for
     port: 7700
     debug_port: 2006
     args: "--seeds"
-<<<<<<< HEAD
   # - dc: "marlow"
   #   node: "marlow1"
   #   ip: "127.0.0.8"
@@ -50,13 +51,3 @@ cassandra_nodes:  # Changes in 4.0 means we need to add nodes to certain DCs for
   #   debug_port: 2007
   #   args: ""
 cassandra_service: cassandra  
-=======
-  - dc: "marlow"
-    node: "marlow1"
-    ip: "127.0.0.8"
-    port: 7800
-    debug_port: 2007
-    args: ""
-cassandra_service: cassandra
-cassandra_version: 3.11.14    
->>>>>>> 3829b5b (Added cassandra_ssl integration tests via ccm)
