@@ -1,0 +1,155 @@
+# Test code for cassandra SSL functionality (roles and keyspaces)
+# (c) 2023,  Alex Ierodiakonou <alexandros.ierodiakonou@sky.uk>
+
+# This file is part of Ansible
+#
+# Ansible is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Ansible is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
+
+# ===========================================================
+- name: Include vars for os family
+  include_vars:
+    file: "{{ ansible_os_family }}.yml"
+
+# This should go into a cassandra_driver dependency
+- name: Ensure epel is available
+  yum:
+    name: epel-release
+  when: ansible_os_family == "RedHat"
+
+- name: Install cassandra-driver
+  pip:
+    name: cassandra-driver
+  environment:
+    CASS_DRIVER_NO_CYTHON: 1
+
+- name: Install ccm via pip
+  pip:
+    name: ccm
+    state: present
+    
+- set_fact:
+    ccm_cmd: /usr/local/bin/ccm
+
+- name: Ensure Cassandra service from setup_cassandra isn't running
+  service:
+    name: "{{ cassandra_service }}"
+    enabled: "yes"
+    state: "stopped"
+  ignore_errors: yes    
+
+- name: Ensure dirs exist for SSL certificates
+  file:
+    path: /home/ssl-test-cluster
+    state: directory
+    owner: cassandra
+    group: cassandra
+    mode: 0755
+
+- name: Copy SSL certificates and truststore/keystore files to local directory
+  copy:
+    src: "{{ item }}"
+    dest: "/home/ssl-test-cluster/{{ item }}"
+    owner: cassandra
+    group: cassandra
+    mode: '0644'
+  with_fileglob:
+    - "../files/*"
+
+- name: Install SSL enabled Cassandra via ccm tool
+  ansible.builtin.shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd }} create ssl-test-cluster -v {{ cassandra_version }} --ssl /home/ssl-test-cluster/ > /dev/null\""
+  become_user: cassandra
+  args:
+    chdir: /home/cassandra
+  environment:
+    CCM_CONFIG_DIR: "/home/cassandra/config"
+    CASSANDRA_HOME: "/home/cassandra"
+    PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ant/bin  
+
+- name: Add nodes to the Cassandra Cluster
+  ansible.builtin.shell: "sudo -E -u cassandra bash -c '{{ ccm_cmd }} add {{ item.node }} -i {{ item.ip }} -j {{ item.port }} -b --data-center={{ item.dc }} --remote-debug-port {{ item.debug_port }} {{ item.args }}'"
+  become_user: cassandra
+  args:
+    chdir: /home/cassandra
+  environment:
+    CCM_CONFIG_DIR: "/home/cassandra/config"
+    CASSANDRA_HOME: "/home/cassandra"
+    PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ant
+  with_items: "{{ cassandra_nodes }}"
+
+- name: Update endpoint_snitch
+  lineinfile:
+    path: "/home/cassandra/config/test/{{ item.node }}/conf/cassandra.yaml"
+    regexp: "^endpoint_snitch"
+    line: "endpoint_snitch: GossipingPropertyFileSnitch"
+  with_items: "{{ cassandra_nodes }}"
+  no_log: yes
+
+- name: Update rack info
+  copy:
+    content: |
+      dc={{ item.dc }}
+      rack=rack1
+    dest: /home/cassandra/config/test/{{ item.node }}/conf/cassandra-rackdc.properties
+  with_items: "{{ cassandra_nodes }}"
+
+- set_fact:
+    cassandra_node_delay: 120
+  when: ansible_os_family == "RedHat"
+
+- name: Start the ccm cluster
+  ansible.builtin.shell: sudo -E -u cassandra bash -c "{{ ccm_cmd }} start  --root"
+  become_user: cassandra
+  args:
+    chdir: /home/cassandra
+  environment:
+    CCM_CONFIG_DIR: "/home/cassandra/config"
+    CASSANDRA_HOME: "/home/cassandra"
+    PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ant/bin
+    CCM_CLUSTER_START_DEFAULT_TIMEOUT: 600
+
+- name: Get cluster status
+  ansible.builtin.shell: sudo -E -u cassandra bash -c "{{ ccm_cmd }} status"
+  become_user: cassandra
+  args:
+    chdir: /home/cassandra
+  register: cluster_status
+  environment:
+    CCM_CONFIG_DIR: "/home/cassandra/config"
+    CASSANDRA_HOME: "/home/cassandra"
+    PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ant/bin   
+
+- debug:
+    msg: "{{ cluster_status.stdout }}"
+
+- name: Wait for the cql port to become active
+  wait_for:
+    port: 9042
+    host: "{{ item.ip }}"
+    delay: 30
+    timeout: 600
+  with_items: "{{ cassandra_nodes }}"               
+
+# Creating a keyspace with ssl=True and verify_mode=CERT_NONE on an SSL enabled cluster should succeed
+- name: Check keyspace creation on an SSL cluster
+  cassandra_keyspace:
+    name: ccmsslkeyspace
+    state: present
+    ssl: True
+    verify_mode: 'CERT_NONE'
+  register: ccm_ssl_keyspace_status
+  ignore_errors: yes          
+
+
+
+
