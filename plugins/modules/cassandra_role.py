@@ -215,9 +215,9 @@ def is_role_changed(role_properties, super_user, login, password,
 def create_alter_role(module, session, role, super_user, login, password,
                       options, data_centers, alter_role):
     if alter_role is False:
-        cql = "CREATE ROLE {0} ".format(role)
+        cql = "CREATE ROLE '{0}' ".format(role)
     else:
-        cql = "ALTER ROLE {0} ".format(role)
+        cql = "ALTER ROLE '{0}' ".format(role)
     cql += "WITH SUPERUSER = {0} ".format(super_user)
     cql += "AND LOGIN = {0} ".format(login)
     if password is not None:
@@ -242,28 +242,28 @@ def create_alter_role(module, session, role, super_user, login, password,
 def create_role(session, role):
     ''' Used for creating roles that are assigned to other users
     '''
-    cql = "CREATE ROLE {0}".format(role)
+    cql = "CREATE ROLE '{0}'".format(role)
     return cql
 
 
 def grant_role(session, role, grantee):
     ''' Assign roles to other roles
     '''
-    cql = "GRANT {0} TO {1}".format(role,
-                                    grantee)
+    cql = "GRANT '{0}' TO '{1}'".format(role,
+                                        grantee)
     return cql
 
 
 def revoke_role(session, role, grantee):
     ''' Revoke a role
     '''
-    cql = "REVOKE {0} FROM {1}".format(role,
-                                       grantee)
+    cql = "REVOKE '{0}' FROM '{1}'".format(role,
+                                           grantee)
     return cql
 
 
 def drop_role(session, role):
-    cql = "DROP ROLE {0}".format(role)
+    cql = "DROP ROLE '{0}'".format(role)
     return cql
 
 
@@ -292,19 +292,19 @@ def validate_keyspace_permissions(keyspace_permissions):
 
 def grant_permission(session, permission, role, keyspace):
     if keyspace == "all_keyspaces":
-        cql = "GRANT {0} ON ALL KEYSPACES TO {1}".format(permission,
-                                                         role)
+        cql = "GRANT {0} ON ALL KEYSPACES TO '{1}'".format(permission,
+                                                           role)
     else:
-        cql = "GRANT {0} ON KEYSPACE {1} TO {2}".format(permission,
-                                                        keyspace,
-                                                        role)
+        cql = "GRANT {0} ON KEYSPACE {1} TO '{2}'".format(permission,
+                                                          keyspace,
+                                                          role)
     return cql
 
 
 def revoke_permission(session, permission, role, keyspace):
-    cql = "REVOKE {0} ON KEYSPACE {1} FROM {2}".format(permission,
-                                                       keyspace,
-                                                       role)
+    cql = "REVOKE {0} ON KEYSPACE {1} FROM '{2}'".format(permission,
+                                                         keyspace,
+                                                         role)
     return cql
 
 
@@ -328,7 +328,7 @@ def list_role_permissions(session, role):
 
      Returns a resultset object of dicts
     '''
-    cql = "LIST ALL OF {0}".format(role)
+    cql = "LIST ALL OF '{0}'".format(role)
     session.row_factory = dict_factory
     try:
         role_permissions = session.execute(cql)
@@ -473,7 +473,7 @@ def build_role_permissions(session,
                 if permission['resource'] == "<all keyspaces>"\
                         and "all_keyspaces" not in keyspace_permissions.keys()\
                         and permission['role'] == role:
-                    cql = "REVOKE ALL PERMISSIONS ON ALL KEYSPACES FROM {0}".format(role)
+                    cql = "REVOKE ALL PERMISSIONS ON ALL KEYSPACES FROM '{0}'".format(role)
                     if cql not in perms_dict['revoke']:  # only do this the once
                         perms_dict['revoke'].add(cql)
                 elif permission['resource'] == "<all keyspaces>" \

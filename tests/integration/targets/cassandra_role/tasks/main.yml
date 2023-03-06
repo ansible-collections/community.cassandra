@@ -270,7 +270,7 @@
 - assert:
     that:
       - "app_user_multi_keyspace.changed == True"
-      - "app_user_multi_keyspace.cql == \"CREATE ROLE app_user_multi_keyspace WITH SUPERUSER = False AND LOGIN = True AND PASSWORD = '********' \""
+      - "app_user_multi_keyspace.cql == \"CREATE ROLE 'app_user_multi_keyspace' WITH SUPERUSER = False AND LOGIN = True AND PASSWORD = '********' \""
       - "app_user_multi_keyspace.role == 'app_user_multi_keyspace'"
 
 - name: Get output of list roles
@@ -424,7 +424,7 @@
 - assert:
     that:
       - "myapp.changed == True"
-      - "'CREATE ROLE myapp WITH SUPERUSER = False AND LOGIN = True AND PASSWORD' in myapp.cql"
+      - "\"CREATE ROLE 'myapp' WITH SUPERUSER = False AND LOGIN = True AND PASSWORD\" in myapp.cql"
       # TODO Check permissions grant and revoke statement
 
 - name: Get output of list permissions for rw_role
@@ -492,7 +492,7 @@
 - assert:
     that:
       - "myapp.changed == True"
-      - "myapp.permissions['grant'] == [\"GRANT SELECT ON KEYSPACE mykeyspace1 TO myapp\"]"
+      - "myapp.permissions['grant'] == [\"GRANT SELECT ON KEYSPACE mykeyspace1 TO 'myapp'\"]"
       - "'roles' not in myapp.keys()"
 
 - name: Get output of list permissions for rw_role
@@ -526,7 +526,7 @@
 - assert:
     that:
       - "myapp.changed == True"
-      - "myapp.permissions['revoke'] == [\"REVOKE ALTER ON KEYSPACE mykeyspace1 FROM myapp\"]"
+      - "myapp.permissions['revoke'] == [\"REVOKE ALTER ON KEYSPACE mykeyspace1 FROM 'myapp'\"]"
       - "'roles' not in myapp.keys()"
 
 - name: Get output of list permissions for rw_role
@@ -658,6 +658,104 @@
       - "'<keyspace mykeyspace6> |     SELECT' in complex.stdout"
       - "'rw_role |        <all keyspaces> |     SELECT' in complex.stdout"
       - "'rw_role |        <all keyspaces> |     MODIFY' in complex.stdout"
+
+- name: Create a role with dash in name
+  community.cassandra.cassandra_role:
+    name: app-user
+    password: 'secretZHB78'
+    state: present
+    login: yes
+    login_user: "{{ cassandra_admin_user }}"
+    login_password: "{{ cassandra_admin_pwd }}"
+  register: create_role
+
+- assert:
+    that:
+      - 'create_role.changed == True'
+
+- name: Get output of list roles
+  ansible.builtin.shell: cqlsh --username "{{ cassandra_admin_user }}" --password "{{ cassandra_admin_pwd }}" --execute "LIST ROLES"
+  register: myrole
+
+- name: Assert app-user exists in output
+  assert:
+    that:
+      - "'app-user' in myrole.stdout"
+
+- name: Remove a role with dash in name
+  community.cassandra.cassandra_role:
+    name: app-user
+    state: absent
+    login_user: "{{ cassandra_admin_user }}"
+    login_password: "{{ cassandra_admin_pwd }}"
+  register: absent
+
+- name: Assert role changed
+  assert:
+    that:
+      - "absent.changed == True"
+
+- name: Get output of list roles
+  ansible.builtin.shell: cqlsh --username "{{ cassandra_admin_user }}" --password "{{ cassandra_admin_pwd }}" --execute "LIST ROLES"
+  register: myrole
+
+- name: Assert app-user does not exist
+  assert:
+    that:
+      - "'app-user' not in myrole.stdout"
+
+- name: Create a user with permissions and dash in name
+  community.cassandra.cassandra_role:
+    name: user-with-perms
+    password: "secret"
+    state: present
+    keyspace_permissions:
+      all_keyspaces:
+        - SELECT
+    login: yes
+    login_user: "{{ cassandra_admin_user }}"
+    login_password: "{{ cassandra_admin_pwd }}"
+  register: user_with_perms
+
+- assert:
+    that: "user_with_perms.changed == True"
+
+- name: Get output of list permissions for user-with-perms user
+  ansible.builtin.shell: cqlsh --username "{{ cassandra_admin_user }}" --password "{{ cassandra_admin_pwd }}" --execute "LIST ALL PERMISSIONS OF 'user-with-perms'"
+  register: user_with_perms_perms
+
+- name: Assert that all keyspaces select permissions exists
+  assert:
+    that:
+      - "'<all keyspaces> |     SELECT' in user_with_perms_perms.stdout"
+      - "'(1 rows)' in user_with_perms_perms.stdout"
+
+- name: Run user-with-perms but remove all_keyspaces permission and add another
+  community.cassandra.cassandra_role:
+    name: user-with-perms
+    password: "secret"
+    state: present
+    keyspace_permissions:
+      mykeyspace1:
+        - SELECT
+    login: yes
+    login_user: "{{ cassandra_admin_user }}"
+    login_password: "{{ cassandra_admin_pwd }}"
+  register: user_with_perms
+
+- assert:
+    that: "user_with_perms.changed == True"
+
+- name: Get output of list permissions for user-with-perms user
+  ansible.builtin.shell: cqlsh --username "{{ cassandra_admin_user }}" --password "{{ cassandra_admin_pwd }}" --execute "LIST ALL PERMISSIONS OF 'user-with-perms'"
+  register: user_with_perms_perms
+
+- name: Assert that all keyspaces select permissions does not exist
+  assert:
+    that:
+      - "'<all keyspaces> |     SELECT' not in user_with_perms_perms.stdout"
+      - "'<keyspace mykeyspace1> |     SELECT' in user_with_perms_perms.stdout"
+      - "'(1 rows)' in user_with_perms_perms.stdout"
 
 - name: Import tasks for issue 204
   import_tasks: 204.yml
