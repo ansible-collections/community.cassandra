@@ -110,7 +110,12 @@
   shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd }} create ssl-test-cluster -v {{ cassandra_version }} --ssl /home/ssl-test-cluster/ > /dev/null\""
 =======
   with_fileglob:
-    - "../files/*"
+    - cassandra.crt
+    - cassandra.pem
+    - client_cert.pem
+    - client_key.pem
+    - keystore.jks
+    - truststore.jks
 
 - name: Install SSL enabled Cassandra via ccm tool
   ansible.builtin.shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd }} create ssl-test-cluster -v {{ cassandra_version }} --ssl /home/ssl-test-cluster/ > /dev/null\""
