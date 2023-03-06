@@ -250,7 +250,7 @@ def grant_role(session, role, grantee):
     ''' Assign roles to other roles
     '''
     cql = "GRANT '{0}' TO '{1}'".format(role,
-                                    grantee)
+                                        grantee)
     return cql
 
 
@@ -258,7 +258,7 @@ def revoke_role(session, role, grantee):
     ''' Revoke a role
     '''
     cql = "REVOKE '{0}' FROM '{1}'".format(role,
-                                       grantee)
+                                           grantee)
     return cql
 
 
@@ -293,18 +293,18 @@ def validate_keyspace_permissions(keyspace_permissions):
 def grant_permission(session, permission, role, keyspace):
     if keyspace == "all_keyspaces":
         cql = "GRANT {0} ON ALL KEYSPACES TO '{1}'".format(permission,
-                                                         role)
+                                                           role)
     else:
         cql = "GRANT {0} ON KEYSPACE {1} TO '{2}'".format(permission,
-                                                        keyspace,
-                                                        role)
+                                                          keyspace,
+                                                          role)
     return cql
 
 
 def revoke_permission(session, permission, role, keyspace):
     cql = "REVOKE {0} ON KEYSPACE {1} FROM '{2}'".format(permission,
-                                                       keyspace,
-                                                       role)
+                                                         keyspace,
+                                                         role)
     return cql
 
 
