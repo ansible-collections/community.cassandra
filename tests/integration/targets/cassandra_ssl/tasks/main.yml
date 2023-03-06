@@ -64,7 +64,7 @@
     owner: cassandra
     group: cassandra
     mode: '0644'
-  with_fileglob:
+  with_items:
     - cassandra.crt
     - cassandra.pem
     - client_cert.pem
