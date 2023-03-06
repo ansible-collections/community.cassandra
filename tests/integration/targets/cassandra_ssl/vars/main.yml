@@ -57,6 +57,10 @@ cassandra_service: cassandra
     port: 7800
     debug_port: 2007
     args: ""
+<<<<<<< HEAD
 cassandra_service: cassandra
 cassandra_version: 3.11.14    
 >>>>>>> 3829b5b (Added cassandra_ssl integration tests via ccm)
+=======
+cassandra_service: cassandra  
+>>>>>>> bad9b42 (Removed explicit cassandra_version from cassandra_ssl test defaults)
