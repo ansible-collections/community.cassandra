@@ -86,6 +86,7 @@
     group: cassandra
     mode: '0644'
 <<<<<<< HEAD
+<<<<<<< HEAD
   with_items:
     - ssl-test.cer.pem
     - ssl-test.key.pem
@@ -110,7 +111,15 @@
   shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd }} create ssl-test-cluster -v {{ cassandra_version }} --ssl /home/ssl-test-cluster/ > /dev/null\""
 =======
   with_fileglob:
-    - "../files/*"
+=======
+  with_items:
+>>>>>>> f15e55a (Changed file copy)
+    - cassandra.crt
+    - cassandra.pem
+    - client_cert.pem
+    - client_key.pem
+    - keystore.jks
+    - truststore.jks
 
 - name: Install SSL enabled Cassandra via ccm tool
   ansible.builtin.shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd }} create ssl-test-cluster -v {{ cassandra_version }} --ssl /home/ssl-test-cluster/ > /dev/null\""
