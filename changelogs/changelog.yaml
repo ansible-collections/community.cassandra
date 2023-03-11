@@ -65,7 +65,7 @@ releases:
       bugfixes:
         - 214 - cassandra_fullquerylog - Fix typo in documentation.
         - 213 - cassandra_cqlsh - Missing handler for `--ssl` option for `cassandra_cqlsh`
-  1.2.3
+  1.2.3:
     changes:
       release_summary: Maintenance release
       bugfixes:
