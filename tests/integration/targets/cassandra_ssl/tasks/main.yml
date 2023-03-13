@@ -1,7 +1,11 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 ---
 =======
 >>>>>>> 3829b5b (Added cassandra_ssl integration tests via ccm)
+=======
+---
+>>>>>>> 170f475 (Linting)
 # Test code for cassandra SSL functionality (roles and keyspaces)
 # (c) 2023,  Alex Ierodiakonou <alexandros.ierodiakonou@sky.uk>
 
@@ -65,10 +69,14 @@
     enabled: "yes"
     state: "stopped"
 <<<<<<< HEAD
+<<<<<<< HEAD
   ignore_errors: yes
 =======
   ignore_errors: yes    
 >>>>>>> 3829b5b (Added cassandra_ssl integration tests via ccm)
+=======
+  ignore_errors: yes
+>>>>>>> 170f475 (Linting)
 
 - name: Ensure dirs exist for SSL certificates
   file:
@@ -130,7 +138,7 @@
   environment:
     CCM_CONFIG_DIR: "/home/cassandra/config"
     CASSANDRA_HOME: "/home/cassandra"
-    PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ant/bin  
+    PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ant/bin
 
 - name: Add nodes to the Cassandra Cluster
 <<<<<<< HEAD
@@ -202,10 +210,14 @@
     CCM_CONFIG_DIR: "/home/cassandra/config"
     CASSANDRA_HOME: "/home/cassandra"
 <<<<<<< HEAD
+<<<<<<< HEAD
     PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ant/bin
 =======
     PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ant/bin   
 >>>>>>> 3829b5b (Added cassandra_ssl integration tests via ccm)
+=======
+    PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ant/bin
+>>>>>>> 170f475 (Linting)
 
 - debug:
     msg: "{{ cluster_status.stdout }}"
@@ -217,10 +229,14 @@
     delay: 30
     timeout: 600
 <<<<<<< HEAD
+<<<<<<< HEAD
   with_items: "{{ cassandra_nodes }}"
 =======
   with_items: "{{ cassandra_nodes }}"               
 >>>>>>> 3829b5b (Added cassandra_ssl integration tests via ccm)
+=======
+  with_items: "{{ cassandra_nodes }}"
+>>>>>>> 170f475 (Linting)
 
 # Creating a keyspace with ssl=True and verify_mode=CERT_NONE on an SSL enabled cluster should succeed
 - name: Check keyspace creation on an SSL cluster
@@ -326,9 +342,13 @@
     ssl: True
     verify_mode: 'CERT_NONE'
   register: ccm_ssl_keyspace_status
+<<<<<<< HEAD
   ignore_errors: yes          
 
 
 
 
 >>>>>>> 3829b5b (Added cassandra_ssl integration tests via ccm)
+=======
+  ignore_errors: yes
+>>>>>>> 170f475 (Linting)
