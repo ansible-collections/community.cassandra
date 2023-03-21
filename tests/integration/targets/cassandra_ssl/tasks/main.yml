@@ -56,10 +56,14 @@
     state: present
 
 - set_fact:
+<<<<<<< HEAD
     ccm_cmd: /usr/local/bin/ccm
 <<<<<<< HEAD
 >>>>>>> 3829b5b (Added cassandra_ssl integration tests via ccm)
 =======
+=======
+    # ccm_cmd: /usr/local/bin/ccm
+>>>>>>> 4c0014a (Changed cassandra.crt format and removed ccm explicit path)
     cassandra_version: 3.11.14
 >>>>>>> 259ec57 (Set cassandra_version fact for ccm)
 
