@@ -95,10 +95,10 @@
   retries: 3
 
 - name: Install cassandra yum package
-  dnf:
+  yum:
     name: "{{ cassandra_yum_pkg }}"
     state: present
-    allowerasing: yes
+    #allowerasing: yes
   when:
     - ansible_os_family == 'RedHat'
   notify:
