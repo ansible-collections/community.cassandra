@@ -175,25 +175,25 @@
     PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ant
   with_items: "{{ cassandra_nodes }}"
 
-# - name: Update endpoint_snitch
-#   lineinfile:
-#     path: "/home/cassandra/config/test/{{ item.node }}/conf/cassandra.yaml"
-#     regexp: "^endpoint_snitch"
-#     line: "endpoint_snitch: GossipingPropertyFileSnitch"
-#   with_items: "{{ cassandra_nodes }}"
-#   no_log: yes
+- name: Update endpoint_snitch
+  lineinfile:
+    path: "/home/cassandra/config/test/{{ item.node }}/conf/cassandra.yaml"
+    regexp: "^endpoint_snitch"
+    line: "endpoint_snitch: GossipingPropertyFileSnitch"
+  with_items: "{{ cassandra_nodes }}"
+  no_log: yes
 
-# - name: Update rack info
-#   copy:
-#     content: |
-#       dc={{ item.dc }}
-#       rack=rack1
-#     dest: /home/cassandra/config/test/{{ item.node }}/conf/cassandra-rackdc.properties
-#   with_items: "{{ cassandra_nodes }}"
+- name: Update rack info
+  copy:
+    content: |
+      dc={{ item.dc }}
+      rack=rack1
+    dest: /home/cassandra/config/test/{{ item.node }}/conf/cassandra-rackdc.properties
+  with_items: "{{ cassandra_nodes }}"
 
-# - set_fact:
-#     cassandra_node_delay: 120
-#   when: ansible_os_family == "RedHat"
+- set_fact:
+    cassandra_node_delay: 120
+  when: ansible_os_family == "RedHat"
 
 - name: Start the ccm cluster
 <<<<<<< HEAD
