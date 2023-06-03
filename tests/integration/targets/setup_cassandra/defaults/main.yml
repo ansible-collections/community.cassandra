@@ -12,7 +12,7 @@ cassandra_yum:
   gpgkey: "https://www.apache.org/dist/cassandra/KEYS"
 
 cassandra_deb:
-  repo: deb http://www.apache.org/dist/cassandra/debian {{ cassandra_version }} main
+  repo: deb https://debian.cassandra.apache.org {{ cassandra_version }} main
   gpgkey: "https://www.apache.org/dist/cassandra/KEYS"
 
 cassandra_yum_pkg: cassandra
