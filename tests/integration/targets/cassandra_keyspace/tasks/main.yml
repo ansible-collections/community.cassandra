@@ -29,7 +29,7 @@
 
 - name: Install cassandra-driver
   pip:
-    name: cassandra-driver
+    name: "cassandra-driver{{ ansible_python_version.startswith('2.7') | ternary('==3.26.*', '') }}"
   environment:
     CASS_DRIVER_NO_CYTHON: 1
 

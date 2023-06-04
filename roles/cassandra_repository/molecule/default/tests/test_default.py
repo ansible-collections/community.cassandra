@@ -54,7 +54,7 @@ def test_debian_cassandra_repository_file(host):
         assert f.user == 'root'
         assert f.group == 'root'
         assert f.mode == 0o644
-        assert f.content_string.strip() == "deb http://www.apache.org/dist/cassandra/debian {0} main".format(cassandra_version)
+        assert f.content_string.strip() == "deb https://debian.cassandra.apache.org {0} main".format(cassandra_version)
 
 
 def test_debian_apt_search(host):
