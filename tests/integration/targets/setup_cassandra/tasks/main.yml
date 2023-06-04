@@ -179,8 +179,6 @@
     - ansible_os_family == "Debian"
   no_log: yes
 
-- shell: cat /etc/cassandra/cassandra.yaml
-
 - name: Set audit_logging_options.allow_nodetool_archive_command
   ansible.builtin.blockinfile:
     path: /etc/cassandra/cassandra.yaml

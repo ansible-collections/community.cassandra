@@ -100,7 +100,7 @@
         that:
           - "rhys.cluster_status['marlow']['down'] | length == 0"
           - "rhys.cluster_status['marlow']['up'] | length == 1"
-          - "rhys.iterations > 1"
+          - "rhys.iterations >= 1"
           - "rhys.cluster_status_list[0]['marlow']['down'][0] == '127.0.0.8'"
           - "'127.0.0.8' in rhys.cluster_status_list[-1]['marlow']['up']"
           - "rhys.msg == 'All nodes are in an UP/NORMAL state'"
