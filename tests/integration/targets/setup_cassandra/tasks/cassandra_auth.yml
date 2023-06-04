@@ -122,7 +122,7 @@
     name: "cassandra-driver{{ ansible_python_version.startswith('2.7') | ternary('==3.26.*', '') }}"
   environment:
     CASS_DRIVER_NO_CYTHON: 1
-  when: "cassandra_version.startswith('4')"
+  #when: "cassandra_version.startswith('4')" why is this here?
 
 - name: Test cqlsh access with default admin user
   command: cqlsh localhost -u cassandra -p cassandra --execute "DESC KEYSPACES"

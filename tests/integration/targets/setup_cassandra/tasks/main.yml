@@ -112,6 +112,7 @@
   block:
     - ansible.builtin.shell: update-alternatives --install /usr/bin/python python /usr/bin/python2.7 1
     - ansible.builtin.shell: update-alternatives --set python /usr/bin/python2.7
+    - ansible.builtin.shell: rm /usr/bin/python && ln -s /usr/bin/python2.7 /usr/bin/python
     - set_fact:
         ansible_python_interpreter: /usr/bin/python2.7
   when:
