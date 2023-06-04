@@ -185,6 +185,8 @@
     block: |
       audit_logging_options:
         allow_nodetool_archive_command: true
+      full_query_logging_options:
+        allow_nodetool_archive_command: true
   when: "cassandra_version[0] | int >= 4"
 
 - name: Adjust heap size
