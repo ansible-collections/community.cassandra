@@ -69,4 +69,9 @@ releases:
     changes:
       release_summary: Maintenance release
       bugfixes:
-        - 239 - cassandra_role - Adds quoting to role name to support special characters in the role name, i.e. my-app-role.  
+        - 239 - cassandra_role - Adds quoting to role name to support special characters in the role name, i.e. my-app-role. 
+  1.2.4:
+    changes:
+      release_summary: Maintenance release
+    bugfixes:
+      - 244 cassandra_repository - Update APT Repository url.

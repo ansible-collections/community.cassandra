@@ -4,6 +4,19 @@ community.cassandra Release Notes
 
 .. contents:: Topics
 
+v1.2.4:
+=======
+
+Release Summary
+---------------
+
+Maintenance release
+
+Bug Fixes
+---------
+
+- 244 cassandra_repository - Update APT Repository url.
+
 v1.2.3:
 =======
 
