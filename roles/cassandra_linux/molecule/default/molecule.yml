@@ -25,10 +25,10 @@ platforms:
     image: debian:buster
     command: /sbin/init
     privileged: True
-  - name: debian_stretch
-    image: debian:stretch
-    command: /sbin/init
-    privileged: True
+  #- name: debian_stretch
+  #  image: debian:stretch
+  #  command: /sbin/init
+  #  privileged: True
 provisioner:
   name: ansible
   lint:

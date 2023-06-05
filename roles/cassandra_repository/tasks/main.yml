@@ -34,7 +34,7 @@
 
 - name: Ensure Cassandra apt repository exists (Debian & Ubuntu)
   apt_repository:
-    repo: "deb http://www.apache.org/dist/cassandra/debian {{ cassandra_version }} main"
+    repo: "deb https://debian.cassandra.apache.org {{ cassandra_version }} main"
     state: present
     filename: "cassandra-{{ cassandra_version }}"
   retries: 3
