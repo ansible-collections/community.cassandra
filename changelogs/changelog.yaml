@@ -73,5 +73,5 @@ releases:
   1.2.4:
     changes:
       release_summary: Maintenance release
-    bugfixes:
-      - 244 cassandra_repository - Update APT Repository url.
+      bugfixes:
+        - 244 cassandra_repository - Update APT Repository url.
