@@ -28,20 +28,14 @@
     name: epel-release
   when: ansible_os_family == "RedHat"
 
+- name: Upgrade pip
+  shell: pip3 install -U pip  
+
 - name: Install cassandra-driver
   pip:
     name: cassandra-driver
   environment:
-    CASS_DRIVER_NO_CYTHON: 1
-
-- name: Install ccm via pip
-  pip:
-    name: ccm
-    state: present
-
-- set_fact:
-    # ccm_cmd: /usr/local/bin/ccm
-    cassandra_version: 3.11.14
+    CASS_DRIVER_NO_CYTHON: 1    
 
 - name: Ensure Cassandra service from setup_cassandra isn't running
   service:
@@ -66,26 +60,26 @@
     group: cassandra
     mode: '0644'
   with_items:
-    - cassandra.crt
-    - cassandra.pem
-    - client_cert.pem
-    - client_key.pem
+    - ssl-test.cer.pem
+    - ssl-test.key.pem
     - keystore.jks
     - truststore.jks
+    - cassandra.crt
 
 - name: Remove default test cluster from CCM to allow testing for SSL enabled cluster
-  ansible.builtin.shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd }} remove test > /dev/null\""
+  shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd }} clear test > /dev/null\""
   become_user: cassandra
   args:
     chdir: /home/cassandra
   environment:
     CCM_CONFIG_DIR: "/home/cassandra/config"
     CASSANDRA_HOME: "/home/cassandra"
+    JAVA_TOOL_OPTIONS: "-Dcom.sun.jndi.rmiURLParsing=legacy"
     PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ant/bin
   ignore_errors: yes      
 
 - name: Create SSL enabled Cassandra cluster via ccm tool
-  ansible.builtin.shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd }} create ssl-test-cluster -v {{ cassandra_version }} --ssl /home/ssl-test-cluster/ > /dev/null\""
+  shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd }} create ssl-test-cluster -v {{ cassandra_version }} --ssl /home/ssl-test-cluster/ > /dev/null\""
   become_user: cassandra
   args:
     chdir: /home/cassandra
@@ -95,7 +89,7 @@
     PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ant/bin  
 
 - name: Add nodes to the Cassandra Cluster
-  ansible.builtin.shell: "sudo -E -u cassandra bash -c '{{ ccm_cmd }} add {{ item.node }} -i {{ item.ip }} -j {{ item.port }} -b --data-center={{ item.dc }} --remote-debug-port {{ item.debug_port }} {{ item.args }}'"
+  shell: "sudo -E -u cassandra bash -c '{{ ccm_cmd }} add {{ item.node }} -i {{ item.ip }} -j {{ item.port }} -b --data-center={{ item.dc }} --remote-debug-port {{ item.debug_port }} {{ item.args }}'"
   become_user: cassandra
   args:
     chdir: /home/cassandra
@@ -126,18 +120,20 @@
   when: ansible_os_family == "RedHat"
 
 - name: Start the ccm cluster
-  ansible.builtin.shell: sudo -E -u cassandra bash -c "{{ ccm_cmd }} start ssl-test-cluster --root"
+  shell: sudo -E -u cassandra bash -c "{{ ccm_cmd }} start ssl-test-cluster --require_client_auth --root"
   become_user: cassandra
   args:
     chdir: /home/cassandra
   environment:
     CCM_CONFIG_DIR: "/home/cassandra/config"
     CASSANDRA_HOME: "/home/cassandra"
+    JAVA_TOOL_OPTIONS: "-Dcom.sun.jndi.rmiURLParsing=legacy"
     PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ant/bin
     CCM_CLUSTER_START_DEFAULT_TIMEOUT: 600
+  ignore_errors: yes      
 
 - name: Get cluster status
-  ansible.builtin.shell: sudo -E -u cassandra bash -c "{{ ccm_cmd }} status"
+  shell: sudo -E -u cassandra bash -c "{{ ccm_cmd }} status"
   become_user: cassandra
   args:
     chdir: /home/cassandra
@@ -161,9 +157,63 @@
 # Creating a keyspace with ssl=True and verify_mode=CERT_NONE on an SSL enabled cluster should succeed
 - name: Check keyspace creation on an SSL cluster
   cassandra_keyspace:
-    name: ccmsslkeyspace
+    name: ccmsslkeyspace_cert_none
     state: present
     ssl: True
     verify_mode: 'CERT_NONE'
-  register: ccm_ssl_keyspace_status
-  ignore_errors: yes
+  ignore_errors: yes 
+  
+- name: Get output of DESC KEYSPACE ccmsslkeyspace_cert_none
+  shell: export SSL_CERTFILE=/home/ssl-test-cluster/ssl-test.cer.pem; cqlsh --ssl --execute "DESC KEYSPACE ccmsslkeyspace_cert_none"
+  register: ccmsslkeyspace_cert_none
+
+- name: Assert ccmsslkeyspace_cert_none exists 1
+  assert:
+    that:
+      - "'\\nCREATE KEYSPACE ccmsslkeyspace_cert_none WITH replication = {\\'class\\': \\'SimpleStrategy\\', \\'replication_factor\\': \\'1\\'}  AND durable_writes = true;' == ccmsslkeyspace_cert_none.stdout"  
+
+- name: Sleep for 3600 seconds and continue with play
+  ansible.builtin.wait_for:
+    timeout: 3600
+  delegate_to: localhost      
+
+# Creating a keyspace with ssl=True and verify_mode=CERT_OPTIONAL on an SSL enabled cluster should succeed
+- name: Check keyspace creation on an SSL cluster
+  cassandra_keyspace:
+    name: ccmsslkeyspace_cert_optional
+    state: present
+    ssl: True
+    verify_mode: 'CERT_OPTIONAL'
+  # ignore_errors: yes 
+  
+- name: Get output of DESC KEYSPACE ccmsslkeyspace_cert_optional
+  shell: export SSL_CERTFILE=/home/ssl-test-cluster/ssl-test.cer.pem; cqlsh --ssl --execute "DESC KEYSPACE ccmsslkeyspace_cert_optional"
+  register: ccmsslkeyspace_cert_optional
+
+- name: Assert ccmsslkeyspace_cert_optional exists 1
+  assert:
+    that:
+      - "'\\nCREATE KEYSPACE ccmsslkeyspace_cert_optional WITH replication = {\\'class\\': \\'SimpleStrategy\\', \\'replication_factor\\': \\'1\\'}  AND durable_writes = true;' == ccmsslkeyspace_cert_optional.stdout"    
+
+# Creating a keyspace with ssl=True and verify_mode=CERT_REQUIRED on an SSL enabled cluster should succeed
+- name: Check keyspace creation on an SSL cluster
+  cassandra_keyspace:
+    name: ccmsslkeyspace_cert_required
+    state: present
+    ssl: True
+    verify_mode: 'CERT_REQUIRED'
+  # ignore_errors: yes 
+  
+- name: Get output of DESC KEYSPACE ccmsslkeyspace_cert_required
+  shell: export SSL_CERTFILE=/home/ssl-test-cluster/ssl-test.cer.pem; cqlsh --ssl --execute "DESC KEYSPACE ccmsslkeyspace_cert_required"
+  register: ccmsslkeyspace_cert_required
+
+- name: Assert ccmsslkeyspace_cert_required exists 1
+  assert:
+    that:
+      - "'\\nCREATE KEYSPACE ccmsslkeyspace_cert_required WITH replication = {\\'class\\': \\'SimpleStrategy\\', \\'replication_factor\\': \\'1\\'}  AND durable_writes = true;' == ccmsslkeyspace_cert_required.stdout"          
+
+- name: Sleep for 3600 seconds and continue with play
+  ansible.builtin.wait_for:
+    timeout: 3600
+  delegate_to: localhost 

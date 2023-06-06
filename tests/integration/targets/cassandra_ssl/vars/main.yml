@@ -42,10 +42,10 @@ cassandra_nodes:  # Changes in 4.0 means we need to add nodes to certain DCs for
     port: 7700
     debug_port: 2006
     args: "--seeds"
-  - dc: "marlow"
-    node: "marlow1"
-    ip: "127.0.0.8"
-    port: 7800
-    debug_port: 2007
-    args: ""
+  # - dc: "marlow"
+  #   node: "marlow1"
+  #   ip: "127.0.0.8"
+  #   port: 7800
+  #   debug_port: 2007
+  #   args: ""
 cassandra_service: cassandra  

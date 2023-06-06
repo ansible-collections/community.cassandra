@@ -36,6 +36,10 @@ options:
       - 'CERT_OPTIONAL'
       - 'CERT_REQUIRED'
     default: 'CERT_REQUIRED'
+  ssl_verify_location:
+    description: The SSL CA chain or certificate location to confirm supplied certificate validity (required when verify_mode is set to CERT_OPTIONAL or CERT_REQUIRED)
+    type: str
+    default: `/home/cassandra/rootca.crt`
   login_host:
     description:
       - The Cassandra hostname.
@@ -44,7 +48,7 @@ options:
     type: list
     elements: str
   login_port:
-    description: The Cassandra poret.
+    description: The Cassandra port.
     type: int
     default: 9042
   name:
@@ -147,7 +151,7 @@ except Exception:
 from ansible.module_utils.basic import AnsibleModule
 
 try:
-    from ssl import SSLContext, PROTOCOL_TLS
+    from ssl import SSLContext, PROTOCOL_TLS, CERT_REQUIRED
     import ssl as ssl_lib
     HAS_SSL_LIBRARY = True
 except Exception:
@@ -258,6 +262,7 @@ def main():
                              choices=['CERT_NONE',
                                       'CERT_OPTIONAL',
                                       'CERT_REQUIRED']),
+            ssl_verify_location=dict(type='str', default='/home/cassandra/rootca.crt'),
             login_host=dict(type='list', elements='str', default=None),
             login_port=dict(type='int', default=9042),
             name=dict(type='str', required=True),
@@ -301,6 +306,8 @@ def main():
                " install ssl.")
         module.fail_json(msg=msg)
 
+    verify_mode=module.params['verify_mode']    
+
     result = dict(
         changed=False,
         keyspace=name,
@@ -320,6 +327,8 @@ def main():
         if ssl is True:
             ssl_context = SSLContext(PROTOCOL_TLS)
             ssl_context.verify_mode = getattr(ssl_lib, module.params['verify_mode'])
+            if verify_mode in ('CERT_REQUIRED', 'CERT_OPTIONAL'):
+                ssl_context.load_verify_locations(module.params['ssl_verify_location'])
         cluster = Cluster(login_host,
                           port=login_port,
                           auth_provider=auth_provider,
