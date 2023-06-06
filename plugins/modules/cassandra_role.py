@@ -7,9 +7,15 @@ from __future__ import absolute_import, division, print_function
 
 DOCUMENTATION = r'''
 ---
-module: cassandra_role
-short_description: Manage roles on your Cassandra cluster.
-description: Manage roles on your Cassandra Cluster.
+module: cassandra_keyspace
+short_description: Manage keyspaces on your Cassandra cluster.
+description:
+   - Manage keyspaces on your Cassandra Cluster.
+   - Keyspace can be created to use SimpleStrategy or NetworkTopologyStrategy.
+   - "Keyspace modifications are supported, for example durable \
+      writes, replication factor or data centre changes but it is not \
+      supported to migrate between replication strategies \
+      i.e. NetworkTopologyStrategy -> SimpleStrategy."
 author: Rhys Campbell (@rhysmeister)
 options:
   login_user:
@@ -29,140 +35,101 @@ options:
       - 'CERT_NONE'
       - 'CERT_OPTIONAL'
       - 'CERT_REQUIRED'
-    default: 'CERT_REQUIRED'
+    default: 'CERT_NONE'
   ssl_verify_location:
-    description: The SSL CA chain or certificate location to confirm supplied certificate validity (required when verify_mode is set to CERT_OPTIONAL or CERT_REQUIRED)
+    description:
+        The SSL CA chain or certificate location to confirm supplied certificate validity
+        (required when verify_mode is set to CERT_OPTIONAL or CERT_REQUIRED)
     type: str
     default: ''
   login_host:
-    description: The Cassandra hostname.
+    description:
+      - The Cassandra hostname.
+      - If unset the instance will check 127.0.0.1 for a C* instance.
+      - Otherwise the value returned by socket.getfqdn() is used.
     type: list
     elements: str
   login_port:
-    description: The Cassandra port.
+    description: The Cassandra poret.
     type: int
     default: 9042
   name:
-    description: The name of the role to create or manage.
+    description: The name of the keyspace to create or manage.
     type: str
     required: true
   state:
-    description: The desired state of the role.
+    description: The desired state of the keyspace.
     type: str
     choices:
       - "present"
-      - "absent"
+      -  "absent"
     required: true
-  super_user:
+  replication_factor:
     description:
-      - If the user is a super user or not.
-    type: bool
-    default: false
-  login:
+      - The total number of copies of your keyspace data.
+      - The keyspace is created with SimpleStrategy.
+      - If data_centres is set this parameter is ignored.
+      - If not supplied the default value will be used.
+    type: int
+    default: 1
+  durable_writes:
     description:
-      - True allows the role to log in.
-      - Use true to create login accounts for internal authentication, PasswordAuthenticator or DSE Unified Authenticator.
+      - Enable durable writes for the keyspace.
+      - If not supplied the default value will be used.
     type: bool
     default: true
-  password:
+  data_centres:
     description:
-      - The password for the role.
-    type: str
-  options:
-    description:
-      - Reserved for use with authentication plug-ins. Refer to the authenticator documentation for details.
+      - The keyspace will be created with NetworkTopologyStrategy.
+      - Specify your data centres, along with replication_factor, as key-value pairs.
     type: dict
-  data_centers:
-    description:
-      - Only relevant if a network_authorizer has been configured.
-      - Specify data centres as keys of this dict.
-      - Can specify a key as 'all' although this implicity assumed by Cassandra if not supplied.
-    type: dict
-    aliases:
-      - data_centres
-  keyspace_permissions:
-    description:
-      - Grant privileges on keyspace objects.
-      - Specify keyspaces as keys of this dict.
-      - Permissions supplied as a list to the keyspace keys.
-      - Valid permissions at keyspace level are as follows; ALL PERMISSIONS, CREATE, ALTER, AUTHORIZE, DROP, MODIFY, SELECT
-      - A special key 'all_keyspaces' can be supplied to assign permissions to all keyspaces.
-    type: dict
-  roles:
-    description:
-      - One or more roles to grant to this user or role.
-    type: list
-    elements: str
-  debug:
-    description:
-      - Additional debug output.
-    type: bool
-    default: false
+
+requirements:
+  - cassandra-driver
 '''
 
 EXAMPLES = r'''
-- name: Create a role
-  community.cassandra.cassandra_role:
-    name: app_user
-    password: 'secretZHB78'
+- name: Create a keyspace
+  community.cassandra.cassandra_keyspace:
+    name: mykeyspace
     state: present
-    login: yes
 
-- name: Remove a role
-  community.cassandra.cassandra_role:
-    name: app_user
+- name: Remove a keyspace
+  community.cassandra.cassandra_keyspace:
+    name: mykeyspace
     state: absent
 
-- name: Create a super user
-  community.cassandra.cassandra_role:
-    name: admin
-    password: 'BigSecretUser2019'
+- name: Create a keyspace with RF 3
+  community.cassandra.cassandra_keyspace:
+    name: mykeyspace
     state: present
-    login: yes
-    super_user: yes
+    replication_factor: 3
 
-- name: Create a user with access only to certain data centres
-  community.cassandra.cassandra_role:
-    name: rhys
-    password: 'secret'
-    state: present
-    login: yes
+- name: Create a keyspace with network topology
+  community.cassandra.cassandra_keyspace:
+    name: mykeyspace
     data_centres:
-      london:
-      zurich:
-
-- name: Create a user with specific permissions for specific keyspaces
-  community.cassandra.cassandra_role:
-    name: rhys
-    password: 'secret'
-    state: present
-    login: yes
-    permissions:
-      mykeyspace:
-        - "ALL PERMISSIONS" # Same as GRANT ALL PERMISSIONS ON mykeyspace TO rhys;
-      mydummy:
-        - "SELECT"
-        - "EXECUTE" # Same as GRANT SELECT, EXECUTE ON mydummy TO rhys;
-      all_keyspaces:
-        - "SELECT" # Same as GRANT SELECT ON ALL KEYSPACES TO rhys;
+      london: 3
+      paris: 3
+      tokyo: 1
+      new_york: 1
 '''
 
 
 RETURN = '''
 changed:
-  description: Whether the module has changed the role.
+  description: Whether the module has changed the keyspace.
   returned: on success
   type: bool
 cql:
-  description: The cql used to create or alter the role.
+  description: The cql used to change the keyspace.
   returned: changed
   type: str
-  sample: "ALTER ROLE admin /
-   WITH SUPERUSER = true /
-   AND LOGIN = true /
-   AND PASSWORD = 'XXXXXXXX'"
-role:
-  description: The role operated on.
+  sample: "ALTER KEYSPACE multidc_keyspace WITH REPLICATION = { 'class' :/
+   'NetworkTopologyStrategy', 'new_york' : 2,'tokyo' : 1,'zurich' : 3 } /
+   AND DURABLE_WRITES = True"
+keyspace:
+  description: The keyspace operated on.
   returned: on success
   type: str
 msg:
@@ -172,15 +139,13 @@ msg:
 '''
 
 __metaclass__ = type
+import re
+import socket
 import os.path
 
-
 try:
-    from cassandra.cluster import Cluster
+    from cassandra.cluster import Cluster, AuthenticationFailed
     from cassandra.auth import PlainTextAuthProvider
-    from cassandra import AuthenticationFailed
-    from cassandra.query import dict_factory
-    from cassandra import InvalidRequest
     HAS_CASSANDRA_DRIVER = True
 except Exception:
     HAS_CASSANDRA_DRIVER = False
@@ -199,355 +164,93 @@ except Exception:
 # =========================================
 
 
-# Does the role exist on the cluster?
-def role_exists(session, role):
-    cql = "SELECT role FROM system_auth.roles WHERE role = '{0}'".format(role)
-    roles = session.execute(cql)
-    s = False
-    if len(list(roles)) > 0:
-        s = True
-    return s
-
-
-def get_role_properties(session, role):
-    cql = "SELECT role, can_login, is_superuser, member_of, salted_hash FROM system_auth.roles WHERE role = '{0}'".format(role)
-    session.row_factory = dict_factory
-    role_properties = session.execute(cql)
-    return role_properties[0]
-
-
-def is_role_changed(role_properties, super_user, login, password,
-                    options, data_centers):
-    '''
-    Determines whether a role has changed and therefore needs /
-    to be changed with an ALTER ROLE statement.
-    role_properties - Dictionary created from the system_auth.roles keyspace?
-    super_user - User provided boolean value.
-    login - User provided boolean value.
-    password - User provided string value. Not currently dealt with.
-    options - User provided value. Not currently dealt with.
-    data_centers - User provided dictionary value. Not currently dealt with.
-    '''
-    changed = False
-    if role_properties['is_superuser'] != super_user:
-        changed = True
-    elif role_properties['can_login'] != login:
-        changed = True
-    return changed
-
-
-def create_alter_role(module, session, role, super_user, login, password,
-                      options, data_centers, alter_role):
-    if alter_role is False:
-        cql = "CREATE ROLE '{0}' ".format(role)
+# Does the keyspace exists on the cluster? TODO Better to use cluster.metadata.keyspaces here?
+def keyspace_exists(session, keyspace):
+    server_version = session.execute("SELECT release_version FROM system.local WHERE key='local'")[0]
+    if int(server_version.release_version[0]) >= 3:
+        cql = "SELECT keyspace_name FROM system_schema.keyspaces"
     else:
-        cql = "ALTER ROLE '{0}' ".format(role)
-    cql += "WITH SUPERUSER = {0} ".format(super_user)
-    cql += "AND LOGIN = {0} ".format(login)
-    if password is not None:
-        cql += "AND PASSWORD = '{0}' ".format(password)
-    if options is not None:
-        cql += "AND OPTIONS = {0}".format(str(options))
-    if data_centers is not None:
-        for dc in data_centers:
-            if str(dc.upper()) == "ALL" and len(data_centers) == 1:
-                cql += " AND ACCESS TO ALL DATACENTERS"
-                break
-            else:
-                if len(data_centers) == 1:
-                    cql += " AND ACCESS TO DATACENTERS {{'{0}'}}".format(str(dc))
-                    break
-                else:
-                    cql += " AND ACCESS TO DATACENTERS {{'{0}'}}".format("','".join(data_centers))
-                    break
+        cql = "SELECT keyspace_name FROM system.schema_keyspaces"
+    keyspaces = session.execute(cql)
+    keyspace_exists = False
+    for ks in keyspaces:
+        if ks.keyspace_name == keyspace:
+            keyspace_exists = True
+    return keyspace_exists
+
+
+def get_keyspace(cluster, keyspace):
+    return cluster.metadata.keyspaces[keyspace].export_as_string()
+
+
+def create_alter_keyspace(module, session, keyspace, replication_factor, durable_writes, data_centres, is_alter):
+    if is_alter is False:
+        cql = "CREATE KEYSPACE {0} ".format(keyspace)
+    else:
+        cql = "ALTER KEYSPACE {0} ".format(keyspace)
+    if data_centres is not None:
+        cql += "WITH REPLICATION = { 'class' : 'NetworkTopologyStrategy', "
+        for dc in data_centres:
+            cql += " '{0}' : {1},".format(str(dc), data_centres[dc])
+        cql = cql[:-1] + " }"
+    else:
+        cql += "WITH REPLICATION = {{ 'class' : 'SimpleStrategy', 'replication_factor': {0} }}".format(replication_factor)
+    cql += " AND DURABLE_WRITES = {0}".format(durable_writes)
+    session.execute(cql)
     return cql
 
 
-def create_role(session, role):
-    ''' Used for creating roles that are assigned to other users
-    '''
-    cql = "CREATE ROLE '{0}'".format(role)
-    return cql
-
-
-def grant_role(session, role, grantee):
-    ''' Assign roles to other roles
-    '''
-    cql = "GRANT '{0}' TO '{1}'".format(role,
-                                        grantee)
-    return cql
-
-
-def revoke_role(session, role, grantee):
-    ''' Revoke a role
-    '''
-    cql = "REVOKE '{0}' FROM '{1}'".format(role,
-                                           grantee)
-    return cql
-
-
-def drop_role(session, role):
-    cql = "DROP ROLE '{0}'".format(role)
-    return cql
-
-
-def validate_keyspace_permissions(keyspace_permissions):
-    '''
-    All keyspace permissions must exist in the perms list
-    '''
-    perms = [
-        "ALL PERMISSIONS",
-        "CREATE",
-        "ALTER",
-        "AUTHORIZE",
-        "DROP",
-        "MODIFY",
-        "SELECT"
-    ]
-
-    invalid_dict = {}
-
-    for k in keyspace_permissions.keys():
-        for v in keyspace_permissions[k]:
-            if v not in perms:
-                return False
+def drop_keyspace(session, keyspace):
+    cql = "DROP KEYSPACE %s" % keyspace
+    session.execute(cql)
     return True
 
 
-def grant_permission(session, permission, role, keyspace):
-    if keyspace == "all_keyspaces":
-        cql = "GRANT {0} ON ALL KEYSPACES TO '{1}'".format(permission,
-                                                           role)
-    else:
-        cql = "GRANT {0} ON KEYSPACE {1} TO '{2}'".format(permission,
-                                                          keyspace,
-                                                          role)
-    return cql
-
-
-def revoke_permission(session, permission, role, keyspace):
-    cql = "REVOKE {0} ON KEYSPACE {1} FROM '{2}'".format(permission,
-                                                         keyspace,
-                                                         role)
-    return cql
-
-
-def list_role_permissions(session, role):
-    '''
-    Returned by LIST ALL OF cassandra;
-
-     role      | username  | resource               | permission
-    -----------+-----------+------------------------+------------
-     cassandra | cassandra |        <all keyspaces> |     SELECT
-     cassandra | cassandra |        <all keyspaces> |     MODIFY
-     cassandra | cassandra |        <keyspace rhys> |      ALTER
-     cassandra | cassandra |        <keyspace rhys> |       DROP
-     cassandra | cassandra |        <keyspace rhys> |     SELECT
-     cassandra | cassandra |        <keyspace rhys> |     MODIFY
-     cassandra | cassandra |        <keyspace rhys> |  AUTHORIZE
-     cassandra | cassandra | <keyspace system_auth> |     SELECT
-     cassandra | cassandra | <keyspace system_auth> |     MODIFY
-
-
-
-     Returns a resultset object of dicts
-    '''
-    cql = "LIST ALL OF '{0}'".format(role)
-    session.row_factory = dict_factory
+def get_keyspace_config(module, cluster, keyspace):
+    cql = get_keyspace(cluster, keyspace)
+    dict_regexp = re.compile(r'{(.*)}')
+    durable_writes_regexp = re.compile('DURABLE_WRITES = (True|False);')
+    repl_settings = re.search(dict_regexp, cql).group(0)
     try:
-        role_permissions = session.execute(cql)
-    except InvalidRequest as excep:
-        # excep_code = type(excep).__name__
-        # if excep_code == 2200: # User does not exist
-        role_permissions = []
-    return role_permissions
+        dw = re.search(durable_writes_regexp, cql).group(0)
+    except AttributeError as excep:
+        dw = "true"  # default to true
+    keyspace_config = eval(repl_settings)
+    keyspace_config['durable_writes'] = bool(dw.lower())
+    return keyspace_config
 
 
-def does_role_have_permission(role_permissions,
-                              permission,
-                              keyspace):
-    '''
-    Returns true if the permission is already assigned to the role.
-    ALTER DROP SELECT MODIFY AUTHORIZE CREATE - The result from "ALL PERMISSIONS"
-    '''
-    match_count = 0  # When 6 then the permission is matched
-    matched = False
-    all_permissions = [
-        "ALTER",
-        "DROP",
-        "SELECT",
-        "MODIFY",
-        "AUTHORIZE",
-        "CREATE"
-    ]
-    if keyspace == "all_keyspaces":
-        resource = "<all keyspaces>"
-    else:
-        resource = "<keyspace {0}>".format(keyspace)
-    for row in role_permissions:
-        if permission == "ALL PERMISSIONS":  # we need to check for CREATE ALTER DROP SELECT MODIFY AUTHORIZE
-            if row['permission'].strip() in all_permissions and row['resource'].strip() == resource:
-                match_count += 1
-        else:  # specific permission check
-            if row['permission'].strip() == permission and row['resource'].strip() == resource:
-                match_count = len(all_permissions)  # specific permission match straight away
-    if match_count == len(all_permissions):
-        matched = True
-    return matched
-
-
-def build_role_grants(session,
-                      role,
-                      roles):
-    '''
-    Builds the cql for granting and revoking roles from users
-    @session - Cassandra connection
-    @role - The role to grant or revoke roles from
-    @roles - The list of roles supplied via the module
-
-    Returns - A dictionary structure containing GRANT
-    and remove cql statements for roles
-    '''
-    roles_dict = {
-        "grant": set(),
-        "revoke": set()
-    }
-
-    role_permissions = list_role_permissions(session, role)
-
-    current_roles = set()
-    for permission in role_permissions:
-        if permission['role'] != role:
-            current_roles.add(permission['role'])
-        else:
-            pass  # We don't touch other perms here
-    # Revokes first
-    if current_roles is not None:
-        for r in current_roles:
-            if r not in roles:
-                cql = revoke_role(session,
-                                  r,
-                                  role)
-                roles_dict['revoke'].add(cql)
-    # grants
-    if roles is not None:
-        for r in roles:
-            if r not in current_roles:
-                cql = grant_role(session,
-                                 r,
-                                 role)
-                roles_dict['grant'].add(cql)
-    return roles_dict
-
-
-def build_role_permissions(session,
-                           keyspace_permissions,
-                           role):
-    '''
-    session - Cassandra cluster session.
-    keyspace_permissions - Dictionary containing new keyspace permissions
-    role - The Cassandra role name
-
-    Returns - A dictionary structure containing GRANT and remove cql statements
-
-    {
-        "grant": ["GRANT SELECT ON KEYSPACE rhys TO cassandra",
-                  "GRANT ALL PERMISSIONS ON KEYSPACE rhys TO admin"],
-        "revoke": ["REVOKE SELECT ON KEYSPACE rhys FROM app_user",
-                   "REVOKE ALL PERMISSIONS ON ALL KEYSPACES FROM legacy_app"]
-    }
-
-    # TODO - To support check mode we probably have to remove the sesssion.execs
-    # from here and run them elsewhere
-
-    '''
-
-    perms_dict = {
-        "grant": set(),
-        "revoke": set(),
-        "temp": set()
-    }
-
-    # Permissions to grant
-    if keyspace_permissions is not None:
-        for keyspace in keyspace_permissions.keys():
-            for permission in keyspace_permissions[keyspace]:
-                role_permissions = list_role_permissions(session,
-                                                         role)
-                bool = does_role_have_permission(role_permissions,
-                                                 permission,
-                                                 keyspace)
-                perms_dict['temp'].add("{0} {1} {2}".format(permission, keyspace, bool))
-
-                if bool:
-                    pass  # permission is already assigned
+def keyspace_is_changed(module, cluster, keyspace, replication_factor,
+                        durable_writes, data_centres):
+    cfg = get_keyspace_config(module, cluster, keyspace)
+    keyspace_definition_changed = False
+    if cfg['class'] == "SimpleStrategy":
+        if int(cfg['replication_factor']) != replication_factor or\
+                cfg['durable_writes'] != durable_writes:
+            keyspace_definition_changed = True
+    elif cfg['class'] == "NetworkTopologyStrategy":
+        # ls = [cfg, keyspace, replication_factor, durable_writes, data_centres]
+        # module.fail_json(msg=str(ls))
+        if cfg['durable_writes'] != durable_writes:
+            keyspace_definition_changed = True
+        else:  # check each dc here
+            for dc in data_centres:
+                if dc in cfg.keys():
+                    if int(data_centres[dc]) != int(cfg[dc]):
+                        keyspace_definition_changed = True
                 else:
-                    cql = grant_permission(session,
-                                           permission,
-                                           role,
-                                           keyspace)
-                    perms_dict['grant'].add(cql)
-    # If the all_keyspaces key does not exist and there are "<all keyspaces>"
-    # resources present we can revoke all
-    # Permissions to revoke from specific keyspaces
-    role_permissions = list_role_permissions(session, role)  # need to reset resultset
-    for permission in role_permissions:
-        if keyspace_permissions is not None:
-            for keyspace in keyspace_permissions.keys():
-                if permission['resource'] == "<all keyspaces>"\
-                        and "all_keyspaces" not in keyspace_permissions.keys()\
-                        and permission['role'] == role:
-                    cql = "REVOKE ALL PERMISSIONS ON ALL KEYSPACES FROM '{0}'".format(role)
-                    if cql not in perms_dict['revoke']:  # only do this the once
-                        perms_dict['revoke'].add(cql)
-                elif permission['resource'] == "<all keyspaces>" \
-                        and "ALL PERMISSIONS" in keyspace_permissions[keyspace]\
-                        and permission['role'] == role:
-                    # No revokes needed
-                    pass
-                elif permission['resource'].startswith('<keyspace') \
-                        and permission['role'] == role:
-                    ks = permission['resource'].split(' ')[1].replace('>', '').strip()
-                    if ks in keyspace_permissions.keys() \
-                            and permission['permission'] not in keyspace_permissions[ks] \
-                            and "ALL PERMISSIONS" not in keyspace_permissions[ks]:
-                        cql = revoke_permission(session,
-                                                permission['permission'],
-                                                role,
-                                                ks)
-                        perms_dict['revoke'].add(cql)
-            # This is for the case when the keyspace permission has not been provided
-            if permission['resource'].startswith('<keyspace') \
-                    and permission['role'] == role \
-                    and permission['resource'].split(' ')[1].replace('>', '') not in keyspace_permissions.keys():
-                cql = revoke_permission(session,
-                                        permission['permission'],
-                                        role,
-                                        ks)
-                perms_dict['revoke'].add(cql)
-        else:
-            current_roles = set()
-            if permission['resource'].startswith('<keyspace') \
-                    and permission['role'] == role:  # We don't touch other permissions
-                ks = permission['resource'].split(' ')[1].replace('>', '')
-                cql = revoke_permission(session,
-                                        permission['permission'],
-                                        role,
-                                        ks)
-                perms_dict['revoke'].add(cql)
-    return perms_dict
-
-
-def process_role_permissions(session,
-                             keyspace_permissions,
-                             role):
-    cql_dict = build_role_permissions(session,
-                                      keyspace_permissions,
-                                      role)
-    return cql_dict
-
+                    keyspace_definition_changed = True
+            # If still false check for removed dc's
+            if keyspace_definition_changed is False:
+                for dc in cfg.keys():
+                    if dc not in data_centres and dc not in ["class", "durable_writes"]:
+                        keyspace_definition_changed = True
+    else:
+        module.fail_json("Unknown Replication strategy: {0}".format(cfg['class']))
+    return keyspace_definition_changed
 
 ############################################
+
 
 def main():
     module = AnsibleModule(
@@ -557,23 +260,18 @@ def main():
             ssl=dict(type='bool', default=False),
             verify_mode=dict(type='str',
                              required=False,
-                             default='CERT_REQUIRED',
+                             default='CERT_NONE',
                              choices=['CERT_NONE',
                                       'CERT_OPTIONAL',
                                       'CERT_REQUIRED']),
             ssl_verify_location=dict(type='str', default=''),
-            login_host=dict(type='list', elements='str'),
+            login_host=dict(type='list', elements='str', default=None),
             login_port=dict(type='int', default=9042),
             name=dict(type='str', required=True),
-            password=dict(type='str', required=False, no_log=True),
             state=dict(type='str', required=True, choices=['present', 'absent']),
-            super_user=dict(type='bool', default=False),
-            login=dict(type='bool', default=True),
-            options=dict(type='dict'),
-            data_centers=dict(type='dict', aliases=['data_centres']),
-            keyspace_permissions=dict(type='dict', no_log=False),
-            roles=dict(type='list', elements='str'),
-            debug=dict(type='bool', default=False)),
+            replication_factor=dict(type='int', default=1),
+            durable_writes=dict(type='bool', default=True),
+            data_centres=dict(type='dict')),
         supports_check_mode=True
     )
 
@@ -585,20 +283,24 @@ def main():
 
     login_user = module.params['login_user']
     login_password = module.params['login_password']
-    ssl = module.params['ssl']
     login_host = module.params['login_host']
     login_port = module.params['login_port']
+    ssl = module.params['ssl']
+    if login_host is None:
+        login_host = []
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        result = s.connect_ex(('127.0.0.1', login_port))
+        if result == 0:
+            login_host.append('127.0.0.1')
+        else:
+            login_host.append(socket.getfqdn())
+
     name = module.params['name']
-    role = name
-    password = module.params['password']
+    keyspace = name
     state = module.params['state']
-    super_user = module.params['super_user']
-    login = module.params['login']
-    options = module.params['options']
-    data_centers = module.params['data_centers']
-    keyspace_permissions = module.params['keyspace_permissions']
-    roles = module.params['roles']
-    debug = module.params['debug']
+    replication_factor = module.params['replication_factor']
+    durable_writes = module.params['durable_writes']
+    data_centres = module.params['data_centres']
 
     if HAS_SSL_LIBRARY is False and ssl is True:
         msg = ("This module requires the SSL python"
@@ -606,34 +308,27 @@ def main():
                " install ssl.")
         module.fail_json(msg=msg)
 
-    verify_mode=module.params['verify_mode']
-    ssl_verify_location=module.params['ssl_verify_location']
+    verify_mode = module.params['verify_mode']
+    ssl_verify_location = module.params['ssl_verify_location']
 
-    if verify_mode in ('CERT_REQUIRED', 'CERT_OPTIONAL') and module.params['ssl_verify_location']=='':
-        msg = ("When verify mode is set to CERT_REQUIRED or CERT_OPTIONAL "
-                "ssl_verify_location is also required to be set and not empty")
+    if verify_mode in ('CERT_REQUIRED', 'CERT_OPTIONAL') and module.params['ssl_verify_location'] == '':
+        msg = ("When verify mode is set to CERT_REQUIRED or CERT_OPTIONAL"
+               " ssl_verify_location is also required to be set and not empty")
         module.fail_json(msg=msg)
 
     if verify_mode in ('CERT_REQUIRED', 'CERT_OPTIONAL') and os.path.exists(ssl_verify_location) is not True:
-        msg=("ssl_verify_location certificate: File not found")
+        msg = ("ssl_verify_location certificate: File not found")
         module.fail_json(msg=msg)
 
     result = dict(
         changed=False,
-        role=name,
+        keyspace=name,
     )
 
-    cql = None
-
-    # For now we won't change the role if it already exists unless the user forces it
-    # Need to figure out password hashing
-    # https://shiro.apache.org/configuration.html#Configuration-EncryptingPasswords
+    # For now we won't change the replication strategy & options if the keyspace already exists
+    # If and when we do we might only support updating the options rather than the replication class itself
 
     try:
-        if keyspace_permissions is not None:
-            if not validate_keyspace_permissions(keyspace_permissions):
-                module.fail_json(msg=("Invalid permission provided in the "
-                                 "keyspace_permission parameter."))
         auth_provider = None
         if login_user is not None:
             auth_provider = PlainTextAuthProvider(
@@ -651,161 +346,74 @@ def main():
                           auth_provider=auth_provider,
                           ssl_context=ssl_context)
         session = cluster.connect()
-    except AuthenticationFailed as auth_failed:
-        module.fail_json(msg="Authentication failed: {0}".format(auth_failed))
+    except AuthenticationFailed as excep:
+        module.fail_json(msg="Authentication failed: {0}".format(excep))
     except Exception as excep:
         module.fail_json(msg="Error connecting to cluster: {0}".format(excep))
 
-    has_role_changed = False
-
     try:
-        if debug:
-            result['role_exists'] = role_exists(session, role)
-        if login:  # Standard user
-            if role_exists(session, role):
-                # Has the role changed?
-                role_properties = get_role_properties(session,
-                                                      role)
-                has_role_changed = is_role_changed(role_properties,
-                                                   super_user,
-                                                   login,
-                                                   password,
-                                                   options,
-                                                   data_centers)
-                if debug:
-                    result['has_role_changed'] = has_role_changed
-                if module.check_mode:
-                    if state == "present":
-                        result['changed'] = has_role_changed
-                    elif state == "absent":
+        if keyspace_exists(session, keyspace):
+            if module.check_mode:
+                if state == "present":
+                    if keyspace_is_changed(module,
+                                           cluster,
+                                           keyspace,
+                                           replication_factor,
+                                           durable_writes,
+                                           data_centres):
+
                         result['changed'] = True
-                else:
-                    if state == "present":
-                        # create the role
-                        if has_role_changed:
-                            cql = create_alter_role(module,
+                    else:
+                        result['changed'] = False
+                elif state == "absent":
+                    result['changed'] = True
+            else:
+                if state == "present":
+                    if keyspace_is_changed(module,
+                                           cluster,
+                                           keyspace,
+                                           replication_factor,
+                                           durable_writes,
+                                           data_centres):
+
+                        cql = create_alter_keyspace(module,
                                                     session,
-                                                    role,
-                                                    super_user,
-                                                    login,
-                                                    password,
-                                                    options,
-                                                    data_centers,
-                                                    has_role_changed)
-                            session .execute(cql)
-                            result['changed'] = True
-                            result['cql'] = cql
-                    elif state == "absent":
-                        cql = drop_role(session, role)
-                        session.execute(cql)
+                                                    keyspace,
+                                                    replication_factor,
+                                                    durable_writes,
+                                                    data_centres,
+                                                    True)
                         result['changed'] = True
                         result['cql'] = cql
-            else:
-                if module.check_mode:
-                    if state == "present":
-                        result['changed'] = True
-                    if state == "absent":
+                    else:
                         result['changed'] = False
-                else:
-                    if state == "present":
-                        cql = create_alter_role(module,
+                elif state == "absent":
+                    drop_keyspace(session, keyspace)
+                    result['changed'] = True
+        else:
+            if module.check_mode:
+                if state == "present":
+                    result['changed'] = True
+                if state == "absent":
+                    result['changed'] = False
+            else:
+                if state == "present":
+                    cql = create_alter_keyspace(module,
                                                 session,
-                                                role,
-                                                super_user,
-                                                login,
-                                                password,
-                                                options,
-                                                data_centers,
+                                                keyspace,
+                                                replication_factor,
+                                                durable_writes,
+                                                data_centres,
                                                 False)
-                        session .execute(cql)
-                        result['changed'] = True
-                        result['cql'] = cql
-                    elif state == "absent":
-                        result['changed'] = False
-        else:  # This is a role
-            if role_exists(session, role):
-                if module.check_mode:
-                    if state == "present":
-                        result['changed'] = False
-                    elif state == "absent":
-                        cql = drop_role(session, role)
-                        session.execute(cql)
-                        result['changed'] = True
-                        result['cql'] = cql
-                else:
-                    if state == "present":
-                        result['changed'] = False
-                    elif state == "absent":
-                        cql = drop_role(session, role)
-                        session.execute(cql)
-                        result['changed'] = True
-                        result['cql'] = cql
-            else:
-                if module.check_mode:
-                    if state == "present":
-                        cql = create_alter_role(module,
-                                                session,
-                                                role,
-                                                super_user,
-                                                login,
-                                                password,
-                                                options,
-                                                data_centers,
-                                                has_role_changed)
-                        session .execute(cql)
-                        result['changed'] = True
-                        result['cql'] = cql
-                    elif state == "absent":
-                        result['changed'] = False
-                else:
-                    if state == "present":
-                        cql = create_role(session, role)
-                        session.execute(cql)
-                        result['changed'] = True
-                        result['cql'] = cql
-                    elif state == "absent":
-                        result['changed'] = False
-
-        if state == "present":
-            cql_dict = process_role_permissions(session,
-                                                keyspace_permissions,
-                                                role)
-            if len(cql_dict['grant']) > 0 or len(cql_dict['revoke']) > 0:
-                for r in cql_dict['revoke']:
-                    if not module.check_mode:
-                        session.execute(r)
-                for g in cql_dict['grant']:
-                    if not module.check_mode:
-                        session.execute(g)
-                result['permissions'] = cql_dict
-                result['changed'] = True
-
-            # Process roles
-            roles_dict = build_role_grants(session,
-                                           role,
-                                           roles)
-
-            if len(roles_dict['grant']) > 0 or len(roles_dict['revoke']) > 0:
-                result['roles'] = roles_dict
-                for r in roles_dict['revoke']:
-                    if not module.check_mode:
-                        session.execute(r)
-                for g in roles_dict['grant']:
-                    if not module.check_mode:
-                        session.execute(g)
-
-                result['changed'] = True
+                    result['changed'] = True
+                    result['cql'] = cql
+                elif state == "absent":
+                    result['changed'] = False
 
         module.exit_json(**result)
 
     except Exception as excep:
-        msg = str(excep)
-        if cql is not None:
-            msg += " | {0}".format(cql)
-        if debug:
-            module.fail_json(msg=msg, **result)
-        else:
-            module.fail_json(msg=msg, **result)
+        module.fail_json(msg="An error occured: {0}".format(excep))
 
 
 if __name__ == '__main__':
