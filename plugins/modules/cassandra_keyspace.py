@@ -39,7 +39,7 @@ options:
   ssl_verify_location:
     description: The SSL CA chain or certificate location to confirm supplied certificate validity (required when verify_mode is set to CERT_OPTIONAL or CERT_REQUIRED)
     type: str
-    default: ``
+    default: ''
   login_host:
     description:
       - The Cassandra hostname.
