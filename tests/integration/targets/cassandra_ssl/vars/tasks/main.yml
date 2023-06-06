@@ -36,15 +36,22 @@
   when: ansible_os_family == "RedHat"
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 - name: Upgrade pip
   shell: pip3 install -U pip  
 
 =======
 >>>>>>> 3829b5b (Added cassandra_ssl integration tests via ccm)
+=======
+- name: Upgrade pip
+  shell: pip3 install -U pip  
+
+>>>>>>> 5bd0572 (Refactored cassandra_keyspace to support ssl_verify_location and fixed cassandra_ssl tests)
 - name: Install cassandra-driver
   pip:
     name: cassandra-driver
   environment:
+<<<<<<< HEAD
 <<<<<<< HEAD
     CASS_DRIVER_NO_CYTHON: 1    
 =======
@@ -66,6 +73,9 @@
 >>>>>>> 4c0014a (Changed cassandra.crt format and removed ccm explicit path)
     cassandra_version: 3.11.14
 >>>>>>> 259ec57 (Set cassandra_version fact for ccm)
+=======
+    CASS_DRIVER_NO_CYTHON: 1    
+>>>>>>> 5bd0572 (Refactored cassandra_keyspace to support ssl_verify_location and fixed cassandra_ssl tests)
 
 - name: Ensure Cassandra service from setup_cassandra isn't running
   service:
@@ -102,6 +112,7 @@
   with_items:
     - ssl-test.cer.pem
     - ssl-test.key.pem
+<<<<<<< HEAD
     - keystore.jks
     - truststore.jks
     - cassandra.crt
@@ -130,8 +141,11 @@
     - cassandra.pem
     - client_cert.pem
     - client_key.pem
+=======
+>>>>>>> 5bd0572 (Refactored cassandra_keyspace to support ssl_verify_location and fixed cassandra_ssl tests)
     - keystore.jks
     - truststore.jks
+    - cassandra.crt
 
 <<<<<<< HEAD
 - name: Install SSL enabled Cassandra via ccm tool
@@ -139,19 +153,24 @@
 >>>>>>> 3829b5b (Added cassandra_ssl integration tests via ccm)
 =======
 - name: Remove default test cluster from CCM to allow testing for SSL enabled cluster
+<<<<<<< HEAD
   ansible.builtin.shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd }} remove test > /dev/null\""
 >>>>>>> d570152 (Ensure CCM default test cluster is removed)
+=======
+  shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd }} clear test > /dev/null\""
+>>>>>>> 5bd0572 (Refactored cassandra_keyspace to support ssl_verify_location and fixed cassandra_ssl tests)
   become_user: cassandra
   args:
     chdir: /home/cassandra
   environment:
     CCM_CONFIG_DIR: "/home/cassandra/config"
     CASSANDRA_HOME: "/home/cassandra"
+    JAVA_TOOL_OPTIONS: "-Dcom.sun.jndi.rmiURLParsing=legacy"
     PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ant/bin
   ignore_errors: yes      
 
 - name: Create SSL enabled Cassandra cluster via ccm tool
-  ansible.builtin.shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd }} create ssl-test-cluster -v {{ cassandra_version }} --ssl /home/ssl-test-cluster/ > /dev/null\""
+  shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd }} create ssl-test-cluster -v {{ cassandra_version }} --ssl /home/ssl-test-cluster/ > /dev/null\""
   become_user: cassandra
   args:
     chdir: /home/cassandra
@@ -162,10 +181,14 @@
 
 - name: Add nodes to the Cassandra Cluster
 <<<<<<< HEAD
+<<<<<<< HEAD
   shell: "sudo -E -u cassandra bash -c '{{ ccm_cmd }} add {{ item.node }} -i {{ item.ip }} -j {{ item.port }} -b --data-center={{ item.dc }} --remote-debug-port {{ item.debug_port }} {{ item.args }}'"
 =======
   ansible.builtin.shell: "sudo -E -u cassandra bash -c '{{ ccm_cmd }} add {{ item.node }} -i {{ item.ip }} -j {{ item.port }} -b --data-center={{ item.dc }} --remote-debug-port {{ item.debug_port }} {{ item.args }}'"
 >>>>>>> 3829b5b (Added cassandra_ssl integration tests via ccm)
+=======
+  shell: "sudo -E -u cassandra bash -c '{{ ccm_cmd }} add {{ item.node }} -i {{ item.ip }} -j {{ item.port }} -b --data-center={{ item.dc }} --remote-debug-port {{ item.debug_port }} {{ item.args }}'"
+>>>>>>> 5bd0572 (Refactored cassandra_keyspace to support ssl_verify_location and fixed cassandra_ssl tests)
   become_user: cassandra
   args:
     chdir: /home/cassandra
@@ -175,27 +198,28 @@
     PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ant
   with_items: "{{ cassandra_nodes }}"
 
-# - name: Update endpoint_snitch
-#   lineinfile:
-#     path: "/home/cassandra/config/test/{{ item.node }}/conf/cassandra.yaml"
-#     regexp: "^endpoint_snitch"
-#     line: "endpoint_snitch: GossipingPropertyFileSnitch"
-#   with_items: "{{ cassandra_nodes }}"
-#   no_log: yes
+- name: Update endpoint_snitch
+  lineinfile:
+    path: "/home/cassandra/config/test/{{ item.node }}/conf/cassandra.yaml"
+    regexp: "^endpoint_snitch"
+    line: "endpoint_snitch: GossipingPropertyFileSnitch"
+  with_items: "{{ cassandra_nodes }}"
+  no_log: yes
 
-# - name: Update rack info
-#   copy:
-#     content: |
-#       dc={{ item.dc }}
-#       rack=rack1
-#     dest: /home/cassandra/config/test/{{ item.node }}/conf/cassandra-rackdc.properties
-#   with_items: "{{ cassandra_nodes }}"
+- name: Update rack info
+  copy:
+    content: |
+      dc={{ item.dc }}
+      rack=rack1
+    dest: /home/cassandra/config/test/{{ item.node }}/conf/cassandra-rackdc.properties
+  with_items: "{{ cassandra_nodes }}"
 
-# - set_fact:
-#     cassandra_node_delay: 120
-#   when: ansible_os_family == "RedHat"
+- set_fact:
+    cassandra_node_delay: 120
+  when: ansible_os_family == "RedHat"
 
 - name: Start the ccm cluster
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
   shell: sudo -E -u cassandra bash -c "{{ ccm_cmd }} start ssl-test-cluster --root"
@@ -205,12 +229,16 @@
 =======
   ansible.builtin.shell: sudo -E -u cassandra bash -c "{{ ccm_cmd }} start ssl-test-cluster --root"
 >>>>>>> d570152 (Ensure CCM default test cluster is removed)
+=======
+  shell: sudo -E -u cassandra bash -c "{{ ccm_cmd }} start ssl-test-cluster --require_client_auth --root"
+>>>>>>> 5bd0572 (Refactored cassandra_keyspace to support ssl_verify_location and fixed cassandra_ssl tests)
   become_user: cassandra
   args:
     chdir: /home/cassandra
   environment:
     CCM_CONFIG_DIR: "/home/cassandra/config"
     CASSANDRA_HOME: "/home/cassandra"
+<<<<<<< HEAD
 <<<<<<< HEAD
     JAVA_TOOL_OPTIONS: "-Dcom.sun.jndi.rmiURLParsing=legacy"
     PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ant/bin
@@ -220,12 +248,20 @@
 - name: Get cluster status
   shell: sudo -E -u cassandra bash -c "{{ ccm_cmd }} status"
 =======
+=======
+    JAVA_TOOL_OPTIONS: "-Dcom.sun.jndi.rmiURLParsing=legacy"
+>>>>>>> 5bd0572 (Refactored cassandra_keyspace to support ssl_verify_location and fixed cassandra_ssl tests)
     PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ant/bin
     CCM_CLUSTER_START_DEFAULT_TIMEOUT: 600
+  ignore_errors: yes      
 
 - name: Get cluster status
+<<<<<<< HEAD
   ansible.builtin.shell: sudo -E -u cassandra bash -c "{{ ccm_cmd }} status"
 >>>>>>> 3829b5b (Added cassandra_ssl integration tests via ccm)
+=======
+  shell: sudo -E -u cassandra bash -c "{{ ccm_cmd }} status"
+>>>>>>> 5bd0572 (Refactored cassandra_keyspace to support ssl_verify_location and fixed cassandra_ssl tests)
   become_user: cassandra
   args:
     chdir: /home/cassandra
@@ -265,6 +301,7 @@
 # Creating a keyspace with ssl=True and verify_mode=CERT_NONE on an SSL enabled cluster should succeed
 - name: Check keyspace creation on an SSL cluster
   cassandra_keyspace:
+<<<<<<< HEAD
 <<<<<<< HEAD
     name: ccmsslkeyspace_cert_none
     state: present
@@ -376,3 +413,65 @@
 =======
   ignore_errors: yes
 >>>>>>> 170f475 (Linting)
+=======
+    name: ccmsslkeyspace_cert_none
+    state: present
+    ssl: True
+    verify_mode: 'CERT_NONE'
+  ignore_errors: yes 
+  
+- name: Get output of DESC KEYSPACE ccmsslkeyspace_cert_none
+  shell: export SSL_CERTFILE=/home/ssl-test-cluster/ssl-test.cer.pem; cqlsh --ssl --execute "DESC KEYSPACE ccmsslkeyspace_cert_none"
+  register: ccmsslkeyspace_cert_none
+
+- name: Assert ccmsslkeyspace_cert_none exists 1
+  assert:
+    that:
+      - "'\\nCREATE KEYSPACE ccmsslkeyspace_cert_none WITH replication = {\\'class\\': \\'SimpleStrategy\\', \\'replication_factor\\': \\'1\\'}  AND durable_writes = true;' == ccmsslkeyspace_cert_none.stdout"  
+
+- name: Sleep for 3600 seconds and continue with play
+  ansible.builtin.wait_for:
+    timeout: 3600
+  delegate_to: localhost      
+
+# Creating a keyspace with ssl=True and verify_mode=CERT_OPTIONAL on an SSL enabled cluster should succeed
+- name: Check keyspace creation on an SSL cluster
+  cassandra_keyspace:
+    name: ccmsslkeyspace_cert_optional
+    state: present
+    ssl: True
+    verify_mode: 'CERT_OPTIONAL'
+  # ignore_errors: yes 
+  
+- name: Get output of DESC KEYSPACE ccmsslkeyspace_cert_optional
+  shell: export SSL_CERTFILE=/home/ssl-test-cluster/ssl-test.cer.pem; cqlsh --ssl --execute "DESC KEYSPACE ccmsslkeyspace_cert_optional"
+  register: ccmsslkeyspace_cert_optional
+
+- name: Assert ccmsslkeyspace_cert_optional exists 1
+  assert:
+    that:
+      - "'\\nCREATE KEYSPACE ccmsslkeyspace_cert_optional WITH replication = {\\'class\\': \\'SimpleStrategy\\', \\'replication_factor\\': \\'1\\'}  AND durable_writes = true;' == ccmsslkeyspace_cert_optional.stdout"    
+
+# Creating a keyspace with ssl=True and verify_mode=CERT_REQUIRED on an SSL enabled cluster should succeed
+- name: Check keyspace creation on an SSL cluster
+  cassandra_keyspace:
+    name: ccmsslkeyspace_cert_required
+    state: present
+    ssl: True
+    verify_mode: 'CERT_REQUIRED'
+  # ignore_errors: yes 
+  
+- name: Get output of DESC KEYSPACE ccmsslkeyspace_cert_required
+  shell: export SSL_CERTFILE=/home/ssl-test-cluster/ssl-test.cer.pem; cqlsh --ssl --execute "DESC KEYSPACE ccmsslkeyspace_cert_required"
+  register: ccmsslkeyspace_cert_required
+
+- name: Assert ccmsslkeyspace_cert_required exists 1
+  assert:
+    that:
+      - "'\\nCREATE KEYSPACE ccmsslkeyspace_cert_required WITH replication = {\\'class\\': \\'SimpleStrategy\\', \\'replication_factor\\': \\'1\\'}  AND durable_writes = true;' == ccmsslkeyspace_cert_required.stdout"          
+
+- name: Sleep for 3600 seconds and continue with play
+  ansible.builtin.wait_for:
+    timeout: 3600
+  delegate_to: localhost 
+>>>>>>> 5bd0572 (Refactored cassandra_keyspace to support ssl_verify_location and fixed cassandra_ssl tests)
