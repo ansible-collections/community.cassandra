@@ -79,6 +79,7 @@
   ignore_errors: yes      
 
 - name: Create SSL enabled Cassandra cluster via ccm tool
+  # shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd }} create ssl-test-cluster -v {{ cassandra_version }} --ssl /home/ssl-test-cluster/ --require_client_auth > /dev/null\""
   shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd }} create ssl-test-cluster -v {{ cassandra_version }} --ssl /home/ssl-test-cluster/ > /dev/null\""
   become_user: cassandra
   args:
@@ -120,7 +121,7 @@
   when: ansible_os_family == "RedHat"
 
 - name: Start the ccm cluster
-  shell: sudo -E -u cassandra bash -c "{{ ccm_cmd }} start ssl-test-cluster --require_client_auth --root"
+  shell: sudo -E -u cassandra bash -c "{{ ccm_cmd }} start ssl-test-cluster --root"
   become_user: cassandra
   args:
     chdir: /home/cassandra
@@ -161,8 +162,7 @@
     state: present
     ssl: True
     verify_mode: 'CERT_NONE'
-  ignore_errors: yes 
-  
+
 - name: Get output of DESC KEYSPACE ccmsslkeyspace_cert_none
   shell: export SSL_CERTFILE=/home/ssl-test-cluster/ssl-test.cer.pem; cqlsh --ssl --execute "DESC KEYSPACE ccmsslkeyspace_cert_none"
   register: ccmsslkeyspace_cert_none
@@ -172,11 +172,6 @@
     that:
       - "'\\nCREATE KEYSPACE ccmsslkeyspace_cert_none WITH replication = {\\'class\\': \\'SimpleStrategy\\', \\'replication_factor\\': \\'1\\'}  AND durable_writes = true;' == ccmsslkeyspace_cert_none.stdout"  
 
-- name: Sleep for 3600 seconds and continue with play
-  ansible.builtin.wait_for:
-    timeout: 3600
-  delegate_to: localhost      
-
 # Creating a keyspace with ssl=True and verify_mode=CERT_OPTIONAL on an SSL enabled cluster should succeed
 - name: Check keyspace creation on an SSL cluster
   cassandra_keyspace:
@@ -184,16 +179,56 @@
     state: present
     ssl: True
     verify_mode: 'CERT_OPTIONAL'
-  # ignore_errors: yes 
+    ssl_verify_location: '/home/ssl-test-cluster/ssl-test.cer.pem' 
   
 - name: Get output of DESC KEYSPACE ccmsslkeyspace_cert_optional
   shell: export SSL_CERTFILE=/home/ssl-test-cluster/ssl-test.cer.pem; cqlsh --ssl --execute "DESC KEYSPACE ccmsslkeyspace_cert_optional"
   register: ccmsslkeyspace_cert_optional
 
-- name: Assert ccmsslkeyspace_cert_optional exists 1
+- name: Assert ccmsslkeyspace_cert_optional exists 2
   assert:
     that:
-      - "'\\nCREATE KEYSPACE ccmsslkeyspace_cert_optional WITH replication = {\\'class\\': \\'SimpleStrategy\\', \\'replication_factor\\': \\'1\\'}  AND durable_writes = true;' == ccmsslkeyspace_cert_optional.stdout"    
+      - "'\\nCREATE KEYSPACE ccmsslkeyspace_cert_optional WITH replication = {\\'class\\': \\'SimpleStrategy\\', \\'replication_factor\\': \\'1\\'}  AND durable_writes = true;' == ccmsslkeyspace_cert_optional.stdout"
+
+# Creating a keyspace with ssl=True and verify_mode=CERT_OPTIONAL on an SSL enabled cluster with wrong ssl_verify_location should fail the module
+- name: Check keyspace creation on an SSL cluster
+  cassandra_keyspace:
+    name: ccmsslkeyspace_cert_optional_f
+    state: present
+    ssl: True
+    verify_mode: 'CERT_OPTIONAL'
+    ssl_verify_location: '/random/cert/location.cer.pem' 
+  ignore_errors: yes  
+  register: ccmsslkeyspace_cert_optional_f
+
+- name: Debug
+  ansible.builtin.debug:
+    msg: "{{ ccmsslkeyspace_cert_optional_f }}"
+  
+- name: Assert ccmsslkeyspace_cert_optional_f fails
+  assert:
+    that:
+      - "'ssl_verify_location certificate: File not found' in ccmsslkeyspace_cert_optional_f.msg"    
+
+# Creating a keyspace with ssl=True and verify_mode=CERT_REQUIRED on an SSL enabled cluster with wrong ssl_verify_location should fail the module
+- name: Check keyspace creation on an SSL cluster
+  cassandra_keyspace:
+    name: ccmsslkeyspace_cert_required_f
+    state: present
+    ssl: True
+    verify_mode: 'CERT_REQUIRED'
+    ssl_verify_location: '/random/cert/location.cer.pem' 
+  ignore_errors: yes  
+  register: ccmsslkeyspace_cert_required_f
+
+- name: Debug
+  ansible.builtin.debug:
+    msg: "{{ ccmsslkeyspace_cert_required_f }}"
+  
+- name: Assert ccmsslkeyspace_cert_required_f fails
+  assert:
+    that:
+      - "'ssl_verify_location certificate: File not found' in ccmsslkeyspace_cert_required_f.msg"          
 
 # Creating a keyspace with ssl=True and verify_mode=CERT_REQUIRED on an SSL enabled cluster should succeed
 - name: Check keyspace creation on an SSL cluster
@@ -202,18 +237,18 @@
     state: present
     ssl: True
     verify_mode: 'CERT_REQUIRED'
-  # ignore_errors: yes 
+    ssl_verify_location: '/home/ssl-test-cluster/ssl-test.cer.pem' 
   
 - name: Get output of DESC KEYSPACE ccmsslkeyspace_cert_required
   shell: export SSL_CERTFILE=/home/ssl-test-cluster/ssl-test.cer.pem; cqlsh --ssl --execute "DESC KEYSPACE ccmsslkeyspace_cert_required"
   register: ccmsslkeyspace_cert_required
 
-- name: Assert ccmsslkeyspace_cert_required exists 1
+- name: Assert ccmsslkeyspace_cert_required exists 3
   assert:
     that:
       - "'\\nCREATE KEYSPACE ccmsslkeyspace_cert_required WITH replication = {\\'class\\': \\'SimpleStrategy\\', \\'replication_factor\\': \\'1\\'}  AND durable_writes = true;' == ccmsslkeyspace_cert_required.stdout"          
 
-- name: Sleep for 3600 seconds and continue with play
-  ansible.builtin.wait_for:
-    timeout: 3600
-  delegate_to: localhost 
+# - name: Sleep for 3600 seconds and continue with play
+#   ansible.builtin.wait_for:
+#     timeout: 3600
+#   delegate_to: localhost 
