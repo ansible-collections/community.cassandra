@@ -244,7 +244,7 @@
 
 - name: End play if wait_for task failed
   fail:
-    msg: "Cassandra filed to start. Check log output above."
+    msg: "Cassandra failed to start. Check log output above."
   when:
     - cassandra_ports.failed is defined
     - cassandra_ports.failed
