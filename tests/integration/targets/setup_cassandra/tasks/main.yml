@@ -119,9 +119,15 @@
     - ansible_os_family == 'RedHat'
     - ansible_distribution_major_version == "7"
 
+- name: Copy static https://downloads.apache.org/cassandra/KEYS file to host
+  copy:
+    src: KEYS
+    dest: /tmp
+
 - name: Add an Apt keys for Cassandra
   apt_key:
-    url: "{{ cassandra_deb.gpgkey }}"
+    #url: "{{ cassandra_deb.gpgkey }}"
+    file: /tmp/KEYS
     state: present
   when: ansible_os_family == 'Debian'
   register: result
