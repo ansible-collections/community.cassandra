@@ -69,7 +69,7 @@ case "$1" in
         echo -n "Starting Cassandra: "
         [ -d `dirname "$pid_file"` ] || \
             install -m 755 -o $CASSANDRA_OWNR -g $CASSANDRA_OWNR -d `dirname $pid_file`
-        runuser $CASSANDRA_OWNR -c "$CASSANDRA_PROG -p $pid_file" > $log_file 2>&1
+        runuser $CASSANDRA_OWNR -c "$CASSANDRA_PROG -p $pid_file" -Dcassandra.ignore_dc=true > $log_file 2>&1  # -Dcassandra.ignore_dc=true shoudl be removed at some point, see https://stackoverflow.com/questions/38405983/apache-cassandra-3-7-snitch-issue-cannot-start-data-center 
         retval=$?
         [ $retval -eq 0 ] && touch $lock_file
         echo "OK"
