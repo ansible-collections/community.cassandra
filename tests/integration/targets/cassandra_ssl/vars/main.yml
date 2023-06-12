@@ -44,32 +44,10 @@ cassandra_nodes:  # Changes in 4.0 means we need to add nodes to certain DCs for
     port: 7700
     debug_port: 2006
     args: "--seeds"
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 5bd0572 (Refactored cassandra_keyspace to support ssl_verify_location and fixed cassandra_ssl tests)
   # - dc: "marlow"
   #   node: "marlow1"
   #   ip: "127.0.0.8"
   #   port: 7800
   #   debug_port: 2007
   #   args: ""
-<<<<<<< HEAD
 cassandra_service: cassandra  
-=======
-  - dc: "marlow"
-    node: "marlow1"
-    ip: "127.0.0.8"
-    port: 7800
-    debug_port: 2007
-    args: ""
-<<<<<<< HEAD
-cassandra_service: cassandra
-cassandra_version: 3.11.14    
->>>>>>> 3829b5b (Added cassandra_ssl integration tests via ccm)
-=======
-cassandra_service: cassandra  
->>>>>>> bad9b42 (Removed explicit cassandra_version from cassandra_ssl test defaults)
-=======
-cassandra_service: cassandra  
->>>>>>> 5bd0572 (Refactored cassandra_keyspace to support ssl_verify_location and fixed cassandra_ssl tests)

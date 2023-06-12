@@ -1,4 +1,0 @@
----
-dependencies:
-  - setup_cassandra
-  - setup_cassandra_cluster_manager
