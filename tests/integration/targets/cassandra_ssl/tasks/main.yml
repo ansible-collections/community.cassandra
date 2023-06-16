@@ -75,8 +75,7 @@
     CCM_CONFIG_DIR: "/home/cassandra/config"
     CASSANDRA_HOME: "/home/cassandra"
     JAVA_TOOL_OPTIONS: "-Dcom.sun.jndi.rmiURLParsing=legacy"
-    PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ant/bin
-  ignore_errors: yes      
+    PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ant/bin     
 
 - name: Create SSL enabled Cassandra cluster via ccm tool
   # shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd }} create ssl-test-cluster -v {{ cassandra_version }} --ssl /home/ssl-test-cluster/ --require_client_auth > /dev/null\""
@@ -130,8 +129,7 @@
     CASSANDRA_HOME: "/home/cassandra"
     JAVA_TOOL_OPTIONS: "-Dcom.sun.jndi.rmiURLParsing=legacy"
     PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ant/bin
-    CCM_CLUSTER_START_DEFAULT_TIMEOUT: 600
-  ignore_errors: yes      
+    CCM_CLUSTER_START_DEFAULT_TIMEOUT: 600      
 
 - name: Get cluster status
   shell: sudo -E -u cassandra bash -c "{{ ccm_cmd }} status"
@@ -216,7 +214,7 @@
 - name: Assert ccmsslkeyspace_cert_required_f fails
   assert:
     that:
-      - "'ssl_verify_location certificate: File not found' in ccmsslkeyspace_cert_required_f.msg"          
+      - "'ssl_verify_location certificate: File not found' in ccmsslkeyspace_cert_required_f.msg" 
 
 - name: Creating a keyspace with ssl=True and verify_mode=CERT_REQUIRED on an SSL enabled cluster should succeed
   cassandra_keyspace:
@@ -242,7 +240,57 @@
     name: myappssl
     state: present
 
-- name: Test table creation
+- name: Test table creation - Creating a table with ssl:True and verify_mode:CERT_REQUIRED and wrong ssl_verify_location should fail
+  community.cassandra.cassandra_table:
+    name: users
+    ssl: True
+    verify_mode: 'CERT_REQUIRED'
+    keyspace: myappssl
+    ssl_verify_location: '/random/cert/location.cer.pem'
+    state: present
+    columns:
+      - id: uuid
+      - username: text
+      - encrypted_password: blob
+      - first_name: text
+      - last_name: text
+      - dob: date
+    primary_key:
+      - username
+  register: create_table_required
+  ignore_errors: yes
+
+- name: Assert create_table_required fails
+  assert:
+    that:
+      - "'ssl_verify_location certificate: File not found' in create_table_required.msg"  
+
+- name: Test table creation - Creating a table with ssl:True and verify_mode:CERT_OPTIONAL and wrong ssl_verify_location should fail
+  community.cassandra.cassandra_table:
+    name: users
+    ssl: True
+    verify_mode: 'CERT_OPTIONAL'
+    keyspace: myappssl
+    ssl_verify_location: '/random/cert/location.cer.pem'
+    state: present
+    columns:
+      - id: uuid
+      - username: text
+      - encrypted_password: blob
+      - first_name: text
+      - last_name: text
+      - dob: date
+    primary_key:
+      - username
+  register: create_table_optional
+  ignore_errors: yes
+
+- name: Assert create_table_optional fails
+  assert:
+    that:
+      - "'ssl_verify_location certificate: File not found' in create_table_optional.msg"
+
+- name: Test table creation - Creating a table with ssl:True and verify_mode:CERT_NONE should succeed
   community.cassandra.cassandra_table:
     name: users
     ssl: True
@@ -313,6 +361,46 @@
     that:
       - "'CREATE TABLE myappssl_cert_required.users' in myappssl_cert_required.stdout"
 
+- name: Creating a keyspace for table tests with ssl:True and verify_mode:CERT_OPTIONAL should succeed
+  cassandra_keyspace:
+    ssl: True
+    verify_mode: 'CERT_OPTIONAL'
+    ssl_verify_location: '/home/ssl-test-cluster/ssl-test.cer.pem' 
+    name: myappssl_cert_optional
+    state: present
+
+- name: Test table creation
+  community.cassandra.cassandra_table:
+    name: users
+    ssl: True
+    ssl_verify_location: '/home/ssl-test-cluster/ssl-test.cer.pem'
+    verify_mode: 'CERT_OPTIONAL'
+    keyspace: myappssl_cert_optional
+    state: present
+    columns:
+      - id: uuid
+      - username: text
+      - encrypted_password: blob
+      - first_name: text
+      - last_name: text
+      - dob: date
+    primary_key:
+      - username
+  register: create_users_cert_required
+
+- assert:
+    that:
+      - "create_users_cert_required.changed == True"
+      - "create_users_cert_required.cql == 'CREATE TABLE myappssl_cert_optional.users ( id uuid, username text, encrypted_password blob, first_name text, last_name text, dob date, PRIMARY KEY (username))'"
+
+- name: Get output of DESC KEYSPACE myappssl_cert_optional
+  shell: " export SSL_CERTFILE=/home/ssl-test-cluster/ssl-test.cer.pem; cqlsh --ssl --execute 'DESC KEYSPACE myappssl_cert_optional'"
+  register: myappssl_cert_optional
+
+- assert:
+    that:
+      - "'CREATE TABLE myappssl_cert_optional.users' in myappssl_cert_optional.stdout"
+
 - name: Remove previous ssl-test cluster from CCM to allow testing for authenticated SSL enabled cluster
   shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd }} clear ssl-test-cluster > /dev/null\""
   become_user: cassandra
@@ -322,8 +410,7 @@
     CCM_CONFIG_DIR: "/home/cassandra/config"
     CASSANDRA_HOME: "/home/cassandra"
     JAVA_TOOL_OPTIONS: "-Dcom.sun.jndi.rmiURLParsing=legacy"
-    PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ant/bin
-  ignore_errors: yes      
+    PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ant/bin      
 
 - name: Create Authenticated and SSL enabled Cassandra cluster via ccm tool
   shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd }} create ssl-test-cluster-auth -v {{ cassandra_version }} --ssl /home/ssl-test-cluster/ --pwd-auth > /dev/null\""
@@ -376,8 +463,7 @@
     CASSANDRA_HOME: "/home/cassandra"
     JAVA_TOOL_OPTIONS: "-Dcom.sun.jndi.rmiURLParsing=legacy"
     PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ant/bin
-    CCM_CLUSTER_START_DEFAULT_TIMEOUT: 600
-  ignore_errors: yes      
+    CCM_CLUSTER_START_DEFAULT_TIMEOUT: 600    
 
 - name: Get cluster status
   shell: sudo -E -u cassandra bash -c "{{ ccm_cmd }} status"
@@ -447,11 +533,11 @@
     login: yes
     login_user: "{{ cassandra_admin_user }}"
     login_password: "{{ cassandra_admin_pwd }}"
-  register: create_role
+  register: create_role_required
 
 - assert:
     that:
-      - 'create_role.changed == True'
+      - 'create_role_required.changed == True'
 
 - name: Create a role (check mode)
   community.cassandra.cassandra_role:
@@ -468,13 +554,87 @@
 
 - name: Get output of list roles
   shell: export SSL_CERTFILE=/home/ssl-test-cluster/ssl-test.cer.pem; cqlsh --ssl --username "{{ cassandra_admin_user }}" --password "{{ cassandra_admin_pwd }}" --execute "LIST ROLES"
-  register: myrole
+  register: myrole_required
 
 - name: Assert app_user_c_r exists in output
   assert:
     that:
-      - "'app_user_c_r' in myrole.stdout"  
+      - "'app_user_c_r' in myrole_required.stdout"  
 
+- name: Create a role with ssl:true and CERT_VERIFY:OPTIONAL 
+  community.cassandra.cassandra_role:
+    name: app_user_c_o
+    ssl: True
+    ssl_verify_location: '/home/ssl-test-cluster/ssl-test.cer.pem'
+    verify_mode: 'CERT_OPTIONAL'
+    password: 'secretZHB78'
+    state: present
+    login: yes
+    login_user: "{{ cassandra_admin_user }}"
+    login_password: "{{ cassandra_admin_pwd }}"
+  register: create_role_optional
+
+- assert:
+    that:
+      - 'create_role_optional.changed == True'
+
+- name: Create a role (check mode)
+  community.cassandra.cassandra_role:
+    name: app_user_c_o
+    ssl: True
+    ssl_verify_location: '/home/ssl-test-cluster/ssl-test.cer.pem'
+    verify_mode: 'CERT_REQUIRED'
+    password: 'secretZHB78'
+    state: present
+    login: yes
+    login_user: "{{ cassandra_admin_user }}"
+    login_password: "{{ cassandra_admin_pwd }}"
+  check_mode: yes
+
+- name: Get output of list roles
+  shell: export SSL_CERTFILE=/home/ssl-test-cluster/ssl-test.cer.pem; cqlsh --ssl --username "{{ cassandra_admin_user }}" --password "{{ cassandra_admin_pwd }}" --execute "LIST ROLES"
+  register: myrole_optional
+
+- name: Assert app_user_c_o exists in output
+  assert:
+    that:
+      - "'app_user_c_o' in myrole_optional.stdout"  
+
+- name: Create a role with ssl:true and CERT_VERIFY:REQUIRED and invalid ssl_verify_location should FAIL 
+  community.cassandra.cassandra_role:
+    name: app_user_c_r
+    ssl: True
+    ssl_verify_location: '/random/ssl/ssl-test.cer.pem'
+    verify_mode: 'CERT_REQUIRED'
+    password: 'secretZHB78'
+    state: present
+    login: yes
+    login_user: "{{ cassandra_admin_user }}"
+    login_password: "{{ cassandra_admin_pwd }}"
+  register: create_role_required_fail
+  ignore_errors: yes
+
+- assert:
+    that:
+      - "'ssl_verify_location certificate: File not found' in create_role_required_fail.msg"
+
+- name: Create a role with ssl:true and CERT_VERIFY:OPTIONAL and invalid ssl_verify_location should FAIL 
+  community.cassandra.cassandra_role:
+    name: app_user_c_o
+    ssl: True
+    ssl_verify_location: '/random/ssl/ssl-test.cer.pem'
+    verify_mode: 'CERT_OPTIONAL'
+    password: 'secretZHB78'
+    state: present
+    login: yes
+    login_user: "{{ cassandra_admin_user }}"
+    login_password: "{{ cassandra_admin_pwd }}"
+  register: create_role_optional_fail
+  ignore_errors: yes
+
+- assert:
+    that:
+      - "'ssl_verify_location certificate: File not found' in create_role_optional_fail.msg"         
 
 # - name: Sleep for 3600 seconds and continue with play
 #   ansible.builtin.wait_for:
