@@ -35,7 +35,11 @@
   pip:
     name: cassandra-driver
   environment:
-    CASS_DRIVER_NO_CYTHON: 1    
+    CASS_DRIVER_NO_CYTHON: 1 
+
+- name: Install CQLSH
+  pip:
+    name: cqlsh        
 
 - name: Ensure Cassandra service from setup_cassandra isn't running
   service:

@@ -52,6 +52,18 @@
     state: present
   when: ansible_os_family == 'RedHat'
 
+- name: Fetch java version
+  shell: java -version
+  changed_when: False
+  register: java_result
+  failed_when: False
+
+- name: Install OpenJDK package if Java not present
+  package:
+    name: "openjdk-8-jre-headless"
+    state: present  
+  when: ansible_os_family == 'Debian' and java_result.rc!=0  
+
 - name: Run the equivalent of "apt-get update"
   apt:
     update_cache: yes
