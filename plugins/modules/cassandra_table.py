@@ -392,9 +392,9 @@ def main():
             login_password=dict(type='str', no_log=True),
             ssl=dict(type='bool', default=False),
             ssl_cert_reqs=dict(type='str',
-                             required=False,
-                             default='CERT_NONE',
-                             choices=['CERT_NONE',
+                               required=False,
+                               default='CERT_NONE',
+                               choices=['CERT_NONE',
                                       'CERT_OPTIONAL',
                                       'CERT_REQUIRED']),
             ssl_ca_certs=dict(type='str', default=''),
@@ -449,7 +449,7 @@ def main():
                "ssl_ca_certs is also required to be set and not empty")
         module.fail_json(msg=msg)
 
-    if  ssl_cert_reqs in ('CERT_REQUIRED', 'CERT_OPTIONAL') and os.path.exists(ssl_ca_certs) is not True:
+    if ssl_cert_reqs in ('CERT_REQUIRED', 'CERT_OPTIONAL') and os.path.exists(ssl_ca_certs) is not True:
         msg = ("ssl_ca_certs certificate: File not found")
         module.fail_json(msg=msg)
 
