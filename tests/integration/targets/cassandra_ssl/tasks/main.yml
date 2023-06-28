@@ -153,12 +153,12 @@
     timeout: 600
   with_items: "{{ cassandra_nodes }}"
 
-- name: Creating a keyspace on an SSL-enabled cluster when ssl=True and verify_mode=CERT_NONE should succeed
+- name: Creating a keyspace on an SSL-enabled cluster when ssl=True and ssl_cert_reqs=CERT_NONE should succeed
   cassandra_keyspace:
     name: ccmsslkeyspace_cert_none
     state: present
     ssl: True
-    verify_mode: 'CERT_NONE'
+    ssl_cert_reqs: 'CERT_NONE'
 
 - name: Get output of DESC KEYSPACE ccmsslkeyspace_cert_none
   shell: export SSL_CERTFILE=/home/ssl-test-cluster/ssl-test.cer.pem; cqlsh --ssl --execute "DESC KEYSPACE ccmsslkeyspace_cert_none"
@@ -169,13 +169,13 @@
     that:
       - "'\\nCREATE KEYSPACE ccmsslkeyspace_cert_none WITH replication = {\\'class\\': \\'SimpleStrategy\\', \\'replication_factor\\': \\'1\\'}  AND durable_writes = true;' == ccmsslkeyspace_cert_none.stdout"  
 
-- name: Creating a keyspace on an SSL-enabled cluster when ssl=True and verify_mode=CERT_OPTIONAL should succeed
+- name: Creating a keyspace on an SSL-enabled cluster when ssl=True and ssl_cert_reqs=CERT_OPTIONAL should succeed
   cassandra_keyspace:
     name: ccmsslkeyspace_cert_optional
     state: present
     ssl: True
-    verify_mode: 'CERT_OPTIONAL'
-    ssl_verify_location: '/home/ssl-test-cluster/ssl-test.cer.pem' 
+    ssl_cert_reqs: 'CERT_OPTIONAL'
+    ssl_ca_certs: '/home/ssl-test-cluster/ssl-test.cer.pem' 
   
 - name: Get output of DESC KEYSPACE ccmsslkeyspace_cert_optional
   shell: export SSL_CERTFILE=/home/ssl-test-cluster/ssl-test.cer.pem; cqlsh --ssl --execute "DESC KEYSPACE ccmsslkeyspace_cert_optional"
@@ -186,43 +186,43 @@
     that:
       - "'\\nCREATE KEYSPACE ccmsslkeyspace_cert_optional WITH replication = {\\'class\\': \\'SimpleStrategy\\', \\'replication_factor\\': \\'1\\'}  AND durable_writes = true;' == ccmsslkeyspace_cert_optional.stdout"
 
-- name: Creating a keyspace with ssl=True and verify_mode=CERT_OPTIONAL on an SSL enabled cluster with wrong ssl_verify_location should fail
+- name: Creating a keyspace with ssl=True and ssl_cert_reqs=CERT_OPTIONAL on an SSL enabled cluster with wrong ssl_ca_certs should fail
   cassandra_keyspace:
     name: ccmsslkeyspace_cert_optional_f
     state: present
     ssl: True
-    verify_mode: 'CERT_OPTIONAL'
-    ssl_verify_location: '/random/cert/location.cer.pem' 
+    ssl_cert_reqs: 'CERT_OPTIONAL'
+    ssl_ca_certs: '/random/cert/location.cer.pem' 
   ignore_errors: yes  
   register: ccmsslkeyspace_cert_optional_f
 
 - name: Assert ccmsslkeyspace_cert_optional_f fails
   assert:
     that:
-      - "'ssl_verify_location certificate: File not found' in ccmsslkeyspace_cert_optional_f.msg"    
+      - "'ssl_ca_certs certificate: File not found' in ccmsslkeyspace_cert_optional_f.msg"    
 
-- name: Creating a keyspace with ssl=True and verify_mode=CERT_REQUIRED on an SSL enabled cluster with wrong ssl_verify_location should fail
+- name: Creating a keyspace with ssl=True and ssl_cert_reqs=CERT_REQUIRED on an SSL enabled cluster with wrong ssl_ca_certs should fail
   cassandra_keyspace:
     name: ccmsslkeyspace_cert_required_f
     state: present
     ssl: True
-    verify_mode: 'CERT_REQUIRED'
-    ssl_verify_location: '/random/cert/location.cer.pem' 
+    ssl_cert_reqs: 'CERT_REQUIRED'
+    ssl_ca_certs: '/random/cert/location.cer.pem' 
   ignore_errors: yes  
   register: ccmsslkeyspace_cert_required_f
 
 - name: Assert ccmsslkeyspace_cert_required_f fails
   assert:
     that:
-      - "'ssl_verify_location certificate: File not found' in ccmsslkeyspace_cert_required_f.msg" 
+      - "'ssl_ca_certs certificate: File not found' in ccmsslkeyspace_cert_required_f.msg" 
 
-- name: Creating a keyspace with ssl=True and verify_mode=CERT_REQUIRED on an SSL enabled cluster should succeed
+- name: Creating a keyspace with ssl=True and ssl_cert_reqs=CERT_REQUIRED on an SSL enabled cluster should succeed
   cassandra_keyspace:
     name: ccmsslkeyspace_cert_required
     state: present
     ssl: True
-    verify_mode: 'CERT_REQUIRED'
-    ssl_verify_location: '/home/ssl-test-cluster/ssl-test.cer.pem' 
+    ssl_cert_reqs: 'CERT_REQUIRED'
+    ssl_ca_certs: '/home/ssl-test-cluster/ssl-test.cer.pem' 
   
 - name: Get output of DESC KEYSPACE ccmsslkeyspace_cert_required
   shell: export SSL_CERTFILE=/home/ssl-test-cluster/ssl-test.cer.pem; cqlsh --ssl --execute "DESC KEYSPACE ccmsslkeyspace_cert_required"
@@ -233,20 +233,20 @@
     that:
       - "'\\nCREATE KEYSPACE ccmsslkeyspace_cert_required WITH replication = {\\'class\\': \\'SimpleStrategy\\', \\'replication_factor\\': \\'1\\'}  AND durable_writes = true;' == ccmsslkeyspace_cert_required.stdout"          
 
-- name: Creating a keyspace for table tests with ssl:True and verify_mode:CERT_NONE should succeed
+- name: Creating a keyspace for table tests with ssl:True and ssl_cert_reqs:CERT_NONE should succeed
   cassandra_keyspace:
     ssl: True
-    verify_mode: 'CERT_NONE'
+    ssl_cert_reqs: 'CERT_NONE'
     name: myappssl
     state: present
 
-- name: Test table creation - Creating a table with ssl:True and verify_mode:CERT_REQUIRED and wrong ssl_verify_location should fail
+- name: Test table creation - Creating a table with ssl:True and ssl_cert_reqs:CERT_REQUIRED and wrong ssl_ca_certs should fail
   community.cassandra.cassandra_table:
     name: users
     ssl: True
-    verify_mode: 'CERT_REQUIRED'
+    ssl_cert_reqs: 'CERT_REQUIRED'
     keyspace: myappssl
-    ssl_verify_location: '/random/cert/location.cer.pem'
+    ssl_ca_certs: '/random/cert/location.cer.pem'
     state: present
     columns:
       - id: uuid
@@ -263,15 +263,15 @@
 - name: Assert create_table_required fails
   assert:
     that:
-      - "'ssl_verify_location certificate: File not found' in create_table_required.msg"  
+      - "'ssl_ca_certs certificate: File not found' in create_table_required.msg"  
 
-- name: Test table creation - Creating a table with ssl:True and verify_mode:CERT_OPTIONAL and wrong ssl_verify_location should fail
+- name: Test table creation - Creating a table with ssl:True and ssl_cert_reqs:CERT_OPTIONAL and wrong ssl_ca_certs should fail
   community.cassandra.cassandra_table:
     name: users
     ssl: True
-    verify_mode: 'CERT_OPTIONAL'
+    ssl_cert_reqs: 'CERT_OPTIONAL'
     keyspace: myappssl
-    ssl_verify_location: '/random/cert/location.cer.pem'
+    ssl_ca_certs: '/random/cert/location.cer.pem'
     state: present
     columns:
       - id: uuid
@@ -288,13 +288,13 @@
 - name: Assert create_table_optional fails
   assert:
     that:
-      - "'ssl_verify_location certificate: File not found' in create_table_optional.msg"
+      - "'ssl_ca_certs certificate: File not found' in create_table_optional.msg"
 
-- name: Test table creation - Creating a table with ssl:True and verify_mode:CERT_NONE should succeed
+- name: Test table creation - Creating a table with ssl:True and ssl_cert_reqs:CERT_NONE should succeed
   community.cassandra.cassandra_table:
     name: users
     ssl: True
-    verify_mode: 'CERT_NONE'
+    ssl_cert_reqs: 'CERT_NONE'
     keyspace: myappssl
     state: present
     columns:
@@ -321,11 +321,11 @@
     that:
       - "'CREATE TABLE myappssl.users' in myappssl.stdout"
 
-- name: Creating a keyspace for table tests with ssl:True and verify_mode:CERT_REQUIRED should succeed
+- name: Creating a keyspace for table tests with ssl:True and ssl_cert_reqs:CERT_REQUIRED should succeed
   cassandra_keyspace:
     ssl: True
-    verify_mode: 'CERT_REQUIRED'
-    ssl_verify_location: '/home/ssl-test-cluster/ssl-test.cer.pem' 
+    ssl_cert_reqs: 'CERT_REQUIRED'
+    ssl_ca_certs: '/home/ssl-test-cluster/ssl-test.cer.pem' 
     name: myappssl_cert_required
     state: present
 
@@ -333,8 +333,8 @@
   community.cassandra.cassandra_table:
     name: users
     ssl: True
-    ssl_verify_location: '/home/ssl-test-cluster/ssl-test.cer.pem'
-    verify_mode: 'CERT_REQUIRED'
+    ssl_ca_certs: '/home/ssl-test-cluster/ssl-test.cer.pem'
+    ssl_cert_reqs: 'CERT_REQUIRED'
     keyspace: myappssl_cert_required
     state: present
     columns:
@@ -361,11 +361,11 @@
     that:
       - "'CREATE TABLE myappssl_cert_required.users' in myappssl_cert_required.stdout"
 
-- name: Creating a keyspace for table tests with ssl:True and verify_mode:CERT_OPTIONAL should succeed
+- name: Creating a keyspace for table tests with ssl:True and ssl_cert_reqs:CERT_OPTIONAL should succeed
   cassandra_keyspace:
     ssl: True
-    verify_mode: 'CERT_OPTIONAL'
-    ssl_verify_location: '/home/ssl-test-cluster/ssl-test.cer.pem' 
+    ssl_cert_reqs: 'CERT_OPTIONAL'
+    ssl_ca_certs: '/home/ssl-test-cluster/ssl-test.cer.pem' 
     name: myappssl_cert_optional
     state: present
 
@@ -373,8 +373,8 @@
   community.cassandra.cassandra_table:
     name: users
     ssl: True
-    ssl_verify_location: '/home/ssl-test-cluster/ssl-test.cer.pem'
-    verify_mode: 'CERT_OPTIONAL'
+    ssl_ca_certs: '/home/ssl-test-cluster/ssl-test.cer.pem'
+    ssl_cert_reqs: 'CERT_OPTIONAL'
     keyspace: myappssl_cert_optional
     state: present
     columns:
@@ -526,8 +526,8 @@
   community.cassandra.cassandra_role:
     name: app_user_c_r
     ssl: True
-    ssl_verify_location: '/home/ssl-test-cluster/ssl-test.cer.pem'
-    verify_mode: 'CERT_REQUIRED'
+    ssl_ca_certs: '/home/ssl-test-cluster/ssl-test.cer.pem'
+    ssl_cert_reqs: 'CERT_REQUIRED'
     password: 'secretZHB78'
     state: present
     login: yes
@@ -543,8 +543,8 @@
   community.cassandra.cassandra_role:
     name: app_user_c_r
     ssl: True
-    ssl_verify_location: '/home/ssl-test-cluster/ssl-test.cer.pem'
-    verify_mode: 'CERT_REQUIRED'
+    ssl_ca_certs: '/home/ssl-test-cluster/ssl-test.cer.pem'
+    ssl_cert_reqs: 'CERT_REQUIRED'
     password: 'secretZHB78'
     state: present
     login: yes
@@ -565,8 +565,8 @@
   community.cassandra.cassandra_role:
     name: app_user_c_o
     ssl: True
-    ssl_verify_location: '/home/ssl-test-cluster/ssl-test.cer.pem'
-    verify_mode: 'CERT_OPTIONAL'
+    ssl_ca_certs: '/home/ssl-test-cluster/ssl-test.cer.pem'
+    ssl_cert_reqs: 'CERT_OPTIONAL'
     password: 'secretZHB78'
     state: present
     login: yes
@@ -582,8 +582,8 @@
   community.cassandra.cassandra_role:
     name: app_user_c_o
     ssl: True
-    ssl_verify_location: '/home/ssl-test-cluster/ssl-test.cer.pem'
-    verify_mode: 'CERT_REQUIRED'
+    ssl_ca_certs: '/home/ssl-test-cluster/ssl-test.cer.pem'
+    ssl_cert_reqs: 'CERT_REQUIRED'
     password: 'secretZHB78'
     state: present
     login: yes
@@ -600,12 +600,12 @@
     that:
       - "'app_user_c_o' in myrole_optional.stdout"  
 
-- name: Create a role with ssl:true and CERT_VERIFY:REQUIRED and invalid ssl_verify_location should FAIL 
+- name: Create a role with ssl:true and CERT_VERIFY:REQUIRED and invalid ssl_ca_certs should FAIL 
   community.cassandra.cassandra_role:
     name: app_user_c_r
     ssl: True
-    ssl_verify_location: '/random/ssl/ssl-test.cer.pem'
-    verify_mode: 'CERT_REQUIRED'
+    ssl_ca_certs: '/random/ssl/ssl-test.cer.pem'
+    ssl_cert_reqs: 'CERT_REQUIRED'
     password: 'secretZHB78'
     state: present
     login: yes
@@ -616,14 +616,14 @@
 
 - assert:
     that:
-      - "'ssl_verify_location certificate: File not found' in create_role_required_fail.msg"
+      - "'ssl_ca_certs certificate: File not found' in create_role_required_fail.msg"
 
-- name: Create a role with ssl:true and CERT_VERIFY:OPTIONAL and invalid ssl_verify_location should FAIL 
+- name: Create a role with ssl:true and CERT_VERIFY:OPTIONAL and invalid ssl_ca_certs should FAIL 
   community.cassandra.cassandra_role:
     name: app_user_c_o
     ssl: True
-    ssl_verify_location: '/random/ssl/ssl-test.cer.pem'
-    verify_mode: 'CERT_OPTIONAL'
+    ssl_ca_certs: '/random/ssl/ssl-test.cer.pem'
+    ssl_cert_reqs: 'CERT_OPTIONAL'
     password: 'secretZHB78'
     state: present
     login: yes
@@ -634,7 +634,7 @@
 
 - assert:
     that:
-      - "'ssl_verify_location certificate: File not found' in create_role_optional_fail.msg"         
+      - "' ssl_ca_certs certificate: File not found' in create_role_optional_fail.msg"         
 
 # - name: Sleep for 3600 seconds and continue with play
 #   ansible.builtin.wait_for:

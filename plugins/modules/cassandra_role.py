@@ -22,7 +22,7 @@ options:
     description: Uses SSL encryption if basic SSL encryption is enabled on Cassandra cluster (without client/server verification)
     type: bool
     default: False
-  verify_mode:
+  ssl_cert_reqs:
     description: SSL verification mode.
     type: str
     choices:
@@ -30,10 +30,10 @@ options:
       - 'CERT_OPTIONAL'
       - 'CERT_REQUIRED'
     default: 'CERT_NONE'
-  ssl_verify_location:
+  ssl_ca_certs:
     description:
         The SSL CA chain or certificate location to confirm supplied certificate validity
-        (required when verify_mode is set to CERT_OPTIONAL or CERT_REQUIRED)
+        (required when  ssl_cert_reqs is set to CERT_OPTIONAL or CERT_REQUIRED)
     type: str
     default: ''
   login_host:
@@ -556,13 +556,13 @@ def main():
             login_user=dict(type='str'),
             login_password=dict(type='str', no_log=True),
             ssl=dict(type='bool', default=False),
-            verify_mode=dict(type='str',
+            ssl_cert_reqs=dict(type='str',
                              required=False,
                              default='CERT_NONE',
                              choices=['CERT_NONE',
                                       'CERT_OPTIONAL',
                                       'CERT_REQUIRED']),
-            ssl_verify_location=dict(type='str', default=''),
+            ssl_ca_certs=dict(type='str', default=''),
             login_host=dict(type='list', elements='str'),
             login_port=dict(type='int', default=9042),
             name=dict(type='str', required=True),
@@ -607,16 +607,16 @@ def main():
                " install ssl.")
         module.fail_json(msg=msg)
 
-    verify_mode = module.params['verify_mode']
-    ssl_verify_location = module.params['ssl_verify_location']
+    ssl_cert_reqs = module.params['ssl_cert_reqs']
+    ssl_ca_certs = module.params['ssl_ca_certs']
 
-    if verify_mode in ('CERT_REQUIRED', 'CERT_OPTIONAL') and module.params['ssl_verify_location'] == '':
+    if ssl_cert_reqs in ('CERT_REQUIRED', 'CERT_OPTIONAL') and ssl_ca_certs == '':
         msg = ("When verify mode is set to CERT_REQUIRED or CERT_OPTIONAL "
-               "ssl_verify_location is also required to be set and not empty")
+               "ssl_ca_certs is also required to be set and not empty")
         module.fail_json(msg=msg)
 
-    if verify_mode in ('CERT_REQUIRED', 'CERT_OPTIONAL') and os.path.exists(ssl_verify_location) is not True:
-        msg = ("ssl_verify_location certificate: File not found")
+    if ssl_cert_reqs in ('CERT_REQUIRED', 'CERT_OPTIONAL') and os.path.exists(ssl_ca_certs) is not True:
+        msg = ("ssl_ca_certs certificate: File not found")
         module.fail_json(msg=msg)
 
     result = dict(
@@ -644,9 +644,9 @@ def main():
         ssl_context = None
         if ssl is True:
             ssl_context = SSLContext(PROTOCOL_TLS)
-            ssl_context.verify_mode = getattr(ssl_lib, module.params['verify_mode'])
-            if verify_mode in ('CERT_REQUIRED', 'CERT_OPTIONAL'):
-                ssl_context.load_verify_locations(module.params['ssl_verify_location'])
+            ssl_context.verify_mode = getattr(ssl_lib, module.params['ssl_cert_reqs'])
+            if ssl_cert_reqs in ('CERT_REQUIRED', 'CERT_OPTIONAL'):
+                ssl_context.load_verify_locations(module.params['ssl_ca_certs'])
         cluster = Cluster(login_host,
                           port=login_port,
                           auth_provider=auth_provider,
