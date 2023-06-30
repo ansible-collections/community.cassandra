@@ -634,7 +634,7 @@
 
 - assert:
     that:
-      - "' ssl_ca_certs certificate: File not found' in create_role_optional_fail.msg"         
+      - "'ssl_ca_certs certificate: File not found' in create_role_optional_fail.msg"
 
 # - name: Sleep for 3600 seconds and continue with play
 #   ansible.builtin.wait_for:
