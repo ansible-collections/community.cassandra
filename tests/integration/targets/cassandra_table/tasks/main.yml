@@ -34,6 +34,29 @@
   environment:
     CASS_DRIVER_NO_CYTHON: 1
 
+# Check that python is able to import ssl lib as an internal library
+- name: Check for ssl library import
+  shell: /usr/bin/python -c "import ssl" || /usr/bin/python3 -c "import ssl"
+  register: ssl_lib_check  
+
+- assert: 
+    that:
+      - "'ModuleNotFoundError' not in ssl_lib_check.stdout"
+
+# Creating a keyspace with ssl=True on a non-SSL enabled cluster should fail
+- name: Check keyspace creation on a non-SSL cluster
+  cassandra_keyspace:
+    name: nonsslapp
+    state: present
+    ssl: True
+  register: nonssl_keyspace
+  ignore_errors: yes  
+
+- assert: 
+    that:
+      - "'SSL: WRONG_VERSION_NUMBER' in nonssl_keyspace.msg"
+  when: "'This module requires the SSL python library' not in nonssl_keyspace.msg"
+
 - name: Create a keyspace for tests
   cassandra_keyspace:
     name: myapp

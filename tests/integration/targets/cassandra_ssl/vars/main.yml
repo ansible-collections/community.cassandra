@@ -1,0 +1,53 @@
+cassandra_admin_user: cassandra
+cassandra_admin_pwd: cassandra
+cassandra_auth_tests: True
+cassandra_nodes:  # Changes in 4.0 means we need to add nodes to certain DCs for some stuff to work
+  - dc: "london"  # 5 seeds because of this https://github.com/ibmcb/cbtool/issues/59
+    node: "london1"
+    ip: "127.0.0.1"
+    port: 7100
+    debug_port: 2000
+    args: "--seeds"
+  - dc: "london"
+    node: "london2"
+    ip: "127.0.0.2"
+    port: 7200
+    debug_port: 2001
+    args: "--seeds"
+  - dc: "paris"
+    node: "paris1"
+    ip: "127.0.0.3"
+    port: 7300
+    debug_port: 2002
+    args: "--seeds"
+  - dc: "new_york"
+    node: "new_york1"
+    ip: "127.0.0.4"
+    port: 7400
+    debug_port: 2003
+    args: "--seeds"
+  - dc: "tokyo"
+    node: "tokyo1"
+    ip: "127.0.0.5"
+    port: 7500
+    debug_port: 2004
+    args: "--seeds"
+  - dc: "zurich"
+    node: "zurich1"
+    ip: "127.0.0.6"
+    port: 7600
+    debug_port: 2005
+    args: "--seeds"
+  - dc: "amsterdam"
+    node: "amsterdam1"
+    ip: "127.0.0.7"
+    port: 7700
+    debug_port: 2006
+    args: "--seeds"
+  # - dc: "marlow"
+  #   node: "marlow1"
+  #   ip: "127.0.0.8"
+  #   port: 7800
+  #   debug_port: 2007
+  #   args: ""
+cassandra_service: cassandra  

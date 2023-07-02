@@ -18,12 +18,30 @@ options:
   login_password:
     description: The Cassandra password to login with.
     type: str
+  ssl:
+    description: Uses SSL encryption if basic SSL encryption is enabled on Cassandra cluster (without client/server verification)
+    type: bool
+    default: False
+  ssl_cert_reqs:
+    description: SSL verification mode.
+    type: str
+    choices:
+      - 'CERT_NONE'
+      - 'CERT_OPTIONAL'
+      - 'CERT_REQUIRED'
+    default: 'CERT_NONE'
+  ssl_ca_certs:
+    description:
+        The SSL CA chain or certificate location to confirm supplied certificate validity
+        (required when  ssl_cert_reqs is set to CERT_OPTIONAL or CERT_REQUIRED)
+    type: str
+    default: ''
   login_host:
     description: The Cassandra hostname.
     type: list
     elements: str
   login_port:
-    description: The Cassandra poret.
+    description: The Cassandra port.
     type: int
     default: 9042
   name:
@@ -156,7 +174,7 @@ msg:
 '''
 
 __metaclass__ = type
-
+import os.path
 
 try:
     from cassandra.cluster import Cluster
@@ -169,6 +187,13 @@ except Exception:
     HAS_CASSANDRA_DRIVER = False
 
 from ansible.module_utils.basic import AnsibleModule
+
+try:
+    from ssl import SSLContext, PROTOCOL_TLS
+    import ssl as ssl_lib
+    HAS_SSL_LIBRARY = True
+except Exception:
+    HAS_SSL_LIBRARY = False
 
 # =========================================
 # Cassandra module specific support methods
@@ -530,6 +555,14 @@ def main():
         argument_spec=dict(
             login_user=dict(type='str'),
             login_password=dict(type='str', no_log=True),
+            ssl=dict(type='bool', default=False),
+            ssl_cert_reqs=dict(type='str',
+                               required=False,
+                               default='CERT_NONE',
+                               choices=['CERT_NONE',
+                                        'CERT_OPTIONAL',
+                                        'CERT_REQUIRED']),
+            ssl_ca_certs=dict(type='str', default=''),
             login_host=dict(type='list', elements='str'),
             login_port=dict(type='int', default=9042),
             name=dict(type='str', required=True),
@@ -553,6 +586,7 @@ def main():
 
     login_user = module.params['login_user']
     login_password = module.params['login_password']
+    ssl = module.params['ssl']
     login_host = module.params['login_host']
     login_port = module.params['login_port']
     name = module.params['name']
@@ -566,6 +600,24 @@ def main():
     keyspace_permissions = module.params['keyspace_permissions']
     roles = module.params['roles']
     debug = module.params['debug']
+
+    if HAS_SSL_LIBRARY is False and ssl is True:
+        msg = ("This module requires the SSL python"
+               " library. You can probably install it with pip"
+               " install ssl.")
+        module.fail_json(msg=msg)
+
+    ssl_cert_reqs = module.params['ssl_cert_reqs']
+    ssl_ca_certs = module.params['ssl_ca_certs']
+
+    if ssl_cert_reqs in ('CERT_REQUIRED', 'CERT_OPTIONAL') and ssl_ca_certs == '':
+        msg = ("When verify mode is set to CERT_REQUIRED or CERT_OPTIONAL "
+               "ssl_ca_certs is also required to be set and not empty")
+        module.fail_json(msg=msg)
+
+    if ssl_cert_reqs in ('CERT_REQUIRED', 'CERT_OPTIONAL') and os.path.exists(ssl_ca_certs) is not True:
+        msg = ("ssl_ca_certs certificate: File not found")
+        module.fail_json(msg=msg)
 
     result = dict(
         changed=False,
@@ -589,9 +641,16 @@ def main():
                 username=login_user,
                 password=login_password
             )
+        ssl_context = None
+        if ssl is True:
+            ssl_context = SSLContext(PROTOCOL_TLS)
+            ssl_context.verify_mode = getattr(ssl_lib, module.params['ssl_cert_reqs'])
+            if ssl_cert_reqs in ('CERT_REQUIRED', 'CERT_OPTIONAL'):
+                ssl_context.load_verify_locations(module.params['ssl_ca_certs'])
         cluster = Cluster(login_host,
                           port=login_port,
-                          auth_provider=auth_provider)
+                          auth_provider=auth_provider,
+                          ssl_context=ssl_context)
         session = cluster.connect()
     except AuthenticationFailed as auth_failed:
         module.fail_json(msg="Authentication failed: {0}".format(auth_failed))
