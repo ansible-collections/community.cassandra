@@ -75,3 +75,9 @@ releases:
       release_summary: Maintenance release
       bugfixes:
         - 244 cassandra_repository - Update APT Repository url.
+  1.3.0:
+    changes:
+      release_summary: Maintenance release
+    minor_changes:
+      - 230 - Adds basic SSL/TLS support to the cassandra_keyspace, cassandra_role and cassandra_table modules.
+        

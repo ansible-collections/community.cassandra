@@ -4,6 +4,19 @@ community.cassandra Release Notes
 
 .. contents:: Topics
 
+v1.3.0:
+=======
+
+Release Summary
+---------------
+
+Maintenance release
+
+Minor Changes
+-------------
+
+- 230 - Adds basic SSL/TLS support to the cassandra_keyspace, cassandra_role and cassandra_table modules.
+
 v1.2.4:
 =======
 
