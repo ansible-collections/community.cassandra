@@ -1,8 +1,8 @@
+# Key from https://adoptopenjdk.jfrog.io/adoptopenjdk/api/gpg/key/public
 - name: Add repository key for OpenJDK 1.8 when needed (Debian & Ubuntu)
-  apt_key:
-    url: https://adoptopenjdk.jfrog.io/adoptopenjdk/api/gpg/key/public
+  ansible.builtin.apt_key:
+    data: "{{ lookup('ansible.builtin.file', 'artifactory.asc') }}"
     state: present
-  retries: 3
 
 - name: Add repo for OpenJDK (Debian & Ubuntu)
   apt_repository:
