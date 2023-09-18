@@ -21,8 +21,8 @@ platforms:
     image: ubuntu:18.04
     command: /sbin/init
     privileged: True
-  - name: debian_buster
-    image: debian:buster
+  - name: debian_bookworm
+    image: debian:bookworm
     command: /sbin/init
     privileged: True
   #- name: debian_stretch
