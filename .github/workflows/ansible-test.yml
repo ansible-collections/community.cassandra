@@ -77,8 +77,9 @@ jobs:
       matrix:
         python_version: ["3.10"]
         ansible_version:
-          - stable-2.12
           - stable-2.13
+          - stable-2.14
+          - stable-2.15
           - devel
         cassandra_version:
           - package_version: "311x"
@@ -144,8 +145,9 @@ jobs:
       matrix:
         python_version: ["3.10"]
         ansible_version:
-          - stable-2.12
           - stable-2.13
+          - stable-2.14
+          - stable-2.15
           - devel
         cassandra_version:
           - package_version: "40x"
