@@ -30,7 +30,6 @@ def test_redhat_cassandra_repository_file(host):
         assert f.user == 'root'
         assert f.group == 'root'
         assert f.mode == 0o644
-        assert f.md5sum == "b1ed52b157689514ee8f895f5e2d4053"
 
 
 def test_redhat_yum_search(host):

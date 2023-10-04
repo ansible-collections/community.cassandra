@@ -4,7 +4,7 @@
   yum_repository:
       name: "cassandra-{{ cassandra_version }}"
       description: "Official Cassandra {{ cassandra_version }} yum repo"
-      baseurl: "https://www.apache.org/dist/cassandra/redhat/{{ cassandra_version }}/"
+      baseurl: "https://redhat.cassandra.apache.org/{{ cassandra_version }}/"
       gpgcheck: 1
       gpgkey: "https://www.apache.org/dist/cassandra/KEYS"
   retries: 3
