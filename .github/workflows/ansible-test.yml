@@ -86,7 +86,7 @@ jobs:
             tar_version: "3.11.11"
         test_scenario:
           - docker_image: default
-            python_version: "3.6"
+            python_version: "3.10"
             ansible_test_options: ""
           #- docker_image: centos7
           #  python_version: "2.7"
