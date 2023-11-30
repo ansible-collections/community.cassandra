@@ -48,7 +48,7 @@
 - assert:
     that:
       - result.changed
-      - "result.msg == "{{ item }} timeout changed"
+      - result.msg == "{{ item }} timeout changed"
 
 - name: Set timeout to 100
   community.cassandra.cassandra_timeout:
