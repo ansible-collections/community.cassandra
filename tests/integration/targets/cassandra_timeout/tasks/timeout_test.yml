@@ -8,10 +8,13 @@
     debug: true
   register: result
 
+- set_fact:
+    mymsg: "{{ item }} timeout changed"
+
 - assert:
     that:
       - result.changed
-      - result.msg == "{{ item }} timeout changed"
+      - result.msg == mymsg
 
 - name: "Get {{ item }} timeout"
   ansible.builtin.shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 gettimeout {{ item }}
@@ -33,7 +36,7 @@
 - assert:
     that:
       - "result.changed == False"
-      - result.msg == "{{ item }} timeout unchanged"
+      - result.msg == mymsg
 
 - name: Set timeout to 0 (check mode)
   community.cassandra.cassandra_timeout:
@@ -48,7 +51,7 @@
 - assert:
     that:
       - result.changed
-      - result.msg == "{{ item }} timeout changed"
+      - result.msg == mymsg
 
 - name: Set timeout to 100
   community.cassandra.cassandra_timeout:
@@ -62,7 +65,7 @@
 - assert:
     that:
       - result.changed
-      - result.msg == "{{ item }} timeout changed"
+      - result.msg == mymsg
 
 - name: "Get {{ item }} timeout"
   ansible.builtin.shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 gettimeout {{ item }}
