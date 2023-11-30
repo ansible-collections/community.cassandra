@@ -1,4 +1,4 @@
----   
+---
 - name: "Set {{ item }} timeout with module"
   community.cassandra.cassandra_timeout:
     username: "{{ cassandra_admin_user }}"
@@ -8,18 +8,24 @@
     debug: true
   register: result
 
+- set_fact:
+    mymsg: "{{ item }} timeout changed"
+
 - assert:
-    that: 
+    that:
       - result.changed
-      - "result.msg == '{{ item }} timeout changed'"
+      - result.msg == mymsg
 
 - name: "Get {{ item }} timeout"
   ansible.builtin.shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 gettimeout {{ item }}
   register: result
 
+- set_fact:
+    mymsg: "Current timeout for type {{ item }}: 15999 ms"
+
 - name: Assert timeout is 15999 ms
   assert:
-    that: "'Current timeout for type {{ item }}: 15999 ms' == result.stdout"
+    that: mymsg == result.stdout
 
 - name: Set throughput to 15999 again
   community.cassandra.cassandra_timeout:
@@ -30,10 +36,13 @@
     debug: true
   register: result
 
+- set_fact:
+    mymsg: "{{ item }} timeout unchanged"
+
 - assert:
-    that: 
+    that:
       - "result.changed == False"
-      - "result.msg == '{{ item }} timeout unchanged'"
+      - result.msg == mymsg
 
 - name: Set timeout to 0 (check mode)
   community.cassandra.cassandra_timeout:
@@ -45,10 +54,13 @@
   check_mode: yes
   register: result
 
+- set_fact:
+    mymsg: "{{ item }} timeout changed"
+
 - assert:
     that:
       - result.changed
-      - "result.msg == '{{ item }} timeout changed'"
+      - result.msg == mymsg
 
 - name: Set timeout to 100
   community.cassandra.cassandra_timeout:
@@ -59,19 +71,25 @@
     debug: true
   register: result
 
+- set_fact:
+    mymsg: "{{ item }} timeout changed"
+
 - assert:
     that:
       - result.changed
-      - "result.msg == '{{ item }} timeout changed'"
+      - result.msg == mymsg
 
 - name: "Get {{ item }} timeout"
   ansible.builtin.shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 gettimeout {{ item }}
   register: result
 
+- set_fact:
+    expected_stdout: "Current timeout for type {{ item }}: 100 ms"
+
 - name: Ensure timeout is 100
   assert:
     that:
-      - "result.stdout == 'Current timeout for type {{ item }}: 100 ms'"
+      - result.stdout == expected_stdout
 
 - name: Return timeout to something high otherwise we mess up later tests
   community.cassandra.cassandra_timeout:
