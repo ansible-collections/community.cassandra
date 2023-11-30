@@ -33,6 +33,9 @@
     debug: true
   register: result
 
+- set_fact:
+    mymsg: "{{ item }} timeout unchanged"
+
 - assert:
     that:
       - "result.changed == False"
@@ -48,6 +51,9 @@
   check_mode: yes
   register: result
 
+- set_fact:
+    mymsg: "{{ item }} timeout changed"
+
 - assert:
     that:
       - result.changed
@@ -61,6 +67,9 @@
     timeout_type: "{{ item }}"
     debug: true
   register: result
+
+- set_fact:
+    mymsg: "{{ item }} timeout changed"
 
 - assert:
     that:
