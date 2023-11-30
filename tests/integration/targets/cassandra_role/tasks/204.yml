@@ -44,8 +44,8 @@
       - first_run.changed
       - first_run.cql == "CREATE ROLE 'test_role' WITH SUPERUSER = False AND LOGIN = True AND PASSWORD = '********' "
       - "first_run.permissions.grant.0 == \"GRANT ALL PERMISSIONS ON KEYSPACE test_keyspace TO 'test_role'\""
-      - "{{ first_run.permissions.grant | length }} == 1"
-      - "{{ first_run.permissions.revoke | length }} == 0"
+      - first_run.permissions.grant | length == 1
+      - first_run.permissions.revoke | length == 0
 
 - name: Create a test role - second run
   community.cassandra.cassandra_role:
@@ -84,8 +84,8 @@
 - assert:
     that:
       - third_run.changed
-      - "{{ third_run.permissions.revoke | length }} == 5"
-      - "{{ third_run.permissions.grant | length }} == 0"
+      - third_run.permissions.revoke | length == 5
+      - third_run.permissions.grant | length == 0
 
 - name: Create a test role - fourth run
   community.cassandra.cassandra_role:
@@ -104,8 +104,8 @@
 - assert:
     that:
       - fourth_run.changed
-      - "{{ fourth_run.permissions.revoke | length }} == 5"
-      - "{{ fourth_run.permissions.grant | length }} == 0"
+      - fourth_run.permissions.revoke | length == 5
+      - fourth_run.permissions.grant | length == 0
 
 
 - name: Create a test role - fifth run
@@ -146,8 +146,8 @@
 - assert:
     that:
       - sixth_run.changed
-      - "{{ sixth_run.permissions.revoke | length }} == 0"
-      - "{{ sixth_run.permissions.grant | length }} == 1"
+      - sixth_run.permissions.revoke | length == 0
+      - sixth_run.permissions.grant | length == 1
       - "sixth_run.permissions.grant.0 == \"GRANT MODIFY ON KEYSPACE test_keyspace TO 'test_role'\""
 
 - name: Create a test role - seventh run
@@ -168,8 +168,8 @@
 - assert:
     that:
       - seventh_run.changed
-      - "{{ seventh_run.permissions.revoke | length }} == 0"
-      - "{{ seventh_run.permissions.grant | length }} == 1"
+      - seventh_run.permissions.revoke | length == 0
+      - seventh_run.permissions.grant | length == 1
       - "seventh_run.permissions.grant.0 == \"GRANT MODIFY ON KEYSPACE test_keyspace TO 'test_role'\""
 
 - name: Create a test role - eighth run
