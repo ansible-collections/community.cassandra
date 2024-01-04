@@ -139,7 +139,7 @@
     apt clean
     apt autoclean
     apt update
-    apt -y install python-apt
+    apt -y install python3-apt
   when: ansible_os_family == 'Debian'
   register: result
   until: result is not failed
