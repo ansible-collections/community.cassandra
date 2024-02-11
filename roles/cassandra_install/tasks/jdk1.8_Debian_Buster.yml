@@ -6,7 +6,7 @@
 
 - name: Add repo for OpenJDK (Debian & Ubuntu)
   apt_repository:
-    repo: "deb https://adoptopenjdk.jfrog.io/adoptopenjdk/deb/ {{ ansible_distribution_release }} main"
+    repo: "deb https://packages.adoptium.net/artifactory/deb {{ ansible_distribution_release }} main"
     state: present
     filename: "openjdk-1.8"
   retries: 3
