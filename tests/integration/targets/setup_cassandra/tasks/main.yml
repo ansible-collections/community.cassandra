@@ -218,7 +218,9 @@
     owner: root
     group: root
     mode: 0755
-  when: ansible_os_family == "Debian"
+  when: 
+  - ansible_os_family == "Debian"
+  - cassandra_version[0] | int >= 4
 
 - name: Reload systemd
   systemd:
