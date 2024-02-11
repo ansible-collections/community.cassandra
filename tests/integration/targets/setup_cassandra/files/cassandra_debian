@@ -1,283 +1,169 @@
-#!/bin/sh
-# Licensed to the Apache Software Foundation (ASF) under one
-# or more contributor license agreements.  See the NOTICE file
-# distributed with this work for additional information
-# regarding copyright ownership.  The ASF licenses this file
-# to you under the Apache License, Version 2.0 (the
-# "License"); you may not use this file except in compliance
-# with the License.  You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+#! /bin/sh
+### BEGIN INIT INFO
+# Provides:          cassandra
+# Required-Start:    $remote_fs $network $named $time
+# Required-Stop:     $remote_fs $network $named $time
+# Should-Start:      ntp mdadm
+# Should-Stop:       ntp mdadm
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: distributed storage system for structured data
+# Description:       Cassandra is a distributed (peer-to-peer) system for
+#                    the management and storage of structured data.
+### END INIT INFO
 
+# Author: Eric Evans <eevans@racklabs.com>
 
-# OPTIONS:
-#   -f: start in foreground
-#   -p <filename>: log the pid to a file (useful to kill it later)
-#   -v: print version string and exit
+DESC="Cassandra"
+NAME=cassandra
+PIDFILE=/var/run/$NAME/$NAME.pid
+SCRIPTNAME=/etc/init.d/$NAME
+CONFDIR=/etc/cassandra
+WAIT_FOR_START=10
+CASSANDRA_HOME=/usr/share/cassandra
+FD_LIMIT=100000
 
-# CONTROLLING STARTUP:
-#
-# This script relies on few environment variables to determine startup
-# behavior, those variables are:
-#
-#   CLASSPATH -- A Java classpath containing everything necessary to run.
-#   EXTRA_CLASSPATH -- A Java classpath with anything to be appended to CLASSPATH
-#   JVM_OPTS -- Additional arguments to the JVM for heap size, etc
-#   JVM_ON_OUT_OF_MEMORY_ERROR_OPT -- The OnOutOfMemoryError JVM option if specified
-#   CASSANDRA_CONF -- Directory containing Cassandra configuration files.
-#   CASSANDRA_LOG_DIR -- Directory containing logs(default: $CASSANDRA_HOME/logs).
-#
-# As a convenience, a fragment of shell is sourced in order to set one or
-# more of these variables. This so-called `include' can be placed in a
-# number of locations and will be searched for in order. The highest
-# priority search path is the same directory as the startup script, and
-# since this is the location of the sample in the project tree, it should
-# almost work Out Of The Box.
-#
-# Any serious use-case though will likely require customization of the
-# include. For production installations, it is recommended that you copy
-# the sample to one of /usr/share/cassandra/cassandra.in.sh,
-# /usr/local/share/cassandra/cassandra.in.sh, or
-# /opt/cassandra/cassandra.in.sh and make your modifications there.
-#
-# Another option is to specify the full path to the include file in the
-# environment. For example:
-#
-#   $ CASSANDRA_INCLUDE=/path/to/in.sh cassandra -p /var/run/cass.pid
-#
-# Note: This is particularly handy for running multiple instances on a
-# single installation, or for quick tests.
-#
-# Finally, developers and enthusiasts who frequently run from an SVN
-# checkout, and do not want to locally modify bin/cassandra.in.sh, can put
-# a customized include file at ~/.cassandra.in.sh.
-#
-# If you would rather configure startup entirely from the environment, you
-# can disable the include by exporting an empty CASSANDRA_INCLUDE, or by
-# ensuring that no include files exist in the aforementioned search list.
-# Be aware that you will be entirely responsible for populating the needed
-# environment variables.
+[ -e /usr/share/cassandra/apache-cassandra.jar ] || exit 0
+[ -e /etc/cassandra/cassandra.yaml ] || exit 0
+[ -e /etc/cassandra/cassandra-env.sh ] || exit 0
 
-# NB: Developers should be aware that this script should remain compatible with
-# POSIX sh and Solaris sh. This means, in particular, no $(( )) and no $( ).
+# Read configuration variable file if it is present
+[ -r /etc/default/$NAME ] && . /etc/default/$NAME
 
-# Unset any grep options that may include `--color=always` per say.
-# Using `unset GREP_OPTIONS` will also work on the non-deprecated use case
-# of setting a new grep alias.
-# See CASSANDRA-14487 for more details.
-unset GREP_OPTIONS
+# Read Cassandra environment file.
+. /etc/cassandra/cassandra-env.sh
 
-# If an include wasn't specified in the environment, then search for one...
-
-jvmoptions_variant="-server"
-
-if [ "x$CASSANDRA_INCLUDE" = "x" ]; then
-    # Locations (in order) to use when searching for an include file.
-    for include in "`dirname "$0"`/cassandra.in.sh" \
-                   "$HOME/.cassandra.in.sh" \
-                   /usr/share/cassandra/cassandra.in.sh \
-                   /usr/local/share/cassandra/cassandra.in.sh \
-                   /opt/cassandra/cassandra.in.sh; do
-        if [ -r "$include" ]; then
-            . "$include"
-            break
-        fi
-    done
-# ...otherwise, source the specified include.
-elif [ -r "$CASSANDRA_INCLUDE" ]; then
-    . "$CASSANDRA_INCLUDE"
+if [ -z "$JVM_OPTS" ]; then
+    echo "Initialization failed; \$JVM_OPTS not set!" >&2
+    exit 3
 fi
 
-# If numactl is available, use it. For Cassandra, the priority is to
-# avoid disk I/O. Even for the purpose of CPU efficiency, we don't
-# really have CPU<->data affinity anyway. Also, empirically test that numactl
-# works before trying to use it (CASSANDRA-3245).
-NUMACTL_ARGS=${NUMACTL_ARGS:-"--interleave=all"}
-if which numactl >/dev/null 2>/dev/null && numactl $NUMACTL_ARGS ls / >/dev/null 2>/dev/null
-then
-    NUMACTL="numactl $NUMACTL_ARGS"
-else
-    NUMACTL=""
-fi
+export JVM_OPTS
 
-if [ -z "$CASSANDRA_CONF" -o -z "$CLASSPATH" ]; then
-    echo "You must set the CASSANDRA_CONF and CLASSPATH vars" >&2
-    exit 1
-fi
+# Export JAVA_HOME, if set.
+[ -n "$JAVA_HOME" ] && export JAVA_HOME
 
-if [ -f "$CASSANDRA_CONF/cassandra-env.sh" ]; then
-    . "$CASSANDRA_CONF/cassandra-env.sh"
-fi
+# Load the VERBOSE setting and other rcS variables
+. /lib/init/vars.sh
 
-if [ -z "$CASSANDRA_LOG_DIR" ]; then
-  CASSANDRA_LOG_DIR=$CASSANDRA_HOME/logs
-fi
+# Define LSB log_* functions.
+# Depend on lsb-base (>= 3.0-6) to ensure that this file is present.
+. /lib/lsb/init-functions
 
-# Cassandra uses an installed jemalloc via LD_PRELOAD / DYLD_INSERT_LIBRARIES by default to improve off-heap
-# memory allocation performance. The following code searches for an installed libjemalloc.dylib/.so/.1.so using
-# Linux and OS-X specific approaches.
-# To specify your own libjemalloc in a different path, configure the fully qualified path in CASSANDRA_LIBJEMALLOC.
-# To disable jemalloc preload at all, set CASSANDRA_LIBJEMALLOC=-
 #
-#CASSANDRA_LIBJEMALLOC=
+# Function that returns 0 if process is running, or nonzero if not.
 #
-find_library()
+# The nonzero value is 3 if the process is simply not running, and 1 if the
+# process is not running but the pidfile exists (to match the exit codes for
+# the "status" command; see LSB core spec 3.1, section 20.2)
+#
+CMD_PATT="cassandra.+CassandraDaemon"
+is_running()
 {
-    pattern=$1
-    path=$(echo ${2} | tr ":" " ")
-
-    find $path -regex "$pattern" -print 2>/dev/null | sort -ru | head -n 1
+    if [ -f $PIDFILE ]; then
+        pid=`cat $PIDFILE`
+        grep -Eq "$CMD_PATT" "/proc/$pid/cmdline" 2>/dev/null && return 0
+        return 1
+    fi
+    return 3
 }
-case "`uname -s`" in
-    Linux)
-        if [ -z $CASSANDRA_LIBJEMALLOC ] ; then
-            dirs="/lib64 /lib /usr/lib64 /usr/lib "
-            which ldconfig > /dev/null 2>&1
-            if [ $? = 0 ] ; then
-                dirs="$dirs `ldconfig -v 2>/dev/null | grep -v '^\s' | sed 's/^\([^:]*\):.*$/\1/'`"
-            fi
-            if [ -f /etc/ld.so.conf ]; then
-                dirs="$dirs `cat /etc/ld.so.conf | grep '^/'`"
-            fi
-            additional_configs=$(ls /etc/ld.so.conf.d/*.conf 2>&1)
-            if [ $? = 0 ]; then
-                for conf in $additional_configs; do
-                    dirs="$dirs `cat $conf | grep '^/'`"
-                done
-            fi
-            dirs=`echo $dirs | tr " " ":"`
-            CASSANDRA_LIBJEMALLOC=$(find_library '.*/libjemalloc\.so.*' $dirs)
-        fi
-        if [ ! -z $CASSANDRA_LIBJEMALLOC ] ; then
-            export JVM_OPTS="$JVM_OPTS -Dcassandra.libjemalloc=$CASSANDRA_LIBJEMALLOC"
-            if [ "-" != "$CASSANDRA_LIBJEMALLOC" ] ; then
-                export LD_PRELOAD=$CASSANDRA_LIBJEMALLOC
-            fi
-        fi
+
+#
+# Function that starts the daemon/service
+#
+do_start()
+{
+    # Return
+    #   0 if daemon has been started
+    #   1 if daemon was already running
+    #   2 if daemon could not be started
+
+    ulimit -l unlimited
+    ulimit -n "$FD_LIMIT"
+
+    cassandra_home=`getent passwd cassandra | awk -F ':' '{ print $6; }'`
+    heap_dump_f="$cassandra_home/java_`date +%s`.hprof"
+    error_log_f="$cassandra_home/hs_err_`date +%s`.log"
+
+    [ -e `dirname "$PIDFILE"` ] || \
+        install -d -ocassandra -gcassandra -m755 `dirname $PIDFILE`
+
+
+
+    start-stop-daemon -S -c cassandra -a /usr/sbin/cassandra -q -p "$PIDFILE" -Dcassandra.ignore_dc=true -t >/dev/null || return 1
+
+    start-stop-daemon -S -c cassandra -a /usr/sbin/cassandra -b -p "$PIDFILE" -Dcassandra.ignore_dc=true -- \
+        -p "$PIDFILE" -H "$heap_dump_f" -E "$error_log_f" >/dev/null || return 2
+
+}
+
+#
+# Function that stops the daemon/service
+#
+do_stop()
+{
+    # Return
+    #   0 if daemon has been stopped
+    #   1 if daemon was already stopped
+    #   2 if daemon could not be stopped
+    #   other if a failure occurred
+    start-stop-daemon -K -p "$PIDFILE" -R TERM/30/KILL/5 >/dev/null
+    RET=$?
+    rm -f "$PIDFILE"
+    return $RET
+}
+
+case "$1" in
+  start)
+	[ "$VERBOSE" != no ] && log_daemon_msg "Starting $DESC" "$NAME"
+	do_start
+	case "$?" in
+		0|1) [ "$VERBOSE" != no ] && log_end_msg 0 ;;
+		2) [ "$VERBOSE" != no ] && log_end_msg 1 ;;
+	esac
+	;;
+  stop)
+	[ "$VERBOSE" != no ] && log_daemon_msg "Stopping $DESC" "$NAME"
+	do_stop
+	case "$?" in
+		0|1) [ "$VERBOSE" != no ] && log_end_msg 0 ;;
+		2) [ "$VERBOSE" != no ] && log_end_msg 1 ;;
+	esac
+	;;
+  restart|force-reload)
+	log_daemon_msg "Restarting $DESC" "$NAME"
+	do_stop
+	case "$?" in
+	  0|1)
+		do_start
+		case "$?" in
+			0) log_end_msg 0 ;;
+			1) log_end_msg 1 ;; # Old process is still running
+			*) log_end_msg 1 ;; # Failed to start
+		esac
+		;;
+	  *)
+	  	# Failed to stop
+		log_end_msg 1
+		;;
+	esac
+	;;
+  status)
+    is_running
+    stat=$?
+    case "$stat" in
+      0) log_success_msg "$DESC is running" ;;
+      1) log_failure_msg "could not access pidfile for $DESC" ;;
+      *) log_success_msg "$DESC is not running" ;;
+    esac
+    exit "$stat"
     ;;
-    Darwin)
-        if [ -z $CASSANDRA_LIBJEMALLOC ] ; then
-            CASSANDRA_LIBJEMALLOC=$(find_library '.*/libjemalloc\.dylib' $DYLD_LIBRARY_PATH:${DYLD_FALLBACK_LIBRARY_PATH-$HOME/lib:/usr/local/lib:/lib:/usr/lib})
-        fi
-        if [ ! -z $CASSANDRA_LIBJEMALLOC ] ; then
-            export JVM_OPTS="$JVM_OPTS -Dcassandra.libjemalloc=$CASSANDRA_LIBJEMALLOC"
-            if [ "-" != "$CASSANDRA_LIBJEMALLOC" ] ; then
-                export DYLD_INSERT_LIBRARIES=$CASSANDRA_LIBJEMALLOC
-            fi
-        fi
-    ;;
+  *)
+	echo "Usage: $SCRIPTNAME {start|stop|restart|force-reload|status}" >&2
+	exit 3
+	;;
 esac
 
-launch_service()
-{
-    pidpath="$1"
-    foreground="$2"
-    props="$3"
-    class="$4"
-    cassandra_parms="-Dlogback.configurationFile=logback.xml"
-    cassandra_parms="$cassandra_parms -Dcassandra.logdir=$CASSANDRA_LOG_DIR"
-    cassandra_parms="$cassandra_parms -Dcassandra.storagedir=$cassandra_storagedir"
-    cassandra_parms="$cassandra_parms -Dcassandra.ignore_dc=true"
+:
 
-    if [ "x$pidpath" != "x" ]; then
-        cassandra_parms="$cassandra_parms -Dcassandra-pidfile=$pidpath"
-    fi
-
-    # The cassandra-foreground option will tell CassandraDaemon not
-    # to close stdout/stderr, but it's up to us not to background.
-    if [ "x$foreground" != "x" ]; then
-        cassandra_parms="$cassandra_parms -Dcassandra-foreground=yes"
-        if [ "x$JVM_ON_OUT_OF_MEMORY_ERROR_OPT" != "x" ]; then
-            exec $NUMACTL "$JAVA" $JVM_OPTS "$JVM_ON_OUT_OF_MEMORY_ERROR_OPT" $cassandra_parms -cp "$CLASSPATH" $props "$class"
-        else
-            exec $NUMACTL "$JAVA" $JVM_OPTS $cassandra_parms -cp "$CLASSPATH" $props "$class"
-        fi
-    # Startup CassandraDaemon, background it, and write the pid.
-    else
-        if [ "x$JVM_ON_OUT_OF_MEMORY_ERROR_OPT" != "x" ]; then
-            exec $NUMACTL "$JAVA" $JVM_OPTS "$JVM_ON_OUT_OF_MEMORY_ERROR_OPT" $cassandra_parms -cp "$CLASSPATH" $props "$class" <&- &
-            [ ! -z "$pidpath" ] && printf "%d" $! > "$pidpath"
-            true
-        else
-            exec $NUMACTL "$JAVA" $JVM_OPTS $cassandra_parms -cp "$CLASSPATH" $props "$class" <&- &
-            [ ! -z "$pidpath" ] && printf "%d" $! > "$pidpath"
-            true
-        fi
-    fi
-
-    return $?
-}
-
-# Parse any command line options.
-args=`getopt vRfhp:bD:H:E: "$@"`
-eval set -- "$args"
-
-classname="org.apache.cassandra.service.CassandraDaemon"
-
-while true; do
-    case "$1" in
-        -p)
-            pidfile="$2"
-            shift 2
-        ;;
-        -f)
-            foreground="yes"
-            shift
-        ;;
-        -h)
-            echo "Usage: $0 [-f] [-h] [-p pidfile] [-H dumpfile] [-E errorfile]"
-            exit 0
-        ;;
-        -v)
-            "$JAVA" -cp "$CLASSPATH" "-Dlogback.configurationFile=logback-tools.xml" org.apache.cassandra.tools.GetVersion
-            exit 0
-        ;;
-        -R)
-            allow_root="yes"
-            shift
-        ;;
-        -D)
-            properties="$properties -D$2"
-            shift 2
-        ;;
-        -H)
-            properties="$properties -XX:HeapDumpPath=$2"
-            shift 2
-        ;;
-        -E)
-            properties="$properties -XX:ErrorFile=$2"
-            shift 2
-        ;;
-        --)
-            shift
-            if [ "x$*" != "x" ] ; then
-                echo "Error parsing arguments! Unknown argument \"$*\"" >&2
-                exit 1
-            fi
-            break
-        ;;
-        *)
-            echo "Error parsing arguments! Unknown argument \"$1\"" >&2
-            exit 1
-        ;;
-    esac
-done
-
-if [ "x$allow_root" != "xyes" ] ; then
-    if [ "`id -u`" = "0" ] || [ "`id -g`" = "0" ] ; then
-        echo "Running Cassandra as root user or group is not recommended - please start Cassandra using a different system user."
-        echo "If you really want to force running Cassandra as root, use -R command line option."
-        exit 1
-    fi
-fi
-
-# Start up the service
-launch_service "$pidfile" "$foreground" "$properties" "$classname"
-
-exit $?
+# vi:ai sw=4 ts=4 tw=0 e

@@ -211,9 +211,6 @@
     mode: 0755
   when: ansible_os_family == "RedHat"
 
-- shell: cat /etc/init.d/cassandra
-  when: ansible_os_family == "Debian"
-
 - name: Replace default cassandra init script - Debian
   copy:
     src: cassandra_debian
