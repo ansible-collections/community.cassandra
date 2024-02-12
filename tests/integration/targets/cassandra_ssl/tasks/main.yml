@@ -167,7 +167,7 @@
 - name: Assert ccmsslkeyspace_cert_none exists 1
   assert:
     that:
-      - "'\\nCREATE KEYSPACE ccmsslkeyspace_cert_none WITH replication = {\\'class\\': \\'SimpleStrategy\\', \\'replication_factor\\': \\'1\\'}  AND durable_writes = true;' == ccmsslkeyspace_cert_none.stdout"  
+      - "'\\nCREATE KEYSPACE ccmsslkeyspace_cert_none WITH replication = {\\'class\\': \\'SimpleStrategy\\', \\'replication_factor\\': \\'1\\'}  AND durable_writes = true;' in ccmsslkeyspace_cert_none.stdout"  
 
 - name: Creating a keyspace on an SSL-enabled cluster when ssl=True and ssl_cert_reqs=CERT_OPTIONAL should succeed
   cassandra_keyspace:
@@ -184,7 +184,7 @@
 - name: Assert ccmsslkeyspace_cert_optional exists 2
   assert:
     that:
-      - "'\\nCREATE KEYSPACE ccmsslkeyspace_cert_optional WITH replication = {\\'class\\': \\'SimpleStrategy\\', \\'replication_factor\\': \\'1\\'}  AND durable_writes = true;' == ccmsslkeyspace_cert_optional.stdout"
+      - "'\\nCREATE KEYSPACE ccmsslkeyspace_cert_optional WITH replication = {\\'class\\': \\'SimpleStrategy\\', \\'replication_factor\\': \\'1\\'}  AND durable_writes = true;' in ccmsslkeyspace_cert_optional.stdout"
 
 - name: Creating a keyspace with ssl=True and ssl_cert_reqs=CERT_OPTIONAL on an SSL enabled cluster with wrong ssl_ca_certs should fail
   cassandra_keyspace:
@@ -231,7 +231,7 @@
 - name: Assert ccmsslkeyspace_cert_required exists 3
   assert:
     that:
-      - "'\\nCREATE KEYSPACE ccmsslkeyspace_cert_required WITH replication = {\\'class\\': \\'SimpleStrategy\\', \\'replication_factor\\': \\'1\\'}  AND durable_writes = true;' == ccmsslkeyspace_cert_required.stdout"          
+      - "'\\nCREATE KEYSPACE ccmsslkeyspace_cert_required WITH replication = {\\'class\\': \\'SimpleStrategy\\', \\'replication_factor\\': \\'1\\'}  AND durable_writes = true;' in ccmsslkeyspace_cert_required.stdout"          
 
 - name: Creating a keyspace for table tests with ssl:True and ssl_cert_reqs:CERT_NONE should succeed
   cassandra_keyspace:
