@@ -185,13 +185,12 @@
     - ansible_os_family == "Debian"
   no_log: yes
 
-- name: Add lines for nodetool auth to cassandra-env.sh
+- name: Add lines DC issue on startup
   blockinfile:
     marker: "# {mark} ANSIBLE MANAGED BLOCK - DC Startup Bug"
     dest: "{{ cassandra_env_file }}"
     block: |
-      JVM_OPTS="$JVM_OPTS -Dcassandra.ignore_dc=true
-      JVM_OPTS="$JVM_OPTS -Dcassandra.ignore_rack=true"
+      JVM_OPTS="$JVM_OPTS -Dcassandra.ignore_dc=true"
 
 - name: Set audit_logging_options.allow_nodetool_archive_command
   ansible.builtin.blockinfile:
