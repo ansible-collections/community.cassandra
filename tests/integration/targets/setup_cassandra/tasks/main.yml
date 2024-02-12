@@ -191,6 +191,7 @@
     dest: "{{ cassandra_env_file }}"
     block: |
       JVM_OPTS="$JVM_OPTS -Dcassandra.ignore_dc=true"
+      JVM_OPTS="$JVM_OPTS -Dcassandra.ignore_rack=true"
 
 - name: Set audit_logging_options.allow_nodetool_archive_command
   ansible.builtin.blockinfile:
