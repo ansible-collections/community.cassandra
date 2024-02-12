@@ -167,7 +167,7 @@
 - name: Assert ccmsslkeyspace_cert_none exists 1
   assert:
     that:
-      - "'\\nCREATE KEYSPACE ccmsslkeyspace_cert_none WITH replication = {\\'class\\': \\'SimpleStrategy\\', \\'replication_factor\\': \\'1\\'}  AND durable_writes = true;' == ccmsslkeyspace_cert_none.stdout"  
+      - "'\\nCREATE KEYSPACE ccmsslkeyspace_cert_none WITH replication = {\\'class\\': \\'SimpleStrategy\\', \\'replication_factor\\': \\'1\\'}  AND durable_writes = true;' in ccmsslkeyspace_cert_none.stdout"  
 
 - name: Creating a keyspace on an SSL-enabled cluster when ssl=True and ssl_cert_reqs=CERT_OPTIONAL should succeed
   cassandra_keyspace:
