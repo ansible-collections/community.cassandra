@@ -110,10 +110,9 @@
   register: bad_login
   ignore_errors: true
 
-# TODO - FIX ME - Cassandra Auth Setup broken on 4.0
-#- assert:
-#    that:
-#      - "'Invalid username or password' in bad_login.stderr"
+- assert:
+    that:
+      - "'Invalid username or password' in bad_login.stderr"
 
 - name: Test nodetool authentication with passwordFile
   command: nodetool -u {{ cassandra_admin_user }} -pwf /etc/cassandra/jmxremote.password status
@@ -138,7 +137,6 @@
   register: bad_cqlsh_login
   ignore_errors: true
 
-# TODO Fix me
-#- assert:
-#    that:
-#      - "'password are incorrect' in bad_cqlsh_login.stderr"
+- assert:
+    that:
+      - "'password are incorrect' in bad_cqlsh_login.stderr"

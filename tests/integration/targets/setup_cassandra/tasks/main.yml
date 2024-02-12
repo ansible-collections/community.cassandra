@@ -17,15 +17,15 @@
 # along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
 
 # ============================================================
-- name: Disable IPv6 with sysctl
-  sysctl: 
-    name: "{{ item }}"
-    value: 1
-    reload: yes
-  with_items:
-    - net.ipv6.conf.all.disable_ipv6
-    - net.ipv6.conf.default.disable_ipv6
-    - net.ipv6.conf.lo.disable_ipv6
+#- name: Disable IPv6 with sysctl
+#  sysctl:
+#    name: "{{ item }}"
+#    value: 1
+#    reload: yes
+#  with_items:
+#    - net.ipv6.conf.all.disable_ipv6
+#    - net.ipv6.conf.default.disable_ipv6
+#    - net.ipv6.conf.lo.disable_ipv6
 
 - name: Install required packages
   package:
@@ -185,6 +185,13 @@
     - ansible_os_family == "Debian"
   no_log: yes
 
+- name: Add lines for nodetool auth to cassandra-env.sh
+  blockinfile:
+    marker: "# {mark} ANSIBLE MANAGED BLOCK - DC Startup Bug"
+    dest: "{{ cassandra_env_file }}"
+    block: |
+      JVM_OPTS="$JVM_OPTS -Dcassandra.ignore_dc=true"
+
 - name: Set audit_logging_options.allow_nodetool_archive_command
   ansible.builtin.blockinfile:
     path: /etc/cassandra/cassandra.yaml
@@ -202,25 +209,25 @@
     line: "MAX_HEAP_SIZE=256M"
   no_log: yes
 
-- name: Replace default cassandra init script - RedHat 7
-  copy:
-    src: cassandra
-    dest: /etc/init.d/cassandra
-    owner: root
-    group: root
-    mode: 0755
-  when: ansible_os_family == "RedHat"
+#- name: Replace default cassandra init script - RedHat 7
+#  copy:
+#    src: cassandra
+#    dest: /etc/init.d/cassandra
+#    owner: root
+#    group: root
+#    mode: 0755
+#  when: ansible_os_family == "RedHat"
 
-- name: Replace default cassandra init script - Debian
-  copy:
-    src: cassandra_debian
-    dest: /etc/init.d/cassandra
-    owner: root
-    group: root
-    mode: 0755
-  when: 
-  - ansible_os_family == "Debian"
-  - cassandra_version[0] | int >= 4
+#- name: Replace default cassandra init script - Debian
+#  copy:
+#    src: cassandra_debian
+#    dest: /etc/init.d/cassandra
+#    owner: root
+#    group: root
+#    mode: 0755
+#  when:
+#  - ansible_os_family == "Debian"
+#  - cassandra_version[0] | int >= 4
 
 - name: Reload systemd
   systemd:
