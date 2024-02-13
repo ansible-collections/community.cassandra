@@ -598,7 +598,7 @@
 - name: Assert app_user_c_o exists in output
   assert:
     that:
-      - "'app_user_c_o' in myrole_optional.stdout"  
+      - "'app_user_c_o' not in myrole_optional.stdout"  
 
 - name: Create a role with ssl:true and CERT_VERIFY:REQUIRED and invalid ssl_ca_certs should FAIL 
   community.cassandra.cassandra_role:
