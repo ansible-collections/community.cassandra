@@ -70,6 +70,12 @@ options:
     description:
       - The password for the role.
     type: str
+  update_password:
+    description:
+      - Passwords are not handled by default. With this set to true, passwords are always overridden.
+      - The task will always be considered changed if this is set to true.
+    type: bool
+    default: false
   options:
     description:
       - Reserved for use with authentication plug-ins. Refer to the authenticator documentation for details.
@@ -137,6 +143,7 @@ EXAMPLES = r'''
   community.cassandra.cassandra_role:
     name: rhys
     password: 'secret'
+    update_password: true
     state: present
     login: yes
     permissions:
@@ -218,7 +225,7 @@ def get_role_properties(session, role):
 
 
 def is_role_changed(role_properties, super_user, login, password,
-                    options, data_centers):
+                    options, data_centers, update_password):
     '''
     Determines whether a role has changed and therefore needs /
     to be changed with an ALTER ROLE statement.
@@ -233,6 +240,8 @@ def is_role_changed(role_properties, super_user, login, password,
     if role_properties['is_superuser'] != super_user:
         changed = True
     elif role_properties['can_login'] != login:
+        changed = True
+    elif update_password is True:
         changed = True
     return changed
 
@@ -574,6 +583,7 @@ def main():
             data_centers=dict(type='dict', aliases=['data_centres']),
             keyspace_permissions=dict(type='dict', no_log=False),
             roles=dict(type='list', elements='str'),
+            update_password=dict(type='bool', default=False),
             debug=dict(type='bool', default=False)),
         supports_check_mode=True
     )
@@ -592,6 +602,7 @@ def main():
     name = module.params['name']
     role = name
     password = module.params['password']
+    update_password = module.params['update_password']
     state = module.params['state']
     super_user = module.params['super_user']
     login = module.params['login']
@@ -672,7 +683,8 @@ def main():
                                                    login,
                                                    password,
                                                    options,
-                                                   data_centers)
+                                                   data_centers,
+                                                   update_password)
                 if debug:
                     result['has_role_changed'] = has_role_changed
                 if module.check_mode:
