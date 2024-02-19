@@ -180,6 +180,10 @@
     login_password: "{{ cassandra_admin_pwd }}"
   register: myrole
 
+- assert:
+    that:
+      - 'myrole.changed == False'
+
 - name: Ensure password not changed
   ansible.builtin.shell: cqlsh --username "app_user" --password "secretZHB78" --execute "CONSISTENCY ONE;"
   register: myrole
@@ -194,6 +198,10 @@
     login_user: "{{ cassandra_admin_user }}"
     login_password: "{{ cassandra_admin_pwd }}"
   register: myrole
+
+- assert:
+    that:
+      - 'myrole.changed == True'
 
 - name: Login with new credentials
   ansible.builtin.shell: cqlsh --username "app_user" --password "secretZHDiff" --execute "CONSISTENCY ONE;"
