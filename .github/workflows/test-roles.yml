@@ -52,7 +52,7 @@ jobs:
           path: ansible_collections/community/cassandra
 
       - name: Set up Python ${{ matrix.test_scenario.python_version }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.test_scenario.python_version }}
 
@@ -60,14 +60,14 @@ jobs:
         run: sudo apt remove ansible
 
       - name: Ensure wheel is installed
-        uses: nick-invision/retry@v2
+        uses: nick-invision/retry@v3
         with:
           timeout_minutes: 3
           max_attempts: 3
           command: pip install wheel
 
       - name: Install requirements
-        uses: nick-invision/retry@v2
+        uses: nick-invision/retry@v3
         with:
           timeout_minutes: 3
           max_attempts: 3
@@ -77,7 +77,7 @@ jobs:
             pip install --requirement requirements-${pyv}.txt
 
       - name: Install ansible.posix
-        uses: nick-invision/retry@v2
+        uses: nick-invision/retry@v3
         with:
           timeout_minutes: 3
           max_attempts: 3
