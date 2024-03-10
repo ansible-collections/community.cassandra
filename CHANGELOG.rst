@@ -4,6 +4,19 @@ community.cassandra Release Notes
 
 .. contents:: Topics
 
+v1.3.2
+=======
+
+Release Summary
+---------------
+
+Maintenance release
+
+Minor Changes
+-------------
+
+- 274 - cassandra_keyspace & cassandra_role - Ensure that data_centres parameter and aliases are consistent.
+
 v1.3.1
 =======
 

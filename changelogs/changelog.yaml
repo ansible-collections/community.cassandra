@@ -88,3 +88,8 @@ releases:
       bugfixes:
         - 259 - cassandra_repository - Fix repo url.
         - 258 - cassandra_repository - Add static key.
+  1.3.2:
+    changes:
+      release_summary: Maintenance release
+      minor_changes:
+        - 274 - cassandra_keyspace & cassandra_role - Ensure that data_centres parameter and aliases are consistent.
