@@ -80,14 +80,14 @@ options:
     description:
       - Reserved for use with authentication plug-ins. Refer to the authenticator documentation for details.
     type: dict
-  data_centers:
+  data_centres:
     description:
       - Only relevant if a network_authorizer has been configured.
       - Specify data centres as keys of this dict.
       - Can specify a key as 'all' although this implicity assumed by Cassandra if not supplied.
     type: dict
     aliases:
-      - data_centres
+      - data_centers
   keyspace_permissions:
     description:
       - Grant privileges on keyspace objects.
@@ -580,7 +580,7 @@ def main():
             super_user=dict(type='bool', default=False),
             login=dict(type='bool', default=True),
             options=dict(type='dict'),
-            data_centers=dict(type='dict', aliases=['data_centres']),
+            data_centres=dict(type='dict', aliases=['data_centers']),
             keyspace_permissions=dict(type='dict', no_log=False),
             roles=dict(type='list', elements='str'),
             update_password=dict(type='bool', default=False),
