@@ -273,7 +273,7 @@ def main():
             state=dict(type='str', required=True, choices=['present', 'absent']),
             replication_factor=dict(type='int', default=1),
             durable_writes=dict(type='bool', default=True),
-            data_centres=dict(type='dict')),
+            data_centres=dict(type='dict', aliases=['data_centers'])),
         supports_check_mode=True
     )
 
