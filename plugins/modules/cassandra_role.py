@@ -70,18 +70,24 @@ options:
     description:
       - The password for the role.
     type: str
+  update_password:
+    description:
+      - Passwords are not handled by default. With this set to true, passwords are always overridden.
+      - The task will always be considered changed if this is set to true.
+    type: bool
+    default: false
   options:
     description:
       - Reserved for use with authentication plug-ins. Refer to the authenticator documentation for details.
     type: dict
-  data_centers:
+  data_centres:
     description:
       - Only relevant if a network_authorizer has been configured.
       - Specify data centres as keys of this dict.
       - Can specify a key as 'all' although this implicity assumed by Cassandra if not supplied.
     type: dict
     aliases:
-      - data_centres
+      - data_centers
   keyspace_permissions:
     description:
       - Grant privileges on keyspace objects.
@@ -137,6 +143,7 @@ EXAMPLES = r'''
   community.cassandra.cassandra_role:
     name: rhys
     password: 'secret'
+    update_password: true
     state: present
     login: yes
     permissions:
@@ -218,7 +225,7 @@ def get_role_properties(session, role):
 
 
 def is_role_changed(role_properties, super_user, login, password,
-                    options, data_centers):
+                    options, data_centres, update_password):
     '''
     Determines whether a role has changed and therefore needs /
     to be changed with an ALTER ROLE statement.
@@ -227,18 +234,20 @@ def is_role_changed(role_properties, super_user, login, password,
     login - User provided boolean value.
     password - User provided string value. Not currently dealt with.
     options - User provided value. Not currently dealt with.
-    data_centers - User provided dictionary value. Not currently dealt with.
+    data_centres - User provided dictionary value. Not currently dealt with.
     '''
     changed = False
     if role_properties['is_superuser'] != super_user:
         changed = True
     elif role_properties['can_login'] != login:
         changed = True
+    elif update_password is True:
+        changed = True
     return changed
 
 
 def create_alter_role(module, session, role, super_user, login, password,
-                      options, data_centers, alter_role):
+                      options, data_centres, alter_role):
     if alter_role is False:
         cql = "CREATE ROLE '{0}' ".format(role)
     else:
@@ -249,17 +258,17 @@ def create_alter_role(module, session, role, super_user, login, password,
         cql += "AND PASSWORD = '{0}' ".format(password)
     if options is not None:
         cql += "AND OPTIONS = {0}".format(str(options))
-    if data_centers is not None:
-        for dc in data_centers:
-            if str(dc.upper()) == "ALL" and len(data_centers) == 1:
+    if data_centres is not None:
+        for dc in data_centres:
+            if str(dc.upper()) == "ALL" and len(data_centres) == 1:
                 cql += " AND ACCESS TO ALL DATACENTERS"
                 break
             else:
-                if len(data_centers) == 1:
+                if len(data_centres) == 1:
                     cql += " AND ACCESS TO DATACENTERS {{'{0}'}}".format(str(dc))
                     break
                 else:
-                    cql += " AND ACCESS TO DATACENTERS {{'{0}'}}".format("','".join(data_centers))
+                    cql += " AND ACCESS TO DATACENTERS {{'{0}'}}".format("','".join(data_centres))
                     break
     return cql
 
@@ -571,9 +580,10 @@ def main():
             super_user=dict(type='bool', default=False),
             login=dict(type='bool', default=True),
             options=dict(type='dict'),
-            data_centers=dict(type='dict', aliases=['data_centres']),
+            data_centres=dict(type='dict', aliases=['data_centers']),
             keyspace_permissions=dict(type='dict', no_log=False),
             roles=dict(type='list', elements='str'),
+            update_password=dict(type='bool', default=False),
             debug=dict(type='bool', default=False)),
         supports_check_mode=True
     )
@@ -592,11 +602,12 @@ def main():
     name = module.params['name']
     role = name
     password = module.params['password']
+    update_password = module.params['update_password']
     state = module.params['state']
     super_user = module.params['super_user']
     login = module.params['login']
     options = module.params['options']
-    data_centers = module.params['data_centers']
+    data_centres = module.params['data_centres']
     keyspace_permissions = module.params['keyspace_permissions']
     roles = module.params['roles']
     debug = module.params['debug']
@@ -672,7 +683,8 @@ def main():
                                                    login,
                                                    password,
                                                    options,
-                                                   data_centers)
+                                                   data_centres,
+                                                   update_password)
                 if debug:
                     result['has_role_changed'] = has_role_changed
                 if module.check_mode:
@@ -691,7 +703,7 @@ def main():
                                                     login,
                                                     password,
                                                     options,
-                                                    data_centers,
+                                                    data_centres,
                                                     has_role_changed)
                             session .execute(cql)
                             result['changed'] = True
@@ -716,7 +728,7 @@ def main():
                                                 login,
                                                 password,
                                                 options,
-                                                data_centers,
+                                                data_centres,
                                                 False)
                         session .execute(cql)
                         result['changed'] = True
@@ -751,7 +763,7 @@ def main():
                                                 login,
                                                 password,
                                                 options,
-                                                data_centers,
+                                                data_centres,
                                                 has_role_changed)
                         session .execute(cql)
                         result['changed'] = True

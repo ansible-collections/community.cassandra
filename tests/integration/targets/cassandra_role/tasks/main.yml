@@ -170,6 +170,43 @@
   register: myrole
   ignore_errors: yes
 
+- name: Change the password of the role without update_password
+  community.cassandra.cassandra_role:
+    name: app_user
+    password: 'secretZHDiff'
+    state: present
+    login: yes
+    login_user: "{{ cassandra_admin_user }}"
+    login_password: "{{ cassandra_admin_pwd }}"
+  register: myrole
+
+- assert:
+    that:
+      - 'myrole.changed == False'
+
+- name: Ensure password not changed
+  ansible.builtin.shell: cqlsh --username "app_user" --password "secretZHB78" --execute "CONSISTENCY ONE;"
+  register: myrole
+
+- name: Change the password of the role
+  community.cassandra.cassandra_role:
+    name: app_user
+    password: 'secretZHDiff'
+    update_password: True
+    state: present
+    login: yes
+    login_user: "{{ cassandra_admin_user }}"
+    login_password: "{{ cassandra_admin_pwd }}"
+  register: myrole
+
+- assert:
+    that:
+      - 'myrole.changed == True'
+
+- name: Login with new credentials
+  ansible.builtin.shell: cqlsh --username "app_user" --password "secretZHDiff" --execute "CONSISTENCY ONE;"
+  register: myrole
+
 - name: Remove a role (check mode)
   community.cassandra.cassandra_role:
     name: app_user
