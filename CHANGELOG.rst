@@ -10,6 +10,19 @@ v1.3.2
 Release Summary
 ---------------
 
+Version bumped to get the auto-release running.
+
+Minor Changes
+-------------
+
+- None
+
+v1.3.2
+=======
+
+Release Summary
+---------------
+
 Maintenance release
 
 Minor Changes

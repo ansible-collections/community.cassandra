@@ -93,3 +93,8 @@ releases:
       release_summary: Maintenance release
       minor_changes:
         - 274 - cassandra_keyspace & cassandra_role - Ensure that data_centres parameter and aliases are consistent.
+  1.3.3:
+    changes:
+      release_summary: Maintenance release. Version bumped to get the auto-release running.
+      minor_changes:
+        - None
