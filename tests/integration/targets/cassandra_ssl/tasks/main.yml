@@ -514,7 +514,7 @@
   check_mode: yes
 
 # https://github.com/ansible-collections/community.cassandra/actions/runs/8995585092/job/24710796144#step:7:4137
-- name: "Small pause because sometimes the user does not seem to exit"
+- name: "Small pause because sometimes the user does not seem to exist"
   pause:
     seconds: 1
 
@@ -558,7 +558,7 @@
   check_mode: yes
 
 # https://github.com/ansible-collections/community.cassandra/actions/runs/8995585092/job/24710796144#step:7:4137
-- name: "Small pause because sometimes the user does not seem to exit"
+- name: "Small pause because sometimes the user does not seem to exist"
   pause:
     seconds: 1
 
@@ -602,7 +602,7 @@
   check_mode: yes
 
 # https://github.com/ansible-collections/community.cassandra/actions/runs/8995585092/job/24710796144#step:7:4137
-- name: "Small pause because sometimes the user does not seem to exit"
+- name: "Small pause because sometimes the user does not seem to exist"
   pause:
     seconds: 1
 
