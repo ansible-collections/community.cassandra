@@ -513,6 +513,11 @@
     login_password: "{{ cassandra_admin_pwd }}"
   check_mode: yes
 
+# https://github.com/ansible-collections/community.cassandra/actions/runs/8995585092/job/24710796144#step:7:4137
+- name: "Small pause because sometimes the user does not seem to exit"
+  pause:
+    seconds: 1
+
 - name: Get output of list roles
   shell: export SSL_CERTFILE=/home/ssl-test-cluster/ssl-test.cer.pem; cqlsh --ssl --username "{{ cassandra_admin_user }}" --password "{{ cassandra_admin_pwd }}" --execute "LIST ROLES"
   register: myrole
@@ -552,6 +557,11 @@
     login_password: "{{ cassandra_admin_pwd }}"
   check_mode: yes
 
+# https://github.com/ansible-collections/community.cassandra/actions/runs/8995585092/job/24710796144#step:7:4137
+- name: "Small pause because sometimes the user does not seem to exit"
+  pause:
+    seconds: 1
+
 - name: Get output of list roles
   shell: export SSL_CERTFILE=/home/ssl-test-cluster/ssl-test.cer.pem; cqlsh --ssl --username "{{ cassandra_admin_user }}" --password "{{ cassandra_admin_pwd }}" --execute "LIST ROLES"
   register: myrole_required
@@ -590,6 +600,11 @@
     login_user: "{{ cassandra_admin_user }}"
     login_password: "{{ cassandra_admin_pwd }}"
   check_mode: yes
+
+# https://github.com/ansible-collections/community.cassandra/actions/runs/8995585092/job/24710796144#step:7:4137
+- name: "Small pause because sometimes the user does not seem to exit"
+  pause:
+    seconds: 1
 
 - name: Get output of list roles
   shell: export SSL_CERTFILE=/home/ssl-test-cluster/ssl-test.cer.pem; cqlsh --ssl --username "{{ cassandra_admin_user }}" --password "{{ cassandra_admin_pwd }}" --execute "LIST ROLES"
