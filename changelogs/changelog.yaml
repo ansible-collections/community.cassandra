@@ -69,7 +69,7 @@ releases:
     changes:
       release_summary: Maintenance release
       bugfixes:
-        - 239 - cassandra_role - Adds quoting to role name to support special characters in the role name, i.e. my-app-role. 
+        - 239 - cassandra_role - Adds quoting to role name to support special characters in the role name, i.e. my-app-role.
   1.2.4:
     changes:
       release_summary: Maintenance release
@@ -80,4 +80,21 @@ releases:
       release_summary: Maintenance release
     minor_changes:
       - 230 - Adds basic SSL/TLS support to the cassandra_keyspace, cassandra_role and cassandra_table modules.
-        
+  1.3.1:
+    changes:
+      release_summary: Maintenance release
+      minor_changes:
+        - 269 - cassandra_role - Allow for update of passwords.
+      bugfixes:
+        - 259 - cassandra_repository - Fix repo url.
+        - 258 - cassandra_repository - Add static key.
+  1.3.2:
+    changes:
+      release_summary: Maintenance release
+      minor_changes:
+        - 274 - cassandra_keyspace & cassandra_role - Ensure that data_centres parameter and aliases are consistent.
+  1.3.3:
+    changes:
+      release_summary: Maintenance release. Version bumped to get the auto-release running.
+      minor_changes:
+        - None
