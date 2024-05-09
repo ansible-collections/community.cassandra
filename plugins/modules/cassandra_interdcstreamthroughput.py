@@ -60,7 +60,7 @@ def main():
     )
 
     set_cmd = "setinterdcstreamthroughput {0}".format(module.params['value'])
-    get_cmd = "getinterdcstreamthroughput -d"
+    get_cmd = "getinterdcstreamthroughput"
     value = module.params['value']
 
     n = NodeToolGetSetCommand(module, get_cmd, set_cmd)
