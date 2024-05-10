@@ -22,7 +22,7 @@ class NodeToolCmd(object):
         if self.host is None:
             self.host = socket.getfqdn()
         if self.cassandra_version is None:
-            (rc, out, err) = self.execute_command("version")
+            (rc, out, err) = self.execute_command("nodetool version")
             what_is_the_version = out.split(' ')[1][0:3]
             module.params['cassandra_version'] = what_is_the_version
 
