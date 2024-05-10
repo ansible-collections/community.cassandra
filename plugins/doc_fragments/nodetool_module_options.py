@@ -52,4 +52,10 @@ options:
       - Enable additional debug output.
     type: bool
     default: False
+  cassandra_version
+    description:
+      - Version of Cassandra being connected to.
+      - If a value if not provided we use `nodetool version`to auto-discover it.
+    type: str
+    default: None
 '''

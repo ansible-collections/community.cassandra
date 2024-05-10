@@ -18,8 +18,13 @@ class NodeToolCmd(object):
         self.nodetool_path = module.params['nodetool_path']
         self.nodetool_flags = module.params['nodetool_flags']
         self.debug = module.params['debug']
+        self.cassandra_version = module.params['cassandra_version']
         if self.host is None:
             self.host = socket.getfqdn()
+        if self.cassandra_version is None:
+            (rc, out, err) = self.execute_command(self, "version")
+            what_is_the_version = out.split(' ')[1][0:3]
+            module.params['cassandra_version'] = what_is_the_version
 
     def execute_command(self, cmd):
         return self.module.run_command(cmd)
