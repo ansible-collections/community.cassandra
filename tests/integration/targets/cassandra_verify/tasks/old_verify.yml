@@ -1,0 +1,186 @@
+# test code for the cassandra_verify module
+# (c) 2020,  Rhys Campbell <rhys.james.campbell@googlemail.com>
+
+# This file is part of Ansible
+#
+# Ansible is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Ansible is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
+
+# ===========================================================
+
+- name: verify the node
+  community.cassandra.cassandra_verify:
+    debug: yes
+  register: verify
+
+- assert:
+    that:
+      - "verify.msg == 'nodetool verify executed successfully'"
+      - "verify.changed == True"
+
+- include_tasks: ../../setup_cassandra/tasks/cassandra_auth.yml
+  when: cassandra_auth_tests == True
+
+- name: Run verify with auth
+  community.cassandra.cassandra_verify:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    debug: yes
+  register: verify
+
+- assert:
+    that:
+      - "verify.msg == 'nodetool verify executed successfully'"
+      - "verify.changed == True"
+
+- name: Test login failure handling
+  community.cassandra.cassandra_verify:
+    username: "{{ cassandra_admin_user }}"
+    password: XXXXXXXXXXXXXXXXXXXXX
+    debug: yes
+  register: login_status
+  ignore_errors: yes
+  when: cassandra_auth_tests == True
+
+- name: Assert failed login
+  assert:
+    that:
+      - login_status.failed == True
+      - "'Invalid username or password' in login_status.stderr"
+  when: cassandra_auth_tests == True
+
+- name: Test incorrect nodetool_path handling
+  community.cassandra.cassandra_verify:
+    nodetool_path: /tmp
+    debug: yes
+  register: nodetool_path_error
+  ignore_errors: true
+  when: cassandra_auth_tests == True
+
+- name: Assert no such file
+  assert:
+    that:
+      - "'No such file or directory' in nodetool_path_error.msg"
+
+- name: Run verify against system_auth keyspace
+  community.cassandra.cassandra_verify:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    keyspace: system_auth
+    debug: yes
+  register: verify
+
+- assert:
+    that:
+      - "verify.msg == 'nodetool verify executed successfully'"
+      - "verify.changed == True"
+
+- name: Run verify against system_auth/roles (str)
+  community.cassandra.cassandra_verify:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    keyspace: system_auth
+    table: roles
+    debug: yes
+  register: verify
+
+- assert:
+    that:
+      - "verify.msg == 'nodetool verify executed successfully'"
+      - "verify.changed == True"
+
+- name: Run verify against system_auth/roles (list)
+  community.cassandra.cassandra_verify:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    keyspace: system_auth
+    table:
+      - roles
+    debug: yes
+  register: verify
+
+- assert:
+    that:
+      - "verify.msg == 'nodetool verify executed successfully'"
+      - "verify.changed == True"
+
+- name: Run verify against multiple system_auth table (list)
+  community.cassandra.cassandra_verify:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    keyspace: system_auth
+    table:
+      - roles
+      - role_permissions
+      - role_members
+    debug: yes
+  register: verify
+
+- assert:
+    that:
+      - "verify.msg == 'nodetool verify executed successfully'"
+      - "verify.changed == True"
+
+- name: Run with extended mode
+  community.cassandra.cassandra_verify:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    keyspace: system_auth
+    table:
+      - roles
+      - role_permissions
+      - role_members
+    extended: yes
+    debug: yes
+  register: verify
+
+- assert:
+    that:
+      - "verify.msg == 'nodetool verify executed successfully'"
+      - "verify.changed == True"
+
+- name: Run with extended on
+  community.cassandra.cassandra_verify:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    keyspace: system_auth
+    table:
+      - roles
+      - role_permissions
+      - role_members
+    e: yes
+    debug: yes
+  register: verify
+
+- assert:
+    that:
+      - "verify.msg == 'nodetool verify executed successfully'"
+      - "verify.changed == True"
+
+- name: Run list again
+  community.cassandra.cassandra_verify:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    keyspace: system_auth
+    table:
+      - roles
+      - role_permissions
+      - role_members
+    e: no
+    debug: yes
+  register: verify
+
+- assert:
+    that:
+      - "verify.msg == 'nodetool verify executed successfully'"
+      - "verify.changed == True"
