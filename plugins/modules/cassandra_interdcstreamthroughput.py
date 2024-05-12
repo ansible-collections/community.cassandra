@@ -62,6 +62,7 @@ def main():
     set_cmd = "setinterdcstreamthroughput {0}".format(module.params['value'])
     get_cmd = "getinterdcstreamthroughput"
 
+    module.warn("cassandra_version: {0}".format(module.params['cassandra_version']))
     n = NodeToolGetSetCommand(module, get_cmd, set_cmd)
     if module.params['cassandra_version'] == "4.1":
         get_cmd += " -d"
