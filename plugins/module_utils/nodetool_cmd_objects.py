@@ -27,7 +27,7 @@ class NodeToolCmd(object):
                 what_is_the_version = out.split(' ')[1][0:3]
                 module.params['cassandra_version'] = what_is_the_version
             else:
-                module.fail_json(msg=f"Unable to determine Cassandra version", stderr=err)
+                module.fail_json(msg="Unable to determine Cassandra version", stderr=err)
 
     def execute_command(self, cmd):
         return self.module.run_command(cmd)
