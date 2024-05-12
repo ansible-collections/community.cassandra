@@ -57,5 +57,4 @@ options:
       - Version of Cassandra being connected to by nodetool.
       - If a value if not provided we use `nodetool version`to auto-discover it.
     type: str
-    default: None
 '''
