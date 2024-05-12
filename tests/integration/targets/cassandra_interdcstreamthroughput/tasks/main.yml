@@ -17,8 +17,13 @@
 # along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
 
 # ===========================================================
+- name: "Set flag what cassandra_version is 4.1"
+  set_fact:
+    additional_flags: "-d"
+  when: cassandra_version = "41x"
+
 - name: Get interdcstreamthroughput
-  ansible.builtin.shell: nodetool -h 127.0.0.1 getinterdcstreamthroughput
+  ansible.builtin.shell: "nodetool -h 127.0.0.1 getinterdcstreamthroughput {{ additional_flags | default(omit) }}"
   register: interdcstreamthroughput
 
 - name: Assert starting status of interdcstreamthroughput
@@ -31,7 +36,7 @@
     debug: true
 
 - name: Get interdcstreamthroughput
-  ansible.builtin.shell: nodetool -h 127.0.0.1 getinterdcstreamthroughput
+  ansible.builtin.shell: "nodetool -h 127.0.0.1 getinterdcstreamthroughput {{ additional_flags | default(omit) }}"
   register: interdcstreamthroughput
 
 - name: Assert interdcstreamthroughput is 500MB
@@ -44,7 +49,7 @@
     debug: true
 
 - name: Get interdcstreamthroughput
-  ansible.builtin.shell: nodetool -h 127.0.0.1 getinterdcstreamthroughput
+  ansible.builtin.shell: "nodetool -h 127.0.0.1 getinterdcstreamthroughput {{ additional_flags | default(omit) }}"
   register: interdcstreamthroughput
 
 - name: Assert interdcstreamthroughput is 200MB
@@ -63,7 +68,7 @@
     that: interdcstreamthroughput.changed == True
 
 - name: Get interdcstreamthroughput
-  ansible.builtin.shell: nodetool -h 127.0.0.1 getinterdcstreamthroughput
+  ansible.builtin.shell: "nodetool -h 127.0.0.1 getinterdcstreamthroughput  {{ additional_flags | default(omit) }}"
   register: interdcstreamthroughput
 
 - name: Assert interdcstreamthroughput is still 200MB
@@ -76,7 +81,7 @@
     debug: true
 
 - name: Get interdcstreamthroughput
-  ansible.builtin.shell: nodetool -h 127.0.0.1 getinterdcstreamthroughput
+  ansible.builtin.shell: "nodetool -h 127.0.0.1 getinterdcstreamthroughput  {{ additional_flags | default(omit) }}"
   register: interdcstreamthroughput
 
 - name: Assert interdcstreamthroughput is 250MB
@@ -90,7 +95,7 @@
   register: module_nochange
 
 - name: Get interdcstreamthroughput
-  ansible.builtin.shell: nodetool -h 127.0.0.1 getinterdcstreamthroughput
+  ansible.builtin.shell: "nodetool -h 127.0.0.1 getinterdcstreamthroughput {{ additional_flags | default(omit) }}"
   register: interdcstreamthroughput
 
 - name: Assert interdcstreamthroughput is still 250MB and module reports no change
@@ -112,7 +117,7 @@
   when: cassandra_auth_tests == True
 
 - name: Get interdcstreamthroughput auth 1
-  ansible.builtin.shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 getinterdcstreamthroughput
+  ansible.builtin.shell: "nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 getinterdcstreamthroughput {{ additional_flags | default(omit) }}"
   register: interdcstreamthroughput
   when: cassandra_auth_tests == True
 
@@ -132,7 +137,7 @@
   when: cassandra_auth_tests == True
 
 - name: Get interdcstreamthroughput auth 2
-  ansible.builtin.shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 getinterdcstreamthroughput
+  ansible.builtin.shell: "nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 getinterdcstreamthroughput {{ additional_flags | default(omit) }}"
   register: interdcstreamthroughput
   when: cassandra_auth_tests == True
 

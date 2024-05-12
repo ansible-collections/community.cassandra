@@ -67,7 +67,7 @@ def main():
     if module.params['cassandra_version'] == "4.1":
         get_cmd += " -d"
     value = module.params['value']
-    module.exit_json(msg=module.params['cassandra_version'])
+
     rc = None
     out = ''
     err = ''
