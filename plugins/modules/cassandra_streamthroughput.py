@@ -65,8 +65,8 @@ def main():
     n = NodeToolGetSetCommand(module, get_cmd, set_cmd)
 
     if module.params['cassandra_version'] == "4.1":
-        get_cmd += " --mib"
-        set_cmd = "setstreamthroughput --mib {0}".format(module.params['value'])
+        get_cmd += " -d"
+        set_cmd = "setstreamthroughput {0}".format(module.params['value'])
     value = module.params['value']
 
     rc = None
