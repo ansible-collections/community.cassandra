@@ -17,8 +17,13 @@
 # along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
 
 # ===========================================================
+- name: "Set flag what cassandra_version is 4.1"
+  set_fact:
+    additional_flags: "-d"
+  when: cassandra_version == "41x"
+
 - name: Get streamthroughput BLAH
-  ansible.builtin.shell: nodetool -h 127.0.0.1 getstreamthroughput
+  ansible.builtin.shell: "nodetool -h 127.0.0.1 getstreamthroughput {{ additional_flags | default('') }}"
   register: streamthroughput
 
 - name: Assert starting status of streamthroughput
@@ -31,7 +36,7 @@
     debug: yes
 
 - name: Get streamthroughput
-  ansible.builtin.shell: nodetool -h 127.0.0.1 getstreamthroughput
+  ansible.builtin.shell: "nodetool -h 127.0.0.1 getstreamthroughput {{ additional_flags | default('') }}"
   register: streamthroughput
 
 - name: Assert streamthroughput is 500MB
@@ -44,7 +49,7 @@
     debug: yes
 
 - name: Get streamthroughput
-  ansible.builtin.shell: nodetool -h 127.0.0.1 getstreamthroughput
+  ansible.builtin.shell: "nodetool -h 127.0.0.1 getstreamthroughput"
   register: streamthroughput
 
 - name: Assert streamthroughput is 200MB
@@ -63,7 +68,7 @@
     that: streamthroughput.changed == True
 
 - name: Get streamthroughput
-  ansible.builtin.shell: nodetool -h 127.0.0.1 getstreamthroughput
+  ansible.builtin.shell: "nodetool -h 127.0.0.1 getstreamthroughput {{ additional_flags | default('') }}"
   register: streamthroughput
 
 - name: Assert streamthroughput is still 200MB
@@ -76,7 +81,7 @@
     debug: yes
 
 - name: Get streamthroughput
-  ansible.builtin.shell: nodetool -h 127.0.0.1 getstreamthroughput
+  ansible.builtin.shell: "nodetool -h 127.0.0.1 getstreamthroughput {{ additional_flags | default('') }}"
   register: streamthroughput
 
 - name: Assert streamthroughput is 250MB
@@ -90,7 +95,7 @@
   register: module_nochange
 
 - name: Get streamthroughput
-  ansible.builtin.shell: nodetool -h 127.0.0.1 getstreamthroughput
+  ansible.builtin.shell: "nodetool -h 127.0.0.1 getstreamthroughput {{ additional_flags | default('') }}"
   register: streamthroughput
 
 - name: Assert streamthroughput is still 250MB and module reports no change
@@ -112,7 +117,7 @@
   when: cassandra_auth_tests == True
 
 - name: Get streamthroughput auth 1
-  ansible.builtin.shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 getstreamthroughput
+  ansible.builtin.shell: "nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 getstreamthroughput {{ additional_flags | default('') }}"
   register: streamthroughput
   when: cassandra_auth_tests == True
 
@@ -132,7 +137,7 @@
   when: cassandra_auth_tests == True
 
 - name: Get streamthroughput auth 2
-  ansible.builtin.shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 getstreamthroughput
+  ansible.builtin.shell: "nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 getstreamthroughput {{ additional_flags | default('') }}"
   register: streamthroughput
   when: cassandra_auth_tests == True
 
