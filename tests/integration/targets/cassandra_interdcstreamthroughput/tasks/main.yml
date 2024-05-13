@@ -86,7 +86,7 @@
 
 - name: Assert interdcstreamthroughput is 250MB
   assert:
-    that: "'Current inter-datacenter stream throughput: 250 Mb/s' == interdcstreamthroughput.stdout"
+    that: "'Current inter-datacenter stream throughput: 250 Mb/s' == interdcstreamthroughput.stdout or 'Current stream throughput: 250.0 Mb/s' == interdcstreamthroughput.stdout"
 
 - name: Set interdcstreamthroughput 250 should not change
   community.cassandra.cassandra_interdcstreamthroughput:
@@ -101,7 +101,7 @@
 - name: Assert interdcstreamthroughput is still 250MB and module reports no change
   assert:
     that:
-      - "'Current inter-datacenter stream throughput: 250 Mb/s' == interdcstreamthroughput.stdout"
+      - "'Current inter-datacenter stream throughput: 250 Mb/s' == interdcstreamthroughput.stdout  or 'Current stream throughput: 250.0 Mb/s' == interdcstreamthroughput.stdout"
       - module_nochange.changed == False
 
 - include_tasks: ../../setup_cassandra/tasks/cassandra_auth.yml
@@ -124,7 +124,7 @@
 - name: Assert interdcstreamthroughput is 300MB
   assert:
     that:
-      - "'Current inter-datacenter stream throughput: 300 Mb/s' == interdcstreamthroughput.stdout"
+      - "'Current inter-datacenter stream throughput: 300 Mb/s' == interdcstreamthroughput.stdout  or 'Current stream throughput: 300.0 Mb/s' == interdcstreamthroughput.stdout"
       - interdcstreamthroughput.changed == True
 
 - name: Set back to 200MB using the pw file option
