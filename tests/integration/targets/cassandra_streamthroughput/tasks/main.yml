@@ -19,7 +19,7 @@
 # ===========================================================
 - name: "Set flag what cassandra_version is 4.1"
   set_fact:
-    additional_flags: "--mib"
+    additional_flags: "-d"
   when: cassandra_version == "41x"
 
 - name: Get streamthroughput BLAH
