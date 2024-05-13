@@ -65,7 +65,7 @@ def main():
     n = NodeToolGetSetCommand(module, get_cmd, set_cmd)
 
     if module.params['cassandra_version'] == "4.1":
-        get_cmd += " -d"
+        get_cmd += " --mib"
         set_cmd = "setinterdcstreamthroughput --mib {0}".format(module.params['value'])
     value = module.params['value']
 
@@ -85,7 +85,7 @@ def main():
 
     get_response = "Current inter-datacenter stream throughput: {0} Mb/s".format(value)
     if module.params['cassandra_version'] == "4.1":
-        formatted_value = "{:.1f}".format(value)
+        formatted_value = "{0:.1f}".format(value)
         get_response = "Current stream throughput: {0} Mb/s".format(formatted_value)
     if get_response == out :
 
