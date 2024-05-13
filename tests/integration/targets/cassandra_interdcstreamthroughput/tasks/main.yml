@@ -41,7 +41,7 @@
 
 - name: Assert interdcstreamthroughput is 500MB
   assert:
-    that: "'Current inter-datacenter stream throughput: 500 Mb/s' == interdcstreamthroughput.stdout"
+    that: "'Current inter-datacenter stream throughput: 500 Mb/s' == interdcstreamthroughput.stdout or 'Current stream throughput: 500.0 Mb/s' == interdcstreamthroughput.stdout"
 
 - name: Set throughput to 200
   community.cassandra.cassandra_interdcstreamthroughput:
