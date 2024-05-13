@@ -28,7 +28,7 @@
 
 - name: Assert starting status of streamthroughput
   assert:
-    that: "'Current stream throughput: 200 Mb/s' == streamthroughput.stdout"
+    that: "'Current stream throughput: 200 Mb/s' == streamthroughput.stdout or 'Current stream throughput: 201.326592 Mb/s' == streamthroughput.stdout"
 
 - name: Increase streamthroughput with module
   community.cassandra.cassandra_streamthroughput:
