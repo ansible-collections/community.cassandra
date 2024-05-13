@@ -66,6 +66,7 @@ def main():
 
     if module.params['cassandra_version'] == "4.1":
         get_cmd += " -d"
+        set_cmd = "setinterdcstreamthroughput --mib {0}".format(module.params['value'])
     value = module.params['value']
 
     rc = None
