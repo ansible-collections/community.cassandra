@@ -87,7 +87,7 @@ def main():
     if module.params['cassandra_version'] == "4.1":
         formatted_value = "{0:.1f}".format(value)
         get_response = "Current stream throughput: {0} Mb/s".format(formatted_value)
-    if get_response == out :
+    if get_response == out:
 
         if rc != 0:
             result['changed'] = False
