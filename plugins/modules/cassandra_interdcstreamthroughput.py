@@ -76,6 +76,7 @@ def main():
 
     (rc, out, err) = n.get_command()
     out = out.strip()
+    module.info("INFO: " + out)
 
     if module.params['debug']:
         if out:

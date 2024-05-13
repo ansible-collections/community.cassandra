@@ -17,6 +17,7 @@
 # along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
 
 # ===========================================================
+# TODO - The integer, e.g. 200 Mb/s checks in this file (each with an OR currently) can be removed when we test against 4.1 and above only
 - name: "Set flag what cassandra_version is 4.1"
   set_fact:
     additional_flags: "-d"
