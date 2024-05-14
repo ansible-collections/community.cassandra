@@ -87,7 +87,7 @@ def main():
             result['stderr'] = err
 
     get_response = "Current inter-datacenter stream throughput: {0} Mb/s".format(value)
-    #if module.params['cassandra_version'] == "4.1":
+    # if module.params['cassandra_version'] == "4.1":
     #    get_response = "Current stream throughput: {0:.1f} Mb/s".format(value)
     if get_response == out:
 
