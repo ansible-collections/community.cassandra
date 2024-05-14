@@ -47,6 +47,7 @@ __metaclass__ = type
 
 from ansible_collections.community.cassandra.plugins.module_utils.nodetool_cmd_objects import NodeToolGetSetCommand
 from ansible_collections.community.cassandra.plugins.module_utils.cassandra_common_options import cassandra_common_argument_spec
+import re
 
 
 def main():
@@ -76,6 +77,7 @@ def main():
 
     (rc, out, err) = n.get_command()
     out = out.strip()
+    out = re.sub(r'^\d+\.\d+', "", out)  # Hack for output bug "250.0Current inter-datacenter stream throughput: 250 Mb/s"
     module.warn("INFO: " + out)
 
     if module.params['debug']:
@@ -85,8 +87,8 @@ def main():
             result['stderr'] = err
 
     get_response = "Current inter-datacenter stream throughput: {0} Mb/s".format(value)
-    if module.params['cassandra_version'] == "4.1":
-        get_response = "Current stream throughput: {0:.1f} Mb/s".format(value)
+    #if module.params['cassandra_version'] == "4.1":
+    #    get_response = "Current stream throughput: {0:.1f} Mb/s".format(value)
     if get_response == out:
 
         if rc != 0:
