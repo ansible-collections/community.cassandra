@@ -57,6 +57,7 @@ def extract_throughput(string):
     else:
         return None
 
+
 def compare_throughputs(string1, string2):
     throughput1 = extract_throughput(string1)
     throughput2 = extract_throughput(string2)
