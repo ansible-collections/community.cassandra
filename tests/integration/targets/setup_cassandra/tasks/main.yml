@@ -171,7 +171,7 @@
     regexp: "^endpoint_snitch"
     line: 'endpoint_snitch: PropertyFileSnitch'
   when:
-    - "cassandra_version.startswith('4')"
+    - "cassandra_version.startswith('4.0')"
     - ansible_os_family == "RedHat"
   no_log: yes
 
@@ -181,7 +181,7 @@
     regexp: "^endpoint_snitch"
     line: 'endpoint_snitch: PropertyFileSnitch'
   when:
-    - "cassandra_version.startswith('4')"
+    - "cassandra_version.startswith('4.0')"
     - ansible_os_family == "Debian"
   no_log: yes
 

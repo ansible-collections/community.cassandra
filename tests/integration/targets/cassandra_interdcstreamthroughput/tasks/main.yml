@@ -17,13 +17,19 @@
 # along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
 
 # ===========================================================
+# TODO - The integer, e.g. 200 Mb/s checks in this file (each with an OR currently) can be removed when we test against 4.1 and above only
+- name: "Set flag what cassandra_version is 4.1"
+  set_fact:
+    additional_flags: "-d"
+  when: cassandra_version == "41x"
+
 - name: Get interdcstreamthroughput
-  ansible.builtin.shell: nodetool -h 127.0.0.1 getinterdcstreamthroughput
+  ansible.builtin.shell: "nodetool -h 127.0.0.1 getinterdcstreamthroughput {{ additional_flags | default('') }}"
   register: interdcstreamthroughput
 
 - name: Assert starting status of interdcstreamthroughput
   assert:
-    that: "'Current inter-datacenter stream throughput: 200 Mb/s' == interdcstreamthroughput.stdout"
+    that: "'Current inter-datacenter stream throughput: 200 Mb/s' == interdcstreamthroughput.stdout or 'Current stream throughput: 201.326592 Mb/s' == interdcstreamthroughput.stdout" 
 
 - name: Increase interdcstreamthroughput with module
   community.cassandra.cassandra_interdcstreamthroughput:
@@ -31,12 +37,12 @@
     debug: true
 
 - name: Get interdcstreamthroughput
-  ansible.builtin.shell: nodetool -h 127.0.0.1 getinterdcstreamthroughput
+  ansible.builtin.shell: "nodetool -h 127.0.0.1 getinterdcstreamthroughput {{ additional_flags | default('') }}"
   register: interdcstreamthroughput
 
 - name: Assert interdcstreamthroughput is 500MB
   assert:
-    that: "'Current inter-datacenter stream throughput: 500 Mb/s' == interdcstreamthroughput.stdout"
+    that: "'Current inter-datacenter stream throughput: 500 Mb/s' == interdcstreamthroughput.stdout or 'Current stream throughput: 500.0 Mb/s' == interdcstreamthroughput.stdout"
 
 - name: Set throughput to 200
   community.cassandra.cassandra_interdcstreamthroughput:
@@ -44,12 +50,12 @@
     debug: true
 
 - name: Get interdcstreamthroughput
-  ansible.builtin.shell: nodetool -h 127.0.0.1 getinterdcstreamthroughput
+  ansible.builtin.shell: "nodetool -h 127.0.0.1 getinterdcstreamthroughput {{ additional_flags | default('') }}"
   register: interdcstreamthroughput
 
 - name: Assert interdcstreamthroughput is 200MB
   assert:
-    that: "'Current inter-datacenter stream throughput: 200 Mb/s' == interdcstreamthroughput.stdout"
+    that: "'Current inter-datacenter stream throughput: 200 Mb/s' == interdcstreamthroughput.stdout or 'Current stream throughput: 200.0 Mb/s' == interdcstreamthroughput.stdout" 
 
 - name: Test module with check_mode = true
   community.cassandra.cassandra_interdcstreamthroughput:
@@ -63,12 +69,12 @@
     that: interdcstreamthroughput.changed == True
 
 - name: Get interdcstreamthroughput
-  ansible.builtin.shell: nodetool -h 127.0.0.1 getinterdcstreamthroughput
+  ansible.builtin.shell: "nodetool -h 127.0.0.1 getinterdcstreamthroughput  {{ additional_flags | default('') }}"
   register: interdcstreamthroughput
 
 - name: Assert interdcstreamthroughput is still 200MB
   assert:
-    that: "'Current inter-datacenter stream throughput: 200 Mb/s' == interdcstreamthroughput.stdout"
+    that: "'Current inter-datacenter stream throughput: 200 Mb/s' == interdcstreamthroughput.stdout or 'Current stream throughput: 200.0 Mb/s' == interdcstreamthroughput.stdout" 
 
 - name: Set interdcstreamthroughput to 250
   community.cassandra.cassandra_interdcstreamthroughput:
@@ -76,12 +82,12 @@
     debug: true
 
 - name: Get interdcstreamthroughput
-  ansible.builtin.shell: nodetool -h 127.0.0.1 getinterdcstreamthroughput
+  ansible.builtin.shell: "nodetool -h 127.0.0.1 getinterdcstreamthroughput  {{ additional_flags | default('') }}"
   register: interdcstreamthroughput
 
 - name: Assert interdcstreamthroughput is 250MB
   assert:
-    that: "'Current inter-datacenter stream throughput: 250 Mb/s' == interdcstreamthroughput.stdout"
+    that: "'Current inter-datacenter stream throughput: 250 Mb/s' == interdcstreamthroughput.stdout or 'Current stream throughput: 250.0 Mb/s' == interdcstreamthroughput.stdout"
 
 - name: Set interdcstreamthroughput 250 should not change
   community.cassandra.cassandra_interdcstreamthroughput:
@@ -90,13 +96,13 @@
   register: module_nochange
 
 - name: Get interdcstreamthroughput
-  ansible.builtin.shell: nodetool -h 127.0.0.1 getinterdcstreamthroughput
+  ansible.builtin.shell: "nodetool -h 127.0.0.1 getinterdcstreamthroughput {{ additional_flags | default('') }}"
   register: interdcstreamthroughput
 
 - name: Assert interdcstreamthroughput is still 250MB and module reports no change
   assert:
     that:
-      - "'Current inter-datacenter stream throughput: 250 Mb/s' == interdcstreamthroughput.stdout"
+      - "'Current inter-datacenter stream throughput: 250 Mb/s' == interdcstreamthroughput.stdout  or 'Current stream throughput: 250.0 Mb/s' == interdcstreamthroughput.stdout"
       - module_nochange.changed == False
 
 - include_tasks: ../../setup_cassandra/tasks/cassandra_auth.yml
@@ -112,14 +118,14 @@
   when: cassandra_auth_tests == True
 
 - name: Get interdcstreamthroughput auth 1
-  ansible.builtin.shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 getinterdcstreamthroughput
+  ansible.builtin.shell: "nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 getinterdcstreamthroughput {{ additional_flags | default('') }}"
   register: interdcstreamthroughput
   when: cassandra_auth_tests == True
 
 - name: Assert interdcstreamthroughput is 300MB
   assert:
     that:
-      - "'Current inter-datacenter stream throughput: 300 Mb/s' == interdcstreamthroughput.stdout"
+      - "'Current inter-datacenter stream throughput: 300 Mb/s' == interdcstreamthroughput.stdout  or 'Current stream throughput: 300.0 Mb/s' == interdcstreamthroughput.stdout"
       - interdcstreamthroughput.changed == True
 
 - name: Set back to 200MB using the pw file option
@@ -132,14 +138,14 @@
   when: cassandra_auth_tests == True
 
 - name: Get interdcstreamthroughput auth 2
-  ansible.builtin.shell: nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 getinterdcstreamthroughput
+  ansible.builtin.shell: "nodetool -u {{ cassandra_admin_user }} -pw {{ cassandra_admin_pwd }} -h 127.0.0.1 getinterdcstreamthroughput {{ additional_flags | default('') }}"
   register: interdcstreamthroughput
   when: cassandra_auth_tests == True
 
 - name: Assert interdcstreamthroughput is again 200MB
   assert:
     that:
-      - "'Current inter-datacenter stream throughput: 200 Mb/s' == interdcstreamthroughput.stdout"
+      - "'Current inter-datacenter stream throughput: 200 Mb/s' == interdcstreamthroughput.stdout or 'Current stream throughput: 200.0 Mb/s' == interdcstreamthroughput.stdout" 
       - interdcstreamthroughput.changed == True
   when: cassandra_auth_tests == True
 

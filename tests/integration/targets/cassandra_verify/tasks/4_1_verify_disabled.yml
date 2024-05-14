@@ -1,0 +1,11 @@
+---
+- name: verify the node
+  community.cassandra.cassandra_verify:
+    debug: yes
+  register: verify
+  ignore_errors: true
+
+- assert:
+    that:
+      - "'verify is disabled unless a [-f|--force] override' in verify.stdout"
+      - "verify.changed == False"

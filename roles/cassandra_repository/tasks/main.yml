@@ -6,7 +6,7 @@
       description: "Official Cassandra {{ cassandra_version }} yum repo"
       baseurl: "https://redhat.cassandra.apache.org/{{ cassandra_version }}/"
       gpgcheck: 1
-      gpgkey: "https://www.apache.org/dist/cassandra/KEYS"
+      gpgkey: "https://downloads.apache.org/cassandra/KEYS"
   retries: 3
   when: ansible_os_family == "RedHat"
 
@@ -27,7 +27,7 @@
 
 - name: Add apt key for Cassandra repository (Debian & Ubuntu)
   apt_key:
-    url: https://www.apache.org/dist/cassandra/KEYS
+    url: https://downloads.apache.org/cassandra/KEYS
     state: present
   retries: 3
   when: ansible_os_family == "Debian"
