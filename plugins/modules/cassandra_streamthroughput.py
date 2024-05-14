@@ -46,6 +46,25 @@ __metaclass__ = type
 
 from ansible_collections.community.cassandra.plugins.module_utils.nodetool_cmd_objects import NodeToolGetSetCommand
 from ansible_collections.community.cassandra.plugins.module_utils.cassandra_common_options import cassandra_common_argument_spec
+import re
+
+
+# Helper functions from ChatGPT
+def extract_throughput(string):
+    match = re.search(r'(\d+(?:\.\d+)?) Mb/s', string)
+    if match:
+        return float(match.group(1))
+    else:
+        return None
+
+
+def compare_throughputs(string1, string2):
+    throughput1 = extract_throughput(string1)
+    throughput2 = extract_throughput(string2)
+    if throughput1 is not None and throughput2 is not None:
+        return throughput1 == throughput2
+    else:
+        return False
 
 
 def main():
@@ -64,6 +83,11 @@ def main():
 
     n = NodeToolGetSetCommand(module, get_cmd, set_cmd)
 
+    if module.params['cassandra_version'] == "4.1":
+        get_cmd += " -d"
+        set_cmd = "setstreamthroughput {0}".format(module.params['value'])
+    value = module.params['value']
+
     rc = None
     out = ''
     err = ''
@@ -79,7 +103,10 @@ def main():
             result['stderr'] = err
 
     get_response = "Current stream throughput: {0} Mb/s".format(value)
-    if get_response == out:
+    if module.params['cassandra_version'] == "4.1":
+        get_response = "Current stream throughput: {0:.1f} Mb/s".format(value)
+
+    if compare_throughputs(get_response, out):
 
         if rc != 0:
             result['changed'] = False
