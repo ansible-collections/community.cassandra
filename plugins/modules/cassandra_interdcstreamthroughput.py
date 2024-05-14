@@ -50,6 +50,24 @@ from ansible_collections.community.cassandra.plugins.module_utils.cassandra_comm
 import re
 
 
+# Helper functions from ChatGPT
+def extract_throughput(string):
+    match = re.search(r'(\d+(?:\.\d+)?) Mb/s', string)
+    if match:
+        return float(match.group(1))
+    else:
+        return None
+
+
+def compare_throughputs(string1, string2):
+    throughput1 = extract_throughput(string1)
+    throughput2 = extract_throughput(string2)
+    if throughput1 is not None and throughput2 is not None:
+        return throughput1 == throughput2
+    else:
+        return False
+
+
 def main():
     argument_spec = cassandra_common_argument_spec()
     argument_spec.update(
@@ -77,8 +95,6 @@ def main():
 
     (rc, out, err) = n.get_command()
     out = out.strip()
-    out = re.sub(r'^\d+\.\d+', "", out)  # Hack for output bug "250.0Current inter-datacenter stream throughput: 250 Mb/s"
-    module.warn("INFO: " + out)
 
     if module.params['debug']:
         if out:
@@ -89,7 +105,7 @@ def main():
     get_response = "Current inter-datacenter stream throughput: {0} Mb/s".format(value)
     # if module.params['cassandra_version'] == "4.1":
     #    get_response = "Current stream throughput: {0:.1f} Mb/s".format(value)
-    if get_response == out:
+    if compare_throughputs(get_response, out):
 
         if rc != 0:
             result['changed'] = False

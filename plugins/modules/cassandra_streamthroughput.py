@@ -105,8 +105,7 @@ def main():
     get_response = "Current stream throughput: {0} Mb/s".format(value)
     if module.params['cassandra_version'] == "4.1":
         get_response = "Current stream throughput: {0:.1f} Mb/s".format(value)
-    module.warn("get_response: " + get_response)
-    module.warn("out: " + out)
+
     if compare_throughputs(get_response, out):
 
         if rc != 0:
