@@ -162,7 +162,7 @@ jobs:
           #- docker_image: centos7
           #  python_version: "2.7"
           #  ansible_test_options: "--docker-privileged"
-          - docker_image: ubuntu2004
+          - docker_image: default
             python_version: "3.8"
             ansible_test_options: ""
         cassandra_module: ${{ fromJson(needs.integration_matrix.outputs.matrix) }}
@@ -231,8 +231,8 @@ jobs:
           #- docker_image: centos7
           #  python_version: "2.7"
           #  ansible_test_options: "--docker-privileged"
-          - docker_image: ubuntu2004
-            python_version: "3.8"
+          - docker_image: default
+            python_version: "3.10"
             ansible_test_options: ""
         cassandra_module: ${{ fromJson(needs.integration_matrix.outputs.matrix) }}
     steps:
