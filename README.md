@@ -1,7 +1,6 @@
 # Cassandra Collection
 ![CI](https://github.com/ansible-collections/community.cassandra/workflows/CI/badge.svg)
 ![CI_roles](https://github.com/ansible-collections/community.cassandra/workflows/CI_roles/badge.svg)
-![documentation](https://github.com/ansible-collections/community.cassandra/workflows/documentation/badge.svg)
 [![Codecov](https://img.shields.io/codecov/c/github/ansible-collections/community.cassandra)](https://codecov.io/gh/ansible-collections/community.cassandra)
 ![Build & Publish Collection](https://github.com/ansible-collections/community.cassandra/workflows/Build%20&%20Publish%20Collection/badge.svg)
 
