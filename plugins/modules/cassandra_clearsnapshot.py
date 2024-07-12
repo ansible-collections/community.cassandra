@@ -39,7 +39,6 @@ options:
       - Add additional debug to module output. 
     type: bool
     default: False 
-   
 '''
 
 EXAMPLES = '''
@@ -47,12 +46,16 @@ EXAMPLES = '''
   community.cassandra.cassandra_clearsnapshot:
 
 - name: Remove snapshots from multiple keyspaces on the node
-  community.cassandra.cassandra_snapshot:
-    keyspace: keyspace1, keyspace2
+  community.cassandra.cassandra_clearsnapshot:
+    keyspace: 
+      - keyspace1
+      - keyspace2
 
 - name: Remove all snapshots named 01-01-2024 from multiple keyspaces
-  community.cassandra.cassandra_snapshot:
-    keyspace: mykeyspace, mykeyspace_1
+  community.cassandra.cassandra_clearsnapshot:
+    keyspace: 
+      - keyspace1
+      - keyspace2
     name: 01-01-2024
 '''
 
@@ -88,10 +91,10 @@ class NodeToolClearSnapshotCommand(NodeToolCmd):
       
         if self.name is not None:
             cmd = "{0} -t {1}".format(cmd, self.name)
+        else:
+            cmd = "{0} --all".format(cmd)
         if self.keyspace is not None:
             cmd = "{0} {1}".format(cmd, " ".join(self.keyspace))
-        if self.name is None and self.keyspace is None:
-            cmd = "{0} --all".format(cmd)
         self.cmd = cmd
  
     def run_command(self): 
@@ -112,7 +115,7 @@ def main():
     
     cmd = "clearsnapshot"
 
-    n = NodeToolSnapshotCommand(module, cmd)
+    n = NodeToolClearSnapshotCommand(module, cmd)
 
     rc = None
     out = ''

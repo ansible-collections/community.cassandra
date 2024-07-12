@@ -1,0 +1,78 @@
+# test code for the cassandra_clearsnapshot module
+# (c) 2024, Jaymit Patel <18jaymit@gmail.com>
+
+# This file is part of Ansible
+#
+# Ansible is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Ansible is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
+
+# ===========================================================
+
+# Tagged snapshot does not need to exist for clearsnapshot to return successful
+
+- name: Clear snapshots named test_backup from specific keyspaces
+  community.cassandra.cassandra_clearsnapshot:
+    name: test_backup
+    keyspace:
+      - system_auth
+      - system_traces
+    debug: true
+  register: result
+  
+- assert:
+    that:
+    - result.changed
+    - "result.msg == 'nodetool clearsnapshot executed successfully'"
+    - "result.stdout is search('[system_auth, system_traces]')"
+    - "result.stdout is search('[test_backup]')"
+
+- name: Clear all snapshots from specific keyspaces
+  community.cassandra.cassandra_clearsnapshot:
+    keyspace: 
+      - system_auth
+      - system_traces
+    debug: true
+  register: result
+
+- assert:
+    that:
+    - result.changed
+    - "result.msg == 'nodetool clearsnapshot executed successfully'"
+    - "result.stdout is search('[system_auth, system_traces]')"
+    - "result.stdout is search('[all snapshots]')"
+
+
+- name: Clear snapshot named test_backup2 from all keyspaces
+  community.cassandra.cassandra_clearsnapshot:
+    name: test_backup2
+    debug: true
+  register: result
+
+- assert:
+    that:
+    - result.changed
+    - "result.msg == 'nodetool clearsnapshot executed successfully'"
+    - "result.stdout is search('[all keyspaces]')"
+    - "result.stdout is search('[test_backup2]')"
+    
+- name: Clear snapshots from all keyspaces on the node
+  community.cassandra.cassandra_clearsnapshot:
+    debug: true
+  register: result
+
+- assert:
+    that:
+    - result.changed
+    - "result.msg == 'nodetool clearsnapshot executed successfully'"
+    - "result.stdout is search('[all keyspaces]')"
+    - "result.stdout is search('[all snapshots]')"

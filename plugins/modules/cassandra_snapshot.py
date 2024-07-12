@@ -156,12 +156,6 @@ def main():
     err = ''
     result = {}
   
-    
-    #if table != None and len(keyspace) > 1:
-    #   module.fail_json(msg = "When specifying the table for a snapshot, you must specify one and only one keyspace")
-    #if keyspace_table != None and keyspace != None:
-    #   module.fail_json(msg = "When specifying the Keyspace table list, you must not also specify keyspaces to snapshot")
-   
     (rc, out, err) = n.run_command()
     out = out.strip()
     err = err.strip()
