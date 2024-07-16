@@ -28,17 +28,17 @@
       - system_traces
     debug: true
   register: result
-  
+
 - assert:
     that:
-    - result.changed
-    - "result.msg == 'nodetool clearsnapshot executed successfully'"
-    - "result.stdout is search('[system_auth, system_traces]')"
-    - "result.stdout is search('[test_backup]')"
+      - result.changed
+      - "result.msg == 'nodetool clearsnapshot executed successfully'"
+      - "result.stdout is search('[system_auth, system_traces]')"
+      - "result.stdout is search('[test_backup]')"
 
 - name: Clear all snapshots from specific keyspaces
   community.cassandra.cassandra_clearsnapshot:
-    keyspace: 
+    keyspace:
       - system_auth
       - system_traces
     debug: true
@@ -46,11 +46,10 @@
 
 - assert:
     that:
-    - result.changed
-    - "result.msg == 'nodetool clearsnapshot executed successfully'"
-    - "result.stdout is search('[system_auth, system_traces]')"
-    - "result.stdout is search('[all snapshots]')"
-
+      - result.changed
+      - "result.msg == 'nodetool clearsnapshot executed successfully'"
+      - "result.stdout is search('[system_auth, system_traces]')"
+      - "result.stdout is search('[all snapshots]')"
 
 - name: Clear snapshot named test_backup2 from all keyspaces
   community.cassandra.cassandra_clearsnapshot:
@@ -60,11 +59,11 @@
 
 - assert:
     that:
-    - result.changed
-    - "result.msg == 'nodetool clearsnapshot executed successfully'"
-    - "result.stdout is search('[all keyspaces]')"
-    - "result.stdout is search('[test_backup2]')"
-    
+      - result.changed
+      - "result.msg == 'nodetool clearsnapshot executed successfully'"
+      - "result.stdout is search('[all keyspaces]')"
+      - "result.stdout is search('[test_backup2]')"
+
 - name: Clear snapshots from all keyspaces on the node
   community.cassandra.cassandra_clearsnapshot:
     debug: true
@@ -72,7 +71,7 @@
 
 - assert:
     that:
-    - result.changed
-    - "result.msg == 'nodetool clearsnapshot executed successfully'"
-    - "result.stdout is search('[all keyspaces]')"
-    - "result.stdout is search('[all snapshots]')"
+      - result.changed
+      - "result.msg == 'nodetool clearsnapshot executed successfully'"
+      - "result.stdout is search('[all keyspaces]')"
+      - "result.stdout is search('[all snapshots]')"

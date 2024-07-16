@@ -15,7 +15,7 @@ short_description: Removes one or more snapshots.
 requirements:
   - nodetool
 description:
-    - Removes one or more snapshots. 
+    - Removes one or more snapshots.
     - To remove all snapshots, omit the snapshot name.
 
 extends_documentation_fragment:
@@ -36,9 +36,9 @@ options:
       - t
   debug:
     description:
-      - Add additional debug to module output. 
+      - Add additional debug to module output.
     type: bool
-    default: False 
+    default: False
 '''
 
 EXAMPLES = '''
@@ -47,13 +47,13 @@ EXAMPLES = '''
 
 - name: Remove snapshots from multiple keyspaces on the node
   community.cassandra.cassandra_clearsnapshot:
-    keyspace: 
+    keyspace:
       - keyspace1
       - keyspace2
 
 - name: Remove all snapshots named 01-01-2024 from multiple keyspaces
   community.cassandra.cassandra_clearsnapshot:
-    keyspace: 
+    keyspace:
       - keyspace1
       - keyspace2
     name: 01-01-2024
@@ -80,15 +80,15 @@ from ansible_collections.community.cassandra.plugins.module_utils.cassandra_comm
 
 class NodeToolClearSnapshotCommand(NodeToolCmd):
 
-    """ 
-    Inherits from the NodeToolCmd class. Adds the following methods;     
-        - run_command 
-    """ 
-    def __init__(self, module, cmd): 
-        NodeToolCmd.__init__(self, module) 
+    """
+    Inherits from the NodeToolCmd class. Adds the following methods;
+        - run_command
+    """
+    def __init__(self, module, cmd):
+        NodeToolCmd.__init__(self, module)
         self.keyspace = module.params["keyspace"]
         self.name = module.params["name"]
-      
+
         if self.name is not None:
             cmd = "{0} -t {1}".format(cmd, self.name)
         else:
@@ -96,23 +96,23 @@ class NodeToolClearSnapshotCommand(NodeToolCmd):
         if self.keyspace is not None:
             cmd = "{0} {1}".format(cmd, " ".join(self.keyspace))
         self.cmd = cmd
- 
-    def run_command(self): 
-       return self.nodetool_cmd(self.cmd) 
+
+    def run_command(self):
+        return self.nodetool_cmd(self.cmd)
 
 
 def main():
     argument_spec = cassandra_common_argument_spec()
     argument_spec.update(
-        keyspace=dict(type='list', elements='str', default=None, required=False),
-        name=dict(type='str', default=None, aliases=['tag','t'], required=False),
+        keyspace=dict(type='list', elements='str', default=None, required=False, no_log=False),
+        name=dict(type='str', default=None, aliases=['tag', 't'], required=False),
     )
 
     module = AnsibleModule(
         argument_spec=argument_spec,
         supports_check_mode=False,
     )
-    
+
     cmd = "clearsnapshot"
 
     n = NodeToolClearSnapshotCommand(module, cmd)
@@ -121,7 +121,7 @@ def main():
     out = ''
     err = ''
     result = {}
-  
+
     (rc, out, err) = n.run_command()
     out = out.strip()
     err = err.strip()

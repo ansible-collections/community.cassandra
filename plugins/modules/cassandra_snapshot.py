@@ -25,13 +25,13 @@ extends_documentation_fragment:
 options:
   keyspace:
     description:
-      - Optional keyspace to snapshot. Default: all keyspaces.
+      - "Optional keyspace to snapshot. Default: all keyspaces."
     type: list
     elements: str
   table:
     description:
       - Optional table to snapshot. You must specify one and only one keyspace.
-    type: str
+    type: raw
   keyspace_table:
     description:
       - Optional keyspace.table to snapshot.
@@ -48,6 +48,8 @@ options:
     description:
       - Executes the snapshot without flushing the tables first
     type: bool
+    aliases:
+      - sf
     default: False
 '''
 
@@ -85,7 +87,7 @@ msg:
   description: A message indicating what has happened.
   returned: on success
   type: str
-rc: 
+rc:
   description: Return code of the last executed command.
   returned: always
   type: int
@@ -101,18 +103,18 @@ from ansible_collections.community.cassandra.plugins.module_utils.cassandra_comm
 
 class NodeToolSnapshotCommand(NodeToolCmd):
 
-    """ 
-    Inherits from the NodeToolCmd class. Adds the following methods;     
-        - run_command 
-    """ 
-    def __init__(self, module, cmd): 
-        NodeToolCmd.__init__(self, module) 
+    """
+    Inherits from the NodeToolCmd class. Adds the following methods;
+        - run_command
+    """
+    def __init__(self, module, cmd):
+        NodeToolCmd.__init__(self, module)
         self.keyspace = module.params["keyspace"]
         self.table = module.params["table"]
         self.keyspace_table = module.params["keyspace_table"]
         self.skip_flush = module.params["skip_flush"]
         self.name = module.params["name"]
-      
+
         if self.skip_flush:
             cmd = "{0} -sf".format(cmd)
         if self.name is not None:
@@ -123,30 +125,30 @@ class NodeToolSnapshotCommand(NodeToolCmd):
             if isinstance(self.keyspace_table, str):
                 cmd = "{0} -kt {1}".format(cmd, self.keyspace_table)
             elif isinstance(self.keyspace_table, list):
-                cmd = "{0} -kt {1}".format(cmd, (",".join(self.keyspace_table)).replace(" ",""))
+                cmd = "{0} -kt {1}".format(cmd, (",".join(self.keyspace_table)).replace(" ", ""))
         if self.keyspace is not None:
             cmd = "{0} {1}".format(cmd, " ".join(self.keyspace))
         self.cmd = cmd
- 
-    def run_command(self): 
-       return self.nodetool_cmd(self.cmd) 
+
+    def run_command(self):
+        return self.nodetool_cmd(self.cmd)
 
 
 def main():
     argument_spec = cassandra_common_argument_spec()
     argument_spec.update(
-        keyspace=dict(type='list', elements='str', default=None, required=False),
+        keyspace=dict(type='list', elements='str', default=None, required=False, no_log=False),
         table=dict(type='raw', default=None, required=False),
-        keyspace_table=dict(type='list', elements='str', default=None, required=False),
+        keyspace_table=dict(type='list', elements='str', default=None, required=False, no_log=False),
         skip_flush=dict(type='bool', default=False, aliases=['sf'], required=False),
-        name=dict(type='str', default=None, aliases=['tag','t'], required=False),
+        name=dict(type='str', default=None, aliases=['tag', 't'], required=False),
     )
 
     module = AnsibleModule(
         argument_spec=argument_spec,
         supports_check_mode=False,     # Maybe, will need to make use of listsnapshots though
     )
-    
+
     cmd = "snapshot"
 
     n = NodeToolSnapshotCommand(module, cmd)
@@ -155,7 +157,7 @@ def main():
     out = ''
     err = ''
     result = {}
-  
+
     (rc, out, err) = n.run_command()
     out = out.strip()
     err = err.strip()

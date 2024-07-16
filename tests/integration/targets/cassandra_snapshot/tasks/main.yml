@@ -22,7 +22,7 @@
     nodetool_cmd: nodetool -h127.0.0.1
 
 - name: List snapshots to ensure there are no snapshots
-  shell: "{{ nodetool_cmd }} listsnapshots" 
+  shell: "{{ nodetool_cmd }} listsnapshots"
   register: snapshot_list
 
 - name: Clear snapshots
@@ -33,13 +33,13 @@
   community.cassandra.cassandra_snapshot:
     debug: true
   register: snapshot
-  
+
 - assert:
     that:
-    - snapshot.changed
-    - "snapshot.msg == 'nodetool snapshot executed successfully'"
-    - "snapshot.snapshot_dir | length == 13" # Verify the correct dir is returned, default tag is a unix timestamp w/ ms
-    - "snapshot.stdout is search('all keyspaces')"
+      - snapshot.changed
+      - "snapshot.msg == 'nodetool snapshot executed successfully'"
+      - "snapshot.snapshot_dir | length == 13" # Verify the correct dir is returned, default tag is a unix timestamp w/ ms
+      - "snapshot.stdout is search('all keyspaces')"
 
 - name: Snapshot multiple keyspaces on the node without flushing node
   community.cassandra.cassandra_snapshot:
@@ -50,23 +50,27 @@
 
 - assert:
     that:
-    - snapshot.changed
-    - "snapshot.msg == 'nodetool snapshot executed successfully'"
-    - "snapshot.stdout is search('skipFlush=true')"
-    - "snapshot.stdout is search('[system_auth, system_traces]')"
+      - snapshot.changed
+      - "snapshot.msg == 'nodetool snapshot executed successfully'"
+      - "snapshot.stdout is search('skipFlush=true')"
+      - "snapshot.stdout is search('[system_auth, system_traces]')"
 
 - name: Snapshot single keyspace with snapshot name 01-01-2024
   community.cassandra.cassandra_snapshot:
     keyspace: system_auth
     name: 01-01-2024
+    debug: true
   register: snapshot
+
+- debug:
+    var: snapshot
 
 - assert:
     that:
-    - snapshot.changed
-    - "snapshot.msg == 'nodetool snapshot executed successfully'"
-    - "snapshot.snapshot_dir == '01-01-2024'"
-    
+      - snapshot.changed
+      - "snapshot.msg == 'nodetool snapshot executed successfully'"
+      - "snapshot.snapshot_dir == '01-01-2024'"
+
 - name: Snapshot single table in a keyspace
   community.cassandra.cassandra_snapshot:
     keyspace: system_auth
@@ -76,9 +80,9 @@
 
 - assert:
     that:
-    - snapshot.changed
-    - "snapshot.msg == 'nodetool snapshot executed successfully'"
-    - "snapshot.stdout is search('[system_auth.roles]')"
+      - snapshot.changed
+      - "snapshot.msg == 'nodetool snapshot executed successfully'"
+      - "snapshot.stdout is search('[system_auth.roles]')"
 
 - name: Snapshot several tables in the same/different keyspaces
   community.cassandra.cassandra_snapshot:
@@ -89,11 +93,10 @@
 
 - assert:
     that:
-    - snapshot.changed
-    - "snapshot.msg == 'nodetool snapshot executed successfully'"
-    - "snapshot.snapshot_dir == 'test_backup'"
-    - "snapshot.stdout is search('[mykeyspace.table, mykeyspace.table2, test.table1]')"
-
+      - snapshot.changed
+      - "snapshot.msg == 'nodetool snapshot executed successfully'"
+      - "snapshot.snapshot_dir == 'test_backup'"
+      - "snapshot.stdout is search('[mykeyspace.table, mykeyspace.table2, test.table1]')"
 
 # Errorneous
 
@@ -106,14 +109,14 @@
 
 - assert:
     that:
-    - not snapshot_failed.changed
-    - "snapshot_failed.msg == 'nodetool snapshot did not execute successfully'"
-    - "snapshot_failed.stderr is search('Snapshot.*already exists')"
+      - not snapshot_failed.changed
+      - "snapshot_failed.msg == 'nodetool snapshot did not execute successfully'"
+      - "snapshot_failed.stderr is search('Snapshot.*already exists')"
 
 - name: Snapshot with table and multiple keyspaces
   community.cassandra.cassandra_snapshot:
     table: roles
-    keyspace: 
+    keyspace:
       - system_auth
       - system_traces
     debug: true
@@ -122,9 +125,9 @@
 
 - assert:
     that:
-    - not snapshot_failed.changed
-    - "snapshot_failed.msg == 'nodetool snapshot did not execute successfully'"
-    - "snapshot_failed.stderr is search('must specify one and only one keyspace')"
+      - not snapshot_failed.changed
+      - "snapshot_failed.msg == 'nodetool snapshot did not execute successfully'"
+      - "snapshot_failed.stderr is search('must specify one and only one keyspace')"
 
 - name: Snapshot with keyspace.table supplied and multiple keyspaces
   community.cassandra.cassandra_snapshot:
@@ -138,10 +141,9 @@
 
 - assert:
     that:
-    - not snapshot_failed.changed
-    - "snapshot_failed.msg == 'nodetool snapshot did not execute successfully'"
-    - "snapshot_failed.stderr is search('you must not also specify keyspaces to snapshot')"
-
+      - not snapshot_failed.changed
+      - "snapshot_failed.msg == 'nodetool snapshot did not execute successfully'"
+      - "snapshot_failed.stderr is search('When specifying the Keyspace')"
 
 - name: Clean snapshots
   shell: "{{ nodetool_cmd }} clearsnapshot --all"
