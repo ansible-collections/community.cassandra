@@ -106,6 +106,11 @@ options:
       - Additional debug output.
     type: bool
     default: false
+  consistency_level:
+    description:
+      - Consistency level to perform cassandra queries with
+    type: str
+    default: "LOCAL_ONE"
 '''
 
 EXAMPLES = r'''
@@ -185,10 +190,13 @@ import os.path
 
 try:
     from cassandra.cluster import Cluster
+    from cassandra.cluster import EXEC_PROFILE_DEFAULT
+    from cassandra.cluster import ExecutionProfile
     from cassandra.auth import PlainTextAuthProvider
     from cassandra import AuthenticationFailed
     from cassandra.query import dict_factory
     from cassandra import InvalidRequest
+    from cassandra import ConsistencyLevel
     HAS_CASSANDRA_DRIVER = True
 except Exception:
     HAS_CASSANDRA_DRIVER = False
@@ -219,8 +227,8 @@ def role_exists(session, role):
 
 def get_role_properties(session, role):
     cql = "SELECT role, can_login, is_superuser, member_of, salted_hash FROM system_auth.roles WHERE role = '{0}'".format(role)
-    session.row_factory = dict_factory
-    role_properties = session.execute(cql)
+    dict_factory_profile = session.execution_profile_clone_update(EXEC_PROFILE_DEFAULT, row_factory=dict_factory)
+    role_properties = session.execute(cql, execution_profile=dict_factory_profile)
     return role_properties[0]
 
 
@@ -363,9 +371,9 @@ def list_role_permissions(session, role):
      Returns a resultset object of dicts
     '''
     cql = "LIST ALL OF '{0}'".format(role)
-    session.row_factory = dict_factory
     try:
-        role_permissions = session.execute(cql)
+        dict_factory_profile = session.execution_profile_clone_update(EXEC_PROFILE_DEFAULT, row_factory=dict_factory)
+        role_permissions = session.execute(cql, execution_profile=dict_factory_profile)
     except InvalidRequest as excep:
         # excep_code = type(excep).__name__
         # if excep_code == 2200: # User does not exist
@@ -584,7 +592,11 @@ def main():
             keyspace_permissions=dict(type='dict', no_log=False),
             roles=dict(type='list', elements='str'),
             update_password=dict(type='bool', default=False),
-            debug=dict(type='bool', default=False)),
+            debug=dict(type='bool', default=False),
+            consistency_level=dict(type='str',
+                                   required=False,
+                                   default="LOCAL_ONE",
+                                   choices=ConsistencyLevel.name_to_value.keys())),
         supports_check_mode=True
     )
 
@@ -611,6 +623,7 @@ def main():
     keyspace_permissions = module.params['keyspace_permissions']
     roles = module.params['roles']
     debug = module.params['debug']
+    consistency_level = module.params['consistency_level']
 
     if HAS_SSL_LIBRARY is False and ssl is True:
         msg = ("This module requires the SSL python"
@@ -658,10 +671,12 @@ def main():
             ssl_context.verify_mode = getattr(ssl_lib, module.params['ssl_cert_reqs'])
             if ssl_cert_reqs in ('CERT_REQUIRED', 'CERT_OPTIONAL'):
                 ssl_context.load_verify_locations(module.params['ssl_ca_certs'])
+        profile = ExecutionProfile(consistency_level=ConsistencyLevel.name_to_value[consistency_level])
         cluster = Cluster(login_host,
                           port=login_port,
                           auth_provider=auth_provider,
-                          ssl_context=ssl_context)
+                          ssl_context=ssl_context,
+                          execution_profiles={EXEC_PROFILE_DEFAULT: profile})
         session = cluster.connect()
     except AuthenticationFailed as auth_failed:
         module.fail_json(msg="Authentication failed: {0}".format(auth_failed))
@@ -765,7 +780,7 @@ def main():
                                                 options,
                                                 data_centres,
                                                 has_role_changed)
-                        session .execute(cql)
+                        session.execute(cql)
                         result['changed'] = True
                         result['cql'] = cql
                     elif state == "absent":
