@@ -118,7 +118,12 @@ fullquerylog_config:
 
 from ansible.module_utils.basic import AnsibleModule
 import shlex
-import pipes
+try:
+    import pipes
+except ImportError as imp_exc:
+    PIPES_LIBRARY_IMPORT_ERROR = imp_exc
+else:
+    PIPES_LIBRARY_IMPORT_ERROR = None
 __metaclass__ = type
 
 
