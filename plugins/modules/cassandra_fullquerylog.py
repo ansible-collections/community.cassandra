@@ -234,9 +234,10 @@ def main():
         required_if=[("state", "enabled", ["log_dir"])]
     )
 
-    if not PIPES_LIBRARY_IMPORT_ERROR:
-        module.fail_json(msg=missing_required_lib('another_library'),
-                         exception=PIPES_LIBRARY_IMPORT_ERROR)
+    # We handle this in the escape_param function above
+    #  if not PIPES_LIBRARY_IMPORT_ERROR:
+    #      module.fail_json(msg=missing_required_lib('pipes'),
+    #                       exception=PIPES_LIBRARY_IMPORT_ERROR)
 
     status_cmd = 'getfullquerylog'
     enable_cmd = 'enablefullquerylog'
