@@ -117,8 +117,14 @@ fullquerylog_config:
 '''
 
 from ansible.module_utils.basic import AnsibleModule
+from ansible.module_utils.basic import missing_required_lib
 import shlex
-import pipes
+try:
+    import pipes
+except ImportError as imp_exc:
+    PIPES_LIBRARY_IMPORT_ERROR = imp_exc
+else:
+    PIPES_LIBRARY_IMPORT_ERROR = None
 __metaclass__ = type
 
 
@@ -227,6 +233,10 @@ def main():
         supports_check_mode=True,
         required_if=[("state", "enabled", ["log_dir"])]
     )
+
+    if not PIPES_LIBRARY_IMPORT_ERROR:
+        module.fail_json(msg=missing_required_lib('another_library'),
+                         exception=PIPES_LIBRARY_IMPORT_ERROR)
 
     status_cmd = 'getfullquerylog'
     enable_cmd = 'enablefullquerylog'
