@@ -99,6 +99,8 @@ options:
   roles:
     description:
       - One or more roles to grant to this user or role.
+      - When set to None, the default, no action is perform on roles.
+      - Set to an empty list to revoke all roles.
     type: list
     elements: str
   debug:
@@ -431,8 +433,8 @@ def build_role_grants(session,
             current_roles.add(permission['role'])
         else:
             pass  # We don't touch other perms here
-    # Revokes first
-    if current_roles is not None:
+    # Revokes first, roles should be an empty list to revoke all
+    if current_roles is not None and roles is not None:
         for r in current_roles:
             if r not in roles:
                 cql = revoke_role(session,
