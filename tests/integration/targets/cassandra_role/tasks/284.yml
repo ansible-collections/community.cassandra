@@ -13,6 +13,10 @@
     consistency_level: "LOCAL_ONE"
   register: local
 
+- assert:
+    that:
+      - local.changed
+
 - name: Create a test role - ANY consistency
   community.cassandra.cassandra_role:
     name: any_role
@@ -26,7 +30,13 @@
     login_password: "{{ cassandra_admin_pwd }}"
     debug: yes
     consistency_level: "ANY"
+  ignore_errors: true
   register: any
+
+- assert:
+    that:
+      - any.failed
+      - "'ANY ConsistencyLevel is only supported for writes' in any.msg"
 
 - name: Create a test role - QUORUM consistency
   community.cassandra.cassandra_role:
