@@ -111,6 +111,18 @@ options:
       - Consistency level to perform cassandra queries with
     type: str
     default: "LOCAL_ONE"
+    choices:
+        - ANY
+        - ONE
+        - TWO
+        - THREE
+        - QUORUM
+        - ALL
+        - LOCAL_QUORUM
+        - EACH_QUORUM
+        - SERIAL
+        - LOCAL_SERIAL
+        - LOCAL_ONE
 '''
 
 EXAMPLES = r'''
