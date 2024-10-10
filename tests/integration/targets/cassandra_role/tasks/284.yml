@@ -1,0 +1,44 @@
+- name: Create a test role - LOCAL_ONE consistency
+  community.cassandra.cassandra_role:
+    name: local_role
+    password: p4ssw0rd
+    login: true
+    keyspace_permissions:
+      test_keyspace:
+        - "ALL PERMISSIONS"
+    state: present
+    login_user: "{{ cassandra_admin_user }}"
+    login_password: "{{ cassandra_admin_pwd }}"
+    debug: yes
+    consistency_level: "LOCAL_ONE"
+  register: local
+
+- name: Create a test role - ANY consistency
+  community.cassandra.cassandra_role:
+    name: any_role
+    password: p4ssw0rd
+    login: true
+    keyspace_permissions:
+      test_keyspace:
+        - "ALL PERMISSIONS"
+    state: present
+    login_user: "{{ cassandra_admin_user }}"
+    login_password: "{{ cassandra_admin_pwd }}"
+    debug: yes
+    consistency_level: "ANY"
+  register: any
+
+- name: Create a test role - QUORUM consistency
+  community.cassandra.cassandra_role:
+    name: any_role
+    password: p4ssw0rd
+    login: true
+    keyspace_permissions:
+      test_keyspace:
+        - "ALL PERMISSIONS"
+    state: present
+    login_user: "{{ cassandra_admin_user }}"
+    login_password: "{{ cassandra_admin_pwd }}"
+    debug: yes
+    consistency_level: "QUORUM"
+  register: quorum
