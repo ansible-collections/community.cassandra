@@ -45,13 +45,11 @@
     consistency_level: "ANY"
     login_user: "{{ cassandra_admin_user }}"
     login_password: "{{ cassandra_admin_pwd }}"
-  ignore_errors: true
   register: any
 
 - assert:
     that:
-      - any.failed
-      - "'ANY ConsistencyLevel is only supported for writes' in any.msg"
+      - any.changed
 
 - name: Create a test keyspace - QUORUM consistency
   community.cassandra.cassandra_table:

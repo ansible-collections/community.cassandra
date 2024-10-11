@@ -503,19 +503,27 @@ def main():
             if ssl_cert_reqs in ('CERT_REQUIRED', 'CERT_OPTIONAL'):
                 ssl_context.load_verify_locations(module.params['ssl_ca_certs'])
         profile = ExecutionProfile(consistency_level=ConsistencyLevel.name_to_value[consistency_level])
-        cluster = Cluster(login_host,
-                          port=login_port,
-                          auth_provider=auth_provider,
-                          ssl_context=ssl_context,
-                          execution_profiles={EXEC_PROFILE_DEFAULT: profile})
-        session = cluster.connect()
+        
+        # read connection - not all consistency levels work on reads
+        cluster_r = Cluster(login_host,
+                            port=login_port,
+                            auth_provider=auth_provider,
+                            ssl_context=ssl_context)
+        
+        cluster_w = Cluster(login_host,
+                            port=login_port,
+                            auth_provider=auth_provider,
+                            ssl_context=ssl_context,
+                            execution_profiles={EXEC_PROFILE_DEFAULT: profile})
+        session_r = cluster_r.connect()
+        session = cluster_r.connect()
     except AuthenticationFailed as excep:
         module.fail_json(msg="Authentication failed: {0}".format(excep))
     except Exception as excep:
         module.fail_json(msg="Error connecting to cluster: {0}".format(excep))
 
     try:
-        if table_exists(session, keyspace_name, table_name):
+        if table_exists(session_r, keyspace_name, table_name):
             if state == "present":
                 result['changed'] = False
             else:
