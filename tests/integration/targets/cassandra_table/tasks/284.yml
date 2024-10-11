@@ -2,6 +2,8 @@
   cassandra_keyspace:
     name: consistency
     state: present
+    login_user: "{{ cassandra_admin_user }}"
+    login_password: "{{ cassandra_admin_pwd }}"
 
 - name: Create a test keyspace - LOCAL_ONE consistency
   community.cassandra.cassandra_table:
