@@ -87,7 +87,7 @@ options:
       - data_centers
   consistency_level:
     description:
-      - Consistency level to perform cassandra queries with
+      - Consistency level to perform cassandra write queries with.
     type: str
     default: "LOCAL_ONE"
     choices:

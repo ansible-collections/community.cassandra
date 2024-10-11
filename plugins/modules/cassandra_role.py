@@ -108,7 +108,7 @@ options:
     default: false
   consistency_level:
     description:
-      - Consistency level to perform cassandra queries with
+      - Consistency level to perform cassandra write queries with.
     type: str
     default: "LOCAL_ONE"
     choices:
@@ -538,8 +538,7 @@ def build_role_permissions(session,
                     if ks in keyspace_permissions.keys() \
                             and permission['permission'] not in keyspace_permissions[ks] \
                             and "ALL PERMISSIONS" not in keyspace_permissions[ks]:
-                        cql = revoke_permission(session,
-                                                permission['permission'],
+                        cql = revoke_permission(permission['permission'],
                                                 role,
                                                 ks)
                         perms_dict['revoke'].add(cql)
@@ -547,8 +546,7 @@ def build_role_permissions(session,
             if permission['resource'].startswith('<keyspace') \
                     and permission['role'] == role \
                     and permission['resource'].split(' ')[1].replace('>', '') not in keyspace_permissions.keys():
-                cql = revoke_permission(session,
-                                        permission['permission'],
+                cql = revoke_permission(permission['permission'],
                                         role,
                                         ks)
                 perms_dict['revoke'].add(cql)
@@ -557,8 +555,7 @@ def build_role_permissions(session,
             if permission['resource'].startswith('<keyspace') \
                     and permission['role'] == role:  # We don't touch other permissions
                 ks = permission['resource'].split(' ')[1].replace('>', '')
-                cql = revoke_permission(session,
-                                        permission['permission'],
+                cql = revoke_permission(permission['permission'],
                                         role,
                                         ks)
                 perms_dict['revoke'].add(cql)
@@ -811,7 +808,8 @@ def main():
                         result['changed'] = False
 
         if state == "present":
-            cql_dict = process_role_permissions(keyspace_permissions,
+            cql_dict = process_role_permissions(session_r,
+                                                keyspace_permissions,
                                                 role)
             if len(cql_dict['grant']) > 0 or len(cql_dict['revoke']) > 0:
                 for r in cql_dict['revoke']:
