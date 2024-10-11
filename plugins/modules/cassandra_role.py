@@ -822,7 +822,8 @@ def main():
                 result['changed'] = True
 
             # Process roles
-            roles_dict = build_role_grants(role,
+            roles_dict = build_role_grants(session_r,
+                                           role,
                                            roles)
 
             if len(roles_dict['grant']) > 0 or len(roles_dict['revoke']) > 0:
