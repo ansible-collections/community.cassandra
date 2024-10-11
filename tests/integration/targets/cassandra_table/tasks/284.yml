@@ -18,6 +18,8 @@
     primary_key:
       - username
     consistency_level: "LOCAL_ONE"
+    login_user: "{{ cassandra_admin_user }}"
+    login_password: "{{ cassandra_admin_pwd }}"
   register: local
 
 - assert:
@@ -38,6 +40,9 @@
       - dob: date
     primary_key:
       - username
+    consistency_level: "ANY"
+    login_user: "{{ cassandra_admin_user }}"
+    login_password: "{{ cassandra_admin_pwd }}"
   ignore_errors: true
   register: any
 
@@ -61,6 +66,8 @@
     primary_key:
       - username
     consistency_level: "QUORUM"
+    login_user: "{{ cassandra_admin_user }}"
+    login_password: "{{ cassandra_admin_pwd }}"
   register: quorum
 
 - assert:
