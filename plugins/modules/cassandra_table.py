@@ -516,7 +516,7 @@ def main():
                             ssl_context=ssl_context,
                             execution_profiles={EXEC_PROFILE_DEFAULT: profile})
         session_r = cluster_r.connect()
-        session = cluster_r.connect()
+        session = cluster_w.connect()
     except AuthenticationFailed as excep:
         module.fail_json(msg="Authentication failed: {0}".format(excep))
     except Exception as excep:
