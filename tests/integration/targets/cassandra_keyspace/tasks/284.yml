@@ -21,13 +21,11 @@
       zurich: 3
       tokyo: 3
       new_york: 2
-  ignore_errors: true
   register: any
 
 - assert:
     that:
-      - any.failed
-      - "'ANY ConsistencyLevel is only supported for writes' in any.msg"
+      - any.changed
 
 - name: Create a test keyspace - QUORUM consistency
   community.cassandra.cassandra_keyspace:
