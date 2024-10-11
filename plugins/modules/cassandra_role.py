@@ -266,7 +266,7 @@ def is_role_changed(role_properties, super_user, login, password,
     return changed
 
 
-def create_alter_role(module, session, role, super_user, login, password,
+def create_alter_role(module, role, super_user, login, password,
                       options, data_centres, alter_role):
     if alter_role is False:
         cql = "CREATE ROLE '{0}' ".format(role)
@@ -293,14 +293,14 @@ def create_alter_role(module, session, role, super_user, login, password,
     return cql
 
 
-def create_role(session, role):
+def create_role(role):
     ''' Used for creating roles that are assigned to other users
     '''
     cql = "CREATE ROLE '{0}'".format(role)
     return cql
 
 
-def grant_role(session, role, grantee):
+def grant_role(role, grantee):
     ''' Assign roles to other roles
     '''
     cql = "GRANT '{0}' TO '{1}'".format(role,
@@ -308,7 +308,7 @@ def grant_role(session, role, grantee):
     return cql
 
 
-def revoke_role(session, role, grantee):
+def revoke_role(role, grantee):
     ''' Revoke a role
     '''
     cql = "REVOKE '{0}' FROM '{1}'".format(role,
@@ -316,7 +316,7 @@ def revoke_role(session, role, grantee):
     return cql
 
 
-def drop_role(session, role):
+def drop_role(role):
     cql = "DROP ROLE '{0}'".format(role)
     return cql
 
@@ -486,9 +486,6 @@ def build_role_permissions(session,
         "revoke": ["REVOKE SELECT ON KEYSPACE rhys FROM app_user",
                    "REVOKE ALL PERMISSIONS ON ALL KEYSPACES FROM legacy_app"]
     }
-
-    # TODO - To support check mode we probably have to remove the sesssion.execs
-    # from here and run them elsewhere
 
     '''
 
@@ -684,12 +681,22 @@ def main():
             if ssl_cert_reqs in ('CERT_REQUIRED', 'CERT_OPTIONAL'):
                 ssl_context.load_verify_locations(module.params['ssl_ca_certs'])
         profile = ExecutionProfile(consistency_level=ConsistencyLevel.name_to_value[consistency_level])
-        cluster = Cluster(login_host,
+        
+        # read connection - not all consistency levels work on reads
+        cluster_r = Cluster(login_host,
+                          port=login_port,
+                          auth_provider=auth_provider,
+                          ssl_context=ssl_context)        
+        
+        cluster_w = Cluster(login_host,
                           port=login_port,
                           auth_provider=auth_provider,
                           ssl_context=ssl_context,
                           execution_profiles={EXEC_PROFILE_DEFAULT: profile})
-        session = cluster.connect()
+
+        session_r = cluster_r.connect()
+        session_w = cluster_w.connect()
+
     except AuthenticationFailed as auth_failed:
         module.fail_json(msg="Authentication failed: {0}".format(auth_failed))
     except Exception as excep:
@@ -699,11 +706,11 @@ def main():
 
     try:
         if debug:
-            result['role_exists'] = role_exists(session, role)
+            result['role_exists'] = role_exists(session_r, role)
         if login:  # Standard user
-            if role_exists(session, role):
+            if role_exists(session_r, role):
                 # Has the role changed?
-                role_properties = get_role_properties(session,
+                role_properties = get_role_properties(session_r,
                                                       role)
                 has_role_changed = is_role_changed(role_properties,
                                                    super_user,
@@ -724,7 +731,6 @@ def main():
                         # create the role
                         if has_role_changed:
                             cql = create_alter_role(module,
-                                                    session,
                                                     role,
                                                     super_user,
                                                     login,
@@ -732,12 +738,12 @@ def main():
                                                     options,
                                                     data_centres,
                                                     has_role_changed)
-                            session .execute(cql)
+                            session_w.execute(cql)
                             result['changed'] = True
                             result['cql'] = cql
                     elif state == "absent":
-                        cql = drop_role(session, role)
-                        session.execute(cql)
+                        cql = drop_role(role)
+                        session_w.execute(cql)
                         result['changed'] = True
                         result['cql'] = cql
             else:
@@ -749,7 +755,6 @@ def main():
                 else:
                     if state == "present":
                         cql = create_alter_role(module,
-                                                session,
                                                 role,
                                                 super_user,
                                                 login,
@@ -757,34 +762,33 @@ def main():
                                                 options,
                                                 data_centres,
                                                 False)
-                        session .execute(cql)
+                        session_w.execute(cql)
                         result['changed'] = True
                         result['cql'] = cql
                     elif state == "absent":
                         result['changed'] = False
         else:  # This is a role
-            if role_exists(session, role):
+            if role_exists(session_r, role):
                 if module.check_mode:
                     if state == "present":
                         result['changed'] = False
                     elif state == "absent":
-                        cql = drop_role(session, role)
-                        session.execute(cql)
+                        cql = drop_role(role)
+                        session_w.execute(cql)
                         result['changed'] = True
                         result['cql'] = cql
                 else:
                     if state == "present":
                         result['changed'] = False
                     elif state == "absent":
-                        cql = drop_role(session, role)
-                        session.execute(cql)
+                        cql = drop_role(role)
+                        session_w.execute(cql)
                         result['changed'] = True
                         result['cql'] = cql
             else:
                 if module.check_mode:
                     if state == "present":
                         cql = create_alter_role(module,
-                                                session,
                                                 role,
                                                 super_user,
                                                 login,
@@ -792,47 +796,45 @@ def main():
                                                 options,
                                                 data_centres,
                                                 has_role_changed)
-                        session.execute(cql)
+                        session_w.execute(cql)
                         result['changed'] = True
                         result['cql'] = cql
                     elif state == "absent":
                         result['changed'] = False
                 else:
                     if state == "present":
-                        cql = create_role(session, role)
-                        session.execute(cql)
+                        cql = create_role(role)
+                        session_w.execute(cql)
                         result['changed'] = True
                         result['cql'] = cql
                     elif state == "absent":
                         result['changed'] = False
 
         if state == "present":
-            cql_dict = process_role_permissions(session,
-                                                keyspace_permissions,
+            cql_dict = process_role_permissions(keyspace_permissions,
                                                 role)
             if len(cql_dict['grant']) > 0 or len(cql_dict['revoke']) > 0:
                 for r in cql_dict['revoke']:
                     if not module.check_mode:
-                        session.execute(r)
+                        session_w.execute(r)
                 for g in cql_dict['grant']:
                     if not module.check_mode:
-                        session.execute(g)
+                        session_w.execute(g)
                 result['permissions'] = cql_dict
                 result['changed'] = True
 
             # Process roles
-            roles_dict = build_role_grants(session,
-                                           role,
+            roles_dict = build_role_grants(role,
                                            roles)
 
             if len(roles_dict['grant']) > 0 or len(roles_dict['revoke']) > 0:
                 result['roles'] = roles_dict
                 for r in roles_dict['revoke']:
                     if not module.check_mode:
-                        session.execute(r)
+                        session_w.execute(r)
                 for g in roles_dict['grant']:
                     if not module.check_mode:
-                        session.execute(g)
+                        session_w.execute(g)
 
                 result['changed'] = True
 

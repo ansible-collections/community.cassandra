@@ -35,8 +35,7 @@
 
 - assert:
     that:
-      - any.failed
-      - "'ANY ConsistencyLevel is only supported for writes' in any.msg"
+      - any.changed
 
 - name: Create a test role - QUORUM consistency
   community.cassandra.cassandra_role:

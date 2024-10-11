@@ -516,7 +516,7 @@ def main():
                             ssl_context=ssl_context,
                             execution_profiles={EXEC_PROFILE_DEFAULT: profile})
         session_r = cluster_r.connect()
-        session = cluster_w.connect()
+        session_w = cluster_w.connect()
     except AuthenticationFailed as excep:
         module.fail_json(msg="Authentication failed: {0}".format(excep))
     except Exception as excep:
@@ -529,7 +529,7 @@ def main():
             else:
                 cql = drop_table(keyspace_name, table_name)
                 if not module.check_mode:
-                    session.execute(cql)
+                    session_w.execute(cql)
                 result['changed'] = True
                 result['cql'] = cql
         else:  # Table does not exist
@@ -543,7 +543,7 @@ def main():
                                    table_options,
                                    is_type)
                 if not module.check_mode:
-                    session.execute(cql)
+                    session_w.execute(cql)
                 result['changed'] = True
                 result['cql'] = cql
             else:
