@@ -344,7 +344,7 @@ def validate_keyspace_permissions(keyspace_permissions):
     return True
 
 
-def grant_permission(session, permission, role, keyspace):
+def grant_permission(permission, role, keyspace):
     if keyspace == "all_keyspaces":
         cql = "GRANT {0} ON ALL KEYSPACES TO '{1}'".format(permission,
                                                            role)
@@ -355,7 +355,7 @@ def grant_permission(session, permission, role, keyspace):
     return cql
 
 
-def revoke_permission(session, permission, role, keyspace):
+def revoke_permission(permission, role, keyspace):
     cql = "REVOKE {0} ON KEYSPACE {1} FROM '{2}'".format(permission,
                                                          keyspace,
                                                          role)
@@ -509,8 +509,7 @@ def build_role_permissions(session,
                 if bool:
                     pass  # permission is already assigned
                 else:
-                    cql = grant_permission(session,
-                                           permission,
+                    cql = grant_permission(permission,
                                            role,
                                            keyspace)
                     perms_dict['grant'].add(cql)
