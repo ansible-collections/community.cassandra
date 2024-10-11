@@ -455,16 +455,14 @@ def build_role_grants(session,
     if current_roles is not None:
         for r in current_roles:
             if r not in roles:
-                cql = revoke_role(session,
-                                  r,
+                cql = revoke_role(r,
                                   role)
                 roles_dict['revoke'].add(cql)
     # grants
     if roles is not None:
         for r in roles:
             if r not in current_roles:
-                cql = grant_role(session,
-                                 r,
+                cql = grant_role(r,
                                  role)
                 roles_dict['grant'].add(cql)
     return roles_dict
