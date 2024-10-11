@@ -99,6 +99,23 @@ options:
       - Debug flag
     type: bool
     default: false
+  consistency_level:
+    description:
+      - Consistency level to perform cassandra queries with
+    type: str
+    default: "LOCAL_ONE"
+    choices:
+        - ANY
+        - ONE
+        - TWO
+        - THREE
+        - QUORUM
+        - ALL
+        - LOCAL_QUORUM
+        - EACH_QUORUM
+        - SERIAL
+        - LOCAL_SERIAL
+        - LOCAL_ONE
 '''
 
 EXAMPLES = r'''
@@ -262,8 +279,11 @@ import os.path
 
 try:
     from cassandra.cluster import Cluster
+    from cassandra.cluster import EXEC_PROFILE_DEFAULT
+    from cassandra.cluster import ExecutionProfile
     from cassandra.auth import PlainTextAuthProvider
     from cassandra import AuthenticationFailed
+    from cassandra import ConsistencyLevel
     HAS_CASSANDRA_DRIVER = True
 except Exception:
     HAS_CASSANDRA_DRIVER = False
@@ -409,7 +429,11 @@ def main():
             partition_key=dict(type='list', elements='str', default=[], no_log=False),
             table_options=dict(type='dict', default=None),
             is_type=dict(type='bool', default=False),
-            debug=dict(type='bool', default=False)),
+            debug=dict(type='bool', default=False),
+            consistency_level=dict(type='str',
+                        required=False,
+                        default="LOCAL_ONE",
+                        choices=ConsistencyLevel.name_to_value.keys())),
         supports_check_mode=True
     )
 
@@ -434,6 +458,7 @@ def main():
     table_options = module.params['table_options']
     is_type = module.params['is_type']
     debug = module.params['debug']
+    consistency_level = module.params['consistency_level']
 
     if HAS_SSL_LIBRARY is False and ssl is True:
         msg = ("This module requires the SSL python"
@@ -477,10 +502,12 @@ def main():
             ssl_context.verify_mode = getattr(ssl_lib, module.params['ssl_cert_reqs'])
             if ssl_cert_reqs in ('CERT_REQUIRED', 'CERT_OPTIONAL'):
                 ssl_context.load_verify_locations(module.params['ssl_ca_certs'])
+        profile = ExecutionProfile(consistency_level=ConsistencyLevel.name_to_value[consistency_level])
         cluster = Cluster(login_host,
                           port=login_port,
                           auth_provider=auth_provider,
-                          ssl_context=ssl_context)
+                          ssl_context=ssl_context,
+                          execution_profiles={EXEC_PROFILE_DEFAULT: profile})
         session = cluster.connect()
     except AuthenticationFailed as excep:
         module.fail_json(msg="Authentication failed: {0}".format(excep))

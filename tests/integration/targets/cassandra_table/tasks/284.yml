@@ -1,0 +1,68 @@
+- name: Create a keyspace for tests
+  cassandra_keyspace:
+    name: consistency
+    state: present
+
+- name: Create a test keyspace - LOCAL_ONE consistency
+  community.cassandra.cassandra_table:
+    name: local
+    keyspace: consistency
+    state: present
+    columns:
+      - id: uuid
+      - username: text
+      - encrypted_password: blob
+      - first_name: text
+      - last_name: text
+      - dob: date
+    primary_key:
+      - username
+    consistency_level: "LOCAL_ONE"
+  register: local
+
+- assert:
+    that:
+      - local.changed
+
+- name: Create a test keyspace- ANY consistency
+  community.cassandra.cassandra_table:
+    name: any
+    keyspace: consistency
+    state: present
+    columns:
+      - id: uuid
+      - username: text
+      - encrypted_password: blob
+      - first_name: text
+      - last_name: text
+      - dob: date
+    primary_key:
+      - username
+  ignore_errors: true
+  register: any
+
+- assert:
+    that:
+      - any.failed
+      - "'ANY ConsistencyLevel is only supported for writes' in any.msg"
+
+- name: Create a test keyspace - QUORUM consistency
+  community.cassandra.cassandra_table:
+    name: quorum
+    keyspace: consistency
+    state: present
+    columns:
+      - id: uuid
+      - username: text
+      - encrypted_password: blob
+      - first_name: text
+      - last_name: text
+      - dob: date
+    primary_key:
+      - username
+    consistency_level: "QUORUM"
+  register: quorum
+
+- assert:
+    that:
+      - quorum.changed

@@ -40,7 +40,7 @@
 
 - name: Create a test role - QUORUM consistency
   community.cassandra.cassandra_role:
-    name: any_role
+    name: quorum_role
     password: p4ssw0rd
     login: true
     keyspace_permissions:
@@ -52,3 +52,7 @@
     debug: yes
     consistency_level: "QUORUM"
   register: quorum
+
+- assert:
+    that:
+      - quorum.changed
