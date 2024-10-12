@@ -571,11 +571,11 @@ def process_role_permissions(session,
     return cql_dict
 
 
-def get_read_and_write_sessions(login_host, 
-                                login_port, 
-                                auth_provider, 
-                                ssl_context, 
-                                consistency_level): 
+def get_read_and_write_sessions(login_host,
+                                login_port,
+                                auth_provider,
+                                ssl_context,
+                                consistency_level):
     profile = ExecutionProfile(
         consistency_level=ConsistencyLevel.name_to_value[consistency_level])
     if consistency_level in ["ANY", "EACH_QUORUM"]:  # Not supported for reads
@@ -593,7 +593,7 @@ def get_read_and_write_sessions(login_host,
         cluster_w = Cluster(login_host,
                             port=login_port,
                             auth_provider=auth_provider,
-                            ssl_context=ssl_context) # Will be LOCAL_ONE
+                            ssl_context=ssl_context)  # Will be LOCAL_ONE
     else:
         cluster_w = Cluster(login_host,
                             port=login_port,
@@ -603,6 +603,7 @@ def get_read_and_write_sessions(login_host,
     return (cluster_r, cluster_w)  # Return a tuple of sessions for C* (read, write)
 
 ############################################
+
 
 def main():
     module = AnsibleModule(
@@ -708,7 +709,7 @@ def main():
             ssl_context.verify_mode = getattr(ssl_lib, module.params['ssl_cert_reqs'])
             if ssl_cert_reqs in ('CERT_REQUIRED', 'CERT_OPTIONAL'):
                 ssl_context.load_verify_locations(module.params['ssl_ca_certs'])
-        
+
         sessions = get_read_and_write_sessions(login_host,
                                                login_port,
                                                auth_provider,
