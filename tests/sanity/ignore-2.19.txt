@@ -1,6 +1,6 @@
 plugins/modules/cassandra_keyspace.py validate-modules:import-error
 plugins/modules/cassandra_role.py validate-modules:import-error 
 plugins/modules/cassandra_table.py validate-modules:import-error
-plugins/modules/cassandra_keyspace.py import:traceback
-plugins/modules/cassandra_role.py import:traceback
-plugins/modules/cassandra_table.py import:traceback
+plugins/modules/cassandra_keyspace.py import-3.9:traceback
+plugins/modules/cassandra_role.py import-3.9:traceback
+plugins/modules/cassandra_table.py import-3.9:traceback
