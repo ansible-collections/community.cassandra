@@ -105,40 +105,46 @@ options:
       - Not all consistency levels are support bz read or write connections.\
         When a level is not supported then LOCAL_ONE, the default is used.
       - Consult the list below for read/write consistency level support.
+  consistency_level:
+    description:
+      - Consistency level to perform cassandra queries with.
+      - Not all consistency levels are support bz read or write connections.\
+        When a level is not supported then LOCAL_ONE, the default is used.
+      - Consult the list below for read/write consistency level support.
       - consistency_level_support:
-            - level: ANY
-                read: false
-                write: true
-            - level: ONE
-                read: true
-                write: true
-            - level: TWO
-                read: true
-                write: true
-            - level: THREE
-                read: true
-                write: true
-            - level: QUORUM
-                read: true
-                write: true
-            - level: ALL
-                read: true
-                write: true
-            - level: LOCAL_ONE
-                read: true
-                write: true
-            - level: LOCAL_QUORUM
-                read: true
-                write: true
-            - level: EACH_QUORUM
-                read: false
-                write: true
-            - level: SERIAL
-                read: true
-                write: false
-            - level: LOCAL_SERIAL
-                read: true
-                write: false
+          - level: ANY
+            read: false
+            write: true
+          - level: ONE
+            read: true
+            write: true
+          - level: TWO
+            read: true
+            write: true
+          - level: THREE
+            read: true
+            write: true
+          - level: QUORUM
+            read: true
+            write: true
+          - level: ALL
+            read: true
+            write: true
+          - level: LOCAL_ONE
+            read: true
+            write: true
+          - level: LOCAL_QUORUM
+            read: true
+            write: true
+          - level: EACH_QUORUM
+            read: false
+            write: true
+          - level: SERIAL
+            read: true
+            write: false
+          - level: LOCAL_SERIAL
+            read: true
+            write: false
     type: str
     default: "LOCAL_ONE"
     choices:
