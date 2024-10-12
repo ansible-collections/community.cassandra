@@ -112,12 +112,6 @@ options:
       - Not all consistency levels are support bz read or write connections.\
         When a level is not supported then LOCAL_ONE, the default is used.
       - Consult the list below for read/write consistency level support.
-  consistency_level:
-    description:
-      - Consistency level to perform cassandra queries with.
-      - Not all consistency levels are support bz read or write connections.\
-        When a level is not supported then LOCAL_ONE, the default is used.
-      - Consult the list below for read/write consistency level support.
       - consistency_level_support:
           - level: ANY
             read: false
