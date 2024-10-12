@@ -30,7 +30,6 @@
     login_password: "{{ cassandra_admin_pwd }}"
     debug: yes
     consistency_level: "ANY"
-  ignore_errors: true
   register: any
 
 - assert:
@@ -70,7 +69,6 @@
     debug: yes
     consistency_level: "SERIAL"
   register: serial
-  ignore_errors: true
 
 - assert:
     that:
@@ -90,7 +88,6 @@
     debug: yes
     consistency_level: "LOCAL_QUORUM"
   register: local_quorum
-  ignore_errors: true
 
 - assert:
     that:
@@ -114,4 +111,5 @@
 
 - assert:
     that:
-      - two.changed
+      - two.failed
+      - "'Cannot achieve consistency level TWO' in two.msg"
