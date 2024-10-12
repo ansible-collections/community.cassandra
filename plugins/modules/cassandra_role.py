@@ -568,6 +568,38 @@ def process_role_permissions(session,
     return cql_dict
 
 
+def get_read_and_write_sessions(login_host, 
+                                login_port, 
+                                auth_provider, 
+                                ssl_context, 
+                                consistency_level):
+    session_tuple = (None, None)  # Return a tuple of sessions for C* (read, write)
+    profile = ExecutionProfile(
+        consistency_level=ConsistencyLevel.name_to_value[consistency_level])
+    if consistency_level in ["ANY", "EACH_QUORUM"]:  # Not supported for reads
+        cluster_r = Cluster(login_host,
+                            port=login_port,
+                            auth_provider=auth_provider,
+                            ssl_context=ssl_context)  # Will be LOCAL_ONE
+    else:
+        cluster_r = Cluster(login_host,
+                            port=login_port,
+                            auth_provider=auth_provider,
+                            ssl_context=ssl_context,
+                            execution_profiles={EXEC_PROFILE_DEFAULT: profile})
+    if consistency_level in ["SERIAL", "SERIAL_LOCAL"]:  # Not supported for writes
+        cluster_w = Cluster(login_host,
+                            port=login_port,
+                            auth_provider=auth_provider,
+                            ssl_context=ssl_context) # Will be LOCAL_ONE
+    else:
+        cluster_w = Cluster(login_host,
+                            port=login_port,
+                            auth_provider=auth_provider,
+                            ssl_context=ssl_context,
+                            execution_profiles={EXEC_PROFILE_DEFAULT: profile})
+    return session_tuple(cluster_r, cluster_w)
+
 ############################################
 
 def main():
@@ -674,22 +706,15 @@ def main():
             ssl_context.verify_mode = getattr(ssl_lib, module.params['ssl_cert_reqs'])
             if ssl_cert_reqs in ('CERT_REQUIRED', 'CERT_OPTIONAL'):
                 ssl_context.load_verify_locations(module.params['ssl_ca_certs'])
-        profile = ExecutionProfile(consistency_level=ConsistencyLevel.name_to_value[consistency_level])
         
-        # read connection - not all consistency levels work on reads
-        cluster_r = Cluster(login_host,
-                          port=login_port,
-                          auth_provider=auth_provider,
-                          ssl_context=ssl_context)        
-        
-        cluster_w = Cluster(login_host,
-                          port=login_port,
-                          auth_provider=auth_provider,
-                          ssl_context=ssl_context,
-                          execution_profiles={EXEC_PROFILE_DEFAULT: profile})
+        sessions = get_read_and_write_sessions(login_host,
+                                               login_port,
+                                               auth_provider,
+                                               ssl_context,
+                                               consistency_level)
 
-        session_r = cluster_r.connect()
-        session_w = cluster_w.connect()
+        session_r = sessions[0].connect()
+        session_w = sessions[1].connect()
 
     except AuthenticationFailed as auth_failed:
         module.fail_json(msg="Authentication failed: {0}".format(auth_failed))
