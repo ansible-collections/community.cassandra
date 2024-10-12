@@ -87,7 +87,44 @@ options:
       - data_centers
   consistency_level:
     description:
-      - Consistency level to perform cassandra write queries with.
+      - Consistency level to perform cassandra queries with.
+      - Not all consistency levels are support bz read or write connections.\
+        When a level is not supported then LOCAL_ONE, the default is used.
+      - Consult the list below for read/write consistency level support.
+      - consistency_level_support:
+            - level: ANY
+                read: false
+                write: true
+            - level: ONE
+                read: true
+                write: true
+            - level: TWO
+                read: true
+                write: true
+            - level: THREE
+                read: true
+                write: true
+            - level: QUORUM
+                read: true
+                write: true
+            - level: ALL
+                read: true
+                write: true
+            - level: LOCAL_ONE
+                read: true
+                write: true
+            - level: LOCAL_QUORUM
+                read: true
+                write: true
+            - level: EACH_QUORUM
+                read: false
+                write: true
+            - level: SERIAL
+                read: true
+                write: false
+            - level: LOCAL_SERIAL
+                read: true
+                write: false
     type: str
     default: "LOCAL_ONE"
     choices:
@@ -271,6 +308,38 @@ def keyspace_is_changed(module, cluster, keyspace, replication_factor,
         module.fail_json("Unknown Replication strategy: {0}".format(cfg['class']))
     return keyspace_definition_changed
 
+
+def get_read_and_write_sessions(login_host, 
+                                login_port, 
+                                auth_provider, 
+                                ssl_context, 
+                                consistency_level): 
+    profile = ExecutionProfile(
+        consistency_level=ConsistencyLevel.name_to_value[consistency_level])
+    if consistency_level in ["ANY", "EACH_QUORUM"]:  # Not supported for reads
+        cluster_r = Cluster(login_host,
+                            port=login_port,
+                            auth_provider=auth_provider,
+                            ssl_context=ssl_context)  # Will be LOCAL_ONE
+    else:
+        cluster_r = Cluster(login_host,
+                            port=login_port,
+                            auth_provider=auth_provider,
+                            ssl_context=ssl_context,
+                            execution_profiles={EXEC_PROFILE_DEFAULT: profile})
+    if consistency_level in ["SERIAL", "LOCAL_SERIAL"]:  # Not supported for writes
+        cluster_w = Cluster(login_host,
+                            port=login_port,
+                            auth_provider=auth_provider,
+                            ssl_context=ssl_context) # Will be LOCAL_ONE
+    else:
+        cluster_w = Cluster(login_host,
+                            port=login_port,
+                            auth_provider=auth_provider,
+                            ssl_context=ssl_context,
+                            execution_profiles={EXEC_PROFILE_DEFAULT: profile})
+    return (cluster_r, cluster_w)  # Return a tuple of sessions for C* (read, write)
+
 ############################################
 
 
@@ -368,24 +437,27 @@ def main():
             ssl_context.verify_mode = getattr(ssl_lib, module.params['ssl_cert_reqs'])
             if ssl_cert_reqs in ('CERT_REQUIRED', 'CERT_OPTIONAL'):
                 ssl_context.load_verify_locations(module.params['ssl_ca_certs'])
-        profile = ExecutionProfile(consistency_level=ConsistencyLevel.name_to_value[consistency_level])
-        cluster = Cluster(login_host,
-                          port=login_port,
-                          auth_provider=auth_provider,
-                          ssl_context=ssl_context,
-                          execution_profiles={EXEC_PROFILE_DEFAULT: profile})
-        session = cluster.connect()
+        
+        sessions = get_read_and_write_sessions(login_host,
+                                               login_port,
+                                               auth_provider,
+                                               ssl_context,
+                                               consistency_level)
+
+        session_r = sessions[0].connect()
+        session_w = sessions[1].connect()
+
     except AuthenticationFailed as excep:
         module.fail_json(msg="Authentication failed: {0}".format(excep))
     except Exception as excep:
         module.fail_json(msg="Error connecting to cluster: {0}".format(excep))
 
     try:
-        if keyspace_exists(session, keyspace):
+        if keyspace_exists(session_r, keyspace):
             if module.check_mode:
                 if state == "present":
                     if keyspace_is_changed(module,
-                                           cluster,
+                                           session_w,
                                            keyspace,
                                            replication_factor,
                                            durable_writes,
@@ -399,14 +471,14 @@ def main():
             else:
                 if state == "present":
                     if keyspace_is_changed(module,
-                                           cluster,
+                                           session_w,
                                            keyspace,
                                            replication_factor,
                                            durable_writes,
                                            data_centres):
 
                         cql = create_alter_keyspace(module,
-                                                    session,
+                                                    session_w,
                                                     keyspace,
                                                     replication_factor,
                                                     durable_writes,
@@ -417,7 +489,7 @@ def main():
                     else:
                         result['changed'] = False
                 elif state == "absent":
-                    drop_keyspace(session, keyspace)
+                    drop_keyspace(session_w, keyspace)
                     result['changed'] = True
         else:
             if module.check_mode:
@@ -428,7 +500,7 @@ def main():
             else:
                 if state == "present":
                     cql = create_alter_keyspace(module,
-                                                session,
+                                                session_w,
                                                 keyspace,
                                                 replication_factor,
                                                 durable_writes,

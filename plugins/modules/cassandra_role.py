@@ -146,7 +146,6 @@ options:
             - level: LOCAL_SERIAL
                 read: true
                 write: false
-
     type: str
     default: "LOCAL_ONE"
     choices:
