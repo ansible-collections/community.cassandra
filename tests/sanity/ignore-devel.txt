@@ -1,0 +1,3 @@
+plugins/modules/cassandra_keyspace.py import-error
+plugins/modules/cassandra_role.py import-error 
+plugins/modules/cassandra_table.py import-error
