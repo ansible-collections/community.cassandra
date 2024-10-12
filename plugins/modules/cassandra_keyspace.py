@@ -444,6 +444,7 @@ def main():
                                                ssl_context,
                                                consistency_level)
 
+        cluster = sessions[1]  # maintain cluster object for comptbility
         session_r = sessions[0].connect()
         session_w = sessions[1].connect()
 
@@ -457,7 +458,7 @@ def main():
             if module.check_mode:
                 if state == "present":
                     if keyspace_is_changed(module,
-                                           session_w,
+                                           cluster,
                                            keyspace,
                                            replication_factor,
                                            durable_writes,
@@ -471,7 +472,7 @@ def main():
             else:
                 if state == "present":
                     if keyspace_is_changed(module,
-                                           session_w,
+                                           cluster,
                                            keyspace,
                                            replication_factor,
                                            durable_writes,
