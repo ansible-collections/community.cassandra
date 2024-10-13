@@ -1,0 +1,43 @@
+- name: Create a test keyspace - LOCAL_ONE consistency
+  community.cassandra.cassandra_keyspace:
+    name: local_keyspace
+    state: present
+    data_centres:
+      zurich: 3
+      tokyo: 3
+      new_york: 2
+    consistency_level: "LOCAL_ONE"
+  register: local
+
+- assert:
+    that:
+      - local.changed
+
+- name: Create a test keyspace- ANY consistency
+  community.cassandra.cassandra_keyspace:
+    name: any_keyspace
+    state: present
+    data_centres:
+      zurich: 3
+      tokyo: 3
+      new_york: 2
+  register: any
+
+- assert:
+    that:
+      - any.changed
+
+- name: Create a test keyspace - QUORUM consistency
+  community.cassandra.cassandra_keyspace:
+    name: quorum_keyspace
+    state: present
+    data_centres:
+      zurich: 3
+      tokyo: 3
+      new_york: 2
+    consistency_level: "QUORUM"
+  register: quorum
+
+- assert:
+    that:
+      - quorum.changed

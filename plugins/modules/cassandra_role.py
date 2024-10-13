@@ -108,6 +108,26 @@ options:
       - Additional debug output.
     type: bool
     default: false
+  consistency_level:
+    description:
+      - Consistency level to perform cassandra queries with.
+      - Not all consistency levels are supported by read or write connections.\
+        When a level is not supported then LOCAL_ONE, the default is used.
+      - Consult the README.md on GitHub for further details.
+    type: str
+    default: "LOCAL_ONE"
+    choices:
+        - ANY
+        - ONE
+        - TWO
+        - THREE
+        - QUORUM
+        - ALL
+        - LOCAL_QUORUM
+        - EACH_QUORUM
+        - SERIAL
+        - LOCAL_SERIAL
+        - LOCAL_ONE
 '''
 
 EXAMPLES = r'''
@@ -187,10 +207,13 @@ import os.path
 
 try:
     from cassandra.cluster import Cluster
+    from cassandra.cluster import EXEC_PROFILE_DEFAULT
+    from cassandra.cluster import ExecutionProfile
     from cassandra.auth import PlainTextAuthProvider
     from cassandra import AuthenticationFailed
     from cassandra.query import dict_factory
     from cassandra import InvalidRequest
+    from cassandra import ConsistencyLevel
     HAS_CASSANDRA_DRIVER = True
 except Exception:
     HAS_CASSANDRA_DRIVER = False
@@ -221,8 +244,8 @@ def role_exists(session, role):
 
 def get_role_properties(session, role):
     cql = "SELECT role, can_login, is_superuser, member_of, salted_hash FROM system_auth.roles WHERE role = '{0}'".format(role)
-    session.row_factory = dict_factory
-    role_properties = session.execute(cql)
+    dict_factory_profile = session.execution_profile_clone_update(EXEC_PROFILE_DEFAULT, row_factory=dict_factory)
+    role_properties = session.execute(cql, execution_profile=dict_factory_profile)
     return role_properties[0]
 
 
@@ -248,7 +271,7 @@ def is_role_changed(role_properties, super_user, login, password,
     return changed
 
 
-def create_alter_role(module, session, role, super_user, login, password,
+def create_alter_role(module, role, super_user, login, password,
                       options, data_centres, alter_role):
     if alter_role is False:
         cql = "CREATE ROLE '{0}' ".format(role)
@@ -275,14 +298,14 @@ def create_alter_role(module, session, role, super_user, login, password,
     return cql
 
 
-def create_role(session, role):
+def create_role(role):
     ''' Used for creating roles that are assigned to other users
     '''
     cql = "CREATE ROLE '{0}'".format(role)
     return cql
 
 
-def grant_role(session, role, grantee):
+def grant_role(role, grantee):
     ''' Assign roles to other roles
     '''
     cql = "GRANT '{0}' TO '{1}'".format(role,
@@ -290,7 +313,7 @@ def grant_role(session, role, grantee):
     return cql
 
 
-def revoke_role(session, role, grantee):
+def revoke_role(role, grantee):
     ''' Revoke a role
     '''
     cql = "REVOKE '{0}' FROM '{1}'".format(role,
@@ -298,7 +321,7 @@ def revoke_role(session, role, grantee):
     return cql
 
 
-def drop_role(session, role):
+def drop_role(role):
     cql = "DROP ROLE '{0}'".format(role)
     return cql
 
@@ -326,7 +349,7 @@ def validate_keyspace_permissions(keyspace_permissions):
     return True
 
 
-def grant_permission(session, permission, role, keyspace):
+def grant_permission(permission, role, keyspace):
     if keyspace == "all_keyspaces":
         cql = "GRANT {0} ON ALL KEYSPACES TO '{1}'".format(permission,
                                                            role)
@@ -337,7 +360,7 @@ def grant_permission(session, permission, role, keyspace):
     return cql
 
 
-def revoke_permission(session, permission, role, keyspace):
+def revoke_permission(permission, role, keyspace):
     cql = "REVOKE {0} ON KEYSPACE {1} FROM '{2}'".format(permission,
                                                          keyspace,
                                                          role)
@@ -365,9 +388,9 @@ def list_role_permissions(session, role):
      Returns a resultset object of dicts
     '''
     cql = "LIST ALL OF '{0}'".format(role)
-    session.row_factory = dict_factory
     try:
-        role_permissions = session.execute(cql)
+        dict_factory_profile = session.execution_profile_clone_update(EXEC_PROFILE_DEFAULT, row_factory=dict_factory)
+        role_permissions = session.execute(cql, execution_profile=dict_factory_profile)
     except InvalidRequest as excep:
         # excep_code = type(excep).__name__
         # if excep_code == 2200: # User does not exist
@@ -437,16 +460,14 @@ def build_role_grants(session,
     if current_roles is not None and roles is not None:
         for r in current_roles:
             if r not in roles:
-                cql = revoke_role(session,
-                                  r,
+                cql = revoke_role(r,
                                   role)
                 roles_dict['revoke'].add(cql)
     # grants
     if roles is not None:
         for r in roles:
             if r not in current_roles:
-                cql = grant_role(session,
-                                 r,
+                cql = grant_role(r,
                                  role)
                 roles_dict['grant'].add(cql)
     return roles_dict
@@ -468,9 +489,6 @@ def build_role_permissions(session,
         "revoke": ["REVOKE SELECT ON KEYSPACE rhys FROM app_user",
                    "REVOKE ALL PERMISSIONS ON ALL KEYSPACES FROM legacy_app"]
     }
-
-    # TODO - To support check mode we probably have to remove the sesssion.execs
-    # from here and run them elsewhere
 
     '''
 
@@ -494,8 +512,7 @@ def build_role_permissions(session,
                 if bool:
                     pass  # permission is already assigned
                 else:
-                    cql = grant_permission(session,
-                                           permission,
+                    cql = grant_permission(permission,
                                            role,
                                            keyspace)
                     perms_dict['grant'].add(cql)
@@ -523,8 +540,7 @@ def build_role_permissions(session,
                     if ks in keyspace_permissions.keys() \
                             and permission['permission'] not in keyspace_permissions[ks] \
                             and "ALL PERMISSIONS" not in keyspace_permissions[ks]:
-                        cql = revoke_permission(session,
-                                                permission['permission'],
+                        cql = revoke_permission(permission['permission'],
                                                 role,
                                                 ks)
                         perms_dict['revoke'].add(cql)
@@ -532,8 +548,7 @@ def build_role_permissions(session,
             if permission['resource'].startswith('<keyspace') \
                     and permission['role'] == role \
                     and permission['resource'].split(' ')[1].replace('>', '') not in keyspace_permissions.keys():
-                cql = revoke_permission(session,
-                                        permission['permission'],
+                cql = revoke_permission(permission['permission'],
                                         role,
                                         ks)
                 perms_dict['revoke'].add(cql)
@@ -542,8 +557,7 @@ def build_role_permissions(session,
             if permission['resource'].startswith('<keyspace') \
                     and permission['role'] == role:  # We don't touch other permissions
                 ks = permission['resource'].split(' ')[1].replace('>', '')
-                cql = revoke_permission(session,
-                                        permission['permission'],
+                cql = revoke_permission(permission['permission'],
                                         role,
                                         ks)
                 perms_dict['revoke'].add(cql)
@@ -559,7 +573,39 @@ def process_role_permissions(session,
     return cql_dict
 
 
+def get_read_and_write_sessions(login_host,
+                                login_port,
+                                auth_provider,
+                                ssl_context,
+                                consistency_level):
+    profile = ExecutionProfile(
+        consistency_level=ConsistencyLevel.name_to_value[consistency_level])
+    if consistency_level in ["ANY", "EACH_QUORUM"]:  # Not supported for reads
+        cluster_r = Cluster(login_host,
+                            port=login_port,
+                            auth_provider=auth_provider,
+                            ssl_context=ssl_context)  # Will be LOCAL_ONE
+    else:
+        cluster_r = Cluster(login_host,
+                            port=login_port,
+                            auth_provider=auth_provider,
+                            ssl_context=ssl_context,
+                            execution_profiles={EXEC_PROFILE_DEFAULT: profile})
+    if consistency_level in ["SERIAL", "LOCAL_SERIAL"]:  # Not supported for writes
+        cluster_w = Cluster(login_host,
+                            port=login_port,
+                            auth_provider=auth_provider,
+                            ssl_context=ssl_context)  # Will be LOCAL_ONE
+    else:
+        cluster_w = Cluster(login_host,
+                            port=login_port,
+                            auth_provider=auth_provider,
+                            ssl_context=ssl_context,
+                            execution_profiles={EXEC_PROFILE_DEFAULT: profile})
+    return (cluster_r, cluster_w)  # Return a tuple of sessions for C* (read, write)
+
 ############################################
+
 
 def main():
     module = AnsibleModule(
@@ -586,7 +632,11 @@ def main():
             keyspace_permissions=dict(type='dict', no_log=False),
             roles=dict(type='list', elements='str'),
             update_password=dict(type='bool', default=False),
-            debug=dict(type='bool', default=False)),
+            debug=dict(type='bool', default=False),
+            consistency_level=dict(type='str',
+                                   required=False,
+                                   default="LOCAL_ONE",
+                                   choices=ConsistencyLevel.name_to_value.keys())),
         supports_check_mode=True
     )
 
@@ -613,6 +663,7 @@ def main():
     keyspace_permissions = module.params['keyspace_permissions']
     roles = module.params['roles']
     debug = module.params['debug']
+    consistency_level = module.params['consistency_level']
 
     if HAS_SSL_LIBRARY is False and ssl is True:
         msg = ("This module requires the SSL python"
@@ -660,11 +711,16 @@ def main():
             ssl_context.verify_mode = getattr(ssl_lib, module.params['ssl_cert_reqs'])
             if ssl_cert_reqs in ('CERT_REQUIRED', 'CERT_OPTIONAL'):
                 ssl_context.load_verify_locations(module.params['ssl_ca_certs'])
-        cluster = Cluster(login_host,
-                          port=login_port,
-                          auth_provider=auth_provider,
-                          ssl_context=ssl_context)
-        session = cluster.connect()
+
+        sessions = get_read_and_write_sessions(login_host,
+                                               login_port,
+                                               auth_provider,
+                                               ssl_context,
+                                               consistency_level)
+
+        session_r = sessions[0].connect()
+        session_w = sessions[1].connect()
+
     except AuthenticationFailed as auth_failed:
         module.fail_json(msg="Authentication failed: {0}".format(auth_failed))
     except Exception as excep:
@@ -674,11 +730,11 @@ def main():
 
     try:
         if debug:
-            result['role_exists'] = role_exists(session, role)
+            result['role_exists'] = role_exists(session_r, role)
         if login:  # Standard user
-            if role_exists(session, role):
+            if role_exists(session_r, role):
                 # Has the role changed?
-                role_properties = get_role_properties(session,
+                role_properties = get_role_properties(session_r,
                                                       role)
                 has_role_changed = is_role_changed(role_properties,
                                                    super_user,
@@ -699,7 +755,6 @@ def main():
                         # create the role
                         if has_role_changed:
                             cql = create_alter_role(module,
-                                                    session,
                                                     role,
                                                     super_user,
                                                     login,
@@ -707,12 +762,12 @@ def main():
                                                     options,
                                                     data_centres,
                                                     has_role_changed)
-                            session .execute(cql)
+                            session_w.execute(cql)
                             result['changed'] = True
                             result['cql'] = cql
                     elif state == "absent":
-                        cql = drop_role(session, role)
-                        session.execute(cql)
+                        cql = drop_role(role)
+                        session_w.execute(cql)
                         result['changed'] = True
                         result['cql'] = cql
             else:
@@ -724,7 +779,6 @@ def main():
                 else:
                     if state == "present":
                         cql = create_alter_role(module,
-                                                session,
                                                 role,
                                                 super_user,
                                                 login,
@@ -732,34 +786,33 @@ def main():
                                                 options,
                                                 data_centres,
                                                 False)
-                        session .execute(cql)
+                        session_w.execute(cql)
                         result['changed'] = True
                         result['cql'] = cql
                     elif state == "absent":
                         result['changed'] = False
         else:  # This is a role
-            if role_exists(session, role):
+            if role_exists(session_r, role):
                 if module.check_mode:
                     if state == "present":
                         result['changed'] = False
                     elif state == "absent":
-                        cql = drop_role(session, role)
-                        session.execute(cql)
+                        cql = drop_role(role)
+                        session_w.execute(cql)
                         result['changed'] = True
                         result['cql'] = cql
                 else:
                     if state == "present":
                         result['changed'] = False
                     elif state == "absent":
-                        cql = drop_role(session, role)
-                        session.execute(cql)
+                        cql = drop_role(role)
+                        session_w.execute(cql)
                         result['changed'] = True
                         result['cql'] = cql
             else:
                 if module.check_mode:
                     if state == "present":
                         cql = create_alter_role(module,
-                                                session,
                                                 role,
                                                 super_user,
                                                 login,
@@ -767,36 +820,36 @@ def main():
                                                 options,
                                                 data_centres,
                                                 has_role_changed)
-                        session .execute(cql)
+                        session_w.execute(cql)
                         result['changed'] = True
                         result['cql'] = cql
                     elif state == "absent":
                         result['changed'] = False
                 else:
                     if state == "present":
-                        cql = create_role(session, role)
-                        session.execute(cql)
+                        cql = create_role(role)
+                        session_w.execute(cql)
                         result['changed'] = True
                         result['cql'] = cql
                     elif state == "absent":
                         result['changed'] = False
 
         if state == "present":
-            cql_dict = process_role_permissions(session,
+            cql_dict = process_role_permissions(session_r,
                                                 keyspace_permissions,
                                                 role)
             if len(cql_dict['grant']) > 0 or len(cql_dict['revoke']) > 0:
                 for r in cql_dict['revoke']:
                     if not module.check_mode:
-                        session.execute(r)
+                        session_w.execute(r)
                 for g in cql_dict['grant']:
                     if not module.check_mode:
-                        session.execute(g)
+                        session_w.execute(g)
                 result['permissions'] = cql_dict
                 result['changed'] = True
 
             # Process roles
-            roles_dict = build_role_grants(session,
+            roles_dict = build_role_grants(session_r,
                                            role,
                                            roles)
 
@@ -804,10 +857,10 @@ def main():
                 result['roles'] = roles_dict
                 for r in roles_dict['revoke']:
                     if not module.check_mode:
-                        session.execute(r)
+                        session_w.execute(r)
                 for g in roles_dict['grant']:
                     if not module.check_mode:
-                        session.execute(g)
+                        session_w.execute(g)
 
                 result['changed'] = True
 

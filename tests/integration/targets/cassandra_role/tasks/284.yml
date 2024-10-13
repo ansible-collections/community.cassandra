@@ -1,0 +1,115 @@
+- name: Create a test role - LOCAL_ONE consistency
+  community.cassandra.cassandra_role:
+    name: local_role
+    password: p4ssw0rd
+    login: true
+    keyspace_permissions:
+      test_keyspace:
+        - "ALL PERMISSIONS"
+    state: present
+    login_user: "{{ cassandra_admin_user }}"
+    login_password: "{{ cassandra_admin_pwd }}"
+    debug: yes
+    consistency_level: "LOCAL_ONE"
+  register: local
+
+- assert:
+    that:
+      - local.changed
+
+- name: Create a test role - ANY consistency
+  community.cassandra.cassandra_role:
+    name: any_role
+    password: p4ssw0rd
+    login: true
+    keyspace_permissions:
+      test_keyspace:
+        - "ALL PERMISSIONS"
+    state: present
+    login_user: "{{ cassandra_admin_user }}"
+    login_password: "{{ cassandra_admin_pwd }}"
+    debug: yes
+    consistency_level: "ANY"
+  register: any
+
+- assert:
+    that:
+      - any.changed
+
+- name: Create a test role - QUORUM consistency
+  community.cassandra.cassandra_role:
+    name: quorum_role
+    password: p4ssw0rd
+    login: true
+    keyspace_permissions:
+      test_keyspace:
+        - "ALL PERMISSIONS"
+    state: present
+    login_user: "{{ cassandra_admin_user }}"
+    login_password: "{{ cassandra_admin_pwd }}"
+    debug: yes
+    consistency_level: "QUORUM"
+  register: quorum
+
+- assert:
+    that:
+      - quorum.changed
+
+- name: Create a test role - SERIAL consistency
+  community.cassandra.cassandra_role:
+    name: serial_role
+    password: p4ssw0rd
+    login: true
+    keyspace_permissions:
+      test_keyspace:
+        - "ALL PERMISSIONS"
+    state: present
+    login_user: "{{ cassandra_admin_user }}"
+    login_password: "{{ cassandra_admin_pwd }}"
+    debug: yes
+    consistency_level: "SERIAL"
+  register: serial
+
+- assert:
+    that:
+      - serial.changed
+
+- name: Create a test role - LOCAL_QUORUM consistency
+  community.cassandra.cassandra_role:
+    name: local_quorum_role
+    password: p4ssw0rd
+    login: true
+    keyspace_permissions:
+      test_keyspace:
+        - "ALL PERMISSIONS"
+    state: present
+    login_user: "{{ cassandra_admin_user }}"
+    login_password: "{{ cassandra_admin_pwd }}"
+    debug: yes
+    consistency_level: "LOCAL_QUORUM"
+  register: local_quorum
+
+- assert:
+    that:
+      - local_quorum.changed
+
+- name: Create a test role - TWO consistency
+  community.cassandra.cassandra_role:
+    name: two_role
+    password: p4ssw0rd
+    login: true
+    keyspace_permissions:
+      test_keyspace:
+        - "ALL PERMISSIONS"
+    state: present
+    login_user: "{{ cassandra_admin_user }}"
+    login_password: "{{ cassandra_admin_pwd }}"
+    debug: yes
+    consistency_level: "TWO"
+  register: two
+  ignore_errors: true
+
+- assert:
+    that:
+      - two.failed
+      - "'Cannot achieve consistency level TWO' in two.msg"

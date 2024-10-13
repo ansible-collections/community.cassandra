@@ -60,6 +60,26 @@ These roles prepare servers with Debian-based and RHEL-based distributions to ru
 - `cassandra_upgradesstables`- Upgrade SSTables which are not on the current Cassandra version.
 - `cassandra_verify`- Checks the data checksum for one or more tables.
 
+## Module support for Consistency Level
+
+The pure-python modules, currently cassandra_role, cassandra_keyspace & cassandra_table all have a consistency_level parameter, through which the consistency level can be changed. Not all consistency levels are supported by read and write. The table below summarizes this.
+
+| **Consistency Level**   | **Read** | **Write** |
+|-------------------------|----------|-----------|
+| **ANY**                 | No       | Yes       |
+| **ONE**                 | Yes      | Yes       |
+| **TWO**                 | Yes      | Yes       |
+| **THREE**               | Yes      | Yes       |
+| **QUORUM**              | Yes      | Yes       |
+| **ALL**                 | Yes      | Yes       |
+| **LOCAL_ONE**           | Yes      | Yes       |
+| **LOCAL_QUORUM**        | Yes      | Yes       |
+| **EACH_QUORUM**         | No       | Yes       |
+| **SERIAL**              | Yes      | No        |
+| **LOCAL_SERIAL**        | Yes      | No        |
+
+If the chosen consistency level is not supported, by either read or write, then the default *LOCAL_ONE* is used.
+
 ## Supported Cassandra Versions
 
 * 4.0.X

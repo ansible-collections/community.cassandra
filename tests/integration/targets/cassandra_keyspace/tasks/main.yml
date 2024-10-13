@@ -569,3 +569,5 @@
           - "'\\'london\\': \\'3\\'' in mykeyspace.stdout"
           - "'\\'new_york\\': \\'3\\'' in mykeyspace.stdout"
           - "multiple_dcs.changed == True"
+
+    - import_tasks: 284.yml
