@@ -98,3 +98,8 @@ releases:
       release_summary: Maintenance release. Version bumped to get the auto-release running.
       minor_changes:
         - None
+  1.4.0:
+    changes:
+      release_summary: Maintenance release.
+    minor_changes:
+      - 287 - Adds the consistency_level parameter to the cassandra_role, cassandra_keyspace and cassandra_table modules.
