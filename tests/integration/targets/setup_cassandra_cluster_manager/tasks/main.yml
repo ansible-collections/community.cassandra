@@ -33,6 +33,8 @@
 - name: Install required_packages
   package:
     name: "{{ required_packages }}"
+  retries: 5
+  delay: 5
 
 - name: Ensure Cassandra service from setup_cassandra isn't running
   service:
@@ -45,22 +47,30 @@
   package:
     name: sudo
     state: present
+  retries: 5
+  delay: 5
 
 - name: Install OpenJDK package
   yum:
     name: "{{ openjdk }}"
     state: present
+  retries: 5
+  delay: 5
   when: ansible_os_family == 'RedHat'
 
 - name: Run the equivalent of "apt-get update"
   apt:
     update_cache: yes
+  retries: 5
+  delay: 5
   when: ansible_os_family == 'Debian'
 
 - name: Install required pip packages
   pip:
     name: "{{ pip_packages }}"
     state: present
+  retries: 5
+  delay: 5
 
 - name: Download ant package and unarchive
   unarchive:
@@ -68,6 +78,8 @@
     dest: /usr/local
     remote_src: yes
     validate_certs: False
+  retries: 5
+  delay: 5
 
 - name: Create a symbolic link for ant
   file:
@@ -75,7 +87,7 @@
     src: "/usr/local/apache-ant-{{ ant_version }}/"
     dest: /usr/local/ant
 
-- name:
+- name: "Adds ant script"
   blockinfile:
     path: /etc/profile.d/ant.sh
     marker: "#<!-- {mark} ANSIBLE MANAGED BLOCK -->"
@@ -128,6 +140,8 @@
   pip:
     name: ccm
     state: present
+  retries: 5
+  delay: 5
 
 - ansible.builtin.shell: find /usr -name ccm -ls
 
@@ -170,6 +184,8 @@
     CCM_CONFIG_DIR: "/home/cassandra/config"
     CASSANDRA_HOME: "/home/cassandra"
     PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ant/bin
+  retries: 5
+  delay: 5
 
 #- name: Add nodes to the Cassandra cluster
 #  ansible.builtin.shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd }} populate -n {{ cassandra_nodes }}\""
