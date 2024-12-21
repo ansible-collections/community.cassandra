@@ -78,7 +78,7 @@
     dest: /usr/local
     remote_src: yes
     validate_certs: False
-  retries: 5
+  retries: 10
   delay: 5
 
 - name: Create a symbolic link for ant
