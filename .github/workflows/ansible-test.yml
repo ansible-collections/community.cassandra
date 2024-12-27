@@ -88,7 +88,7 @@ jobs:
             ansible_version: "devel"
         cassandra_version:
           - package_version: "311x"
-            tar_version: "3.11.11"
+            tar_version: "3.11.17"
         test_scenario:
           - docker_image: "ubuntu2204"
             python_version: "3.10"
@@ -157,7 +157,7 @@ jobs:
             ansible_version: "devel"
         cassandra_version:
           - package_version: "40x"
-            tar_version: "4.0.5"
+            tar_version: "4.0.9"
         test_scenario:
           #- docker_image: centos7
           #  python_version: "2.7"
@@ -226,7 +226,7 @@ jobs:
             ansible_version: "devel"
         cassandra_version:
           - package_version: "41x"
-            tar_version: "4.1.4"
+            tar_version: "4.1.7"
         test_scenario:
           #- docker_image: centos7
           #  python_version: "2.7"
