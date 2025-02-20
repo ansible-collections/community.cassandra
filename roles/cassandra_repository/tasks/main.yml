@@ -26,9 +26,9 @@
 
 
 - name: Add apt key for Cassandra repository (Debian & Ubuntu)
-  apt_key:
-    url: https://downloads.apache.org/cassandra/KEYS
-    state: present
+  ansible.builtin.shell: curl -o /etc/apt/keyrings/apache-cassandra.asc https://downloads.apache.org/cassandra/KEYS
+  args:
+    creates: /etc/apt/keyrings/apache-cassandra.asc
   retries: 3
   when: ansible_os_family == "Debian"
 
