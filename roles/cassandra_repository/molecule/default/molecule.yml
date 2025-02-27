@@ -15,6 +15,8 @@ platforms:
     image: ubuntu:16.04
   - name: ubuntu_18
     image: ubuntu:18.04
+  - name: ubuntu_20
+    image: ubuntu:20.04
   - name: debian_buster
     image: debian:buster
   #- name: debian_stretch
