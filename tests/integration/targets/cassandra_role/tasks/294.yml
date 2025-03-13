@@ -1,3 +1,10 @@
+- name: Create keyspace for tests
+  cassandra_keyspace:
+    name: mydummy
+    state: present
+    login_user: "{{ cassandra_admin_user }}"
+    login_password: "{{ cassandra_admin_pwd }}"
+
 - name: Create a user with specific permissions for specific keyspaces
   community.cassandra.cassandra_role:
     name: rhys
