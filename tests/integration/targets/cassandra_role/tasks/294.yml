@@ -1,9 +1,12 @@
-- name: Create keyspace for tests
+- name: Create keyspaces for tests
   cassandra_keyspace:
-    name: mydummy
+    name: "{{ item }}"
     state: present
     login_user: "{{ cassandra_admin_user }}"
     login_password: "{{ cassandra_admin_pwd }}"
+  loop:
+    - mykeyspace
+    - mydummy
 
 - name: Create a user with specific permissions for specific keyspaces
   community.cassandra.cassandra_role:
