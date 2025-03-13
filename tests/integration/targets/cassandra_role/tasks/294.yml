@@ -10,6 +10,5 @@
         - "ALL PERMISSIONS" # Same as GRANT ALL PERMISSIONS ON mykeyspace TO rhys;
       mydummy:
         - "SELECT"
-        - "EXECUTE" # Same as GRANT SELECT, EXECUTE ON mydummy TO rhys;
       all_keyspaces:
         - "SELECT" # Same as GRANT SELECT ON ALL KEYSPACES TO rhys;
