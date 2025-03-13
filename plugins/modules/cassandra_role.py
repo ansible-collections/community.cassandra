@@ -173,7 +173,6 @@ EXAMPLES = r'''
         - "ALL PERMISSIONS" # Same as GRANT ALL PERMISSIONS ON mykeyspace TO rhys;
       mydummy:
         - "SELECT"
-        - "EXECUTE" # Same as GRANT SELECT, EXECUTE ON mydummy TO rhys;
       all_keyspaces:
         - "SELECT" # Same as GRANT SELECT ON ALL KEYSPACES TO rhys;
 '''
@@ -629,7 +628,7 @@ def main():
             login=dict(type='bool', default=True),
             options=dict(type='dict'),
             data_centres=dict(type='dict', aliases=['data_centers']),
-            keyspace_permissions=dict(type='dict', no_log=False),
+            keyspace_permissions=dict(type='dict', no_log=False, aliases=['permissions']),
             roles=dict(type='list', elements='str'),
             update_password=dict(type='bool', default=False),
             debug=dict(type='bool', default=False),
