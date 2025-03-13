@@ -5,6 +5,8 @@
     update_password: true
     state: present
     login: yes
+    login_user: "{{ cassandra_admin_user }}"
+    login_password: "{{ cassandra_admin_pwd }}"
     permissions:
       mykeyspace:
         - "ALL PERMISSIONS" # Same as GRANT ALL PERMISSIONS ON mykeyspace TO rhys;
