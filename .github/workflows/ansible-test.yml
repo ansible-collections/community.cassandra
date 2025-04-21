@@ -10,7 +10,7 @@ env:
 
 jobs:
   sanity:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: ansible_collections/community/cassandra
@@ -46,7 +46,7 @@ jobs:
         run: ansible-test sanity --docker -v --color --python 3.9
 
   integration_matrix:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: ansible_collections/community/cassandra
@@ -73,7 +73,7 @@ jobs:
 
   integration_311x:
     needs: integration_matrix
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: ansible_collections/community/cassandra
@@ -142,7 +142,7 @@ jobs:
 
   integration_40x:
     needs: integration_matrix
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: ansible_collections/community/cassandra
@@ -211,7 +211,7 @@ jobs:
 
   integration_41x:
     needs: integration_matrix
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: ansible_collections/community/cassandra
