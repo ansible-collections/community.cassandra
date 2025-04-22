@@ -196,7 +196,7 @@
 
 - name: Check that we can iterate over the results
   debug:
-    var: "{{ item }}"
+    var: item # No quotes or ir causes an "is not a string and conversion is not allowed" error
   with_items:
     - "{{ cqlsh.transformed_output }}"
 
@@ -219,7 +219,7 @@
     execute: "INVALID CQL CMD"
     transform: "raw"
   register: cqlsh
-  ignore_errors: yes
+  ignore_errors: true
 
 - assert:
     that:
