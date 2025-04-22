@@ -72,9 +72,8 @@ jobs:
           timeout_minutes: 3
           max_attempts: 3
           command: |
-            export pyv=$(python -c 'from platform import python_version; print(python_version()[:3])')
             cd ansible_collections/community/cassandra
-            pip install --requirement requirements-${pyv}.txt
+            pip install --requirement requirements.txt
 
       - name: Install ansible.posix
         uses: nick-invision/retry@v3
