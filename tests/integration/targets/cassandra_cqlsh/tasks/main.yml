@@ -136,7 +136,7 @@
 
 - name: Check that we can iterate over the results
   debug:
-    var: "{{ item }}"
+    var: item
   with_items:
     - "{{ cqlsh.transformed_output }}"
 
