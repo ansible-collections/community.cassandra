@@ -41,7 +41,7 @@
     name: "{{ cassandra_service }}"
     enabled: "yes"
     state: "stopped"
-  ignore_errors: yes  # Might not exist
+  ignore_errors: true  # Might not exist
 
 - name: Install sudo
   package:
@@ -60,7 +60,7 @@
 
 - name: Run the equivalent of "apt-get update"
   apt:
-    update_cache: yes
+    update_cache: true
   retries: 5
   delay: 5
   when: ansible_os_family == 'Debian'
@@ -94,7 +94,7 @@
     block: |
       export ANT_HOME=/usr/local/ant
       export PATH=${PATH}:${ANT_HOME}/bin
-    create: yes
+    create: true
 
 - name: Check ant setup
   ansible.builtin.shell: source /etc/profile.d/ant.sh && echo $ANT_HOME
@@ -123,7 +123,7 @@
     name: cassandra
     state: present
     shell: /bin/bash
-    create_home: yes
+    create_home: true
 
 - name: Ensure dirs exist
   file:
@@ -150,7 +150,7 @@
     which ccm && which ant
   environment:
     PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ant/bin
-  ignore_errors: yes
+  ignore_errors: true
 
 - set_fact:
     ccm_cmd: /usr/local/bin/ccm
@@ -158,7 +158,7 @@
 - name: Test ccm executable
   ansible.builtin.shell:  /usr/local/bin/ccm --help
   register: ccm
-  ignore_errors: yes
+  ignore_errors: true
 
 - set_fact:
     ccm_cmd: /usr/bin/ccm
@@ -173,7 +173,7 @@
     CCM_CONFIG_DIR: "/home/cassandra/config"
     CASSANDRA_HOME: "/home/cassandra"
     PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ant/bin
-  ignore_errors: yes
+  ignore_errors: true
 
 - name: Install Cassandra via ccm tool
   ansible.builtin.shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd }} create test -v {{ cassandra_version }} > /dev/null\""
@@ -215,7 +215,7 @@
     regexp: "^endpoint_snitch"
     line: "endpoint_snitch: GossipingPropertyFileSnitch"
   with_items: "{{ cassandra_nodes }}"
-  no_log: yes
+  no_log: true
 
 - name: Update rack info
   copy:
