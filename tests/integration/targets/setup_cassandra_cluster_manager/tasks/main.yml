@@ -231,18 +231,18 @@
 
 - name: Get node jvm config info
   shell: |
-    "sudo -E -u cassandra bash -c '{{ ccm_cmd }} {{ item.node }} env' | grep JVM_EXTRA_OPTS"
+    sudo -E -u cassandra bash -c '{{ ccm_cmd }} {{ item.node }} env' | grep JVM_EXTRA_OPTS
   with_items: "{{ cassandra_nodes }}"
   ignore_errors: true
 
 - name: Assume the start of one node is failing due to a memory issue
   shell: |
-    'sudo -E -u cassandra bash -c \"{{ ccm_cmd }} {{ item.node }} updateconf 'jvm.options: -Xms256M -Xmx512M'\"'
+    sudo -E -u cassandra bash -c '{{ ccm_cmd }} {{ item.node }} updateconf "jvm.options: -Xms256M -Xmx512M"'
   with_items: "{{ cassandra_nodes }}"
 
 - name: Get node jvm config info
   shell: |
-    "sudo -E -u cassandra bash -c '{{ ccm_cmd }} {{ item.node }} env' | grep JVM_EXTRA_OPTS"
+    sudo -E -u cassandra bash -c '{{ ccm_cmd }} {{ item.node }} env' | grep JVM_EXTRA_OPTS
   with_items: "{{ cassandra_nodes }}"
   ignore_errors: true
 
