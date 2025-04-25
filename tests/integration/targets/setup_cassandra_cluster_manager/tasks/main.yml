@@ -242,7 +242,7 @@
 
 - name: Get node jvm config info
   shell: |
-    "sudo -E -u cassandra bash -c '{{ ccm_cmd }} -c test {{ item }} env | grep JVM_EXTRA_OPTS"
+    "sudo -E -u cassandra bash -c '{{ ccm_cmd }} -c test {{ item.node }} env | grep JVM_EXTRA_OPTS"
   with_items: "{{ cassandra_nodes }}"
   ignore_errors: true
 
