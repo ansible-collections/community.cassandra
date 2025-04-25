@@ -237,7 +237,7 @@
 
 - name: Assume the start of one node is failing due to a memory issue
   shell: |
-    ccm {{ item }} updateconf 'jvm.options: -Xms256M -Xmx512M'
+    ccm {{ item.node }} updateconf 'jvm.options: -Xms256M -Xmx512M'
   with_items: "{{ cassandra_nodes }}"
 
 - name: Get node jvm config info again
