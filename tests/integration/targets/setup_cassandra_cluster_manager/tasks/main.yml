@@ -231,7 +231,7 @@
 
 - name: Get node jvm config info
   shell: |
-    ccm {{ item }} env | grep JVM_EXTRA_OPTS
+    ccm {{ item }} env | grep JVM_EXTRA_OPTS && true
   with_items: "{{ cassandra_nodes }}"
 
 - name: Assume the start of one node is failing due to a memory issue
@@ -241,7 +241,7 @@
 
 - name: Get node jvm config info again
   shell: |
-    ccm {{ item }} env | grep JVM_EXTRA_OPTS
+    ccm {{ item }} env | grep JVM_EXTRA_OPTS && true
   with_items: "{{ cassandra_nodes }}"
 
 - name: Start the ccm cluster
