@@ -229,6 +229,21 @@
     cassandra_node_delay: 120
   when: ansible_os_family == "RedHat"
 
+- name: Get node jvm config info
+  shell: |
+    ccm {{ item }} env | grep JVM_EXTRA_OPTS
+  with_items: "{{ cassandra_nodes }}"
+
+- name: Assume the start of one node is failing due to a memory issue
+  shell: |
+    ccm {{ item }} updateconf 'jvm.options: -Xms256M -Xmx512M'
+  with_items: "{{ cassandra_nodes }}"
+
+- name: Get node jvm config info again
+  shell: |
+    ccm {{ item }} env | grep JVM_EXTRA_OPTS
+  with_items: "{{ cassandra_nodes }}"
+
 - name: Start the ccm cluster
   ansible.builtin.shell: sudo -E -u cassandra bash -c "{{ ccm_cmd }} start  --root"
   become_user: cassandra
