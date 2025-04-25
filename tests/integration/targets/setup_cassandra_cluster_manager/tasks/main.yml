@@ -231,8 +231,9 @@
 
 - name: Get node jvm config info
   shell: |
-    ccm {{ item }} env | grep JVM_EXTRA_OPTS && true
+    ccm {{ item }} env | grep JVM_EXTRA_OPTS
   with_items: "{{ cassandra_nodes }}"
+  ignore_errors: true
 
 - name: Assume the start of one node is failing due to a memory issue
   shell: |
@@ -241,8 +242,9 @@
 
 - name: Get node jvm config info again
   shell: |
-    ccm {{ item }} env | grep JVM_EXTRA_OPTS && true
+    ccm {{ item }} env | grep JVM_EXTRA_OPTS
   with_items: "{{ cassandra_nodes }}"
+  ignore_errors: true
 
 - name: Start the ccm cluster
   ansible.builtin.shell: sudo -E -u cassandra bash -c "{{ ccm_cmd }} start  --root"
