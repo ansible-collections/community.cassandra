@@ -262,7 +262,7 @@
   ignore_errors: true
 
 - name: Start the ccm cluster
-  ansible.builtin.shell: sudo -E -u cassandra bash -c "{{ ccm_cmd }} start  --root"
+  ansible.builtin.shell: sudo -E -u cassandra bash -c "{{ ccm_cmd }} start"
   become_user: cassandra
   args:
     chdir: /home/cassandra
