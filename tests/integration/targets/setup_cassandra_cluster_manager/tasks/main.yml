@@ -57,23 +57,6 @@
   retries: 5
   delay: 5
 
-- name: Set JAVA_HOME for RedHat-based systems
-  ansible.builtin.shell: |
-    echo "export JAVA_HOME=/usr/lib/jvm/java-11-openjdk" >> /etc/profile.d/java.sh
-  when: ansible_os_family == 'RedHat'
-
-- name: Set JAVA_HOME for Debian-based systems
-  ansible.builtin.shell: |
-    echo "export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64" >> /etc/profile.d/java.sh
-  when: ansible_os_family == 'Debian'
-
-- name: Ensure java.sh file has correct permissions
-  ansible.builtin.file:
-    path: /etc/profile.d/java.sh
-    mode: '0644'
-    owner: root
-    group: root
-
 - name: Run the equivalent of "apt-get update"
   apt:
     update_cache: true
@@ -212,6 +195,7 @@
     CCM_CONFIG_DIR: "/home/cassandra/config"
     CASSANDRA_HOME: "/home/cassandra"
     PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ant/bin
+    JAVA_HOME: "{{ (ansible_os_family == 'RedHat') | ternary('/usr/lib/jvm/java-11-openjdk', '/usr/lib/jvm/java-11-openjdk-amd64') }}"
   ignore_errors: true
 
 - name: Install Cassandra via ccm tool
@@ -223,6 +207,7 @@
     CCM_CONFIG_DIR: "/home/cassandra/config"
     CASSANDRA_HOME: "/home/cassandra"
     PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ant/bin
+    JAVA_HOME: "{{ (ansible_os_family == 'RedHat') | ternary('/usr/lib/jvm/java-11-openjdk', '/usr/lib/jvm/java-11-openjdk-amd64') }}"
   retries: 5
   delay: 5
 
@@ -246,6 +231,7 @@
     CCM_CONFIG_DIR: "/home/cassandra/config"
     CASSANDRA_HOME: "/home/cassandra"
     PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ant
+    JAVA_HOME: "{{ (ansible_os_family == 'RedHat') | ternary('/usr/lib/jvm/java-11-openjdk', '/usr/lib/jvm/java-11-openjdk-amd64') }}"
   with_items: "{{ cassandra_nodes }}"
 
 - name: Update endpoint_snitch
@@ -275,7 +261,8 @@
     chdir: /home/cassandra
   environment:
     CCM_CONFIG_DIR: "/home/cassandra/config"
-    CASSANDRA_HOME: "/home/cassandra"  
+    CASSANDRA_HOME: "/home/cassandra"
+    JAVA_HOME: "{{ (ansible_os_family == 'RedHat') | ternary('/usr/lib/jvm/java-11-openjdk', '/usr/lib/jvm/java-11-openjdk-amd64') }}" 
   with_items: "{{ cassandra_nodes }}"
   ignore_errors: true
 
@@ -287,6 +274,7 @@
   environment:
     CCM_CONFIG_DIR: "/home/cassandra/config"
     CASSANDRA_HOME: "/home/cassandra"
+    JAVA_HOME: "{{ (ansible_os_family == 'RedHat') | ternary('/usr/lib/jvm/java-11-openjdk', '/usr/lib/jvm/java-11-openjdk-amd64') }}"
   with_items: "{{ cassandra_nodes }}"
 
 - name: Get node jvm config info
@@ -297,6 +285,7 @@
   environment:
     CCM_CONFIG_DIR: "/home/cassandra/config"
     CASSANDRA_HOME: "/home/cassandra"
+    JAVA_HOME: "{{ (ansible_os_family == 'RedHat') | ternary('/usr/lib/jvm/java-11-openjdk', '/usr/lib/jvm/java-11-openjdk-amd64') }}"
   with_items: "{{ cassandra_nodes }}"
   ignore_errors: true
 
@@ -309,6 +298,7 @@
     CCM_CONFIG_DIR: "/home/cassandra/config"
     CASSANDRA_HOME: "/home/cassandra"
     PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ant/bin
+    JAVA_HOME: "{{ (ansible_os_family == 'RedHat') | ternary('/usr/lib/jvm/java-11-openjdk', '/usr/lib/jvm/java-11-openjdk-amd64') }}"
     CCM_CLUSTER_START_DEFAULT_TIMEOUT: 600
 
 - name: Get cluster status
@@ -321,6 +311,7 @@
     CCM_CONFIG_DIR: "/home/cassandra/config"
     CASSANDRA_HOME: "/home/cassandra"
     PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ant/bin
+    JAVA_HOME: "{{ (ansible_os_family == 'RedHat') | ternary('/usr/lib/jvm/java-11-openjdk', '/usr/lib/jvm/java-11-openjdk-amd64') }}"
 
 - debug:
     msg: "{{ cluster_status.stdout }}"
