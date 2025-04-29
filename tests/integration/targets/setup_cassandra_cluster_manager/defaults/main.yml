@@ -1,4 +1,4 @@
-openjdk: java-1.8.0-openjdk
+openjdk: java-11-openjdk-devel
 pip_packages:
   - pyYaml
   - six
