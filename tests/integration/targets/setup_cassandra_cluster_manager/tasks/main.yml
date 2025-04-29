@@ -302,7 +302,7 @@
     CCM_CLUSTER_START_DEFAULT_TIMEOUT: "600"
   ignore_errors: true # tmp debug
 
-- shell: cat /home/cassandra/config/test/marlow11/logs/*
+- shell: ls -lh /home/cassandra/config/ && cat /home/cassandra/config/test/marlow11/logs/*
 
 - name: Get cluster status
   ansible.builtin.shell: sudo -E -u cassandra bash -c "{{ ccm_cmd }} status"
