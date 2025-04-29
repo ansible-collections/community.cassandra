@@ -56,7 +56,7 @@
     state: present
   retries: 5
   delay: 5
-  when: ansible_os_family == 'RedHat'
+  #when: ansible_os_family == 'RedHat'
 
 - name: Run the equivalent of "apt-get update"
   apt:
