@@ -300,6 +300,9 @@
     PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ant/bin
     JAVA_HOME: "{{ (ansible_os_family == 'RedHat') | ternary('/usr/lib/jvm/java-11-openjdk', '/usr/lib/jvm/java-11-openjdk-amd64') }}"
     CCM_CLUSTER_START_DEFAULT_TIMEOUT: 600
+  ignore_errors: true # tmp debug
+
+- shell: cat /home/cassandra/.ccm/test-cluster/node1/logs/*
 
 - name: Get cluster status
   ansible.builtin.shell: sudo -E -u cassandra bash -c "{{ ccm_cmd }} status"
