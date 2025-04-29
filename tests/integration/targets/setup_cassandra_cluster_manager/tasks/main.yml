@@ -143,13 +143,20 @@
 #  retries: 5
 #  delay: 5
 
+- name: symlink python3
+  ansible.builtin.file:
+    src: /usr/bin/python3
+    dest: /usr/bin/python
+    state: link
+  become: true
+
 - name: Clone Apache Cassandra CCM repository
   ansible.builtin.git:
     repo: https://github.com/apache/cassandra-ccm.git
     dest: "/opt/cassandra-ccm"
     version: "trunk"
-    update: yes
-    force: yes
+    update: true
+    force: true
   retries: 5
   delay: 5
 
