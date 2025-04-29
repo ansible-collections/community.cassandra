@@ -57,6 +57,23 @@
   retries: 5
   delay: 5
 
+- name: Set JAVA_HOME for RedHat-based systems
+  ansible.builtin.shell: |
+    echo "export JAVA_HOME=/usr/lib/jvm/java-11-openjdk" >> /etc/profile.d/java.sh
+  when: ansible_os_family == 'RedHat'
+
+- name: Set JAVA_HOME for Debian-based systems
+  ansible.builtin.shell: |
+    echo "export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64" >> /etc/profile.d/java.sh
+  when: ansible_os_family == 'Debian'
+
+- name: Ensure java.sh file has correct permissions
+  ansible.builtin.file:
+    path: /etc/profile.d/java.sh
+    mode: '0644'
+    owner: root
+    group: root
+
 - name: Run the equivalent of "apt-get update"
   apt:
     update_cache: true
