@@ -136,12 +136,28 @@
     - /home/cassandra
     - /home/cassandra/config
 
-- name: Install ccm via pip
-  pip:
-    name: ccm
-    state: present
+#- name: Install ccm via pip
+#  pip:
+#    name: ccm
+#    state: present
+#  retries: 5
+#  delay: 5
+
+- name: Clone Apache Cassandra CCM repository
+  ansible.builtin.git:
+    repo: https://github.com/apache/cassandra-ccm.git
+    dest: "/opt/cassandra-ccm"
+    version: "trunk"
+    update: yes
+    force: yes
   retries: 5
   delay: 5
+
+- name: Install ccm via git
+  ansible.builtin.shell: sudo ./setup.py install
+  args:
+    chdir: /opt/cassandra-ccm
+    creates: /usr/local/bin/ccm
 
 - ansible.builtin.shell: find /usr -name ccm -ls
 
