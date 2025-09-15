@@ -144,7 +144,7 @@
     data_centres:
       london: 3
       paris: 1
-      new_york: 2
+      newyork: 2
   register: multiple_dcs
 
 - name: Get output of DESC KEYSPACE mykeyspace 2
@@ -155,7 +155,7 @@
   assert:
     that:
       - "'CREATE KEYSPACE mykeyspace WITH replication' in mykeyspace.stdout"
-      - "'\\'new_york\\': \\'2\\'' in mykeyspace.stdout"
+      - "'\\'newyork\\': \\'2\\'' in mykeyspace.stdout"
       - "'\\'london\\': \\'3\\'' in mykeyspace.stdout"
       - "'\\'paris\\': \\'1\\'' in mykeyspace.stdout"
       - "multiple_dcs.changed == True"
@@ -167,7 +167,7 @@
     data_centres:
       london: 3
       paris: 1
-      new_york: 2
+      newyork: 2
   register: multiple_dcs
 
 - name: Assert multi-dc keyspace not changed
@@ -232,7 +232,7 @@
     data_centres:
       london: 2
       paris: 1
-      new_york: 1
+      newyork: 1
   register: rhys
 
 - name: Get output of DESC KEYSPACE rhys
@@ -244,7 +244,7 @@
     that:
       - "rhys.changed == True"
       - "'\\'london\\': \\'2\\'' in mykeyspace.stdout"
-      - "'\\'new_york\\': \\'1\\'' in mykeyspace.stdout"
+      - "'\\'newyork\\': \\'1\\'' in mykeyspace.stdout"
       - "'\\'paris\\': \\'1\\'' in mykeyspace.stdout"
       - "'CREATE KEYSPACE rhys WITH replication = {\\'class\\': \\'NetworkTopologyStrategy\\'' in mykeyspace.stdout"
 
@@ -382,7 +382,7 @@
           london: 3
           zurich: 3
           tokyo: 1
-          new_york: 2
+          newyork: 2
       register: multiple_dcs
 
     - name: Get output of DESC KEYSPACE multidc_keyspace
@@ -396,7 +396,7 @@
           - "'\\'london\\': \\'3\\'' in mykeyspace.stdout"
           - "'\\'zurich\\': \\'3\\'' in mykeyspace.stdout"
           - "'\\'tokyo\\': \\'1\\'' in mykeyspace.stdout"
-          - "'\\'new_york\\': \\'2\\'' in mykeyspace.stdout"
+          - "'\\'newyork\\': \\'2\\'' in mykeyspace.stdout"
           - "multiple_dcs.changed == True"
 
     - name: Add a dc to multidc_keyspace
@@ -407,7 +407,7 @@
           london: 3
           zurich: 3
           tokyo: 1
-          new_york: 2
+          newyork: 2
           amsterdam: 3
       register: multiple_dcs
 
@@ -422,7 +422,7 @@
           - "'\\'london\\': \\'3\\'' in mykeyspace.stdout"
           - "'\\'zurich\\': \\'3\\'' in mykeyspace.stdout"
           - "'\\'tokyo\\': \\'1\\'' in mykeyspace.stdout"
-          - "'\\'new_york\\': \\'2\\'' in mykeyspace.stdout"
+          - "'\\'newyork\\': \\'2\\'' in mykeyspace.stdout"
           - "'\\'amsterdam\\': \\'3\\'' in mykeyspace.stdout"
           - "multiple_dcs.changed == True"
 
@@ -434,7 +434,7 @@
           london: 3
           zurich: 3
           tokyo: 1
-          new_york: 2
+          newyork: 2
       register: multiple_dcs
 
     - name: Get output of DESC KEYSPACE multidc_keyspace
@@ -448,7 +448,7 @@
           - "'\\'london\\': \\'3\\'' in mykeyspace.stdout"
           - "'\\'zurich\\': \\'3\\'' in mykeyspace.stdout"
           - "'\\'tokyo\\': \\'1\\'' in mykeyspace.stdout"
-          - "'\\'new_york\\': \\'2\\'' in mykeyspace.stdout"
+          - "'\\'newyork\\': \\'2\\'' in mykeyspace.stdout"
           - "'\\'amsterdam\\': \\'3\\'' not in mykeyspace.stdout"
           - "multiple_dcs.changed == True"
 
@@ -459,7 +459,7 @@
         data_centres:
           zurich: 3
           tokyo: 1
-          new_york: 2
+          newyork: 2
       register: multiple_dcs
 
     - name: Get output of DESC KEYSPACE multidc_keyspace
@@ -473,7 +473,7 @@
           - "'london' not in mykeyspace.stdout"
           - "'\\'zurich\\': \\'3\\'' in mykeyspace.stdout"
           - "'\\'tokyo\\': \\'1\\'' in mykeyspace.stdout"
-          - "'\\'new_york\\': \\'2\\'' in mykeyspace.stdout"
+          - "'\\'newyork\\': \\'2\\'' in mykeyspace.stdout"
           - "multiple_dcs.changed == True"
 
     - name: Change tokyo replication factor to 3
@@ -483,7 +483,7 @@
         data_centres:
           zurich: 3
           tokyo: 3
-          new_york: 2
+          newyork: 2
       register: multiple_dcs
 
     - name: Get output of DESC KEYSPACE multidc_keyspace
@@ -496,7 +496,7 @@
           - "'CREATE KEYSPACE multidc_keyspace WITH replication = {\\'class\\': \\'NetworkTopologyStrategy\\'' in mykeyspace.stdout"
           - "'\\'zurich\\': \\'3\\'' in mykeyspace.stdout"
           - "'\\'tokyo\\': \\'3\\'' in mykeyspace.stdout"
-          - "'\\'new_york\\': \\'2\\'' in mykeyspace.stdout"
+          - "'\\'newyork\\': \\'2\\'' in mykeyspace.stdout"
           - "multiple_dcs.changed == True"
 
     - name: Drop multidc_keyspace
@@ -552,7 +552,7 @@
           marlow: 3
           zurich: 3
           london: 3
-          new_york: 3
+          newyork: 3
       register: multiple_dcs
 
     - name: Get output of DESC KEYSPACE multi_dc_keyspace
@@ -567,7 +567,7 @@
           - "'\\'marlow\\': \\'3\\'' in mykeyspace.stdout"
           - "'\\'zurich\\': \\'3\\'' in mykeyspace.stdout"
           - "'\\'london\\': \\'3\\'' in mykeyspace.stdout"
-          - "'\\'new_york\\': \\'3\\'' in mykeyspace.stdout"
+          - "'\\'newyork\\': \\'3\\'' in mykeyspace.stdout"
           - "multiple_dcs.changed == True"
 
     - import_tasks: 284.yml

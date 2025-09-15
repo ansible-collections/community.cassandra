@@ -41,7 +41,7 @@
     name: "{{ cassandra_service }}"
     enabled: "yes"
     state: "stopped"
-  ignore_errors: yes  # Might not exist
+  ignore_errors: true  # Might not exist
 
 - name: Install sudo
   package:
@@ -51,16 +51,15 @@
   delay: 5
 
 - name: Install OpenJDK package
-  yum:
-    name: "{{ openjdk }}"
+  ansible.builtin.package:
+    name: "{{ (ansible_os_family == 'RedHat') | ternary('java-11-openjdk-devel', 'openjdk-11-jdk') }}"
     state: present
   retries: 5
   delay: 5
-  when: ansible_os_family == 'RedHat'
 
 - name: Run the equivalent of "apt-get update"
   apt:
-    update_cache: yes
+    update_cache: true
   retries: 5
   delay: 5
   when: ansible_os_family == 'Debian'
@@ -94,7 +93,7 @@
     block: |
       export ANT_HOME=/usr/local/ant
       export PATH=${PATH}:${ANT_HOME}/bin
-    create: yes
+    create: true
 
 - name: Check ant setup
   ansible.builtin.shell: source /etc/profile.d/ant.sh && echo $ANT_HOME
@@ -123,7 +122,7 @@
     name: cassandra
     state: present
     shell: /bin/bash
-    create_home: yes
+    create_home: true
 
 - name: Ensure dirs exist
   file:
@@ -136,12 +135,35 @@
     - /home/cassandra
     - /home/cassandra/config
 
-- name: Install ccm via pip
-  pip:
-    name: ccm
-    state: present
+#- name: Install ccm via pip
+#  pip:
+#    name: ccm
+#    state: present
+#  retries: 5
+#  delay: 5
+
+- name: symlink python3
+  ansible.builtin.file:
+    src: /usr/bin/python3
+    dest: /usr/bin/python
+    state: link
+  become: true
+
+- name: Clone Apache Cassandra CCM repository
+  ansible.builtin.git:
+    repo: https://github.com/apache/cassandra-ccm.git
+    dest: "/opt/cassandra-ccm"
+    version: "trunk"
+    update: true
+    force: true
   retries: 5
   delay: 5
+
+- name: Install ccm via git
+  ansible.builtin.shell: sudo ./setup.py install
+  args:
+    chdir: /opt/cassandra-ccm
+    creates: /usr/local/bin/ccm
 
 - ansible.builtin.shell: find /usr -name ccm -ls
 
@@ -150,7 +172,7 @@
     which ccm && which ant
   environment:
     PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ant/bin
-  ignore_errors: yes
+  ignore_errors: true
 
 - set_fact:
     ccm_cmd: /usr/local/bin/ccm
@@ -158,7 +180,7 @@
 - name: Test ccm executable
   ansible.builtin.shell:  /usr/local/bin/ccm --help
   register: ccm
-  ignore_errors: yes
+  ignore_errors: true
 
 - set_fact:
     ccm_cmd: /usr/bin/ccm
@@ -173,7 +195,8 @@
     CCM_CONFIG_DIR: "/home/cassandra/config"
     CASSANDRA_HOME: "/home/cassandra"
     PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ant/bin
-  ignore_errors: yes
+    JAVA_HOME: "{{ (ansible_os_family == 'RedHat') | ternary('/usr/lib/jvm/java-11-openjdk', '/usr/lib/jvm/java-11-openjdk-amd64') }}"
+  ignore_errors: true
 
 - name: Install Cassandra via ccm tool
   ansible.builtin.shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd }} create test -v {{ cassandra_version }} > /dev/null\""
@@ -184,6 +207,7 @@
     CCM_CONFIG_DIR: "/home/cassandra/config"
     CASSANDRA_HOME: "/home/cassandra"
     PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ant/bin
+    JAVA_HOME: "{{ (ansible_os_family == 'RedHat') | ternary('/usr/lib/jvm/java-11-openjdk', '/usr/lib/jvm/java-11-openjdk-amd64') }}"
   retries: 5
   delay: 5
 
@@ -207,6 +231,7 @@
     CCM_CONFIG_DIR: "/home/cassandra/config"
     CASSANDRA_HOME: "/home/cassandra"
     PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ant
+    JAVA_HOME: "{{ (ansible_os_family == 'RedHat') | ternary('/usr/lib/jvm/java-11-openjdk', '/usr/lib/jvm/java-11-openjdk-amd64') }}"
   with_items: "{{ cassandra_nodes }}"
 
 - name: Update endpoint_snitch
@@ -215,7 +240,7 @@
     regexp: "^endpoint_snitch"
     line: "endpoint_snitch: GossipingPropertyFileSnitch"
   with_items: "{{ cassandra_nodes }}"
-  no_log: yes
+  no_log: true
 
 - name: Update rack info
   copy:
@@ -229,8 +254,43 @@
     cassandra_node_delay: 120
   when: ansible_os_family == "RedHat"
 
+- name: Get node jvm config info
+  shell: |
+    sudo -E -u cassandra bash -c '{{ ccm_cmd }} {{ item.node }} env' | grep JVM_EXTRA_OPTS
+  args:
+    chdir: /home/cassandra
+  environment:
+    CCM_CONFIG_DIR: "/home/cassandra/config"
+    CASSANDRA_HOME: "/home/cassandra"
+    JAVA_HOME: "{{ (ansible_os_family == 'RedHat') | ternary('/usr/lib/jvm/java-11-openjdk', '/usr/lib/jvm/java-11-openjdk-amd64') }}" 
+  with_items: "{{ cassandra_nodes }}"
+  ignore_errors: true
+
+- name: Assume the start of one node is failing due to a memory issue
+  shell: |
+    sudo -E -u cassandra bash -c '{{ ccm_cmd }} {{ item.node }} updateconf "jvm.options: -Xms256M -Xmx512M"'
+  args:
+    chdir: /home/cassandra
+  environment:
+    CCM_CONFIG_DIR: "/home/cassandra/config"
+    CASSANDRA_HOME: "/home/cassandra"
+    JAVA_HOME: "{{ (ansible_os_family == 'RedHat') | ternary('/usr/lib/jvm/java-11-openjdk', '/usr/lib/jvm/java-11-openjdk-amd64') }}"
+  with_items: "{{ cassandra_nodes }}"
+
+- name: Get node jvm config info
+  shell: |
+    sudo -E -u cassandra bash -c '{{ ccm_cmd }} {{ item.node }} env' | grep JVM_EXTRA_OPTS
+  args:
+    chdir: /home/cassandra
+  environment:
+    CCM_CONFIG_DIR: "/home/cassandra/config"
+    CASSANDRA_HOME: "/home/cassandra"
+    JAVA_HOME: "{{ (ansible_os_family == 'RedHat') | ternary('/usr/lib/jvm/java-11-openjdk', '/usr/lib/jvm/java-11-openjdk-amd64') }}"
+  with_items: "{{ cassandra_nodes }}"
+  ignore_errors: true
+
 - name: Start the ccm cluster
-  ansible.builtin.shell: sudo -E -u cassandra bash -c "{{ ccm_cmd }} start  --root"
+  ansible.builtin.shell: sudo -E -u cassandra bash -c "{{ ccm_cmd }} start"
   become_user: cassandra
   args:
     chdir: /home/cassandra
@@ -238,7 +298,11 @@
     CCM_CONFIG_DIR: "/home/cassandra/config"
     CASSANDRA_HOME: "/home/cassandra"
     PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ant/bin
-    CCM_CLUSTER_START_DEFAULT_TIMEOUT: 600
+    JAVA_HOME: "{{ (ansible_os_family == 'RedHat') | ternary('/usr/lib/jvm/java-11-openjdk', '/usr/lib/jvm/java-11-openjdk-amd64') }}"
+    CCM_CLUSTER_START_DEFAULT_TIMEOUT: "600"
+  ignore_errors: true # tmp debug
+
+- shell: ls -lh /home/cassandra/config/*/ && cat /home/cassandra/config/test/marlow11/logs/*
 
 - name: Get cluster status
   ansible.builtin.shell: sudo -E -u cassandra bash -c "{{ ccm_cmd }} status"
@@ -250,6 +314,7 @@
     CCM_CONFIG_DIR: "/home/cassandra/config"
     CASSANDRA_HOME: "/home/cassandra"
     PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ant/bin
+    JAVA_HOME: "{{ (ansible_os_family == 'RedHat') | ternary('/usr/lib/jvm/java-11-openjdk', '/usr/lib/jvm/java-11-openjdk-amd64') }}"
 
 - debug:
     msg: "{{ cluster_status.stdout }}"

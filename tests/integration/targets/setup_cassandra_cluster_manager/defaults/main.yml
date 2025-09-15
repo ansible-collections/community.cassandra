@@ -1,4 +1,4 @@
-openjdk: java-1.8.0-openjdk
+openjdk: java-11-openjdk-devel
 pip_packages:
   - pyYaml
   - six
@@ -25,8 +25,8 @@ cassandra_nodes:  # Changes in 4.0 means we need to add nodes to certain DCs for
     port: 7300
     debug_port: 2002
     args: "--seeds"
-  - dc: "new_york"
-    node: "new_york1"
+  - dc: "newyork"
+    node: "newyork1"
     ip: "127.0.0.4"
     port: 7400
     debug_port: 2003

@@ -5,7 +5,7 @@
     data_centres:
       zurich: 3
       tokyo: 3
-      new_york: 2
+      newyork: 2
     consistency_level: "LOCAL_ONE"
   register: local
 
@@ -20,7 +20,7 @@
     data_centres:
       zurich: 3
       tokyo: 3
-      new_york: 2
+      newyork: 2
   register: any
 
 - assert:
@@ -34,7 +34,7 @@
     data_centres:
       zurich: 3
       tokyo: 3
-      new_york: 2
+      newyork: 2
     consistency_level: "QUORUM"
   register: quorum
 
