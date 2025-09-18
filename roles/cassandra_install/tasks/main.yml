@@ -9,7 +9,7 @@
 
 - name: Install Cassandra Packages
   package:
-    name: "{{ cassandra_packages }}"
+    name: "{{ cassandra_packages }}={{ cassandra_exact_version }}"
     state: present
   retries: 3
 
