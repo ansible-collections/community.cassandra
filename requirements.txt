@@ -6,4 +6,4 @@ molecule==2.22
 pytest==5.3.4
 python-vagrant==0.5.15
 sh==1.13.1
-anyconfig>=0.10.0
+anyconfig==0.9.7
