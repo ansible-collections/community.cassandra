@@ -42,6 +42,9 @@ jobs:
           max_attempts: 3
           command: pip install https://github.com/ansible/ansible/archive/${{ matrix.versions.ansible_version }}.tar.gz --disable-pip-version-check
 
+      - name: Install cassandra-driver
+        run: pip install cassandra-driver
+
       - name: Run sanity tests
         run: ansible-test sanity --docker -v --color --python 3.9
 
