@@ -46,7 +46,7 @@ jobs:
         run: pip install cassandra-driver
 
       - name: Run sanity tests
-        run: ansible-test sanity --docker -v --color --python 3.9
+        run: ansible-test sanity --docker -v --color --python ${{ matrix.versions.python_version }}
 
   integration_matrix:
     runs-on: ubuntu-24.04
