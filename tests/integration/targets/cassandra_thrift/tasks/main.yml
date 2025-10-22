@@ -159,4 +159,4 @@
 - name: Assert no such file
   assert:
     that:
-      - "'No such file or directory' in nodetool_path_error.msg"
+      - "'Error executing command' in nodetool_path_error.msg"
