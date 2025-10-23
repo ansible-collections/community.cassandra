@@ -21,6 +21,10 @@ platforms:
     image: ubuntu:18.04
     command: /sbin/init
     privileged: True
+  - name: ubuntu_20
+    image: ubuntu:20.04
+    command: /sbin/init
+    privileged: True
   - name: debian_buster
     image: debian:buster
     command: /sbin/init
