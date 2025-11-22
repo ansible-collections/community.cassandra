@@ -2,7 +2,7 @@
 # tasks file for cassandra_linux
 - name: Include vars for OS family
   ansible.builtin.include_vars:
-    file: "{{ ansible_os_family }}.yml"
+    file: "{{ ansible_facts['os_family'] }}.yml"
 
 - name: Check is_docker.txt file exists
   ansible.builtin.stat:
@@ -34,17 +34,19 @@
     sysctl_set: yes
     reload: yes
 
-- name: Install ntp
+- name: Install time sync package
   ansible.builtin.package:
-    name: "{{ ntp_packages }}"
+    name: "{{ (ansible_facts['os_family'] == 'Debian') | ternary('systemd-timesyncd', 'chrony') }}"
     state: present
   retries: 3
 
-- name: Ensure ntp service starts
+- name: Ensure timesync service starts
   ansible.builtin.service:
-    name: "{{ ntp_service }}"
+    name: "{{ (ansible_facts['os_family'] == 'Debian') | ternary('systemd-timesyncd', 'chronyd') }}"
     enabled: yes
     state: started
+  tags:
+  - molecule-idempotence-notest # Ubuntu 2404 timesyncd issue
 
 - name: Ensure limits are set
   ansible.builtin.blockinfile:
@@ -63,7 +65,7 @@
     regexp: "^\\* - nproc 32768"
     line: "* - nproc 32768"
     create: yes
-  when: ansible_os_family == "RedHat"
+  when: ansible_facts['os_family'] == "RedHat"
 
 - name: TCP setting for prevents timeouts and handling many connections
   ansible.builtin.sysctl:

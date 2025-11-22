@@ -1,11 +1,19 @@
 ---
+# tasks file for cassandra_linux
+- name: Include vars for OS family
+  ansible.builtin.include_vars:
+    file: "{{ ansible_facts['os_family'] }}.yml"
+
 # tasks file for cassandra_install
-- name: For Debian Buster we need to make sure openjdk 1.8 is installed
-  ansible.builtin.include_tasks:
-    file: jdk1.8_Debian_Buster.yml
+- name: Ensure man1 directory exists (fix Ubuntu 24.04 Java bug)
+  ansible.builtin.file:
+    path: /usr/share/man/man1
+    state: directory
+    mode: "0755"
   when:
-    - ansible_os_family == "Debian"
-    - ansible_distribution_release == "buster"
+    - ansible_facts['os_family'] == 'Debian'
+    - ansible_facts['distribution'] == 'Ubuntu'
+    - ansible_facts['distribution_major_version'] | int == 24
 
 - name: Install Cassandra Packages
   ansible.builtin.package:
@@ -19,6 +27,6 @@
   args:
     creates: /usr/lib/python2.7/site-packages/cqlshlib
   when:
-    - ansible_os_family == 'RedHat'
-    - ansible_distribution_major_version == "7"
+    - ansible_facts['os_family'] == 'RedHat'
+    - ansible_facts['distribution_major_version'] == "7"
     - "cassandra_version.startswith('4') or cassandra_version.startswith('3')"

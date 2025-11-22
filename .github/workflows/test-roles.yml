@@ -42,7 +42,7 @@ jobs:
     strategy:
       matrix:
         python_version:
-          - "3.10"
+          - "3.12"
         cassandra_role: ${{ fromJson(needs.roles_matrix.outputs.matrix) }}
 
     steps:
@@ -72,8 +72,7 @@ jobs:
           timeout_minutes: 3
           max_attempts: 3
           command: |
-            cd ansible_collections/community/cassandra
-            pip install --requirement requirements.txt
+            pip install molecule molecule-docker pytest-testinfra
 
       - name: Install ansible.posix
         uses: nick-invision/retry@v3
@@ -85,6 +84,17 @@ jobs:
       - name: Add molecule location to path
         run: echo "${HOME}/.local/bin" >> $GITHUB_PATH
 
+      - name: Build the collection
+        run: ansible-galaxy collection build
+
+      - name: Rename the build artifact
+        run: mv community-cassandra-*.tar.gz community-cassandra-latest.tar.gz
+
+      - name: Install collection
+        run: ansible-galaxy collection install community-cassandra-*.tar.gz
+
       - name: Run molecule test for ${{ matrix.cassandra_role }}
         run: molecule test
         working-directory: ansible_collections/community/cassandra/roles/${{ matrix.cassandra_role }}
+        env:
+          ANSIBLE_ALLOW_BROKEN_CONDITIONALS: 1  # need for  TASK [Set async_dir for HOME env]

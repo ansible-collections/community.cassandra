@@ -1,5 +1,5 @@
 ---
-cassandra_version: "311x"
+cassandra_version: "41x"
 debian_packages:
   - apt-transport-https
   - curl

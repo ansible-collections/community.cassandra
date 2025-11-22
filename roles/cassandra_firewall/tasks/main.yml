@@ -2,27 +2,21 @@
 # tasks file for cassandra_firewall
 - name: Include vars for os family
   ansible.builtin.include_vars:
-    file: "{{ ansible_os_family }}.yml"
+    file: "{{ ansible_facts['os_family'] }}.yml"
 
-- name: Ensure firewalld package is installed
+- name: Ensure firewall package is installed
   ansible.builtin.package:
-    name: "{{ firewalld_packages }}"
+    name: "{{ firewall_packages }}"
     state: present
   retries: 3
 
-- name: Ensure firewalld service is started
+- name: Ensure firewall service is started
   ansible.builtin.service:
-    name: firewalld
+    name: "{{ (ansible_facts['os_family'] == 'RedHat') | ternary('firewalld', 'ufw') }}"
     state: started
     enabled: yes
 
-- name: Set python3 for Debian based system
-  ansible.builtin.set_fact:
-    mypy: "/usr/bin/python3"
-  when:
-    - ansible_os_family == "Debian"
-
-- name: Ensure ports for cassandra open
+- name: Ensure ports for cassandra open (RedHat)
   ansible.builtin.firewalld:
     port: "{{ item }}"
     permanent: yes
@@ -30,5 +24,13 @@
     state: enabled
   with_items:
     - "{{ open_ports }}"
-  vars:
-    ansible_python_interpreter: "{{ mypy | default('python') }}"
+  when: ansible_facts['os_family'] == "RedHat"
+
+- name: Ensure ports for cassandra open (Debian)
+  ansible.builtin.ufw:
+    port: "{{ item | split('/') | first }}"
+    proto: "{{ item | split('/') | last }}"
+    rule: "allow"
+  with_items:
+    - "{{ open_ports }}"
+  when: ansible_facts['os_family'] == "Debian"

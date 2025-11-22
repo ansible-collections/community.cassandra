@@ -1,7 +1,7 @@
 ---
 - name: Prepare
   hosts: all
-
+  
   tasks:
 
   - name: Clean package manager cache
@@ -11,11 +11,3 @@
   - name: Clean package manager cache
     ansible.builtin.shell: apt-get update && apt-get clean
     when: ansible_facts['os_family'] == 'Debian'
-
-  - name: Are we in docker?
-    ansible.builtin.shell: "grep :/docker /proc/self/cgroup | wc -l"
-
-  - name: Create is_docker.txt file
-    ansible.builtin.file:
-      path: is_docker.txt
-      state: touch
