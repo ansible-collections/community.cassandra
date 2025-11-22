@@ -8,6 +8,6 @@
     ansible.builtin.shell: "grep :/docker /proc/self/cgroup | wc -l"
 
   - name: Create is_docker.txt file
-    file:
+    ansible.builtin.file:
       path: is_docker.txt
       state: touch

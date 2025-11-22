@@ -1,53 +1,53 @@
 ---
 # tasks file for cassandra_linux
 - name: Include vars for OS family
-  include_vars:
+  ansible.builtin.include_vars:
     file: "{{ ansible_os_family }}.yml"
 
 - name: Check is_docker.txt file exists
-  stat:
+  ansible.builtin.stat:
     path: is_docker.txt
   register: is_docker
 
 - name: Disable Swap
-  command: swapoff -a
+  ansible.builtin.command: swapoff -a
   when:
     - is_docker.stat.exists == False
     - ansible_swaptotal_mb > 0
 
 - name: Remove swap partitions
-  mount:
+  ansible.builtin.mount:
     path: swap
     state: absent
 
 - name: Ensure Swappiness is 1
-  sysctl:
+  ansible.builtin.sysctl:
     name: vm.swappiness
     value: "1"
     sysctl_set: yes
     reload: yes
 
 - name: Ensure max_map_count is 1048575
-  sysctl:
+  ansible.builtin.sysctl:
     name: vm.max_map_count
     value: "1048575"
     sysctl_set: yes
     reload: yes
 
 - name: Install ntp
-  package:
+  ansible.builtin.package:
     name: "{{ ntp_packages }}"
     state: present
   retries: 3
 
 - name: Ensure ntp service starts
-  service:
+  ansible.builtin.service:
     name: "{{ ntp_service }}"
     enabled: yes
     state: started
 
 - name: Ensure limits are set
-  blockinfile:
+  ansible.builtin.blockinfile:
     path: /etc/security/limits.conf
     block: |
       cassandra - memlock unlimited
@@ -58,7 +58,7 @@
     state: present
 
 - name: Extra Limit for RH Derived Distros
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/security/limits.d/90-nproc.conf
     regexp: "^\\* - nproc 32768"
     line: "* - nproc 32768"
@@ -66,7 +66,7 @@
   when: ansible_os_family == "RedHat"
 
 - name: TCP setting for prevents timeouts and handling many connections
-  sysctl:
+  ansible.builtin.sysctl:
     name: "{{ item.key }}"
     value: "{{ item.value }}"
     state: present
@@ -87,7 +87,7 @@
     - is_docker.stat.exists == False
 
 - name: Disable zone_reclaim_mode
-  sysctl:
+  ansible.builtin.sysctl:
     name: vm.zone_reclaim_mode
     value: 0
     state: present
@@ -97,13 +97,13 @@
     - is_docker.stat.exists == False
 
 - name: Ensure disable-thp service file exists
-  copy:
+  ansible.builtin.copy:
     src: disable-thp.service
     dest: /etc/systemd/system/
   register: thp
 
 - name: Ensure service to disable THP exists
-  systemd:
+  ansible.builtin.systemd:
     name: disable-thp
     daemon-reload: yes
     state: started
