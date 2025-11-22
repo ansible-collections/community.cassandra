@@ -2,5 +2,5 @@
 - name: Converge
   hosts: all
   roles:
-    - role: cassandra_repository
-    - role: cassandra_install
+    - role: community.cassandra.cassandra_repository
+    - role: community.cassandra.cassandra_install
