@@ -46,7 +46,7 @@
     enabled: yes
     state: started
   tags:
-  - - molecule_skip_idempotency # Ubuntu 2404 timesyncd issue
+  - molecule-idempotence-notest # Ubuntu 2404 timesyncd issue
 
 - name: Ensure limits are set
   ansible.builtin.blockinfile:
