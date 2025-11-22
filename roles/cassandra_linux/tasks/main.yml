@@ -34,9 +34,9 @@
     sysctl_set: yes
     reload: yes
 
-- name: Install ntp
+- name: Install time sync package
   ansible.builtin.package:
-    name: "{{ ntp_packages }}"
+    name: "{{ (ansible_os_family == 'Debian') | ternary('systemd-timesyncd', 'chrony') }}"
     state: present
   retries: 3
 
