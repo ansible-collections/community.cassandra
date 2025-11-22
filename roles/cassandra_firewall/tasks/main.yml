@@ -28,7 +28,8 @@
 
 - name: Ensure ports for cassandra open (Debian)
   ansible.builtin.ufw:
-    port: "{{ item }}"
+    port: "{{ item | split('/') | first }}"
+    proto: "{{ item | split('/') | last }}"
     rule: "allow"
   with_items:
     - "{{ open_ports }}"
