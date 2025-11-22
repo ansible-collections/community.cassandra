@@ -40,11 +40,13 @@
     state: present
   retries: 3
 
-- name: Ensure ntp service starts
+- name: Ensure timesync service starts
   ansible.builtin.service:
     name: "{{ (ansible_facts['os_family'] == 'Debian') | ternary('systemd-timesyncd', 'chronyd') }}"
     enabled: yes
     state: started
+  tags:
+  - - molecule_skip_idempotency # Ubuntu 2404 timesyncd issue
 
 - name: Ensure limits are set
   ansible.builtin.blockinfile:
