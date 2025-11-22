@@ -36,7 +36,7 @@
 
 - name: Install time sync package
   ansible.builtin.package:
-    name: "{{ (ansible_os_family == 'Debian') | ternary('systemd-timesyncd', 'chrony') }}"
+    name: "{{ (ansible_facts['os_family'] == 'Debian') | ternary('systemd-timesyncd', 'chrony') }}"
     state: present
   retries: 3
 
