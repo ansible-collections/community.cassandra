@@ -1,2 +1,2 @@
-firewalld_packages:
-  - firewalld
+firewall_packages:
+  - ufw

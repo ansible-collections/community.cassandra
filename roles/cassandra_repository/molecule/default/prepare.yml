@@ -1,5 +1,9 @@
 ---
-- name: Converge
+- name: Prepare
   hosts: all
-  roles:
-    - role: community.cassandra.cassandra_repository
+  
+  tasks:
+
+  - name: Clean package manager cache
+    ansible.builtin.shell: dnf clean all || apt-get clean
+    become: true

@@ -2,7 +2,7 @@
 # tasks file for cassandra_firewall
 - name: Include vars for os family
   ansible.builtin.include_vars:
-    file: "{{ ansible_os_family }}.yml"
+    file: "{{ ansible_facts['os_family'] }}.yml"
 
 - name: Ensure firewall package is installed
   ansible.builtin.package:
