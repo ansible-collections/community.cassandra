@@ -42,7 +42,7 @@ jobs:
     strategy:
       matrix:
         python_version:
-          - "3.10"
+          - "3.12"
         cassandra_role: ${{ fromJson(needs.roles_matrix.outputs.matrix) }}
 
     steps:
@@ -73,7 +73,7 @@ jobs:
           max_attempts: 3
           command: |
             cd ansible_collections/community/cassandra
-            pip install --requirement requirements.txt
+            pip install molecule molecule-docker pytest-testinfra
 
       - name: Install ansible.posix
         uses: nick-invision/retry@v3
