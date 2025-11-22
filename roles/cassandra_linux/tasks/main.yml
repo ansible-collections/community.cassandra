@@ -2,7 +2,7 @@
 # tasks file for cassandra_linux
 - name: Include vars for OS family
   ansible.builtin.include_vars:
-    file: "{{ ansible_os_family }}.yml"
+    file: "{{ ansible_facts['os_family'] }}.yml"
 
 - name: Check is_docker.txt file exists
   ansible.builtin.stat:
@@ -63,7 +63,7 @@
     regexp: "^\\* - nproc 32768"
     line: "* - nproc 32768"
     create: yes
-  when: ansible_os_family == "RedHat"
+  when: ansible_facts['os_family'] == "RedHat"
 
 - name: TCP setting for prevents timeouts and handling many connections
   ansible.builtin.sysctl:

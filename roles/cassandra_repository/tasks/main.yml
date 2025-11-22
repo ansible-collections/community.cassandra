@@ -8,7 +8,7 @@
       gpgcheck: 1
       gpgkey: "https://downloads.apache.org/cassandra/KEYS"
   retries: 3
-  when: ansible_os_family == "RedHat"
+  when: ansible_facts['os_family'] == "RedHat"
 
 
 - name: Install debian packages (Debian & Ubuntu)
@@ -16,13 +16,13 @@
     name: "{{ debian_packages }}"
     state: present
   retries: 3
-  when: ansible_os_family == "Debian"
+  when: ansible_facts['os_family'] == "Debian"
 
 - set_fact:
     validate_certs: true
   when:
-    - "ansible_distribution == 'Ubuntu'"
-    - "ansible_distribution_version == '16.04'"
+    - "ansible_facts['distribution'] == 'Ubuntu'"
+    - "ansible_facts['distribution_version'] == '16.04'"
 
 
 - name: Add apt key for Cassandra repository (Debian & Ubuntu)
@@ -30,7 +30,7 @@
     url: https://downloads.apache.org/cassandra/KEYS
     state: present
   retries: 3
-  when: ansible_os_family == "Debian"
+  when: ansible_facts['os_family'] == "Debian"
 
 - name: Ensure Cassandra apt repository exists (Debian & Ubuntu)
   ansible.builtin.apt_repository:
@@ -38,4 +38,4 @@
     state: present
     filename: "cassandra-{{ cassandra_version }}"
   retries: 3
-  when: ansible_os_family == "Debian"
+  when: ansible_facts['os_family'] == "Debian"
