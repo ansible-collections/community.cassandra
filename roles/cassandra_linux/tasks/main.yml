@@ -42,7 +42,7 @@
 
 - name: Ensure ntp service starts
   ansible.builtin.service:
-    name: "{{ ntp_service }}"
+    name: "{{ (ansible_facts['os_family'] == 'Debian') | ternary('systemd-timesyncd', 'chronyd') }}"
     enabled: yes
     state: started
 
