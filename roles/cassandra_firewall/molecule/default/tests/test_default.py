@@ -20,6 +20,7 @@ def test_ensure_firewalld_commands(host):
 
 
 def test_ensure_cassandra_ports_open_redhat(host):
+    # TODO Test ufw rules
     if host.system_info.distribution == "redhat":
         expected_output = ['22/tcp',
                         '7000/tcp',
