@@ -72,7 +72,6 @@ jobs:
           timeout_minutes: 3
           max_attempts: 3
           command: |
-            cd ansible_collections/community/cassandra
             pip install molecule molecule-docker pytest-testinfra
 
       - name: Install ansible.posix
@@ -88,3 +87,5 @@ jobs:
       - name: Run molecule test for ${{ matrix.cassandra_role }}
         run: molecule test
         working-directory: ansible_collections/community/cassandra/roles/${{ matrix.cassandra_role }}
+        env:
+          ANSIBLE_ALLOW_BROKEN_CONDITIONALS: 1  # need for  TASK [Set async_dir for HOME env]
