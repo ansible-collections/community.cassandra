@@ -3,7 +3,6 @@
 - name: Include vars for OS family
   ansible.builtin.include_vars:
     file: "{{ ansible_facts['os_family'] }}.yml"
-    optional: true
 
 # tasks file for cassandra_install
 - name: Ensure man1 directory exists (fix Ubuntu 24.04 Java bug)
