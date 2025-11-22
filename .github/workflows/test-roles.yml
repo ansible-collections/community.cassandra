@@ -84,6 +84,15 @@ jobs:
       - name: Add molecule location to path
         run: echo "${HOME}/.local/bin" >> $GITHUB_PATH
 
+      - name: Build the collection
+        run: ansible-galaxy collection build
+
+      - name: Rename the build artifact
+        run: mv community-cassandra-*.tar.gz community-cassandra-latest.tar.gz
+
+      - name: Install collection
+        run: ansible-galaxy collection install community-cassandra-*.tar.gz
+
       - name: Run molecule test for ${{ matrix.cassandra_role }}
         run: molecule test
         working-directory: ansible_collections/community/cassandra/roles/${{ matrix.cassandra_role }}
