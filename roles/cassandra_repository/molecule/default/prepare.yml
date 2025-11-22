@@ -5,4 +5,4 @@
   tasks:
 
   - name: Clean package manager cache
-    ansible.builtin.shell: dnf clean all || apt-get clean
+    ansible.builtin.shell: dnf clean all || apt-get update && update apt-get clean
