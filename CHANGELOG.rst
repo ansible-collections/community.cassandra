@@ -4,6 +4,18 @@ community.cassandra Release Notes
 
 .. contents:: Topics
 
+v1.4.1
+=======
+
+Release Summary
+---------------
+
+Maintenance Release
+
+Minor Changes
+-------------
+- 306 - various roles - Use full module paths.
+
 v1.3.2
 =======
 
