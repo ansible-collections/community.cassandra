@@ -839,5 +839,8 @@
 - name: Import tasks for issue 204
   import_tasks: 204.yml
 
-- name: Import testa for issue 284
+- name: Import tests for issue 284
   import_tasks: 284.yml
+
+- name: Import test for issue 294
+  import_tasks: 294.yml
