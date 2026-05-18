@@ -218,9 +218,34 @@ try:
 except Exception:
     HAS_CASSANDRA_DRIVER = False
 
-    # This is here for ansible-test import
-    class ConsistencyLevel:
-        name_to_value = {}
+  # This is here for ansible-test import (when cassandra-driver is not installed)
+  class ConsistencyLevel:
+      ANY = "ANY"
+      ONE = "ONE"
+      TWO = "TWO"
+      THREE = "THREE"
+      QUORUM = "QUORUM"
+      ALL = "ALL"
+      LOCAL_QUORUM = "LOCAL_QUORUM"
+      EACH_QUORUM = "EACH_QUORUM"
+      SERIAL = "SERIAL"
+      LOCAL_SERIAL = "LOCAL_SERIAL"
+      LOCAL_ONE = "LOCAL_ONE"
+
+      name_to_value = {
+          "ANY": ANY,
+          "ONE": ONE,
+          "TWO": TWO,
+          "THREE": THREE,
+          "QUORUM": QUORUM,
+          "ALL": ALL,
+          "LOCAL_QUORUM": LOCAL_QUORUM,
+          "EACH_QUORUM": EACH_QUORUM,
+          "SERIAL": SERIAL,
+          "LOCAL_SERIAL": LOCAL_SERIAL,
+          "LOCAL_ONE": LOCAL_ONE,
+      }
+
 
 from ansible.module_utils.basic import AnsibleModule
 
