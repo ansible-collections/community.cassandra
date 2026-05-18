@@ -291,6 +291,10 @@ try:
 except Exception:
     HAS_CASSANDRA_DRIVER = False
 
+    # This is here for ansible-test import
+    class ConsistencyLevel:
+        name_to_value = {}
+
 try:
     from ssl import SSLContext, PROTOCOL_TLS
     import ssl as ssl_lib
