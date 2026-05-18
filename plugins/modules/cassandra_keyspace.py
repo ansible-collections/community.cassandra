@@ -175,6 +175,10 @@ try:
 except Exception:
     HAS_CASSANDRA_DRIVER = False
 
+    # This is here for ansible-test import
+    class ConsistencyLevel:
+        name_to_value = {}
+
 from ansible.module_utils.basic import AnsibleModule
 
 try:
