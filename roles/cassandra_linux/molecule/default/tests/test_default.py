@@ -51,7 +51,7 @@ def test_time_sync_package_installed(host):
     assert legacy_ntp or chrony or timesyncd, "No supported time-sync package installed (ntp/chrony/systemd-timesyncd)"
 
 # TOD Re-enable when Ubuntu 24.04 fixed
-#def test_time_sync_service(host):
+# def test_time_sync_service(host):
 #    # Accept any common service name provided by the supported packages:
 #    candidates = ["ntpd", "ntp", "chronyd", "chrony", "systemd-timesyncd"]
 #
