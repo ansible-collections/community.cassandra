@@ -35,7 +35,7 @@ EXAMPLES = '''
 '''
 
 RETURN = '''
-community.cassandra.cassandra_compactionthroughput:
+cassandra_compactionthroughput:
   description: The return state of the executed command.
   returned: success
   type: str
