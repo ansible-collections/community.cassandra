@@ -232,7 +232,6 @@ except Exception:
         LOCAL_SERIAL = "LOCAL_SERIAL"
         LOCAL_ONE = "LOCAL_ONE"
 
-
     ConsistencyLevel.name_to_value = {
         "ANY": ConsistencyLevel.ANY,
         "ONE": ConsistencyLevel.ONE,
