@@ -362,7 +362,7 @@ def main():
             consistency_level=dict(type='str',
                                    required=False,
                                    default="LOCAL_ONE",
-                                   choices=ConsistencyLevel.name_to_value.keys())),
+                                   choices=list(ConsistencyLevel.name_to_value.keys()))),
         supports_check_mode=True
     )
 
