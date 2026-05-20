@@ -94,7 +94,7 @@ jobs:
           - package_version: "311x"
             tar_version: "3.11.17"
         test_scenario:
-          - docker_image: "ubuntu2204" # TODO legacy... perhaps we drop this Cassandra version soon?
+          - docker_image: "ubuntu2204" # TODO legacy... perhaps we drop this Cassandra version soon? Only 3.10 supported inside this container
             python_version: "3.12"
             ansible_test_options: ""
           #- docker_image: centos7
@@ -132,7 +132,7 @@ jobs:
           command: ansible-galaxy collection install ansible.posix -p ansible_collections/
 
       - name: Run integration tests on Python ${{ matrix.test_scenario.python_version }} | ${{ matrix.test_scenario.docker_image }} | ${{ matrix.versions.ansible_version }} | ${{ matrix.cassandra_module }} | ${{ matrix.cassandra_version.package_version }}
-        run: ansible-test integration --docker ${{ matrix.test_scenario.docker_image }} ${{ matrix.test_scenario.ansible_test_options }} -v --color --retry-on-error --python ${{ matrix.test_scenario.python_version }} --continue-on-error --diff --coverage  ${{ matrix.cassandra_module }}
+        run: ansible-test integration --docker ${{ matrix.test_scenario.docker_image }} ${{ matrix.test_scenario.ansible_test_options }} -v --color --retry-on-error --python 3.10 --continue-on-error --diff --coverage  ${{ matrix.cassandra_module }}
 
       - name: Generate coverage report.
         run: ansible-test coverage xml -v --requirements --group-by command --group-by version
