@@ -23,7 +23,7 @@ jobs:
             ansible_version: "stable-2.17"
           - python_version: "3.12"
             ansible_version: "stable-2.18"
-          - python_version: "3.13"
+          - python_version: "3.12"
             ansible_version: "devel"
     steps:
 
@@ -88,7 +88,7 @@ jobs:
             ansible_version: "stable-2.17"
           - python_version: "3.12"
             ansible_version: "stable-2.18"
-          - python_version: "3.13"
+          - python_version: "3.12"
             ansible_version: "devel"
         cassandra_version:
           - package_version: "311x"
@@ -159,7 +159,7 @@ jobs:
             ansible_version: "stable-2.17"
           - python_version: "3.12"
             ansible_version: "stable-2.18"
-          - python_version: "3.13"
+          - python_version: "3.12"
             ansible_version: "devel"
         cassandra_version:
           - package_version: "40x"
@@ -230,7 +230,7 @@ jobs:
             ansible_version: "stable-2.17"
           - python_version: "3.12"
             ansible_version: "stable-2.18"
-          - python_version: "3.13"
+          - python_version: "3.12"
             ansible_version: "devel"
         cassandra_version:
           - package_version: "41x"
