@@ -287,3 +287,7 @@
     - ansible_distribution_major_version == "7"
   notify: redhat_remove_cassandra
   no_log: yes
+
+- name: Install six
+  ansible.builtin.pip:
+    name: six
