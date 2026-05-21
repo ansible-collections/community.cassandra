@@ -334,3 +334,12 @@
     delay: 30
     timeout: 600
   with_items: "{{ cassandra_nodes }}"
+
+- name: Remove textract
+  ansible.builtin.pip:
+    name: textract
+    state: absent
+
+- name: Install six
+  ansible.builtin.pip:
+    name: six
