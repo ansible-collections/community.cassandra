@@ -288,6 +288,11 @@
   notify: redhat_remove_cassandra
   no_log: yes
 
+- name: Remove textract
+  ansible.builtin.pip:
+    name: textract
+    state: absent
+
 - name: Install six
   ansible.builtin.pip:
     name: six
