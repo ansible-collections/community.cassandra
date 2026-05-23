@@ -134,7 +134,7 @@ jobs:
           command: ansible-galaxy collection install ansible.posix -p ansible_collections/
 
       - name: Run integration tests on Python ${{ matrix.test_scenario.python_version }} | ${{ matrix.test_scenario.docker_image }} | ${{ matrix.versions.ansible_version }} | ${{ matrix.cassandra_module }} | ${{ matrix.cassandra_version.package_version }}
-        run: ansible-test integration --docker ${{ matrix.test_scenario.docker_image }} ${{ matrix.test_scenario.ansible_test_options }} -v --color --retry-on-error --python 3.10 --continue-on-error --diff --coverage  ${{ matrix.cassandra_module }}
+        run: ansible-test integration --docker ${{ matrix.test_scenario.docker_image }} ${{ matrix.test_scenario.ansible_test_options }} -v --color --retry-on-error --python 3.8 --continue-on-error --diff --coverage  ${{ matrix.cassandra_module }}
 
       - name: Generate coverage report.
         run: ansible-test coverage xml -v --requirements --group-by command --group-by version
