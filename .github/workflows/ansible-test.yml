@@ -153,12 +153,12 @@ jobs:
         versions:
           - python_version: "3.10"
             ansible_version: "stable-2.16"
-          - python_version: "3.11"
+          - python_version: "3.10"
             ansible_version: "stable-2.17"
-          - python_version: "3.12"
-            ansible_version: "stable-2.18"
-          - python_version: "3.12"
-            ansible_version: "milestone"
+          #- python_version: "3.12"
+          #  ansible_version: "stable-2.18"
+          #- python_version: "3.12"
+          #  ansible_version: "milestone"
         cassandra_version:
           - package_version: "40x"
             tar_version: "4.0.9"
@@ -167,7 +167,7 @@ jobs:
           #  python_version: "2.7"
           #  ansible_test_options: "--docker-privileged"
           - docker_image: "default"
-            python_version: "3.12"
+            python_version: "3.10" # ccm issues with six
             ansible_test_options: ""
         cassandra_module: ${{ fromJson(needs.integration_matrix.outputs.matrix) }}
     steps:
@@ -224,12 +224,12 @@ jobs:
         versions:
           - python_version: "3.10"
             ansible_version: "stable-2.16"
-          - python_version: "3.11"
+          - python_version: "3.10"
             ansible_version: "stable-2.17"
-          - python_version: "3.12"
-            ansible_version: "stable-2.18"
-          - python_version: "3.12"
-            ansible_version: "milestone"
+          #- python_version: "3.12" ccm issues with six older python https://github.com/apache/cassandra-ccm/pull/800
+          #  ansible_version: "stable-2.18"
+          #- python_version: "3.12"
+          #  ansible_version: "milestone"
         cassandra_version:
           - package_version: "41x"
             tar_version: "4.1.7"
@@ -238,7 +238,7 @@ jobs:
           #  python_version: "2.7"
           #  ansible_test_options: "--docker-privileged"
           - docker_image: "default"
-            python_version: "3.12"
+            python_version: "3.10" # ccm / six
             ansible_test_options: ""
         cassandra_module: ${{ fromJson(needs.integration_matrix.outputs.matrix) }}
     steps:
