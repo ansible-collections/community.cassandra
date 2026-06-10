@@ -19,6 +19,8 @@ class NodeToolCmd(object):
         self.nodetool_flags = module.params['nodetool_flags']
         self.debug = module.params['debug']
         self.cassandra_version = module.params['cassandra_version']
+        self.resolve_ip = bool(module.params.get('resolve_ip', False))
+        self.keyspace = module.params['keyspace']
         if self.host is None:
             self.host = socket.getfqdn()
         if self.cassandra_version is None:
@@ -50,6 +52,10 @@ class NodeToolCmd(object):
                 cmd += " --password '{0}'".format(self.password)
         # The thing we want nodetool to execute
         cmd += " {0}".format(sub_command)
+        if self.resolve_ip:
+            cmd += " --resolve-ip"
+        if self.keyspace is not None:
+            cmd += " -- {0}".format(self.keyspace)
         if self.debug:
             self.module.debug(cmd)
         return self.execute_command(cmd)
