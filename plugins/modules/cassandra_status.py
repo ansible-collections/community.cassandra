@@ -41,6 +41,11 @@ options:
       - The number of seconds to wait between poll executions.
     type: int
     default: 30
+  resolve_ip:
+    description:
+      - Resolve node ip address to domain names.
+    type: bool
+    default: false
 '''
 
 EXAMPLES = '''
@@ -90,6 +95,7 @@ class NodeToolStatusCommand(NodeToolCmd):
     def __init__(self, module):
         NodeToolCmd.__init__(self, module)
         self.status_cmd = "status"
+        
 
     def status_command(self):
         return self.nodetool_cmd(self.status_cmd)
@@ -178,7 +184,8 @@ def main():
     argument_spec.update(
         down=dict(type='int', default=0, aliases=["d"]),
         poll=dict(type='int', default=1),
-        interval=dict(type='int', default=30)
+        interval=dict(type='int', default=30),
+        resolve_ip=dict(type='bool'm default=False),
     )
     module = AnsibleModule(
         argument_spec=argument_spec,

@@ -17,4 +17,5 @@ def cassandra_common_argument_spec():
         username=dict(type='str', no_log=True, aliases=['login_user']),
         nodetool_flags=dict(type='str', default="-Dcom.sun.jndi.rmiURLParsing=legacy"),
         cassandra_version=dict(type='str', default=None),
+        keyspace=dict(type='str', default=None),
     )
