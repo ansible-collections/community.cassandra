@@ -157,7 +157,7 @@
   ansible.builtin.git:
     repo: https://github.com/apache/cassandra-ccm.git
     dest: "/opt/cassandra-ccm"
-    version: "trunk"
+    version: "cassandra-test"
     update: true
     force: true
   retries: 5
