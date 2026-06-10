@@ -185,7 +185,7 @@ def main():
         down=dict(type='int', default=0, aliases=["d"]),
         poll=dict(type='int', default=1),
         interval=dict(type='int', default=30),
-        resolve_ip=dict(type='bool'm default=False),
+        resolve_ip=dict(type='bool', default=False),
     )
     module = AnsibleModule(
         argument_spec=argument_spec,
