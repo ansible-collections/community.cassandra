@@ -146,6 +146,12 @@
     - /home/cassandra
     - /home/cassandra/config
 
+# We need six specifically installed for CCM (python 3.8)
+- name: Install six for CCM python
+  ansible.builtin.shell: python3.8 -m pip install six
+  become: true
+  when: cassandra_version.startswith('3')
+
 #- name: Install ccm via pip
 #  pip:
 #    name: ccm
@@ -343,7 +349,3 @@
   ansible.builtin.pip:
     name: textract
     state: absent
-
-- name: Install six
-  ansible.builtin.pip:
-    name: six
