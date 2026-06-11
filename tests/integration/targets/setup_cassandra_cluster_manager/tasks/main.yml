@@ -43,6 +43,14 @@
     state: "stopped"
   ignore_errors: true  # Might not exist
 
+- name: Wait for Cassandra apt service to release port 7000
+  ansible.builtin.wait_for:
+    port: 7000
+    host: 127.0.0.1
+    state: absent
+    timeout: 60
+  ignore_errors: true  # Port may never have been in use
+
 - name: Install sudo
   package:
     name: sudo
