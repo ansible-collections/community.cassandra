@@ -140,7 +140,8 @@
     CASSANDRA_HOME: "/home/cassandra"
     JAVA_TOOL_OPTIONS: "-Dcom.sun.jndi.rmiURLParsing=legacy"
     PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ant/bin
-    CCM_CLUSTER_START_DEFAULT_TIMEOUT: 600      
+    CCM_CLUSTER_START_DEFAULT_TIMEOUT: 600
+    JAVA_HOME: "{{ (ansible_os_family == 'RedHat') | ternary('/usr/lib/jvm/java-' ~ j_version ~ '-openjdk', '/usr/lib/jvm/java-' ~ j_version ~ '-openjdk-amd64') }}"
 
 - name: Get cluster status
   shell: sudo -E -u cassandra bash -c "{{ ccm_cmd }} status"
@@ -485,7 +486,8 @@
     CASSANDRA_HOME: "/home/cassandra"
     JAVA_TOOL_OPTIONS: "-Dcom.sun.jndi.rmiURLParsing=legacy"
     PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ant/bin
-    CCM_CLUSTER_START_DEFAULT_TIMEOUT: 600    
+    CCM_CLUSTER_START_DEFAULT_TIMEOUT: 600
+    JAVA_HOME: "{{ (ansible_os_family == 'RedHat') | ternary('/usr/lib/jvm/java-' ~ j_version ~ '-openjdk', '/usr/lib/jvm/java-' ~ j_version ~ '-openjdk-amd64') }}"
 
 - name: Get cluster status
   shell: sudo -E -u cassandra bash -c "{{ ccm_cmd }} status"

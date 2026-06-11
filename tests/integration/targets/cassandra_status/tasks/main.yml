@@ -76,13 +76,15 @@
           - "'127.0.0.8' not in rhys.cluster_status['marlow']['up']"
 
     - name: Start node2
-      ansible.builtin.shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd | mandatory }} marlow1 start &\""
+      ansible.builtin.shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd | mandatory }} marlow1 start\""
       become_user: cassandra
       args:
         chdir: /home/cassandra
       environment:
         CCM_CONFIG_DIR: "/home/cassandra/config"
         CASSANDRA_HOME: "/home/cassandra"
+        PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ant/bin
+        JAVA_HOME: "{{ (ansible_os_family == 'RedHat') | ternary('/usr/lib/jvm/java-' ~ j_version ~ '-openjdk', '/usr/lib/jvm/java-' ~ j_version ~ '-openjdk-amd64') }}"
 
     # We expect marlow1 to rejoin the cluster
     - name: Execute module after marlow1 started again
