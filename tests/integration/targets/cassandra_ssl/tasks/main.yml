@@ -115,6 +115,17 @@
     dest: /home/cassandra/config/test/{{ item.node }}/conf/cassandra-rackdc.properties
   with_items: "{{ cassandra_nodes }}"
 
+- name: Cap JVM heap for CI runners via cassandra-env.sh
+  ansible.builtin.blockinfile:
+    path: "/home/cassandra/config/ssl-test-cluster/{{ item.node }}/conf/cassandra-env.sh"
+    marker: "# {mark} CI JVM HEAP SETTINGS"
+    block: |
+      MAX_HEAP_SIZE="256M"
+      HEAP_NEWSIZE="256M"
+    owner: cassandra
+    group: cassandra
+  with_items: "{{ cassandra_nodes }}"
+
 - set_fact:
     cassandra_node_delay: 120
   when: ansible_os_family == "RedHat"
@@ -447,6 +458,17 @@
       dc={{ item.dc }}
       rack=rack1
     dest: /home/cassandra/config/test/{{ item.node }}/conf/cassandra-rackdc.properties
+  with_items: "{{ cassandra_nodes }}"
+
+- name: Cap JVM heap for CI runners via cassandra-env.sh
+  ansible.builtin.blockinfile:
+    path: "/home/cassandra/config/ssl-test-cluster-auth/{{ item.node }}/conf/cassandra-env.sh"
+    marker: "# {mark} CI JVM HEAP SETTINGS"
+    block: |
+      MAX_HEAP_SIZE="256M"
+      HEAP_NEWSIZE="256M"
+    owner: cassandra
+    group: cassandra
   with_items: "{{ cassandra_nodes }}"
 
 - set_fact:
