@@ -178,15 +178,6 @@
     executable: pip3.8
   become: true
 
-- ansible.builtin.shell: find /usr -name ccm -ls
-
-- name: DEBUG - Test with PATH set
-  ansible.builtin.shell: |
-    which ccm && which ant
-  environment:
-    PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ant/bin
-  ignore_errors: true
-
 - set_fact:
     ccm_cmd: /usr/local/bin/ccm
 
@@ -313,7 +304,6 @@
     PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ant/bin
     JAVA_HOME: "{{ (ansible_os_family == 'RedHat') | ternary('/usr/lib/jvm/java-' ~ j_version ~ '-openjdk', '/usr/lib/jvm/java-' ~ j_version ~ '-openjdk-amd64') }}"
     CCM_CLUSTER_START_DEFAULT_TIMEOUT: "600"
-  ignore_errors: true # tmp debug
 
 - name: Get cluster status
   ansible.builtin.shell: sudo -E -u cassandra bash -c "{{ ccm_cmd }} status"
@@ -345,8 +335,3 @@
     delay: 30
     timeout: 600
   with_items: "{{ cassandra_nodes }}"
-
-- name: Remove textract
-  ansible.builtin.pip:
-    name: textract
-    state: absent
