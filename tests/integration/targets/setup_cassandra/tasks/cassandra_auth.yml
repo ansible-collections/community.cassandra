@@ -32,13 +32,17 @@
     line: "{{ cassandra_authorizer}}"
   no_log: yes
 
-# Should be replaced by 'nodetool invalidatecredentialscache' in 4.1+
 - name: Disable credential cache
   lineinfile:
     path: "{{ cassandra_yml_file }}"
     regexp: "^credentials_validity"
-    line: 'credentials_validity_in_ms: 0'
+    line: "{{ cassandra_credentials_validity_line }}"
 
+- name: Disable credentials update rate limit
+  lineinfile:
+    path: "{{ cassandra_yml_file }}"
+    regexp: "^#?.*credentials_update_interval"
+    line: "{{ cassandra_credentials_update_interval_line }}"
 
 - name: Add lines for nodetool auth to cassandra-env.sh
   blockinfile:
