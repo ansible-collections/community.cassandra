@@ -1,0 +1,13 @@
+- name: Execute module against the first ccm node with resolve_ip
+  community.cassandra.cassandra_status:
+    host: 127.0.0.1
+    port: 7100
+    nodetool_path: /home/cassandra/config/repository/{{ cassandra_version }}/bin
+    resolve_ip: true
+  register: rhys
+
+- name: debug
+  ansible.builtin.debug:
+    var: rhys
+
+
