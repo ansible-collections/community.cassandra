@@ -20,7 +20,6 @@ class NodeToolCmd(object):
         self.debug = module.params['debug']
         self.cassandra_version = module.params['cassandra_version']
         self.resolve_ip = module.params.get('resolve_ip', False)
-        self.keyspace = module.params['keyspace']
         if self.host is None:
             self.host = socket.getfqdn()
         if self.cassandra_version is None:

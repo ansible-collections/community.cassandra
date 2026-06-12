@@ -9,5 +9,3 @@
 - name: debug
   ansible.builtin.debug:
     var: rhys
-
-
