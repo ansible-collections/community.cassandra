@@ -172,10 +172,21 @@ def cluster_up_down(stdout):
             cluster_up_down[data_center] = dict()
             cluster_up_down[data_center]["up"] = list()
             cluster_up_down[data_center]["down"] = list()
+            cluster_up_down[data_center]["nodes"] = list()
         if line.startswith("UN") and bool(re.findall(r'[0-9]+(?:\.[0-9]+){3}', line)):
             cluster_up_down[data_center]["up"].append(line.split()[1])
         if line.startswith("D") and bool(re.findall(r'[0-9]+(?:\.[0-9]+){3}', line)):
             cluster_up_down[data_center]["down"].append(line.split()[1])
+        cluster_up_down[data_center]["nodes"].append({ 
+            "address": line.split()[1],
+            "load": line.split()[2],
+            "tokens": line.split()[3],
+            "owns": line.split()[4],
+            "host_id": line.split()[5],
+            "rack:": line.split()[6],
+            "status": line.split()[0][0],
+            "state": line.split()[0][1],
+        })
     return cluster_up_down
 
 
