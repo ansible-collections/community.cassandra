@@ -117,13 +117,13 @@ fullquerylog_config:
 '''
 
 from ansible.module_utils.basic import AnsibleModule
-import shlex
+
 try:
-    import pipes
+    import shlex
 except ImportError as imp_exc:
-    PIPES_LIBRARY_IMPORT_ERROR = imp_exc
+    SHLEX_LIBRARY_IMPORT_ERROR = imp_exc
 else:
-    PIPES_LIBRARY_IMPORT_ERROR = None
+    SHLEX_LIBRARY_IMPORT_ERROR = None
 __metaclass__ = type
 
 
@@ -139,8 +139,6 @@ def escape_param(param):
     escaped = None
     if hasattr(shlex, 'quote'):
         escaped = shlex.quote(param)
-    elif hasattr(pipes, 'quote'):
-        escaped = pipes.quote(param)
     else:
         escaped = "'" + param.replace("'", "'\\''") + "'"
     return escaped

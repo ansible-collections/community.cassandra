@@ -8,7 +8,7 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
 
 
 def test_ensure_firewalld_commands(host):
-        # TODO Test ufw cmds
+    # TODO Test ufw cmds
     if host.system_info.distribution == "redhat":
         firewalld_commands = [
             "firewall-cmd",
@@ -25,11 +25,11 @@ def test_ensure_cassandra_ports_open(host):
     # TODO Test ufw rules
     if host.system_info.distribution == "redhat":
         expected_output = ['22/tcp',
-                        '7000/tcp',
-                        '7001/tcp',
-                        '7199/tcp',
-                        '9042/tcp',
-                        '9160/tcp']
+                           '7000/tcp',
+                           '7001/tcp',
+                           '7199/tcp',
+                           '9042/tcp',
+                           '9160/tcp']
         with host.sudo():
             cmd = host.run("firewall-cmd --list-ports")
 

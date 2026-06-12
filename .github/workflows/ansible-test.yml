@@ -17,12 +17,14 @@ jobs:
     strategy:
       matrix:
         versions:
-          - python_version: "3.11"
-            ansible_version: "stable-2.15"
-          - python_version: "3.12"
+          - python_version: "3.10"
             ansible_version: "stable-2.16"
-          - python_version: "3.13"
-            ansible_version: "devel"
+          - python_version: "3.11"
+            ansible_version: "stable-2.17"
+          - python_version: "3.12"
+            ansible_version: "stable-2.18"
+          #- python_version: "3.12"
+          #  ansible_version: "devel"
     steps:
 
       - name: Check out code
@@ -43,7 +45,7 @@ jobs:
           command: pip install https://github.com/ansible/ansible/archive/${{ matrix.versions.ansible_version }}.tar.gz --disable-pip-version-check
 
       - name: Run sanity tests
-        run: ansible-test sanity --docker -v --color --python 3.9
+        run: ansible-test sanity --docker -v --color --python ${{ matrix.versions.python_version }}
 
   integration_matrix:
     runs-on: ubuntu-24.04
@@ -80,22 +82,17 @@ jobs:
     strategy:
       matrix:
         versions:
-          - python_version: "3.11"
-            ansible_version: "stable-2.15"
-          - python_version: "3.12"
+          - python_version: "3.10"
             ansible_version: "stable-2.16"
-          - python_version: "3.13"
-            ansible_version: "devel"
+          - python_version: "3.10"
+            ansible_version: "stable-2.17"
         cassandra_version:
           - package_version: "311x"
             tar_version: "3.11.17"
         test_scenario:
-          - docker_image: "ubuntu2204"
+          - docker_image: "default"
             python_version: "3.10"
             ansible_test_options: ""
-          #- docker_image: centos7
-          #  python_version: "2.7"
-          #  ansible_test_options: "--docker-privileged"
         cassandra_module: ${{ fromJson(needs.integration_matrix.outputs.matrix) }}
     steps:
       - name: Check out code
@@ -149,12 +146,14 @@ jobs:
     strategy:
       matrix:
         versions:
-          - python_version: "3.11"
-            ansible_version: "stable-2.15"
-          - python_version: "3.12"
+          - python_version: "3.10"
             ansible_version: "stable-2.16"
-          - python_version: "3.13"
-            ansible_version: "devel"
+          - python_version: "3.10"
+            ansible_version: "stable-2.17"
+          #- python_version: "3.12"
+          #  ansible_version: "stable-2.18"
+          #- python_version: "3.12"
+          #  ansible_version: "milestone"
         cassandra_version:
           - package_version: "40x"
             tar_version: "4.0.9"
@@ -162,8 +161,8 @@ jobs:
           #- docker_image: centos7
           #  python_version: "2.7"
           #  ansible_test_options: "--docker-privileged"
-          - docker_image: "ubuntu2204"
-            python_version: "3.10"
+          - docker_image: "default"
+            python_version: "3.10" # ccm issues with six
             ansible_test_options: ""
         cassandra_module: ${{ fromJson(needs.integration_matrix.outputs.matrix) }}
     steps:
@@ -218,12 +217,14 @@ jobs:
     strategy:
       matrix:
         versions:
-          - python_version: "3.11"
-            ansible_version: "stable-2.15"
-          - python_version: "3.12"
+          - python_version: "3.10"
             ansible_version: "stable-2.16"
-          - python_version: "3.13"
-            ansible_version: "devel"
+          - python_version: "3.10"
+            ansible_version: "stable-2.17"
+          #- python_version: "3.12" ccm issues with six older python https://github.com/apache/cassandra-ccm/pull/800
+          #  ansible_version: "stable-2.18"
+          #- python_version: "3.12"
+          #  ansible_version: "milestone"
         cassandra_version:
           - package_version: "41x"
             tar_version: "4.1.7"
@@ -231,8 +232,8 @@ jobs:
           #- docker_image: centos7
           #  python_version: "2.7"
           #  ansible_test_options: "--docker-privileged"
-          - docker_image: "ubuntu2204"
-            python_version: "3.10"
+          - docker_image: "default"
+            python_version: "3.10" # ccm / six
             ansible_test_options: ""
         cassandra_module: ${{ fromJson(needs.integration_matrix.outputs.matrix) }}
     steps:

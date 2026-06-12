@@ -291,6 +291,34 @@ try:
 except Exception:
     HAS_CASSANDRA_DRIVER = False
 
+    # This is here for ansible-test import (when cassandra-driver is not installed)
+    class ConsistencyLevel:
+        ANY = "ANY"
+        ONE = "ONE"
+        TWO = "TWO"
+        THREE = "THREE"
+        QUORUM = "QUORUM"
+        ALL = "ALL"
+        LOCAL_QUORUM = "LOCAL_QUORUM"
+        EACH_QUORUM = "EACH_QUORUM"
+        SERIAL = "SERIAL"
+        LOCAL_SERIAL = "LOCAL_SERIAL"
+        LOCAL_ONE = "LOCAL_ONE"
+
+    ConsistencyLevel.name_to_value = {
+        "ANY": ConsistencyLevel.ANY,
+        "ONE": ConsistencyLevel.ONE,
+        "TWO": ConsistencyLevel.TWO,
+        "THREE": ConsistencyLevel.THREE,
+        "QUORUM": ConsistencyLevel.QUORUM,
+        "ALL": ConsistencyLevel.ALL,
+        "LOCAL_QUORUM": ConsistencyLevel.LOCAL_QUORUM,
+        "EACH_QUORUM": ConsistencyLevel.EACH_QUORUM,
+        "SERIAL": ConsistencyLevel.SERIAL,
+        "LOCAL_SERIAL": ConsistencyLevel.LOCAL_SERIAL,
+        "LOCAL_ONE": ConsistencyLevel.LOCAL_ONE,
+    }
+
 try:
     from ssl import SSLContext, PROTOCOL_TLS
     import ssl as ssl_lib
@@ -468,7 +496,7 @@ def main():
             consistency_level=dict(type='str',
                                    required=False,
                                    default="LOCAL_ONE",
-                                   choices=ConsistencyLevel.name_to_value.keys())),
+                                   choices=list(ConsistencyLevel.name_to_value.keys()))),
         supports_check_mode=True
     )
 
