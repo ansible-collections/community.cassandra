@@ -29,6 +29,18 @@ cassandra_authorizer: "authorizer: CassandraAuthorizer"
 cassandra_admin_user: cassandra
 cassandra_admin_pwd: cassandra
 
+# 3.11/4.0 use _in_ms integer keys; 4.1+ use duration-string keys.
+# cassandra_version is set by the test matrix: "311x", "40x", "41x", etc.
+cassandra_credentials_validity_line: >-
+  {{ 'credentials_validity_in_ms: 0'
+     if cassandra_version in ['311x', '40x']
+     else 'credentials_validity: 0ms' }}
+
+cassandra_credentials_update_interval_line: >-
+  {{ 'credentials_update_interval_in_ms: 0'
+     if cassandra_version in ['311x', '40x']
+     else 'credentials_update_interval: 0ms' }}
+
 # Generic Linux Packages
 required_packages:
   - "net-tools"

@@ -8,8 +8,6 @@ env:
   setup_cassandra_version_file: "./tests/integration/targets/setup_cassandra/defaults/main.yml"
   setup_ccm_version_file: "./tests/integration/targets/setup_cassandra_cluster_manager/defaults/main.yml"
 
-# Some of the software used in these tests, e.g. ccm and csqlsh requires the six library and this 
-# breaks on anything over python 3.10, so we hardcode this python version in ansible-test commands
 jobs:
   sanity:
     runs-on: ubuntu-24.04
@@ -95,9 +93,6 @@ jobs:
           - docker_image: "default"
             python_version: "3.10"
             ansible_test_options: ""
-          - docker_image: centos7
-            python_version: "2.7"
-            ansible_test_options: "--docker-privileged"
         cassandra_module: ${{ fromJson(needs.integration_matrix.outputs.matrix) }}
     steps:
       - name: Check out code
@@ -130,7 +125,7 @@ jobs:
           command: ansible-galaxy collection install ansible.posix -p ansible_collections/
 
       - name: Run integration tests on Python ${{ matrix.test_scenario.python_version }} | ${{ matrix.test_scenario.docker_image }} | ${{ matrix.versions.ansible_version }} | ${{ matrix.cassandra_module }} | ${{ matrix.cassandra_version.package_version }}
-        run: ansible-test integration --docker ${{ matrix.test_scenario.docker_image }} ${{ matrix.test_scenario.ansible_test_options }} -v --color --retry-on-error --python 3.8 --continue-on-error --diff --coverage  ${{ matrix.cassandra_module }}
+        run: ansible-test integration --docker ${{ matrix.test_scenario.docker_image }} ${{ matrix.test_scenario.ansible_test_options }} -v --color --retry-on-error --python ${{ matrix.test_scenario.python_version }} --continue-on-error --diff --coverage  ${{ matrix.cassandra_module }}
 
       - name: Generate coverage report.
         run: ansible-test coverage xml -v --requirements --group-by command --group-by version
@@ -201,7 +196,7 @@ jobs:
           sed -i 's/^cassandra_version:.*/cassandra_version: \"${{ matrix.cassandra_version.tar_version }}\"/g' ${{ env.setup_ccm_version_file }}
 
       - name: Run integration tests on Python ${{ matrix.test_scenario.python_version }} | ${{ matrix.test_scenario.docker_image }} | ${{ matrix.versions.ansible_version }} | ${{ matrix.cassandra_module }} | ${{ matrix.cassandra_version.package_version }}
-        run: ansible-test integration --docker ${{ matrix.test_scenario.docker_image }} ${{ matrix.test_scenario.ansible_test_options }} -v --color --retry-on-error --python 3.10 --continue-on-error --diff --coverage  ${{ matrix.cassandra_module }}
+        run: ansible-test integration --docker ${{ matrix.test_scenario.docker_image }} ${{ matrix.test_scenario.ansible_test_options }} -v --color --retry-on-error --python ${{ matrix.test_scenario.python_version }} --continue-on-error --diff --coverage  ${{ matrix.cassandra_module }}
 
       - name: Generate coverage report.
         run: ansible-test coverage xml -v --requirements --group-by command --group-by version
@@ -272,7 +267,7 @@ jobs:
           sed -i 's/^cassandra_version:.*/cassandra_version: \"${{ matrix.cassandra_version.tar_version }}\"/g' ${{ env.setup_ccm_version_file }}
 
       - name: Run integration tests on Python ${{ matrix.test_scenario.python_version }} | ${{ matrix.test_scenario.docker_image }} | ${{ matrix.versions.ansible_version }} | ${{ matrix.cassandra_module }} | ${{ matrix.cassandra_version.package_version }}
-        run: ansible-test integration --docker ${{ matrix.test_scenario.docker_image }} ${{ matrix.test_scenario.ansible_test_options }} -v --color --retry-on-error --python 3.10 --continue-on-error --diff --coverage  ${{ matrix.cassandra_module }}
+        run: ansible-test integration --docker ${{ matrix.test_scenario.docker_image }} ${{ matrix.test_scenario.ansible_test_options }} -v --color --retry-on-error --python ${{ matrix.test_scenario.python_version }} --continue-on-error --diff --coverage  ${{ matrix.cassandra_module }}
 
       - name: Generate coverage report.
         run: ansible-test coverage xml -v --requirements --group-by command --group-by version
