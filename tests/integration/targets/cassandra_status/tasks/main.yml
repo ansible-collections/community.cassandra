@@ -158,6 +158,8 @@
       environment:
         CCM_CONFIG_DIR: "/home/cassandra/config"
         CASSANDRA_HOME: "/home/cassandra"
+        PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ant/bin
+        JAVA_HOME: "{{ (ansible_os_family == 'RedHat') | ternary('/usr/lib/jvm/java-' ~ j_version ~ '-openjdk', '/usr/lib/jvm/java-' ~ j_version ~ '-openjdk-amd64') }}"
 
     - name: Test tasks for 316
       ansible.builtin.import_tasks: 316.yml
