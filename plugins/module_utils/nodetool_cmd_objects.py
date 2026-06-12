@@ -54,8 +54,6 @@ class NodeToolCmd(object):
         cmd += " {0}".format(sub_command)
         if self.resolve_ip:
             cmd += " --resolve-ip"
-        if self.keyspace is not None:
-            cmd += " -- {0}".format(self.keyspace)
         if self.debug:
             self.module.debug(cmd)
         return self.execute_command(cmd)

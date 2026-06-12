@@ -57,8 +57,4 @@ options:
       - Version of Cassandra being connected to by nodetool.
       - If a value if not provided we use `nodetool version`to auto-discover it.
     type: str
-  keyspace:
-    description:
-      - Keyspace context in which to execute the command.
-    type: str
 '''
