@@ -6,16 +6,23 @@
     resolve_ip: true
   register: rhys
 
-- name: Verify output
+- name: Verify London node details
+  ansible.builtin.assert:
+    that:
+      - item.status == 'U'
+      - item.state == 'N'
+      - item.host_id is match('^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$')
+  loop: "{{ rhys.cluster_status.london.nodes }}"
+  loop_control:
+    label: "{{ item.address }}"
+
+- name: Verify London datacentre
   ansible.builtin.assert:
     that:
       - rhys.cluster_status | length == 7
       - rhys.cluster_status.london.down | length == 0
       - rhys.cluster_status.london.up | length == 2
       - rhys.cluster_status.london.nodes | length == 2
-      - item.status == 'U'
-      - item.state == 'N'
-      - item.host_id is match('^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$')
 
 - name: Install cassandra-driver
   pip:
@@ -36,16 +43,23 @@
     keyspace: mytestkeyspace
   register: rhys
 
-- name: Verify output
+- name: Verify London node details
+  ansible.builtin.assert:
+    that:
+      - item.status == 'U'
+      - item.state == 'N'
+      - item.host_id is match('^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$')
+  loop: "{{ rhys.cluster_status.london.nodes }}"
+  loop_control:
+    label: "{{ item.address }}"
+
+- name: Verify London datacentre
   ansible.builtin.assert:
     that:
       - rhys.cluster_status | length == 7
       - rhys.cluster_status.london.down | length == 0
       - rhys.cluster_status.london.up | length == 2
       - rhys.cluster_status.london.nodes | length == 2
-      - item.status == 'U'
-      - item.state == 'N'
-      - item.host_id is match('^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$')
 
 - name: resolve_ip & keyspace
   community.cassandra.cassandra_status:
