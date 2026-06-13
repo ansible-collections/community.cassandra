@@ -38,7 +38,7 @@ jobs:
           python-version: ${{ matrix.versions.python_version }}
 
       - name: Install ansible-base (${{ matrix.versions.ansible_version }})
-        uses: nick-invision/retry@v3
+        uses: nick-invision/retry@v4
         with:
           timeout_minutes: 3
           max_attempts: 3
@@ -106,7 +106,7 @@ jobs:
           python-version: ${{ matrix.versions.python_version }}
 
       - name: Install ansible-base (${{ matrix.versions.ansible_version }})
-        uses: nick-invision/retry@v3
+        uses: nick-invision/retry@v4
         with:
           timeout_minutes: 3
           max_attempts: 3
@@ -118,7 +118,7 @@ jobs:
           sed -i 's/^cassandra_version:.*/cassandra_version: \"${{ matrix.cassandra_version.tar_version }}\"/g' ${{ env.setup_ccm_version_file }}
 
       - name: Install ansible.posix
-        uses: nick-invision/retry@v3
+        uses: nick-invision/retry@v4
         with:
           timeout_minutes: 3
           max_attempts: 3
@@ -177,14 +177,14 @@ jobs:
           python-version: ${{ matrix.versions.python_version }}
 
       - name: Install ansible-base (${{ matrix.versions.ansible_version }})
-        uses: nick-invision/retry@v3
+        uses: nick-invision/retry@v4
         with:
           timeout_minutes: 3
           max_attempts: 3
           command: pip install https://github.com/ansible/ansible/archive/${{ matrix.versions.ansible_version }}.tar.gz --disable-pip-version-check
 
       - name: Install ansible.posix
-        uses: nick-invision/retry@v3
+        uses: nick-invision/retry@v4
         with:
           timeout_minutes: 3
           max_attempts: 3
@@ -248,14 +248,14 @@ jobs:
           python-version: ${{ matrix.versions.python_version }}
 
       - name: Install ansible-base (${{ matrix.versions.ansible_version }})
-        uses: nick-invision/retry@v3
+        uses: nick-invision/retry@v4
         with:
           timeout_minutes: 3
           max_attempts: 3
           command: pip install https://github.com/ansible/ansible/archive/${{ matrix.versions.ansible_version }}.tar.gz --disable-pip-version-check
 
       - name: Install ansible.posix
-        uses: nick-invision/retry@v3
+        uses: nick-invision/retry@v4
         with:
           timeout_minutes: 3
           max_attempts: 3
