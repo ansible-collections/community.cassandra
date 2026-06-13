@@ -54,7 +54,7 @@
       {% for host in hosts_entries %}
       {{ host.ip }} {{ host.node }}
       {% endfor %}
-  become: true
+    unsafe_writes: true
 
 - name: Execute module against the first ccm node with resolve_ip
   community.cassandra.cassandra_status:
