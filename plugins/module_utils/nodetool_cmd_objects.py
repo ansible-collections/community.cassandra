@@ -51,7 +51,7 @@ class NodeToolCmd(object):
                 cmd += " --password '{0}'".format(self.password)
         # The thing we want nodetool to execute
         cmd += " {0}".format(sub_command)
-        #if self.resolve_ip:
+        #if self.resolve_ip:  Whyd oesn't this work? Check debug cmd otuput tomorrow
         #    cmd += " --resolve-ip"
         if self.debug:
             self.module.debug(cmd)

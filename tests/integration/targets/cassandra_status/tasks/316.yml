@@ -4,6 +4,7 @@
     port: 7100
     nodetool_path: /home/cassandra/config/repository/{{ cassandra_version }}/bin
     resolve_ip: true
+    debug: true
   register: rhys
 
 - name: debug
