@@ -105,7 +105,6 @@ class NodeToolStatusCommand(NodeToolCmd):
         if module.params["keyspace"] is not None:
             self.status_cmd += " -- {0}".format(module.params["keyspace"])
 
-
     def status_command(self):
         return self.nodetool_cmd(self.status_cmd)
 

@@ -99,8 +99,8 @@
 
 - name: Assert expected node hostnames
   ansible.builtin.assert:
-    that:
-      - rhys.cluster_status.london.nodes | map(attribute='address') | list | sort == ['london1', 'london2'] | sort
+    that:  # london1 resolves to localhost here
+      - rhys.cluster_status.london.nodes | map(attribute='address') | list | sort == ['localhost', 'london2'] | sort
       - rhys.cluster_status.paris.nodes | map(attribute='address') | list == ['paris1']
       - rhys.cluster_status.newyork.nodes | map(attribute='address') | list == ['newyork1']
       - rhys.cluster_status.tokyo.nodes | map(attribute='address') | list == ['tokyo1']
