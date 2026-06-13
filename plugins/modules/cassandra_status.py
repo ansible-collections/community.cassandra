@@ -176,29 +176,39 @@ def cluster_up_down(stdout):
         }
     '''
     cluster_up_down = {}
-    for line in ''.join(stdout).split('\n'):
-        if line.startswith("Datacenter"):
-            data_center = line.split(' ')[1]
-            cluster_up_down[data_center] = dict()
-            cluster_up_down[data_center]["up"] = list()
-            cluster_up_down[data_center]["down"] = list()
-            cluster_up_down[data_center]["nodes"] = list()
-        if line.startswith("UN") and bool(re.findall(r'[0-9]+(?:\.[0-9]+){3}', line)):
-            cluster_up_down[data_center]["up"].append(line.split()[1])
-        if line.startswith("D") and bool(re.findall(r'[0-9]+(?:\.[0-9]+){3}', line)):
-            cluster_up_down[data_center]["down"].append(line.split()[1])
-        if (line.startswith("UN") or line.startswith("D")) and \
-                bool(re.findall(r'[0-9]+(?:\.[0-9]+){3}', line)):
-            cluster_up_down[data_center]["nodes"].append({ 
-                "address": line.split()[1],
-                "load": " ".join(line.split()[2:4]),
-                "tokens": line.split()[4],
-                "owns": line.split()[5],
-                "host_id": line.split()[6],
-                "rack:": line.split()[7],
-                "status": line.split()[0][0],
-                "state": line.split()[0][1],
-            })
+    node_re = re.compile(r'^[UD][NLJM]\s+')
+
+    for line in ''.join(stdout).splitlines():
+        if line.startswith("Datacenter:"):
+            data_center = line.split(":", 1)[1].strip()
+            cluster_up_down[data_center] = {
+                "up": [],
+                "down": [],
+                "nodes": []
+            }
+            continue
+
+        if not node_re.match(line):
+            continue
+
+        fields = line.split()
+
+        if fields[0].startswith("U"):
+            cluster_up_down[data_center]["up"].append(fields[1])
+
+        if fields[0].startswith("D"):
+            cluster_up_down[data_center]["down"].append(fields[1])
+
+        cluster_up_down[data_center]["nodes"].append({
+            "address": fields[1],
+            "load": " ".join(fields[2:4]),
+            "tokens": fields[4],
+            "owns": fields[5],
+            "host_id": fields[6],
+            "rack": fields[7],
+            "status": fields[0][0],
+            "state": fields[0][1],
+        })
     return cluster_up_down
 
 
