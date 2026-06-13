@@ -10,12 +10,18 @@
   ansible.builtin.debug:
     var: rhys
 
+- name: Install cassandra-driver
+  pip:
+    name: "cassandra-driver{{ ansible_python_version.startswith('2.7') | ternary('==3.26.*', '') }}"
+  environment:
+    CASS_DRIVER_NO_CYTHON: 1
+
 - name: create keyspace
   community.cassandra.cassandra_keyspace:
     name: mytestkeyspace
     state: present
 
-- name: keyspaceflag 
+- name: keyspace flag 
   community.cassandra.cassandra_status:
     host: 127.0.0.1
     port: 7100
