@@ -4,7 +4,36 @@
     port: 7100
     nodetool_path: /home/cassandra/config/repository/{{ cassandra_version }}/bin
     resolve_ip: true
-    debug: true
+  register: rhys
+
+- name: debug
+  ansible.builtin.debug:
+    var: rhys
+
+- name: create keyspace
+  community.cassandra.cassandra_keyspace:
+    name: mytestkeyspace
+    state: present
+
+- name: keyspaceflag 
+  community.cassandra.cassandra_status:
+    host: 127.0.0.1
+    port: 7100
+    nodetool_path: /home/cassandra/config/repository/{{ cassandra_version }}/bin
+    keyspace: mytestkeyspace
+  register: rhys
+
+- name: debug
+  ansible.builtin.debug:
+    var: rhys
+
+- name: resolve_ip & keyspace
+  community.cassandra.cassandra_status:
+    host: 127.0.0.1
+    port: 7100
+    nodetool_path: /home/cassandra/config/repository/{{ cassandra_version }}/bin
+    resolve_ip: true
+    keyspace: mytestkeyspace
   register: rhys
 
 - name: debug
