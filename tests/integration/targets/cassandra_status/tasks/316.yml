@@ -6,9 +6,16 @@
     resolve_ip: true
   register: rhys
 
-- name: debug
-  ansible.builtin.debug:
-    var: rhys
+- name: Verify output
+  ansible.builtin.assert:
+    that:
+      - rhys.cluster_status | length == 7
+      - rhys.cluster_status.london.down | length == 0
+      - rhys.cluster_status.london.up | length == 2
+      - rhys.cluster_status.london.nodes | length == 2
+      - item.status == 'U'
+      - item.state == 'N'
+      - item.host_id is match('^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$')
 
 - name: Install cassandra-driver
   pip:
@@ -29,9 +36,16 @@
     keyspace: mytestkeyspace
   register: rhys
 
-- name: debug
-  ansible.builtin.debug:
-    var: rhys
+- name: Verify output
+  ansible.builtin.assert:
+    that:
+      - rhys.cluster_status | length == 7
+      - rhys.cluster_status.london.down | length == 0
+      - rhys.cluster_status.london.up | length == 2
+      - rhys.cluster_status.london.nodes | length == 2
+      - item.status == 'U'
+      - item.state == 'N'
+      - item.host_id is match('^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$')
 
 - name: resolve_ip & keyspace
   community.cassandra.cassandra_status:
@@ -69,6 +83,13 @@
     resolve_ip: true
   register: rhys
 
-- name: debug
-  ansible.builtin.debug:
-    var: rhys # TODO need to verify module outputs
+- name: Assert expected node hostnames
+  ansible.builtin.assert:
+    that:
+      - rhys.cluster_status.london.nodes | map(attribute='address') | list | sort == ['london1', 'london2'] | sort
+      - rhys.cluster_status.paris.nodes | map(attribute='address') | list == ['paris1']
+      - rhys.cluster_status.newyork.nodes | map(attribute='address') | list == ['newyork1']
+      - rhys.cluster_status.tokyo.nodes | map(attribute='address') | list == ['tokyo1']
+      - rhys.cluster_status.zurich.nodes | map(attribute='address') | list == ['zurich1']
+      - rhys.cluster_status.amsterdam.nodes | map(attribute='address') | list == ['amsterdam1']
+      - rhys.cluster_status.marlow.nodes | map(attribute='address') | list == ['marlow1']
