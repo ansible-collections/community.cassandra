@@ -209,7 +209,7 @@ def main():
         poll=dict(type='int', default=1),
         interval=dict(type='int', default=30),
         resolve_ip=dict(type='bool', default=False),
-        keyspace=dict(type='str', required=True, no_log=False),
+        keyspace=dict(type='str', required=False, no_log=False),
     )
     module = AnsibleModule(
         argument_spec=argument_spec,
