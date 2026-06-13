@@ -51,7 +51,7 @@
     path: /etc/hosts
     marker: "# {mark} ANSIBLE CLUSTER HOSTS"
     block: |
-      {% for host in nodes %}
+      {% for host in hosts_entries %}
       {{ host.ip }} {{ host.node }}
       {% endfor %}
   become: true
