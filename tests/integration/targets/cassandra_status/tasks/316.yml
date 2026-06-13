@@ -70,10 +70,6 @@
     keyspace: mytestkeyspace
   register: rhys
 
-- name: debug
-  ansible.builtin.debug:
-    var: rhys
-
 - name: Manage cluster hosts entries
   ansible.builtin.blockinfile:
     path: /etc/hosts
@@ -83,11 +79,6 @@
       {{ host.ip }} {{ host.node }}
       {% endfor %}
     unsafe_writes: true
-
-- name: debug cmd
-  shell: ./nodetool -h 127.0.0.1 -p 7100 status --resolve-ip
-  args:
-    chdir: "/home/cassandra/config/repository/{{ cassandra_version }}/bin"
 
 - name: Execute module against the first ccm node with resolve_ip
   community.cassandra.cassandra_status:
