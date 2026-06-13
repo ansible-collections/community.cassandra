@@ -46,6 +46,11 @@ options:
       - Resolve node ip address to domain names.
     type: bool
     default: false
+  keyspace:
+    description:
+      - Optional keyspace argument.
+    type: str
+    required: True
 '''
 
 EXAMPLES = '''
@@ -95,6 +100,11 @@ class NodeToolStatusCommand(NodeToolCmd):
     def __init__(self, module):
         NodeToolCmd.__init__(self, module)
         self.status_cmd = "status"
+        if module.params["resolve_ip"]:
+            self.status_cmd += " --resolve-ip"
+        if module.params["keyspace"] is not None:
+            self.cmd += " -- {0}".format(module.params["keyspace"])
+        
         
 
     def status_command(self):
@@ -181,7 +191,7 @@ def cluster_up_down(stdout):
                 bool(re.findall(r'[0-9]+(?:\.[0-9]+){3}', line)):
             cluster_up_down[data_center]["nodes"].append({ 
                 "address": line.split()[1],
-                "load": " ".join(map(str, line.split()[2:4])),
+                "load": " ".join(line.split()[2:4]),
                 "tokens": line.split()[4],
                 "owns": line.split()[5],
                 "host_id": line.split()[6],
@@ -199,6 +209,7 @@ def main():
         poll=dict(type='int', default=1),
         interval=dict(type='int', default=30),
         resolve_ip=dict(type='bool', default=False),
+        keyspace=dict(type='str', required=True, no_log=False),
     )
     module = AnsibleModule(
         argument_spec=argument_spec,
