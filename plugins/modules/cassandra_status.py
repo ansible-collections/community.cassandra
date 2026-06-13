@@ -103,7 +103,7 @@ class NodeToolStatusCommand(NodeToolCmd):
         if module.params["resolve_ip"]:
             self.status_cmd += " --resolve-ip"
         if module.params["keyspace"] is not None:
-            self.cmd += " -- {0}".format(module.params["keyspace"])
+            self.status_cmd += " -- {0}".format(module.params["keyspace"])
         
         
 
