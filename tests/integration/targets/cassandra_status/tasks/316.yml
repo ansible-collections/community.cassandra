@@ -16,7 +16,7 @@
   loop_control:
     label: "{{ item.address }}"
 
-- name: Verify London datacentre
+- name: Verify data
   ansible.builtin.assert:
     that:
       - rhys.cluster_status | length == 7
@@ -30,7 +30,9 @@
       - rhys.cluster_status.zurich.nodes | map(attribute='address') | list == ['127.0.0.6']
       - rhys.cluster_status.amsterdam.nodes | map(attribute='address') | list == ['127.0.0.7']
       - rhys.cluster_status.marlow.nodes | map(attribute='address') | list == ['127.0.0.8']
-      - rhys.cluster_status_london.up | list | sort == ['127.0.0.1', '127.0.0.2'] | sort
+      - rhys.cluster_status.marlow.up | list | sort == ['127.0.0.8'] | sort
+      - rhys.cluster_status.newyork.up | list | sort == ['127.0.0.4'] | sort
+      - rhys.cluster_status.paris.up | list | sort == ['127.0.0.3'] | sort
 
 - name: Install cassandra-driver
   pip:
@@ -61,7 +63,7 @@
   loop_control:
     label: "{{ item.address }}"
 
-- name: Verify London datacentre
+- name: Verify data
   ansible.builtin.assert:
     that:
       - rhys.cluster_status | length == 7
@@ -75,7 +77,9 @@
       - rhys.cluster_status.zurich.nodes | map(attribute='address') | list == ['127.0.0.6']
       - rhys.cluster_status.amsterdam.nodes | map(attribute='address') | list == ['127.0.0.7']
       - rhys.cluster_status.marlow.nodes | map(attribute='address') | list == ['127.0.0.8']
-      - rhys.cluster_status_london.up | list | sort == ['127.0.0.1', '127.0.0.2'] | sort
+      - rhys.cluster_status.marlow.up | list | sort == ['127.0.0.8'] | sort
+      - rhys.cluster_status.newyork.up | list | sort == ['127.0.0.4'] | sort
+      - rhys.cluster_status.paris.up | list | sort == ['127.0.0.3'] | sort
 
 - name: resolve_ip & keyspace
   community.cassandra.cassandra_status:
@@ -114,7 +118,9 @@
       - rhys.cluster_status.zurich.nodes | map(attribute='address') | list == ['zurich1']
       - rhys.cluster_status.amsterdam.nodes | map(attribute='address') | list == ['amsterdam1']
       - rhys.cluster_status.marlow.nodes | map(attribute='address') | list == ['marlow1']
-      - rhys.cluster_status_london.up | list | sort == ['localhost', 'london2']
+      - rhys.cluster_status.marlow.up | list | sort == ['marlow1'] | sort
+      - rhys.cluster_status.newyork.up | list | sort == ['newyork1'] | sort
+      - rhys.cluster_status.paris.up | list | sort == ['paris1'] | sort
 
 - name: Assert london first node contains non-empty values
   ansible.builtin.assert:
@@ -177,4 +183,6 @@
           - rhys.cluster_status.zurich.nodes | map(attribute='address') | list == ['127.0.0.6']
           - rhys.cluster_status.amsterdam.nodes | map(attribute='address') | list == ['127.0.0.7']
           - rhys.cluster_status.marlow.nodes | map(attribute='address') | list == ['127.0.0.8']
-          - rhys.cluster_status_london.up | list | sort == ['127.0.0.1', '127.0.0.2'] | sort
+          - rhys.cluster_status.marlow.up | list | sort == ['127.0.0.8'] | sort
+          - rhys.cluster_status.newyork.up | list | sort == ['127.0.0.4'] | sort
+          - rhys.cluster_status.paris.up | list | sort == ['127.0.0.3'] | sort
