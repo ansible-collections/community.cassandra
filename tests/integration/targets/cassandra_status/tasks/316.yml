@@ -23,6 +23,14 @@
       - rhys.cluster_status.london.down | length == 0
       - rhys.cluster_status.london.up | length == 2
       - rhys.cluster_status.london.nodes | length == 2
+      - rhys.cluster_status.london.nodes | map(attribute='ip') | list | sort == ['127.0.0.1', '127.0.0.2'] | sort
+      - rhys.cluster_status.paris.nodes | map(attribute='ip') | list == ['127.0.0.3']
+      - rhys.cluster_status.newyork.nodes | map(attribute='ip') | list == ['127.0.0.4']
+      - rhys.cluster_status.tokyo.nodes | map(attribute='ip') | list == ['127.0.0.5']
+      - rhys.cluster_status.zurich.nodes | map(attribute='ip') | list == ['127.0.0.6']
+      - rhys.cluster_status.amsterdam.nodes | map(attribute='ip') | list == ['127.0.0.7']
+      - rhys.cluster_status.marlow.nodes | map(attribute='ip') | list == ['127.0.0.8']
+      - rhys.cluster_status_london.up | list | sort == ['127.0.0.1', '127.0.0.2'] | sort
 
 - name: Install cassandra-driver
   pip:
@@ -60,6 +68,14 @@
       - rhys.cluster_status.london.down | length == 0
       - rhys.cluster_status.london.up | length == 2
       - rhys.cluster_status.london.nodes | length == 2
+      - rhys.cluster_status.london.nodes | map(attribute='ip') | list | sort == ['127.0.0.1', '127.0.0.2'] | sort
+      - rhys.cluster_status.paris.nodes | map(attribute='ip') | list == ['127.0.0.3']
+      - rhys.cluster_status.newyork.nodes | map(attribute='ip') | list == ['127.0.0.4']
+      - rhys.cluster_status.tokyo.nodes | map(attribute='ip') | list == ['127.0.0.5']
+      - rhys.cluster_status.zurich.nodes | map(attribute='ip') | list == ['127.0.0.6']
+      - rhys.cluster_status.amsterdam.nodes | map(attribute='ip') | list == ['127.0.0.7']
+      - rhys.cluster_status.marlow.nodes | map(attribute='ip') | list == ['127.0.0.8']
+      - rhys.cluster_status_london.up | list | sort == ['127.0.0.1', '127.0.0.2'] | sort
 
 - name: resolve_ip & keyspace
   community.cassandra.cassandra_status:
@@ -98,3 +114,28 @@
       - rhys.cluster_status.zurich.nodes | map(attribute='address') | list == ['zurich1']
       - rhys.cluster_status.amsterdam.nodes | map(attribute='address') | list == ['amsterdam1']
       - rhys.cluster_status.marlow.nodes | map(attribute='address') | list == ['marlow1']
+      - rhys.cluster_status_london.up | list | sort == ['localhost', 'london2']
+
+- name: Assert london first node contains expected fields
+  ansible.builtin.assert:
+    that:
+      - >
+        ['address', 'load', 'tokens', 'owns',
+         'host_id', 'rack', 'status', 'state']
+        | difference(rhys.cluster_status.london.nodes[0].keys())
+        | length == 0
+
+- name: Test with keyspace that does not exist
+  community.cassandra.cassandra_status:
+    host: 127.0.0.1
+    port: 7100
+    nodetool_path: "/home/cassandra/config/repository/{{ cassandra_version }}/bin"
+    keyspace: idonotexist
+  register: rhys
+  ignore_errors: true
+
+- name: Assert expected error message
+  ansible.builtin.assert:
+    that:
+      - rhys.failed
+      - "'The keyspace idonotexist, does not exist' in rhys.msg"
