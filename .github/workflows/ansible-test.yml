@@ -130,7 +130,7 @@ jobs:
       - name: Generate coverage report.
         run: ansible-test coverage xml -v --requirements --group-by command --group-by version
 
-      - uses: codecov/codecov-action@v3
+      - uses: codecov/codecov-action@v7.0.0
         with:
           fail_ci_if_error: false
 
@@ -201,7 +201,7 @@ jobs:
       - name: Generate coverage report.
         run: ansible-test coverage xml -v --requirements --group-by command --group-by version
 
-      - uses: codecov/codecov-action@v3
+      - uses: codecov/codecov-action@v7.0.0
         with:
           fail_ci_if_error: false
 
@@ -272,7 +272,7 @@ jobs:
       - name: Generate coverage report.
         run: ansible-test coverage xml -v --requirements --group-by command --group-by version
 
-      - uses: codecov/codecov-action@v3
+      - uses: codecov/codecov-action@v7.0.0
         with:
           fail_ci_if_error: false
 
