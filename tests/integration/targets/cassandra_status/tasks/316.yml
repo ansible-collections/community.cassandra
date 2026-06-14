@@ -139,3 +139,39 @@
     that:
       - rhys.failed
       - "'The keyspace idonotexist, does not exist' in rhys.msg"
+
+- name: Repeat test to ensure we don't get acccidental ip resolutions when not wanted
+  block:
+    - name: keyspace flag 
+      community.cassandra.cassandra_status:
+        host: 127.0.0.1
+        port: 7100
+        nodetool_path: "/home/cassandra/config/repository/{{ cassandra_version }}/bin"
+        keyspace: mytestkeyspace
+      register: rhys
+
+    - name: Verify London node details
+      ansible.builtin.assert:
+        that:
+          - item.status == 'U'
+          - item.state == 'N'
+          - item.host_id is match('^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$')
+      loop: "{{ rhys.cluster_status.london.nodes }}"
+      loop_control:
+        label: "{{ item.address }}"
+
+    - name: Verify London datacentre
+      ansible.builtin.assert:
+        that:
+          - rhys.cluster_status | length == 7
+          - rhys.cluster_status.london.down | length == 0
+          - rhys.cluster_status.london.up | length == 2
+          - rhys.cluster_status.london.nodes | length == 2
+          - rhys.cluster_status.london.nodes | map(attribute='ip') | list | sort == ['127.0.0.1', '127.0.0.2'] | sort
+          - rhys.cluster_status.paris.nodes | map(attribute='ip') | list == ['127.0.0.3']
+          - rhys.cluster_status.newyork.nodes | map(attribute='ip') | list == ['127.0.0.4']
+          - rhys.cluster_status.tokyo.nodes | map(attribute='ip') | list == ['127.0.0.5']
+          - rhys.cluster_status.zurich.nodes | map(attribute='ip') | list == ['127.0.0.6']
+          - rhys.cluster_status.amsterdam.nodes | map(attribute='ip') | list == ['127.0.0.7']
+          - rhys.cluster_status.marlow.nodes | map(attribute='ip') | list == ['127.0.0.8']
+          - rhys.cluster_status_london.up | list | sort == ['127.0.0.1', '127.0.0.2'] | sort
