@@ -116,14 +116,17 @@
       - rhys.cluster_status.marlow.nodes | map(attribute='address') | list == ['marlow1']
       - rhys.cluster_status_london.up | list | sort == ['localhost', 'london2']
 
-- name: Assert london first node contains expected fields
+- name: Assert london first node contains non-empty values
   ansible.builtin.assert:
     that:
-      - >
-        ['address', 'load', 'tokens', 'owns',
-         'host_id', 'rack', 'status', 'state']
-        | difference(rhys.cluster_status.london.nodes[0].keys())
-        | length == 0
+      - rhys.cluster_status.london.nodes[0].address | length > 0
+      - rhys.cluster_status.london.nodes[0].load | length > 0
+      - rhys.cluster_status.london.nodes[0].tokens | length > 0
+      - rhys.cluster_status.london.nodes[0].owns | length > 0
+      - rhys.cluster_status.london.nodes[0].host_id | length > 0
+      - rhys.cluster_status.london.nodes[0].rack | length > 0
+      - rhys.cluster_status.london.nodes[0].status | length > 0
+      - rhys.cluster_status.london.nodes[0].state | length > 0
 
 - name: Test with keyspace that does not exist
   community.cassandra.cassandra_status:
