@@ -23,13 +23,13 @@
       - rhys.cluster_status.london.down | length == 0
       - rhys.cluster_status.london.up | length == 2
       - rhys.cluster_status.london.nodes | length == 2
-      - rhys.cluster_status.london.nodes | map(attribute='ip') | list | sort == ['127.0.0.1', '127.0.0.2'] | sort
-      - rhys.cluster_status.paris.nodes | map(attribute='ip') | list == ['127.0.0.3']
-      - rhys.cluster_status.newyork.nodes | map(attribute='ip') | list == ['127.0.0.4']
-      - rhys.cluster_status.tokyo.nodes | map(attribute='ip') | list == ['127.0.0.5']
-      - rhys.cluster_status.zurich.nodes | map(attribute='ip') | list == ['127.0.0.6']
-      - rhys.cluster_status.amsterdam.nodes | map(attribute='ip') | list == ['127.0.0.7']
-      - rhys.cluster_status.marlow.nodes | map(attribute='ip') | list == ['127.0.0.8']
+      - rhys.cluster_status.london.nodes | map(attribute='address') | list | sort == ['127.0.0.1', '127.0.0.2'] | sort
+      - rhys.cluster_status.paris.nodes | map(attribute='address') | list == ['127.0.0.3']
+      - rhys.cluster_status.newyork.nodes | map(attribute='address') | list == ['127.0.0.4']
+      - rhys.cluster_status.tokyo.nodes | map(attribute='address') | list == ['127.0.0.5']
+      - rhys.cluster_status.zurich.nodes | map(attribute='address') | list == ['127.0.0.6']
+      - rhys.cluster_status.amsterdam.nodes | map(attribute='address') | list == ['127.0.0.7']
+      - rhys.cluster_status.marlow.nodes | map(attribute='address') | list == ['127.0.0.8']
       - rhys.cluster_status_london.up | list | sort == ['127.0.0.1', '127.0.0.2'] | sort
 
 - name: Install cassandra-driver
@@ -68,13 +68,13 @@
       - rhys.cluster_status.london.down | length == 0
       - rhys.cluster_status.london.up | length == 2
       - rhys.cluster_status.london.nodes | length == 2
-      - rhys.cluster_status.london.nodes | map(attribute='ip') | list | sort == ['127.0.0.1', '127.0.0.2'] | sort
-      - rhys.cluster_status.paris.nodes | map(attribute='ip') | list == ['127.0.0.3']
-      - rhys.cluster_status.newyork.nodes | map(attribute='ip') | list == ['127.0.0.4']
-      - rhys.cluster_status.tokyo.nodes | map(attribute='ip') | list == ['127.0.0.5']
-      - rhys.cluster_status.zurich.nodes | map(attribute='ip') | list == ['127.0.0.6']
-      - rhys.cluster_status.amsterdam.nodes | map(attribute='ip') | list == ['127.0.0.7']
-      - rhys.cluster_status.marlow.nodes | map(attribute='ip') | list == ['127.0.0.8']
+      - rhys.cluster_status.london.nodes | map(attribute='address') | list | sort == ['127.0.0.1', '127.0.0.2'] | sort
+      - rhys.cluster_status.paris.nodes | map(attribute='address') | list == ['127.0.0.3']
+      - rhys.cluster_status.newyork.nodes | map(attribute='address') | list == ['127.0.0.4']
+      - rhys.cluster_status.tokyo.nodes | map(attribute='address') | list == ['127.0.0.5']
+      - rhys.cluster_status.zurich.nodes | map(attribute='address') | list == ['127.0.0.6']
+      - rhys.cluster_status.amsterdam.nodes | map(attribute='address') | list == ['127.0.0.7']
+      - rhys.cluster_status.marlow.nodes | map(attribute='address') | list == ['127.0.0.8']
       - rhys.cluster_status_london.up | list | sort == ['127.0.0.1', '127.0.0.2'] | sort
 
 - name: resolve_ip & keyspace
@@ -170,11 +170,11 @@
           - rhys.cluster_status.london.down | length == 0
           - rhys.cluster_status.london.up | length == 2
           - rhys.cluster_status.london.nodes | length == 2
-          - rhys.cluster_status.london.nodes | map(attribute='ip') | list | sort == ['127.0.0.1', '127.0.0.2'] | sort
-          - rhys.cluster_status.paris.nodes | map(attribute='ip') | list == ['127.0.0.3']
-          - rhys.cluster_status.newyork.nodes | map(attribute='ip') | list == ['127.0.0.4']
-          - rhys.cluster_status.tokyo.nodes | map(attribute='ip') | list == ['127.0.0.5']
-          - rhys.cluster_status.zurich.nodes | map(attribute='ip') | list == ['127.0.0.6']
-          - rhys.cluster_status.amsterdam.nodes | map(attribute='ip') | list == ['127.0.0.7']
-          - rhys.cluster_status.marlow.nodes | map(attribute='ip') | list == ['127.0.0.8']
+          - rhys.cluster_status.london.nodes | map(attribute='address') | list | sort == ['127.0.0.1', '127.0.0.2'] | sort
+          - rhys.cluster_status.paris.nodes | map(attribute='address') | list == ['127.0.0.3']
+          - rhys.cluster_status.newyork.nodes | map(attribute='address') | list == ['127.0.0.4']
+          - rhys.cluster_status.tokyo.nodes | map(attribute='address') | list == ['127.0.0.5']
+          - rhys.cluster_status.zurich.nodes | map(attribute='address') | list == ['127.0.0.6']
+          - rhys.cluster_status.amsterdam.nodes | map(attribute='address') | list == ['127.0.0.7']
+          - rhys.cluster_status.marlow.nodes | map(attribute='address') | list == ['127.0.0.8']
           - rhys.cluster_status_london.up | list | sort == ['127.0.0.1', '127.0.0.2'] | sort
