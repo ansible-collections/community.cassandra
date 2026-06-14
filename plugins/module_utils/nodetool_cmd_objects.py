@@ -19,6 +19,7 @@ class NodeToolCmd(object):
         self.nodetool_flags = module.params['nodetool_flags']
         self.debug = module.params['debug']
         self.cassandra_version = module.params['cassandra_version']
+        self.resolve_ip = module.params.get('resolve_ip', False)
         if self.host is None:
             self.host = socket.getfqdn()
         if self.cassandra_version is None:
@@ -27,7 +28,7 @@ class NodeToolCmd(object):
                 what_is_the_version = ".".join(out.split(': ')[1].split(".")[:2]).strip()
                 module.params['cassandra_version'] = what_is_the_version
             else:
-                module.fail_json(msg="Unable to determine Cassandra version", stderr=err)
+                module.fail_json(msg="Unable to determine Cassandra version: {0}".format(out), stderr=err)
 
     def execute_command(self, cmd):
         return self.module.run_command(cmd)

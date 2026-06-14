@@ -149,6 +149,21 @@
           - "rhys.cluster_status['london']['down'][0] == '127.0.0.2'"
           - "rhys.msg == 'Too many nodes are in a DOWN state'"
           - "rhys.failed == True"
+
+    - name: start london2 again
+      ansible.builtin.shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd | mandatory }} london2 start\""
+      become_user: cassandra
+      args:
+        chdir: /home/cassandra
+      environment:
+        CCM_CONFIG_DIR: "/home/cassandra/config"
+        CASSANDRA_HOME: "/home/cassandra"
+        PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ant/bin
+        JAVA_HOME: "{{ (ansible_os_family == 'RedHat') | ternary('/usr/lib/jvm/java-' ~ j_version ~ '-openjdk', '/usr/lib/jvm/java-' ~ j_version ~ '-openjdk-amd64') }}"
+
+    - name: Test tasks for 316
+      ansible.builtin.import_tasks: 316.yml
+
   always:
     - name: Cleanup any ccm stuff
       ansible.builtin.shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd | mandatory }} stop test && ccm remove test > /dev/null\""
