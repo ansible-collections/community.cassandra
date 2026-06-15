@@ -257,8 +257,8 @@ def main():
     else:
         result['msg'] = (
             "nodetool error: " + stderr_list[-1]
-            if stderr_list[-1].strip() != ""
-            else stdout_list
+            if stderr_list[-1] != ""
+            else stdout_list[-1]
         )
         result['rc'] = return_codes[-1]
         module.fail_json(**result)
