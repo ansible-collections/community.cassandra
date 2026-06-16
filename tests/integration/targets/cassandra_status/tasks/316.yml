@@ -4,7 +4,7 @@
     port: 7100
     nodetool_path: "/home/cassandra/config/repository/{{ cassandra_version }}/bin"
     resolve_ip: true
-  register: rhys
+  register: status_result
 
 - name: Verify London node details
   ansible.builtin.assert:
@@ -12,26 +12,26 @@
       - item.status == 'U'
       - item.state == 'N'
       - item.host_id is match('^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$')
-  loop: "{{ rhys.cluster_status.london.nodes }}"
+  loop: "{{ status_result.cluster_status.london.nodes }}"
   loop_control:
     label: "{{ item.address }}"
 
 - name: Verify data
   ansible.builtin.assert:
     that:
-      - rhys.cluster_status | length == 7
-      - rhys.cluster_status.london.down | length == 0
-      - rhys.cluster_status.london.up | length == 2
-      - rhys.cluster_status.london.nodes | length == 2
-      - rhys.cluster_status.paris.nodes | map(attribute='address') | list == ['127.0.0.3']
-      - rhys.cluster_status.newyork.nodes | map(attribute='address') | list == ['127.0.0.4']
-      - rhys.cluster_status.tokyo.nodes | map(attribute='address') | list == ['127.0.0.5']
-      - rhys.cluster_status.zurich.nodes | map(attribute='address') | list == ['127.0.0.6']
-      - rhys.cluster_status.amsterdam.nodes | map(attribute='address') | list == ['127.0.0.7']
-      - rhys.cluster_status.marlow.nodes | map(attribute='address') | list == ['127.0.0.8']
-      - rhys.cluster_status.marlow.up | list | sort == ['127.0.0.8'] | sort
-      - rhys.cluster_status.newyork.up | list | sort == ['127.0.0.4'] | sort
-      - rhys.cluster_status.paris.up | list | sort == ['127.0.0.3'] | sort
+      - status_result.cluster_status | length == 7
+      - status_result.cluster_status.london.down | length == 0
+      - status_result.cluster_status.london.up | length == 2
+      - status_result.cluster_status.london.nodes | length == 2
+      - status_result.cluster_status.paris.nodes | map(attribute='address') | list == ['127.0.0.3']
+      - status_result.cluster_status.newyork.nodes | map(attribute='address') | list == ['127.0.0.4']
+      - status_result.cluster_status.tokyo.nodes | map(attribute='address') | list == ['127.0.0.5']
+      - status_result.cluster_status.zurich.nodes | map(attribute='address') | list == ['127.0.0.6']
+      - status_result.cluster_status.amsterdam.nodes | map(attribute='address') | list == ['127.0.0.7']
+      - status_result.cluster_status.marlow.nodes | map(attribute='address') | list == ['127.0.0.8']
+      - status_result.cluster_status.marlow.up | list | sort == ['127.0.0.8'] | sort
+      - status_result.cluster_status.newyork.up | list | sort == ['127.0.0.4'] | sort
+      - status_result.cluster_status.paris.up | list | sort == ['127.0.0.3'] | sort
 
 - name: Install cassandra-driver
   pip:
@@ -50,7 +50,7 @@
     port: 7100
     nodetool_path: "/home/cassandra/config/repository/{{ cassandra_version }}/bin"
     keyspace: mytestkeyspace
-  register: rhys
+  register: status_result
 
 - name: Verify London node details
   ansible.builtin.assert:
@@ -58,26 +58,26 @@
       - item.status == 'U'
       - item.state == 'N'
       - item.host_id is match('^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$')
-  loop: "{{ rhys.cluster_status.london.nodes }}"
+  loop: "{{ status_result.cluster_status.london.nodes }}"
   loop_control:
     label: "{{ item.address }}"
 
 - name: Verify data
   ansible.builtin.assert:
     that:
-      - rhys.cluster_status | length == 7
-      - rhys.cluster_status.london.down | length == 0
-      - rhys.cluster_status.london.up | length == 2
-      - rhys.cluster_status.london.nodes | length == 2
-      - rhys.cluster_status.paris.nodes | map(attribute='address') | list == ['127.0.0.3']
-      - rhys.cluster_status.newyork.nodes | map(attribute='address') | list == ['127.0.0.4']
-      - rhys.cluster_status.tokyo.nodes | map(attribute='address') | list == ['127.0.0.5']
-      - rhys.cluster_status.zurich.nodes | map(attribute='address') | list == ['127.0.0.6']
-      - rhys.cluster_status.amsterdam.nodes | map(attribute='address') | list == ['127.0.0.7']
-      - rhys.cluster_status.marlow.nodes | map(attribute='address') | list == ['127.0.0.8']
-      - rhys.cluster_status.marlow.up | list | sort == ['127.0.0.8'] | sort
-      - rhys.cluster_status.newyork.up | list | sort == ['127.0.0.4'] | sort
-      - rhys.cluster_status.paris.up | list | sort == ['127.0.0.3'] | sort
+      - status_result.cluster_status | length == 7
+      - status_result.cluster_status.london.down | length == 0
+      - status_result.cluster_status.london.up | length == 2
+      - status_result.cluster_status.london.nodes | length == 2
+      - status_result.cluster_status.paris.nodes | map(attribute='address') | list == ['127.0.0.3']
+      - status_result.cluster_status.newyork.nodes | map(attribute='address') | list == ['127.0.0.4']
+      - status_result.cluster_status.tokyo.nodes | map(attribute='address') | list == ['127.0.0.5']
+      - status_result.cluster_status.zurich.nodes | map(attribute='address') | list == ['127.0.0.6']
+      - status_result.cluster_status.amsterdam.nodes | map(attribute='address') | list == ['127.0.0.7']
+      - status_result.cluster_status.marlow.nodes | map(attribute='address') | list == ['127.0.0.8']
+      - status_result.cluster_status.marlow.up | list | sort == ['127.0.0.8'] | sort
+      - status_result.cluster_status.newyork.up | list | sort == ['127.0.0.4'] | sort
+      - status_result.cluster_status.paris.up | list | sort == ['127.0.0.3'] | sort
 
 - name: resolve_ip & keyspace
   community.cassandra.cassandra_status:
@@ -86,7 +86,7 @@
     nodetool_path: "/home/cassandra/config/repository/{{ cassandra_version }}/bin"
     resolve_ip: true
     keyspace: mytestkeyspace
-  register: rhys
+  register: status_result
 
 - name: Manage cluster hosts entries
   ansible.builtin.blockinfile:
@@ -104,32 +104,32 @@
     port: 7100
     nodetool_path: "/home/cassandra/config/repository/{{ cassandra_version }}/bin"
     resolve_ip: true
-  register: rhys
+  register: status_result
 
 - name: Assert expected node hostnames
   ansible.builtin.assert:
     that:
-      - rhys.cluster_status.paris.nodes | map(attribute='address') | list == ['paris1']
-      - rhys.cluster_status.newyork.nodes | map(attribute='address') | list == ['newyork1']
-      - rhys.cluster_status.tokyo.nodes | map(attribute='address') | list == ['tokyo1']
-      - rhys.cluster_status.zurich.nodes | map(attribute='address') | list == ['zurich1']
-      - rhys.cluster_status.amsterdam.nodes | map(attribute='address') | list == ['amsterdam1']
-      - rhys.cluster_status.marlow.nodes | map(attribute='address') | list == ['marlow1']
-      - rhys.cluster_status.marlow.up | list | sort == ['marlow1'] | sort
-      - rhys.cluster_status.newyork.up | list | sort == ['newyork1'] | sort
-      - rhys.cluster_status.paris.up | list | sort == ['paris1'] | sort
+      - status_result.cluster_status.paris.nodes | map(attribute='address') | list == ['paris1']
+      - status_result.cluster_status.newyork.nodes | map(attribute='address') | list == ['newyork1']
+      - status_result.cluster_status.tokyo.nodes | map(attribute='address') | list == ['tokyo1']
+      - status_result.cluster_status.zurich.nodes | map(attribute='address') | list == ['zurich1']
+      - status_result.cluster_status.amsterdam.nodes | map(attribute='address') | list == ['amsterdam1']
+      - status_result.cluster_status.marlow.nodes | map(attribute='address') | list == ['marlow1']
+      - status_result.cluster_status.marlow.up | list | sort == ['marlow1'] | sort
+      - status_result.cluster_status.newyork.up | list | sort == ['newyork1'] | sort
+      - status_result.cluster_status.paris.up | list | sort == ['paris1'] | sort
 
 - name: Assert london first node contains non-empty values
   ansible.builtin.assert:
     that:
-      - rhys.cluster_status.london.nodes[0].address | length > 0
-      - rhys.cluster_status.london.nodes[0].load | length > 0
-      - rhys.cluster_status.london.nodes[0].tokens | length > 0
-      - rhys.cluster_status.london.nodes[0].owns | length > 0
-      - rhys.cluster_status.london.nodes[0].host_id | length > 0
-      - rhys.cluster_status.london.nodes[0].rack | length > 0
-      - rhys.cluster_status.london.nodes[0].status | length > 0
-      - rhys.cluster_status.london.nodes[0].state | length > 0
+      - status_result.cluster_status.london.nodes[0].address | length > 0
+      - status_result.cluster_status.london.nodes[0].load | length > 0
+      - status_result.cluster_status.london.nodes[0].tokens | length > 0
+      - status_result.cluster_status.london.nodes[0].owns | length > 0
+      - status_result.cluster_status.london.nodes[0].host_id | length > 0
+      - status_result.cluster_status.london.nodes[0].rack | length > 0
+      - status_result.cluster_status.london.nodes[0].status | length > 0
+      - status_result.cluster_status.london.nodes[0].state | length > 0
 
 - name: Test with keyspace that does not exist
   community.cassandra.cassandra_status:
@@ -137,14 +137,14 @@
     port: 7100
     nodetool_path: "/home/cassandra/config/repository/{{ cassandra_version }}/bin"
     keyspace: idonotexist
-  register: rhys
+  register: status_result
   ignore_errors: true
 
 - name: Assert expected error message
   ansible.builtin.assert:
     that:
-      - rhys.failed
-      - "'The keyspace idonotexist, does not exist' in rhys.msg"
+      - status_result.failed
+      - "'The keyspace idonotexist, does not exist' in status_result.msg"
 
 - name: Repeat test to ensure we don't get acccidental ip resolutions when not wanted
   block:
@@ -154,7 +154,7 @@
         port: 7100
         nodetool_path: "/home/cassandra/config/repository/{{ cassandra_version }}/bin"
         keyspace: mytestkeyspace
-      register: rhys
+      register: status_result
 
     - name: Verify London node details
       ansible.builtin.assert:
@@ -162,23 +162,23 @@
           - item.status == 'U'
           - item.state == 'N'
           - item.host_id is match('^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$')
-      loop: "{{ rhys.cluster_status.london.nodes }}"
+      loop: "{{ status_result.cluster_status.london.nodes }}"
       loop_control:
         label: "{{ item.address }}"
 
     - name: Verify London datacentre
       ansible.builtin.assert:
         that:
-          - rhys.cluster_status | length == 7
-          - rhys.cluster_status.london.down | length == 0
-          - rhys.cluster_status.london.up | length == 2
-          - rhys.cluster_status.london.nodes | length == 2
-          - rhys.cluster_status.paris.nodes | map(attribute='address') | list == ['127.0.0.3']
-          - rhys.cluster_status.newyork.nodes | map(attribute='address') | list == ['127.0.0.4']
-          - rhys.cluster_status.tokyo.nodes | map(attribute='address') | list == ['127.0.0.5']
-          - rhys.cluster_status.zurich.nodes | map(attribute='address') | list == ['127.0.0.6']
-          - rhys.cluster_status.amsterdam.nodes | map(attribute='address') | list == ['127.0.0.7']
-          - rhys.cluster_status.marlow.nodes | map(attribute='address') | list == ['127.0.0.8']
-          - rhys.cluster_status.marlow.up | list | sort == ['127.0.0.8'] | sort
-          - rhys.cluster_status.newyork.up | list | sort == ['127.0.0.4'] | sort
-          - rhys.cluster_status.paris.up | list | sort == ['127.0.0.3'] | sort
+          - status_result.cluster_status | length == 7
+          - status_result.cluster_status.london.down | length == 0
+          - status_result.cluster_status.london.up | length == 2
+          - status_result.cluster_status.london.nodes | length == 2
+          - status_result.cluster_status.paris.nodes | map(attribute='address') | list == ['127.0.0.3']
+          - status_result.cluster_status.newyork.nodes | map(attribute='address') | list == ['127.0.0.4']
+          - status_result.cluster_status.tokyo.nodes | map(attribute='address') | list == ['127.0.0.5']
+          - status_result.cluster_status.zurich.nodes | map(attribute='address') | list == ['127.0.0.6']
+          - status_result.cluster_status.amsterdam.nodes | map(attribute='address') | list == ['127.0.0.7']
+          - status_result.cluster_status.marlow.nodes | map(attribute='address') | list == ['127.0.0.8']
+          - status_result.cluster_status.marlow.up | list | sort == ['127.0.0.8'] | sort
+          - status_result.cluster_status.newyork.up | list | sort == ['127.0.0.4'] | sort
+          - status_result.cluster_status.paris.up | list | sort == ['127.0.0.3'] | sort

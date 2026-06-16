@@ -19,7 +19,6 @@ class NodeToolCmd(object):
         self.nodetool_flags = module.params['nodetool_flags']
         self.debug = module.params['debug']
         self.cassandra_version = module.params['cassandra_version']
-        self.resolve_ip = module.params.get('resolve_ip', False)
         if self.host is None:
             self.host = socket.getfqdn()
         if self.cassandra_version is None:

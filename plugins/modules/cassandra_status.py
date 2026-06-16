@@ -256,9 +256,11 @@ def main():
                 result['msg'] = "Down nodes are within the tolerated level"
     else:
         result['msg'] = (
-            "nodetool error: " + stderr_list[-1]
-            if stderr_list[-1] != ""
-            else stdout_list[-1]
+            "nodetool error: " + (
+                stderr_list[-1]
+                if stderr_list[-1] != ""
+                else stdout_list[-1]
+            )
         )
         result['rc'] = return_codes[-1]
         module.fail_json(**result)
