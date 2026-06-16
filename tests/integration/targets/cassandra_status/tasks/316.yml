@@ -88,6 +88,33 @@
     keyspace: mytestkeyspace
   register: status_result
 
+- name: Verify London node details
+  ansible.builtin.assert:
+    that:
+      - item.status == 'U'
+      - item.state == 'N'
+      - item.host_id is match('^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$')
+  loop: "{{ status_result.cluster_status.london.nodes }}"
+  loop_control:
+    label: "{{ item.address }}"
+
+- name: Verify data
+  ansible.builtin.assert:
+    that:
+      - status_result.cluster_status | length == 7
+      - status_result.cluster_status.london.down | length == 0
+      - status_result.cluster_status.london.up | length == 2
+      - status_result.cluster_status.london.nodes | length == 2
+      - status_result.cluster_status.paris.nodes | map(attribute='address') | list == ['127.0.0.3']
+      - status_result.cluster_status.newyork.nodes | map(attribute='address') | list == ['127.0.0.4']
+      - status_result.cluster_status.tokyo.nodes | map(attribute='address') | list == ['127.0.0.5']
+      - status_result.cluster_status.zurich.nodes | map(attribute='address') | list == ['127.0.0.6']
+      - status_result.cluster_status.amsterdam.nodes | map(attribute='address') | list == ['127.0.0.7']
+      - status_result.cluster_status.marlow.nodes | map(attribute='address') | list == ['127.0.0.8']
+      - status_result.cluster_status.marlow.up | list | sort == ['127.0.0.8'] | sort
+      - status_result.cluster_status.newyork.up | list | sort == ['127.0.0.4'] | sort
+      - status_result.cluster_status.paris.up | list | sort == ['127.0.0.3'] | sort
+
 - name: Manage cluster hosts entries
   ansible.builtin.blockinfile:
     path: /etc/hosts
