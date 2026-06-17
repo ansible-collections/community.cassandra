@@ -26,25 +26,25 @@
         host: 127.0.0.1
         port: 7100
         nodetool_path: /home/cassandra/config/repository/{{ cassandra_version }}/bin
-      register: rhys
+      register: status_result
 
     - name: Assert module output reports all nodes up
       assert:
         that:
-          - "rhys.cluster_status['london']['down'] | length == 0"
-          - "rhys.cluster_status['london']['up'] | length == 2"
-          - "rhys.cluster_status['paris']['down'] | length == 0"
-          - "rhys.cluster_status['paris']['up'] | length == 1"
-          - "rhys.cluster_status['newyork']['down'] | length == 0"
-          - "rhys.cluster_status['newyork']['up'] | length == 1"
-          - "rhys.cluster_status['tokyo']['down'] | length == 0"
-          - "rhys.cluster_status['tokyo']['up'] | length == 1"
-          - "rhys.cluster_status['zurich']['down'] | length == 0"
-          - "rhys.cluster_status['zurich']['up'] | length == 1"
-          - "rhys.cluster_status['amsterdam']['down'] | length == 0"
-          - "rhys.cluster_status['amsterdam']['up'] | length == 1"
-          - "rhys.cluster_status['marlow']['down'] | length == 0"
-          - "rhys.cluster_status['marlow']['up'] | length == 1"
+          - "status_result.cluster_status['london']['down'] | length == 0"
+          - "status_result.cluster_status['london']['up'] | length == 2"
+          - "status_result.cluster_status['paris']['down'] | length == 0"
+          - "status_result.cluster_status['paris']['up'] | length == 1"
+          - "status_result.cluster_status['newyork']['down'] | length == 0"
+          - "status_result.cluster_status['newyork']['up'] | length == 1"
+          - "status_result.cluster_status['tokyo']['down'] | length == 0"
+          - "status_result.cluster_status['tokyo']['up'] | length == 1"
+          - "status_result.cluster_status['zurich']['down'] | length == 0"
+          - "status_result.cluster_status['zurich']['up'] | length == 1"
+          - "status_result.cluster_status['amsterdam']['down'] | length == 0"
+          - "status_result.cluster_status['amsterdam']['up'] | length == 1"
+          - "status_result.cluster_status['marlow']['down'] | length == 0"
+          - "status_result.cluster_status['marlow']['up'] | length == 1"
 
     - name: Stop marlow1
       ansible.builtin.shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd | mandatory }} marlow1 stop\""
@@ -64,16 +64,16 @@
         host: 127.0.0.1
         port: 7100
         nodetool_path: /home/cassandra/config/repository/{{ cassandra_version }}/bin
-      ignore_errors: yes
-      register: rhys
+      ignore_errors: true
+      register: status_result
 
     - name: Assert module output reports node2 down
       assert:
         that:
-          - "rhys.cluster_status['marlow']['down'] | length == 1"
-          - "rhys.cluster_status['marlow']['up'] | length == 0"
-          - "'127.0.0.8' in rhys.cluster_status['marlow']['down']"
-          - "'127.0.0.8' not in rhys.cluster_status['marlow']['up']"
+          - "status_result.cluster_status['marlow']['down'] | length == 1"
+          - "status_result.cluster_status['marlow']['up'] | length == 0"
+          - "'127.0.0.8' in status_result.cluster_status['marlow']['down']"
+          - "'127.0.0.8' not in status_result.cluster_status['marlow']['up']"
 
     - name: Start node2
       ansible.builtin.shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd | mandatory }} marlow1 start\""
@@ -95,17 +95,17 @@
         port: 7100
         nodetool_path: /home/cassandra/config/repository/{{ cassandra_version }}/bin
         debug: yes
-      register: rhys
+      register: status_result
 
     - name: Assert module all nodes are up
       assert:
         that:
-          - "rhys.cluster_status['marlow']['down'] | length == 0"
-          - "rhys.cluster_status['marlow']['up'] | length == 1"
-          - "rhys.iterations >= 1"
-          #- "rhys.cluster_status_list[0]['marlow']['down'][0] == '127.0.0.8'" from 4.0.5 node recovery seems much faster so these tests can't be done anymore
-          #- "'127.0.0.8' in rhys.cluster_status_list[-1]['marlow']['up']"
-          - "rhys.msg == 'All nodes are in an UP/NORMAL state'"
+          - "status_result.cluster_status['marlow']['down'] | length == 0"
+          - "status_result.cluster_status['marlow']['up'] | length == 1"
+          - "status_result.iterations >= 1"
+          #- "status_result.cluster_status_list[0]['marlow']['down'][0] == '127.0.0.8'" from 4.0.5 node recovery seems much faster so these tests can't be done anymore
+          #- "'127.0.0.8' in status_result.cluster_status_list[-1]['marlow']['up']"
+          - "status_result.msg == 'All nodes are in an UP/NORMAL state'"
 
     - name: Bring down london2
       ansible.builtin.shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd | mandatory }} london2 stop\""
@@ -123,32 +123,47 @@
         port: 7100
         nodetool_path: /home/cassandra/config/repository/{{ cassandra_version }}/bin
         debug: no
-      register: rhys
+      register: status_result
 
     - name: Assert cluster status 127.0.0.2 is down
       assert:
         that:
-          - "rhys.cluster_status['london']['down'] | length == 1"
-          - "rhys.cluster_status['london']['up'] | length == 1"
-          - "rhys.cluster_status['london']['down'][0] == '127.0.0.2'"
-          - "rhys.msg == 'Down nodes are within the tolerated level'"
+          - "status_result.cluster_status['london']['down'] | length == 1"
+          - "status_result.cluster_status['london']['up'] | length == 1"
+          - "status_result.cluster_status['london']['down'][0] == '127.0.0.2'"
+          - "status_result.msg == 'Down nodes are within the tolerated level'"
 
     - name: Allow none down and test msg
       community.cassandra.cassandra_status:
         host: 127.0.0.1
         port: 7100
         nodetool_path: /home/cassandra/config/repository/{{ cassandra_version }}/bin
-      register: rhys
+      register: status_result
       ignore_errors: yes
 
     - name: Assert cluster status 127.0.0.2 is down
       assert:
         that:
-          - "rhys.cluster_status['london']['down'] | length == 1"
-          - "rhys.cluster_status['london']['up'] | length == 1"
-          - "rhys.cluster_status['london']['down'][0] == '127.0.0.2'"
-          - "rhys.msg == 'Too many nodes are in a DOWN state'"
-          - "rhys.failed == True"
+          - "status_result.cluster_status['london']['down'] | length == 1"
+          - "status_result.cluster_status['london']['up'] | length == 1"
+          - "status_result.cluster_status['london']['down'][0] == '127.0.0.2'"
+          - "status_result.msg == 'Too many nodes are in a DOWN state'"
+          - "status_result.failed == True"
+
+    - name: start london2 again
+      ansible.builtin.shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd | mandatory }} london2 start\""
+      become_user: cassandra
+      args:
+        chdir: /home/cassandra
+      environment:
+        CCM_CONFIG_DIR: "/home/cassandra/config"
+        CASSANDRA_HOME: "/home/cassandra"
+        PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ant/bin
+        JAVA_HOME: "{{ (ansible_os_family == 'RedHat') | ternary('/usr/lib/jvm/java-' ~ j_version ~ '-openjdk', '/usr/lib/jvm/java-' ~ j_version ~ '-openjdk-amd64') }}"
+
+    - name: Test tasks for 316
+      ansible.builtin.import_tasks: 316.yml
+
   always:
     - name: Cleanup any ccm stuff
       ansible.builtin.shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd | mandatory }} stop test && ccm remove test > /dev/null\""

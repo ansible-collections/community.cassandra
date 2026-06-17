@@ -153,13 +153,6 @@
     - /home/cassandra
     - /home/cassandra/config
 
-#- name: Install ccm via pip
-#  pip:
-#    name: ccm
-#    state: present
-#  retries: 5
-#  delay: 5
-
 - name: Clone Apache Cassandra CCM repository
   ansible.builtin.git:
     repo: https://github.com/apache/cassandra-ccm.git
@@ -213,17 +206,6 @@
     JAVA_HOME: "{{ (ansible_os_family == 'RedHat') | ternary('/usr/lib/jvm/java-' ~ j_version ~ '-openjdk', '/usr/lib/jvm/java-' ~ j_version ~ '-openjdk-amd64') }}"
   retries: 5
   delay: 5
-
-#- name: Add nodes to the Cassandra cluster
-#  ansible.builtin.shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd }} populate -n {{ cassandra_nodes }}\""
-#  become_user: cassandra
-#  args:
-#    warn: false
-#    chdir: /home/cassandra
-#  environment:
-#    CCM_CONFIG_DIR: "/home/cassandra/config"
-#    CASSANDRA_HOME: "/home/cassandra"
-#    PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ant
 
 - name: Add nodes to the Cassandra Cluster
   ansible.builtin.shell: "sudo -E -u cassandra bash -c '{{ ccm_cmd }} add {{ item.node }} -i {{ item.ip }} -j {{ item.port }} -b --data-center={{ item.dc }} --remote-debug-port {{ item.debug_port }} {{ item.args }}'"

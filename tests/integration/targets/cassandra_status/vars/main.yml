@@ -1,1 +1,18 @@
 cassandra_auth_tests: True
+hosts_entries:
+  - node: london1
+    ip: 127.0.0.1
+  - node: london2
+    ip: 127.0.0.2
+  - node: paris1
+    ip: 127.0.0.3
+  - node: newyork1
+    ip: 127.0.0.4
+  - node: tokyo1
+    ip: 127.0.0.5
+  - node: zurich1
+    ip: 127.0.0.6
+  - node: amsterdam1
+    ip: 127.0.0.7
+  - node: marlow1
+    ip: 127.0.0.8

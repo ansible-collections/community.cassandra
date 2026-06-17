@@ -41,6 +41,16 @@ options:
       - The number of seconds to wait between poll executions.
     type: int
     default: 30
+  resolve_ip:
+    description:
+      - Resolve node ip address to domain names.
+    type: bool
+    default: false
+  keyspace:
+    description:
+      - Optional keyspace argument.
+    type: str
+    required: false
 '''
 
 EXAMPLES = '''
@@ -90,6 +100,10 @@ class NodeToolStatusCommand(NodeToolCmd):
     def __init__(self, module):
         NodeToolCmd.__init__(self, module)
         self.status_cmd = "status"
+        if module.params["resolve_ip"]:
+            self.status_cmd += " --resolve-ip"
+        if module.params["keyspace"] is not None:
+            self.status_cmd += " -- {0}".format(module.params["keyspace"])
 
     def status_command(self):
         return self.nodetool_cmd(self.status_cmd)
@@ -160,16 +174,39 @@ def cluster_up_down(stdout):
         }
     '''
     cluster_up_down = {}
-    for line in ''.join(stdout).split('\n'):
-        if line.startswith("Datacenter"):
-            data_center = line.split(' ')[1]
-            cluster_up_down[data_center] = dict()
-            cluster_up_down[data_center]["up"] = list()
-            cluster_up_down[data_center]["down"] = list()
-        if line.startswith("UN") and bool(re.findall(r'[0-9]+(?:\.[0-9]+){3}', line)):
-            cluster_up_down[data_center]["up"].append(line.split()[1])
-        if line.startswith("D") and bool(re.findall(r'[0-9]+(?:\.[0-9]+){3}', line)):
-            cluster_up_down[data_center]["down"].append(line.split()[1])
+    node_re = re.compile(r'^[UD][NLJM]\s+')
+
+    for line in ''.join(stdout).splitlines():
+        if line.startswith("Datacenter:"):
+            data_center = line.split(":", 1)[1].strip()
+            cluster_up_down[data_center] = {
+                "up": [],
+                "down": [],
+                "nodes": []
+            }
+            continue
+
+        if not node_re.match(line):
+            continue
+
+        fields = line.split()
+
+        if fields[0].startswith("U"):
+            cluster_up_down[data_center]["up"].append(fields[1])
+
+        if fields[0].startswith("D"):
+            cluster_up_down[data_center]["down"].append(fields[1])
+
+        cluster_up_down[data_center]["nodes"].append({
+            "address": fields[1],
+            "load": " ".join(fields[2:4]),
+            "tokens": fields[4],
+            "owns": fields[5],
+            "host_id": fields[6],
+            "rack": fields[7],
+            "status": fields[0][0],
+            "state": fields[0][1],
+        })
     return cluster_up_down
 
 
@@ -178,7 +215,9 @@ def main():
     argument_spec.update(
         down=dict(type='int', default=0, aliases=["d"]),
         poll=dict(type='int', default=1),
-        interval=dict(type='int', default=30)
+        interval=dict(type='int', default=30),
+        resolve_ip=dict(type='bool', default=False),
+        keyspace=dict(type='str', required=False, no_log=False),
     )
     module = AnsibleModule(
         argument_spec=argument_spec,
@@ -216,7 +255,13 @@ def main():
             else:
                 result['msg'] = "Down nodes are within the tolerated level"
     else:
-        result['msg'] = "nodetool error: {0}".format(stderr_list[-1])
+        result['msg'] = (
+            "nodetool error: " + (
+                stderr_list[-1]
+                if stderr_list[-1] != ""
+                else stdout_list[-1]
+            )
+        )
         result['rc'] = return_codes[-1]
         module.fail_json(**result)
 
