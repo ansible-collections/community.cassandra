@@ -82,6 +82,7 @@ If the chosen consistency level is not supported, by either read or write, then 
 
 ## Supported Cassandra Versions
 
+* 4.1.X
 * 4.0.X
 * 3.11.X
 * ~~2.2.X~~ Dropped on 21.10.2021.
