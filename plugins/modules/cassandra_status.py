@@ -76,6 +76,95 @@ rc:
   description: Return code of the last executed command.
   returned: always
   type: int
+datacenters:
+  description:
+    - Cassandra cluster information grouped by datacenter.
+    - Each key is a datacenter name.
+  returned: success
+  type: dict
+  sample:
+    london:
+      up:
+        - 127.0.0.1
+      down:
+        - 127.0.0.2
+      nodes:
+        - address: 127.0.0.1
+          host_id: d384e6b9-d9fa-45b6-9779-112b0a7e5801
+          load: 66.2 KiB
+          owns: 33.7%
+          rack: rack1
+          state: N
+          status: U
+          tokens: "1"
+
+  contains:
+    datacenter_name:
+      description:
+        - Information for a single datacenter.
+      type: dict
+      contains:
+        up:
+          description:
+            - IP addresses of nodes that are up.
+          type: list
+          elements: str
+          sample:
+            - 127.0.0.1
+        down:
+          description:
+            - IP addresses of nodes that are down.
+          type: list
+          elements: str
+          sample:
+            - 127.0.0.2
+        nodes:
+          description:
+            - Detailed node information for the datacenter.
+          type: list
+          elements: dict
+          sample:
+            - address: 127.0.0.1
+              host_id: d384e6b9-d9fa-45b6-9779-112b0a7e5801
+              load: 66.2 KiB
+              owns: 33.7%
+              rack: rack1
+              state: N
+              status: U
+              tokens: "1"
+          contains:
+            address:
+              description:
+                - Node IP address.
+              type: str
+            host_id:
+              description:
+                - Cassandra host identifier.
+              type: str
+            load:
+              description:
+                - Data load reported by nodetool.
+              type: str
+            owns:
+              description:
+                - Percentage of token ownership.
+              type: str
+            rack:
+              description:
+                - Rack containing the node.
+              type: str
+            state:
+              description:
+                - Cassandra node state.
+              type: str
+            status:
+              description:
+                - Cassandra node status.
+              type: str
+            tokens:
+              description:
+                - Number of tokens assigned to the node.
+              type: str
 '''
 
 from ansible.module_utils.basic import AnsibleModule
@@ -156,6 +245,8 @@ def cluster_up_down(stdout):
     Extract the Data Centres from the nodetool status stdout
     Returns a dict in the following format...
         {
+            "up": [All up nodes in cluster],
+            "down": [All down nodes in cluster],
             "datacenter1":
                 "up": [ "1.1.1.1",
                         "1.1.1.2",
