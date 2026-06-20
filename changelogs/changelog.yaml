@@ -106,7 +106,7 @@ releases:
   1.4.1:
     changes:
       release_summary: Maintenance release.
-    minor_changed:
+    minor_change:
       - 306 - various roles - Use full module paths.
   1.5.0:
     change:
@@ -114,3 +114,8 @@ releases:
     modules:
       - name: cassandra_status
         description: Adds resolve_ip and keyspace parameters and provides richer return data (#316).
+  1.5.1:
+    change:
+      release_summary: Maintenance release.
+    minor_change:
+      - Update RETURN documentation block in the cassandra_status to describe return data correctly (#323).
