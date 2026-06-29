@@ -1,0 +1,132 @@
+# test code for the cassandra_statusbinary module
+# (c) 2026,  Alain Rodriguez <alain@casterix.fr>
+
+# This file is part of Ansible
+#
+# Ansible is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Ansible is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
+
+# ===========================================================
+- name: Ensure binary is enabled before tests
+  community.cassandra.cassandra_binary:
+    state: "enabled"
+
+- name: Get binary status with module 1
+  community.cassandra.cassandra_statusbinary:
+    debug: true
+  register: statusbinary
+
+- name: Assert binary is running 1
+  assert:
+    that:
+      - statusbinary.is_up
+      - statusbinary.stdout == 'running'
+
+- name: Assert statusbinary did not change
+  assert:
+    that: statusbinary.changed == False
+
+- name: Disable binary
+  community.cassandra.cassandra_binary:
+    state: "disabled"
+
+- name: Get binary status with module 2
+  community.cassandra.cassandra_statusbinary:
+    debug: true
+  register: statusbinary
+
+- name: Assert binary is not running
+  assert:
+    that:
+      - not statusbinary.is_up
+      - statusbinary.stdout == 'not running'
+
+- name: Assert statusbinary did not change
+  assert:
+    that: statusbinary.changed == False
+
+- name: Re-enable binary
+  community.cassandra.cassandra_binary:
+    state: "enabled"
+
+- name: Get binary status with module 3
+  community.cassandra.cassandra_statusbinary:
+    debug: true
+  register: statusbinary
+
+- name: Assert binary is running again
+  assert:
+    that:
+      - statusbinary.is_up
+      - statusbinary.stdout == 'running'
+
+- include_tasks: ../../setup_cassandra/tasks/cassandra_auth.yml
+  when: cassandra_auth_tests == True
+
+- name: Get binary status with auth
+  community.cassandra.cassandra_statusbinary:
+    username: "{{ cassandra_admin_user }}"
+    password: "{{ cassandra_admin_pwd }}"
+    debug: true
+  register: statusbinary
+  when: cassandra_auth_tests == True
+
+- name: Assert binary is running with auth
+  assert:
+    that:
+      - statusbinary.is_up
+      - statusbinary.stdout == 'running'
+  when: cassandra_auth_tests == True
+
+- name: Get binary status using password file
+  community.cassandra.cassandra_statusbinary:
+    username: "{{ cassandra_admin_user }}"
+    password_file: /etc/cassandra/jmxremote.password
+    debug: true
+  register: statusbinary
+  when: cassandra_auth_tests == True
+
+- name: Assert binary is running with password file
+  assert:
+    that:
+      - statusbinary.is_up
+      - statusbinary.stdout == 'running'
+  when: cassandra_auth_tests == True
+
+- name: Test login failure handling
+  community.cassandra.cassandra_statusbinary:
+    username: "{{ cassandra_admin_user }}"
+    password: XXXXXXXXXXXXXXXXXXXXX
+    debug: true
+  register: login_status
+  ignore_errors: true
+  when: cassandra_auth_tests == True
+
+- name: Assert failed login
+  assert:
+    that:
+      - login_status.failed == True
+      - "'Invalid username or password' in login_status.stderr"
+  when: cassandra_auth_tests == True
+
+- name: Test incorrect nodetool_path handling
+  community.cassandra.cassandra_statusbinary:
+    nodetool_path: /tmp
+    debug: true
+  register: nodetool_path_error
+  ignore_errors: true
+
+- name: Assert no such file
+  assert:
+    that:
+      - "'Error executing command' in nodetool_path_error.msg or 'No such file or directory' in nodetool_path_error.msg"
