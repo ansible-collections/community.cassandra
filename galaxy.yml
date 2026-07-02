@@ -1,6 +1,6 @@
 namespace: community
 name: cassandra
-version: 1.5.1
+version: 1.5.2
 readme: README.md
 authors: Rhys Campbell
 description: null
