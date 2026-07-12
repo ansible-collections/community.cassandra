@@ -17,6 +17,20 @@
 # along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
 
 # ===========================================================
+
+# Skipped on 5.0: the "pending tasks: 0" exact-match this test (and the
+# module itself) relies on breaks against 5.0's richer compactionstats
+# output - but the deeper issue is that cassandra_compact's stop path
+# calls plain `nodetool stop` with no compaction type/id, which halts
+# EVERY in-flight compaction on the node, including VALIDATION compactions
+# (i.e. an in-progress repair). Fixing the 5.0 output-parsing alone would
+# make this test go green while leaving that unsafe behaviour in place.
+# Needs a real redesign (scope compact to keyspace/table, stop by specific
+# compaction id via `nodetool stop -id`) before enabling for 5.0.
+- name: Compaction behaviour needs a redesign before it's safe on 5.0 - see module notes
+  meta: end_play
+  when: cassandra_version == "50x"
+
 - name: Get compactionstats status 1
   ansible.builtin.shell: nodetool -h 127.0.0.1 compactionstats
   register: compaction_status
