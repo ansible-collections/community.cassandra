@@ -16,7 +16,7 @@
     - ansible_swaptotal_mb > 0
 
 - name: Remove swap partitions
-  ansible.builtin.mount:
+  ansible.posix.mount:
     path: swap
     state: absent
 

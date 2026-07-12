@@ -13,6 +13,7 @@ tags:
   - datastore
 dependencies:
   community.general: '>=0.1.1'
+  ansible.posix: '>=1.0.0'
 repository: https://github.com/ansible-collections/community.cassandra
 documentation: https://ansible-collections.github.io/community.cassandra/
 homepage: https://github.com/ansible-collections/community.cassandra
