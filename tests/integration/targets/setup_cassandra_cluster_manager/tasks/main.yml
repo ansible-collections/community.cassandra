@@ -57,9 +57,16 @@
   retries: 5
   delay: 5
 
-- name: Set Java Version # Cassandra 3 = 8, 4 = 11
+- name: Set Java Version # Cassandra 3.x = 8, 4.x = 11, 5.x+ = 17
   ansible.builtin.set_fact:
-    j_version: "{{ (cassandra_version.startswith('3')) | ternary('8', '11') }}"
+    j_version: >-
+      {%- if cassandra_version is version('5.0', '>=') -%}
+      17
+      {%- elif cassandra_version is version('4.0', '>=') -%}
+      11
+      {%- else -%}
+      8
+      {%- endif -%}
 
 - name: Install OpenJDK package
   ansible.builtin.package:
