@@ -45,7 +45,7 @@ from ansible.module_utils.basic import AnsibleModule
 __metaclass__ = type
 
 
-from ansible_collections.community.cassandra.plugins.module_utils.nodetool_cmd_objects import NodeToolGetSetCommand
+from ansible_collections.community.cassandra.plugins.module_utils.nodetool_cmd_objects import NodeToolGetSetCommand, cassandra_version_at_least
 from ansible_collections.community.cassandra.plugins.module_utils.cassandra_common_options import cassandra_common_argument_spec
 import re
 
@@ -83,9 +83,13 @@ def main():
 
     n = NodeToolGetSetCommand(module, get_cmd, set_cmd)
 
-    if module.params['cassandra_version'] == "4.1":
-        get_cmd += " -d"
-        set_cmd = "setinterdcstreamthroughput {0}".format(module.params['value'])
+    # cassandra_version may still be None here if not passed explicitly -
+    # NodeToolGetSetCommand.__init__ (above) auto-detects it as a side
+    # effect. Mutate n.get_cmd itself, not the get_cmd local variable:
+    # n already copied its value by the time we get here, so reassigning
+    # the local has no effect on the command that actually gets run.
+    if cassandra_version_at_least(module.params['cassandra_version'], "4.1"):
+        n.get_cmd += " -d"
     value = module.params['value']
 
     rc = None

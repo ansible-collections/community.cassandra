@@ -4,6 +4,6 @@
   import_tasks: old_verify.yml
   when: cassandra_version == "40x" or cassandra_version == "311x"
 
-- name: "Run tests for 4.1"
+- name: "Run tests for versions where verify is disabled by default (CASSANDRA-9947/17017)"
   import_tasks: 4_1_verify_disabled.yml
-  when: cassandra_version == "41x"
+  when: cassandra_version in ["41x", "50x"]

@@ -3,6 +3,22 @@ __metaclass__ = type
 import socket
 
 
+def cassandra_version_at_least(version_string, minimum_version):
+    """Compare two "MAJOR.MINOR"-style Cassandra version strings, e.g.
+    cassandra_version_at_least("5.0", "4.1") -> True.
+
+    version_string is normally auto-detected in NodeToolCmd.__init__ (or
+    passed via the cassandra_version module option). Several nodetool
+    sub-commands changed output/flags starting in a given version (e.g.
+    get*streamthroughput requiring -d since 4.1) and keep that behaviour
+    in later versions too - comparing with == against a single version
+    string breaks the moment a newer version ships.
+    """
+    def parts(v):
+        return tuple(int(p) for p in v.split(".")[:2])
+    return parts(version_string) >= parts(minimum_version)
+
+
 class NodeToolCmd(object):
     """
     This is a generic NodeToolCmd class for building nodetool commands
