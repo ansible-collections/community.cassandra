@@ -14,10 +14,10 @@ Role Variables
 --------------
 
 cassandra_version:
-  - Which version of Cassandra to install.
-  - Should be a version from..
-      - http://dl.bintray.com/apache/cassandra/dists/
-      - https://www.apache.org/dist/cassandra/redhat/
+  - Which version of Cassandra to install, e.g. "50x", "41x", "40x", "311x".
+  - See the distribution names available at:
+      - https://debian.cassandra.apache.org (Debian & Ubuntu)
+      - https://redhat.cassandra.apache.org/ (RedHat)
 
 Dependencies
 ------------

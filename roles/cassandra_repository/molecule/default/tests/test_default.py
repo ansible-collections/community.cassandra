@@ -19,6 +19,10 @@ def get_cassandra_version(host):
     return include_vars(host)['ansible_facts']['cassandra_version']
 
 
+def get_cassandra_apt_keyring_path(host):
+    return include_vars(host)['ansible_facts']['cassandra_apt_keyring_path']
+
+
 def test_redhat_cassandra_repository_file(host):
     # with capsys.disabled(): #Disable autocapture of output and send to stdout N.B capsys must be passed into function
     # print(include_vars(host)['ansible_facts'])
@@ -45,6 +49,7 @@ def test_redhat_yum_search(host):
 
 def test_debian_cassandra_repository_file(host):
     cassandra_version = get_cassandra_version(host)
+    keyring_path = get_cassandra_apt_keyring_path(host)
     if host.system_info.distribution == "debian" \
             or host.system_info.distribution == "ubuntu":
         f = host.file("/etc/apt/sources.list.d/cassandra-{0}.list".format(cassandra_version))
@@ -53,7 +58,15 @@ def test_debian_cassandra_repository_file(host):
         assert f.user == 'root'
         assert f.group == 'root'
         assert f.mode == 0o644
-        assert f.content_string.strip() == "deb https://debian.cassandra.apache.org {0} main".format(cassandra_version)
+        assert f.content_string.strip() == "deb [signed-by={0}] https://debian.cassandra.apache.org {1} main".format(keyring_path, cassandra_version)
+
+
+def test_debian_apt_keyring_file(host):
+    if host.system_info.distribution == "debian" \
+            or host.system_info.distribution == "ubuntu":
+        f = host.file(get_cassandra_apt_keyring_path(host))
+
+        assert f.exists
 
 
 def test_debian_apt_search(host):
