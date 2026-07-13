@@ -639,7 +639,7 @@
       default_time_to_live: 630720000
       gc_grace_seconds: 864001
       compaction: "{'class': 'SizeTieredCompactionStrategy', 'enabled': 'true' }"
-      compression: "{'sstable_compression': 'LZ4Compressor', 'chunk_length_kb': 64}"
+      compression: "{'class': 'LZ4Compressor', 'chunk_length_in_kb': 64}"
     login_user: "{{ cassandra_admin_user }}"
     login_password: "{{ cassandra_admin_pwd }}"
   register: complex_table_options
