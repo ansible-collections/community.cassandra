@@ -281,6 +281,10 @@
   with_items: "{{ cassandra_nodes }}"
   ignore_errors: true
 
+# Retried: a node's JVM occasionally dies mid-startup on the CI runner when
+# bringing up all cassandra_nodes at once (more likely on 5.0+, which has a
+# bigger default footprint per node) - this is transient resource pressure,
+# not a config issue, and ccm start only (re)starts nodes not already up.
 - name: Start the ccm cluster
   ansible.builtin.shell: sudo -E -u cassandra bash -c "{{ ccm_cmd }} start"
   become_user: cassandra
@@ -292,6 +296,10 @@
     PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ant/bin
     JAVA_HOME: "{{ (ansible_os_family == 'RedHat') | ternary('/usr/lib/jvm/java-' ~ j_version ~ '-openjdk', '/usr/lib/jvm/java-' ~ j_version ~ '-openjdk-amd64') }}"
     CCM_CLUSTER_START_DEFAULT_TIMEOUT: "600"
+  register: ccm_start_result
+  until: ccm_start_result.rc == 0
+  retries: 2
+  delay: 15
 
 - name: Get cluster status
   ansible.builtin.shell: sudo -E -u cassandra bash -c "{{ ccm_cmd }} status"
