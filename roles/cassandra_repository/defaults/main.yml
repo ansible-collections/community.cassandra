@@ -4,3 +4,4 @@ debian_packages:
   - apt-transport-https
   - curl
   - gnupg
+cassandra_apt_keyring_path: /etc/apt/keyrings/apache-cassandra.asc

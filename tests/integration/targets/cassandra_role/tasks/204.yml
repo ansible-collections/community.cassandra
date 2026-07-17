@@ -81,10 +81,13 @@
   check_mode: yes
   register: third_run
 
+# ALL PERMISSIONS -> SELECT-only revokes the other 5 constituent perms on
+# 311x/40x/41x (CREATE/ALTER/DROP/MODIFY/AUTHORIZE). 5.0+ also revokes
+# UNMASK/SELECT_MASKED, so 7 there.
 - assert:
     that:
       - third_run.changed
-      - third_run.permissions.revoke | length == 5
+      - "third_run.permissions.revoke | length == (5 if cassandra_version in ['311x', '40x', '41x'] else 7)"
       - third_run.permissions.grant | length == 0
 
 - name: Create a test role - fourth run
@@ -104,7 +107,7 @@
 - assert:
     that:
       - fourth_run.changed
-      - fourth_run.permissions.revoke | length == 5
+      - "fourth_run.permissions.revoke | length == (5 if cassandra_version in ['311x', '40x', '41x'] else 7)"
       - fourth_run.permissions.grant | length == 0
 
 

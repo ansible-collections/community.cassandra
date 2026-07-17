@@ -3,3 +3,11 @@
   hosts: all
   roles:
     - role: community.cassandra.cassandra_linux
+  tasks:
+    # The role's own swap-removal task never runs in this test scenario
+    # (always skipped), so it never actually proved ansible.posix.mount
+    # resolves. This does, directly.
+    - name: Regression check - ansible.posix.mount must resolve
+      ansible.posix.mount:
+        path: /mnt/community-cassandra-molecule-regression-check
+        state: absent

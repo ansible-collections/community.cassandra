@@ -658,24 +658,37 @@
   ansible.builtin.shell: cqlsh --username "{{ cassandra_admin_user }}" --password "{{ cassandra_admin_pwd }}" --execute "LIST ALL PERMISSIONS OF complex"
   register: complex
 
+# 5.0+ auto-grants 2 extra permissions (UNMASK, SELECT_MASKED) on
+# mykeyspace4. cqlsh right-aligns the whole "permission" column to its
+# widest value in the result, so adding SELECT_MASKED (13 chars, wider
+# than anything before it) reflows the padding on every row, not just
+# mykeyspace4's - collapse that padding to a single space before matching
+# so the assertions below don't have to hardcode column width at all.
+- name: "Set expected row count for complex role permissions"
+  set_fact:
+    expected_complex_permission_rows: "{{ '14' if cassandra_version in ['311x', '40x', '41x'] else '16' }}"
+    complex_perms: "{{ complex.stdout | regex_replace('[ \t]+', ' ') }}"
+
 - name: complex role permissions test
   assert:
     that:
-      - "'(14 rows)' in complex.stdout"
-      - "'<keyspace mykeyspace1> |     SELECT' in complex.stdout"
-      - "'<keyspace mykeyspace2> |     SELECT' in complex.stdout"
-      - "'<keyspace mykeyspace2> |     MODIFY' in complex.stdout"
-      - "'<keyspace mykeyspace3> |     SELECT' in complex.stdout"
-      - "'<keyspace mykeyspace3> |     MODIFY' in complex.stdout"
-      - "'<keyspace mykeyspace3> |      ALTER' in complex.stdout"
-      - "'<keyspace mykeyspace4> |     CREATE' in complex.stdout"
-      - "'<keyspace mykeyspace4> |     SELECT' in complex.stdout"
-      - "'<keyspace mykeyspace4> |     MODIFY' in complex.stdout"
-      - "'<keyspace mykeyspace4> |      ALTER' in complex.stdout"
-      - "'<keyspace mykeyspace4> |       DROP' in complex.stdout"
-      - "'<keyspace mykeyspace4> |  AUTHORIZE' in complex.stdout"
-      - "'<keyspace mykeyspace5> |     SELECT' in complex.stdout"
-      - "'<keyspace mykeyspace6> |     SELECT' in complex.stdout"
+      - "'(' + expected_complex_permission_rows + ' rows)' in complex.stdout"
+      - "'<keyspace mykeyspace1> | SELECT' in complex_perms"
+      - "'<keyspace mykeyspace2> | SELECT' in complex_perms"
+      - "'<keyspace mykeyspace2> | MODIFY' in complex_perms"
+      - "'<keyspace mykeyspace3> | SELECT' in complex_perms"
+      - "'<keyspace mykeyspace3> | MODIFY' in complex_perms"
+      - "'<keyspace mykeyspace3> | ALTER' in complex_perms"
+      - "'<keyspace mykeyspace4> | CREATE' in complex_perms"
+      - "'<keyspace mykeyspace4> | SELECT' in complex_perms"
+      - "'<keyspace mykeyspace4> | MODIFY' in complex_perms"
+      - "'<keyspace mykeyspace4> | ALTER' in complex_perms"
+      - "'<keyspace mykeyspace4> | DROP' in complex_perms"
+      - "'<keyspace mykeyspace4> | AUTHORIZE' in complex_perms"
+      - "(cassandra_version in ['311x', '40x', '41x']) or ('<keyspace mykeyspace4> | UNMASK' in complex_perms)"
+      - "(cassandra_version in ['311x', '40x', '41x']) or ('<keyspace mykeyspace4> | SELECT_MASKED' in complex_perms)"
+      - "'<keyspace mykeyspace5> | SELECT' in complex_perms"
+      - "'<keyspace mykeyspace6> | SELECT' in complex_perms"
 
 # Drop permissions from complex user
 - name: Drop permissions and add role to complex user
@@ -702,10 +715,13 @@
     login_password: "{{ cassandra_admin_pwd }}"
   register: complex
 
+# 8 on 311x/40x/41x: mykeyspace2's MODIFY + mykeyspace3's ALTER + mykeyspace4's
+# ALL PERMISSIONS (6 constituent perms there). 5.0+ expands ALL PERMISSIONS to
+# 8 constituent perms (adds UNMASK, SELECT_MASKED), so 1 + 1 + 8 = 10 there.
 - assert:
     that:
       - "complex.changed == True"
-      - "complex.permissions['revoke'] | length == 8"
+      - "complex.permissions['revoke'] | length == (8 if cassandra_version in ['311x', '40x', '41x'] else 10)"
       - "complex.permissions['grant'] | length == 0"
       - "'roles' in complex.keys()"
 

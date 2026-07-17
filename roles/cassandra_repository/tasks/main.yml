@@ -25,16 +25,24 @@
     - "ansible_facts['distribution_version'] == '16.04'"
 
 
-- name: Add apt key for Cassandra repository (Debian & Ubuntu)
-  ansible.builtin.apt_key:
+- name: Ensure /etc/apt/keyrings exists (Debian & Ubuntu)
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: "0755"
+  when: ansible_facts['os_family'] == "Debian"
+
+- name: Fetch Cassandra apt signing key (Debian & Ubuntu)
+  ansible.builtin.get_url:
     url: https://downloads.apache.org/cassandra/KEYS
-    state: present
+    dest: "{{ cassandra_apt_keyring_path }}"
+    mode: "0644"
   retries: 3
   when: ansible_facts['os_family'] == "Debian"
 
 - name: Ensure Cassandra apt repository exists (Debian & Ubuntu)
   ansible.builtin.apt_repository:
-    repo: "deb https://debian.cassandra.apache.org {{ cassandra_version }} main"
+    repo: "deb [signed-by={{ cassandra_apt_keyring_path }}] https://debian.cassandra.apache.org {{ cassandra_version }} main"
     state: present
     filename: "cassandra-{{ cassandra_version }}"
   retries: 3
