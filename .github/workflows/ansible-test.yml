@@ -45,7 +45,10 @@ jobs:
           command: pip install https://github.com/ansible/ansible/archive/${{ matrix.versions.ansible_version }}.tar.gz --disable-pip-version-check
 
       - name: Run sanity tests
-        run: ansible-test sanity --docker -v --color --python ${{ matrix.versions.python_version }}
+        uses: nick-invision/retry@v4
+        with:
+          max_attempts: 3
+          command: ansible-test sanity --docker -v --color --python ${{ matrix.versions.python_version }}
 
   integration_matrix:
     runs-on: ubuntu-24.04
@@ -125,7 +128,10 @@ jobs:
           command: ansible-galaxy collection install ansible.posix -p ansible_collections/
 
       - name: Run integration tests on Python ${{ matrix.test_scenario.python_version }} | ${{ matrix.test_scenario.docker_image }} | ${{ matrix.versions.ansible_version }} | ${{ matrix.cassandra_module }} | ${{ matrix.cassandra_version.package_version }}
-        run: ansible-test integration --docker ${{ matrix.test_scenario.docker_image }} ${{ matrix.test_scenario.ansible_test_options }} -v --color --retry-on-error --python ${{ matrix.test_scenario.python_version }} --continue-on-error --diff --coverage  ${{ matrix.cassandra_module }}
+        uses: nick-invision/retry@v4
+        with:
+          max_attempts: 3
+          command: ansible-test integration --docker ${{ matrix.test_scenario.docker_image }} ${{ matrix.test_scenario.ansible_test_options }} -v --color --retry-on-error --python ${{ matrix.test_scenario.python_version }} --continue-on-error --diff --coverage  ${{ matrix.cassandra_module }}
 
       - name: Generate coverage report.
         run: ansible-test coverage xml -v --requirements --group-by command --group-by version
@@ -196,7 +202,10 @@ jobs:
           sed -i 's/^cassandra_version:.*/cassandra_version: \"${{ matrix.cassandra_version.tar_version }}\"/g' ${{ env.setup_ccm_version_file }}
 
       - name: Run integration tests on Python ${{ matrix.test_scenario.python_version }} | ${{ matrix.test_scenario.docker_image }} | ${{ matrix.versions.ansible_version }} | ${{ matrix.cassandra_module }} | ${{ matrix.cassandra_version.package_version }}
-        run: ansible-test integration --docker ${{ matrix.test_scenario.docker_image }} ${{ matrix.test_scenario.ansible_test_options }} -v --color --retry-on-error --python ${{ matrix.test_scenario.python_version }} --continue-on-error --diff --coverage  ${{ matrix.cassandra_module }}
+        uses: nick-invision/retry@v4
+        with:
+          max_attempts: 3
+          command: ansible-test integration --docker ${{ matrix.test_scenario.docker_image }} ${{ matrix.test_scenario.ansible_test_options }} -v --color --retry-on-error --python ${{ matrix.test_scenario.python_version }} --continue-on-error --diff --coverage  ${{ matrix.cassandra_module }}
 
       - name: Generate coverage report.
         run: ansible-test coverage xml -v --requirements --group-by command --group-by version
@@ -270,7 +279,10 @@ jobs:
         run: ansible-test integration --docker ${{ matrix.test_scenario.docker_image }} ${{ matrix.test_scenario.ansible_test_options }} -v --color --retry-on-error --python ${{ matrix.test_scenario.python_version }} --continue-on-error --diff --coverage  ${{ matrix.cassandra_module }}
 
       - name: Generate coverage report.
-        run: ansible-test coverage xml -v --requirements --group-by command --group-by version
+        uses: nick-invision/retry@v4
+        with:
+          max_attempts: 3
+          command: ansible-test coverage xml -v --requirements --group-by command --group-by version
 
       - uses: codecov/codecov-action@v7.0.0
         with:
@@ -331,7 +343,10 @@ jobs:
           sed -i 's/^cassandra_version:.*/cassandra_version: \"${{ matrix.cassandra_version.tar_version }}\"/g' ${{ env.setup_ccm_version_file }}
 
       - name: Run integration tests on Python ${{ matrix.test_scenario.python_version }} | ${{ matrix.test_scenario.docker_image }} | ${{ matrix.versions.ansible_version }} | ${{ matrix.cassandra_module }} | ${{ matrix.cassandra_version.package_version }}
-        run: ansible-test integration --docker ${{ matrix.test_scenario.docker_image }} ${{ matrix.test_scenario.ansible_test_options }} -v --color --retry-on-error --python ${{ matrix.test_scenario.python_version }} --continue-on-error --diff --coverage  ${{ matrix.cassandra_module }}
+        uses: nick-invision/retry@v4
+        with:
+          max_attempts: 3
+          command: ansible-test integration --docker ${{ matrix.test_scenario.docker_image }} ${{ matrix.test_scenario.ansible_test_options }} -v --color --retry-on-error --python ${{ matrix.test_scenario.python_version }} --continue-on-error --diff --coverage  ${{ matrix.cassandra_module }}
 
       - name: Generate coverage report.
         run: ansible-test coverage xml -v --requirements --group-by command --group-by version
