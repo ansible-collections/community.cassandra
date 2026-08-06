@@ -76,7 +76,7 @@ rc:
   description: Return code of the last executed command.
   returned: always
   type: int
-datacenters:
+cluster_status:
   description:
     - Cassandra cluster information grouped by datacenter.
     - Each key is a datacenter name.
