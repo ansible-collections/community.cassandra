@@ -265,7 +265,10 @@ def cluster_up_down(stdout):
         }
     '''
     cluster_up_down = {}
-    node_re = re.compile(r'^[UD][NLJM]\s+')
+    # Second letter is the node state (N/L/J/M upstream, plus DSE's S for
+    # a drained-but-still-running node). Match any state letter so unknown
+    # or DSE-specific codes aren't silently dropped from the parsed output.
+    node_re = re.compile(r'^[UD][A-Z]\s+')
 
     for line in ''.join(stdout).splitlines():
         if line.startswith("Datacenter:"):
