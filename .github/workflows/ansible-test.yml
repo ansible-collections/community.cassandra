@@ -80,6 +80,9 @@ jobs:
           max_attempts: 3
           command: pip install https://github.com/ansible/ansible/archive/${{ matrix.versions.ansible_version }}.tar.gz --disable-pip-version-check
 
+      - name: Install coverage
+        run: pip install coverage --disable-pip-version-check
+
       - name: Run unit tests
         run: ansible-test units -v --color --python ${{ matrix.versions.python_version }} --coverage
 
