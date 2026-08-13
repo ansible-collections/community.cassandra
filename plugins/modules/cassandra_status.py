@@ -240,6 +240,52 @@ def nodetool_status_poll(module):
         return_codes, stdout_list, stderr_list, down_running_total
 
 
+# nodetool's status columns are fixed-width, padded to the widest value seen
+# in each column (Cassandra's own TableBuilder.printTo: every cell, even an
+# empty one, is left-justified to the column's max width) -- so a column's
+# start offset in the header line applies identically to every data line
+# below it. Column order/labels vary by cluster type: legacy "token-per-node"
+# clusters print Owns/Host ID before Token, vnodes clusters print
+# Tokens/Owns/Host ID in that order (see Cassandra's Status.java,
+# addNodesHeader()) -- search for known labels instead of assuming one order.
+_NODE_STATUS_COLUMN_LABELS = ["Address", "Load", "Tokens", "Owns (effective)",
+                              "Owns", "Host ID", "Token", "Rack"]
+
+
+def node_status_column_offsets(header_line):
+    found = {}
+    for label in _NODE_STATUS_COLUMN_LABELS:
+        idx = header_line.find(label)
+        if idx == -1:
+            continue
+        # "Owns"/"Token" are substrings of "Owns (effective)"/"Tokens" --
+        # don't let the short label re-claim a spot the long one already has.
+        if label == "Owns" and found.get("Owns (effective)") == idx:
+            continue
+        if label == "Token" and found.get("Tokens") == idx:
+            continue
+        found[label] = idx
+    if "Address" not in found or "Load" not in found or "Host ID" not in found or "Rack" not in found:
+        return None
+    return {
+        "address": found["Address"],
+        "load": found["Load"],
+        "owns": found.get("Owns (effective)", found.get("Owns")),
+        "tokens": found.get("Tokens", found.get("Token")),
+        "host_id": found["Host ID"],
+        "rack": found["Rack"],
+    }
+
+
+def node_status_columns(line, offsets):
+    ordered = sorted(offsets.items(), key=lambda kv: kv[1])
+    values = {}
+    for i, (name, start) in enumerate(ordered):
+        end = ordered[i + 1][1] if i + 1 < len(ordered) else len(line)
+        values[name] = line[start:end].strip()
+    return values
+
+
 def cluster_up_down(stdout):
     '''
     Extract the Data Centres from the nodetool status stdout
@@ -269,6 +315,7 @@ def cluster_up_down(stdout):
     # a drained-but-still-running node). Match any state letter so unknown
     # or DSE-specific codes aren't silently dropped from the parsed output.
     node_re = re.compile(r'^[UD][A-Z]\s+')
+    column_offsets = None
 
     for line in ''.join(stdout).splitlines():
         if line.startswith("Datacenter:"):
@@ -278,28 +325,35 @@ def cluster_up_down(stdout):
                 "down": [],
                 "nodes": []
             }
+            column_offsets = None  # re-derive for this datacenter's own header
             continue
 
-        if not node_re.match(line):
+        if line.strip().startswith("--") and "Address" in line:
+            column_offsets = node_status_column_offsets(line)
             continue
 
-        fields = line.split()
+        if column_offsets is None or not node_re.match(line):
+            continue
 
-        if fields[0].startswith("U"):
-            cluster_up_down[data_center]["up"].append(fields[1])
+        status = line[0]
+        state = line[1]
+        cols = node_status_columns(line, column_offsets)
 
-        if fields[0].startswith("D"):
-            cluster_up_down[data_center]["down"].append(fields[1])
+        if status == "U":
+            cluster_up_down[data_center]["up"].append(cols["address"])
+
+        if status == "D":
+            cluster_up_down[data_center]["down"].append(cols["address"])
 
         cluster_up_down[data_center]["nodes"].append({
-            "address": fields[1],
-            "load": " ".join(fields[2:4]),
-            "tokens": fields[4],
-            "owns": fields[5],
-            "host_id": fields[6],
-            "rack": fields[7],
-            "status": fields[0][0],
-            "state": fields[0][1],
+            "address": cols["address"],
+            "load": cols["load"],
+            "tokens": cols["tokens"],
+            "owns": cols["owns"],
+            "host_id": cols["host_id"],
+            "rack": cols["rack"],
+            "status": status,
+            "state": state,
         })
     return cluster_up_down
 
