@@ -47,6 +47,52 @@ jobs:
       - name: Run sanity tests
         run: ansible-test sanity --docker -v --color --python ${{ matrix.versions.python_version }}
 
+  units:
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: ansible_collections/community/cassandra
+    strategy:
+      matrix:
+        versions:
+          - python_version: "3.10"
+            ansible_version: "stable-2.16"
+          - python_version: "3.11"
+            ansible_version: "stable-2.17"
+          - python_version: "3.12"
+            ansible_version: "stable-2.18"
+    steps:
+
+      - name: Check out code
+        uses: actions/checkout@v6
+        with:
+          path: ansible_collections/community/cassandra
+
+      - name: Set up Python ${{ matrix.versions.python_version }}
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.versions.python_version }}
+
+      - name: Install ansible-base (${{ matrix.versions.ansible_version }})
+        uses: nick-invision/retry@v4
+        with:
+          timeout_minutes: 3
+          max_attempts: 3
+          command: pip install https://github.com/ansible/ansible/archive/${{ matrix.versions.ansible_version }}.tar.gz --disable-pip-version-check
+
+      - name: Run unit tests
+        run: ansible-test units -v --color --python ${{ matrix.versions.python_version }} --coverage
+
+      - name: Generate coverage report.
+        run: ansible-test coverage xml -v --requirements --group-by command --group-by version
+
+      - uses: codecov/codecov-action@v7.0.0
+        with:
+          fail_ci_if_error: false
+
+      - name: Upload Coverage data
+        run: tests/coverage.sh
+
   integration_matrix:
     runs-on: ubuntu-24.04
     defaults:
