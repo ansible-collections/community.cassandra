@@ -76,7 +76,7 @@ rc:
   description: Return code of the last executed command.
   returned: always
   type: int
-datacenters:
+cluster_status:
   description:
     - Cassandra cluster information grouped by datacenter.
     - Each key is a datacenter name.
@@ -265,7 +265,10 @@ def cluster_up_down(stdout):
         }
     '''
     cluster_up_down = {}
-    node_re = re.compile(r'^[UD][NLJM]\s+')
+    # Second letter is the node state (N/L/J/M upstream, plus DSE's S for
+    # a drained-but-still-running node). Match any state letter so unknown
+    # or DSE-specific codes aren't silently dropped from the parsed output.
+    node_re = re.compile(r'^[UD][A-Z]\s+')
 
     for line in ''.join(stdout).splitlines():
         if line.startswith("Datacenter:"):
@@ -312,7 +315,7 @@ def main():
     )
     module = AnsibleModule(
         argument_spec=argument_spec,
-        supports_check_mode=False,
+        supports_check_mode=True,
     )
 
     down = module.params['down']
