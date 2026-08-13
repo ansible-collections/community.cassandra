@@ -83,6 +83,9 @@ jobs:
       - name: Install coverage
         run: pip install coverage --disable-pip-version-check
 
+      - name: Install unit test requirements
+        run: pip install -r tests/unit/requirements.txt --disable-pip-version-check
+
       - name: Run unit tests
         run: ansible-test units -v --color --python ${{ matrix.versions.python_version }} --coverage
 
