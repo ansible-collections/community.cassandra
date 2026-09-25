@@ -1,0 +1,4 @@
+breaking_changes:
+  - cassandra_firewall - port 9160 (Thrift, removed in Cassandra 4.0) is no longer opened; add it to open_ports if a node still needs it.
+minor_changes:
+  - cassandra_firewall - use the FQCNs of the firewalld and ufw modules instead of their ansible.builtin redirects.

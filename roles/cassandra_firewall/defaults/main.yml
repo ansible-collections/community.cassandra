@@ -5,5 +5,4 @@ open_ports:
   - 7199/tcp  # jmx
   - 7000/tcp  # Internode communication (not used if TLS enabled)
   - 7001/tcp  # TLS Internode communication (used if TLS enabled)
-  - 9160/tcp  # Thrift client API
   - 9042/tcp  # CQL native transport port

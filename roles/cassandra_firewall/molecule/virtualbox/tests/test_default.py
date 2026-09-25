@@ -23,8 +23,7 @@ def test_ensure_cassandra_ports_open(host):
                        '7000/tcp',
                        '7001/tcp',
                        '7199/tcp',
-                       '9042/tcp',
-                       '9160/tcp']
+                       '9042/tcp']
     with host.sudo():
         cmd = host.run("firewall-cmd --list-ports")
 
