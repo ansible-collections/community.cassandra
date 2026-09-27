@@ -24,28 +24,28 @@
 
 # This should go into a cassandra_driver dependency
 - name: Ensure epel is available
-  yum:
+  ansible.builtin.yum:
     name: epel-release
   when: ansible_os_family == "RedHat"
 
 - name: Upgrade pip
-  shell: pip3 install -U pip  
+  ansible.builtin.shell: pip3 install -U pip  
 
 - name: Install cassandra-driver
-  pip:
+  ansible.builtin.pip:
     name: cassandra-driver
   environment:
     CASS_DRIVER_NO_CYTHON: 1 
 
 - name: Ensure Cassandra service from setup_cassandra isn't running
-  service:
+  ansible.builtin.service:
     name: "{{ cassandra_service }}"
     enabled: "yes"
     state: "stopped"
   ignore_errors: yes
 
 - name: Ensure directories exist for SSL certificates
-  file:
+  ansible.builtin.file:
     path: /home/ssl-test-cluster
     state: directory
     owner: cassandra
@@ -53,7 +53,7 @@
     mode: 0755
 
 - name: Copy SSL certificates and truststore/keystore files to local directory
-  copy:
+  ansible.builtin.copy:
     src: "{{ item }}"
     dest: "/home/ssl-test-cluster/{{ item }}"
     owner: cassandra
@@ -67,7 +67,7 @@
     - cassandra.crt
 
 - name: Remove default test cluster from CCM to allow testing for SSL enabled cluster
-  shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd }} clear test > /dev/null\""
+  ansible.builtin.shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd }} clear test > /dev/null\""
   become_user: cassandra
   args:
     chdir: /home/cassandra
@@ -79,7 +79,7 @@
 
 - name: Create SSL enabled Cassandra cluster via ccm tool
   # shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd }} create ssl-test-cluster -v {{ cassandra_version }} --ssl /home/ssl-test-cluster/ --require_client_auth > /dev/null\""
-  shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd }} create ssl-test-cluster -v {{ cassandra_version }} --ssl /home/ssl-test-cluster/ > /dev/null\""
+  ansible.builtin.shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd }} create ssl-test-cluster -v {{ cassandra_version }} --ssl /home/ssl-test-cluster/ > /dev/null\""
   become_user: cassandra
   args:
     chdir: /home/cassandra
@@ -89,7 +89,7 @@
     PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin  
 
 - name: Add nodes to the Cassandra Cluster
-  shell: "sudo -E -u cassandra bash -c '{{ ccm_cmd }} add {{ item.node }} -i {{ item.ip }} -j {{ item.port }} -b --data-center={{ item.dc }} --remote-debug-port {{ item.debug_port }} {{ item.args }}'"
+  ansible.builtin.shell: "sudo -E -u cassandra bash -c '{{ ccm_cmd }} add {{ item.node }} -i {{ item.ip }} -j {{ item.port }} -b --data-center={{ item.dc }} --remote-debug-port {{ item.debug_port }} {{ item.args }}'"
   become_user: cassandra
   args:
     chdir: /home/cassandra
@@ -100,7 +100,7 @@
   with_items: "{{ cassandra_nodes }}"
 
 - name: Update endpoint_snitch
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: "/home/cassandra/config/test/{{ item.node }}/conf/cassandra.yaml"
     regexp: "^endpoint_snitch"
     line: "endpoint_snitch: GossipingPropertyFileSnitch"
@@ -108,7 +108,7 @@
   no_log: yes
 
 - name: Update rack info
-  copy:
+  ansible.builtin.copy:
     content: |
       dc={{ item.dc }}
       rack=rack1
@@ -126,17 +126,17 @@
     group: cassandra
   with_items: "{{ cassandra_nodes }}"
 
-- set_fact:
+- ansible.builtin.set_fact:
     cassandra_node_delay: 120
   when: ansible_os_family == "RedHat"
 
 - name: Start the ccm cluster
-  include_tasks: start_ccm_cluster.yml
+  ansible.builtin.include_tasks: start_ccm_cluster.yml
   vars:
     ccm_cluster: ssl-test-cluster
 
 - name: Get cluster status
-  shell: sudo -E -u cassandra bash -c "{{ ccm_cmd }} status"
+  ansible.builtin.shell: sudo -E -u cassandra bash -c "{{ ccm_cmd }} status"
   become_user: cassandra
   args:
     chdir: /home/cassandra
@@ -146,11 +146,11 @@
     CASSANDRA_HOME: "/home/cassandra"
     PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
-- debug:
+- ansible.builtin.debug:
     msg: "{{ cluster_status.stdout }}"
 
 - name: Wait for the cql port to become active
-  wait_for:
+  ansible.builtin.wait_for:
     port: 9042
     host: "{{ item.ip }}"
     delay: 30
@@ -158,23 +158,23 @@
   with_items: "{{ cassandra_nodes }}"
 
 - name: Creating a keyspace on an SSL-enabled cluster when ssl=True and ssl_cert_reqs=CERT_NONE should succeed
-  cassandra_keyspace:
+  community.cassandra.cassandra_keyspace:
     name: ccmsslkeyspace_cert_none
     state: present
     ssl: True
     ssl_cert_reqs: 'CERT_NONE'
 
 - name: Get output of DESC KEYSPACE ccmsslkeyspace_cert_none
-  shell: export SSL_CERTFILE=/home/ssl-test-cluster/ssl-test.cer.pem; cqlsh --ssl --execute "DESC KEYSPACE ccmsslkeyspace_cert_none"
+  ansible.builtin.shell: export SSL_CERTFILE=/home/ssl-test-cluster/ssl-test.cer.pem; cqlsh --ssl --execute "DESC KEYSPACE ccmsslkeyspace_cert_none"
   register: ccmsslkeyspace_cert_none
 
 - name: Assert ccmsslkeyspace_cert_none exists 1
-  assert:
+  ansible.builtin.assert:
     that:
       - "'\\nCREATE KEYSPACE ccmsslkeyspace_cert_none WITH replication = {\\'class\\': \\'SimpleStrategy\\', \\'replication_factor\\': \\'1\\'}  AND durable_writes = true;' in ccmsslkeyspace_cert_none.stdout"  
 
 - name: Creating a keyspace on an SSL-enabled cluster when ssl=True and ssl_cert_reqs=CERT_OPTIONAL should succeed
-  cassandra_keyspace:
+  community.cassandra.cassandra_keyspace:
     name: ccmsslkeyspace_cert_optional
     state: present
     ssl: True
@@ -182,16 +182,16 @@
     ssl_ca_certs: '/home/ssl-test-cluster/ssl-test.cer.pem' 
   
 - name: Get output of DESC KEYSPACE ccmsslkeyspace_cert_optional
-  shell: export SSL_CERTFILE=/home/ssl-test-cluster/ssl-test.cer.pem; cqlsh --ssl --execute "DESC KEYSPACE ccmsslkeyspace_cert_optional"
+  ansible.builtin.shell: export SSL_CERTFILE=/home/ssl-test-cluster/ssl-test.cer.pem; cqlsh --ssl --execute "DESC KEYSPACE ccmsslkeyspace_cert_optional"
   register: ccmsslkeyspace_cert_optional
 
 - name: Assert ccmsslkeyspace_cert_optional exists 2
-  assert:
+  ansible.builtin.assert:
     that:
       - "'\\nCREATE KEYSPACE ccmsslkeyspace_cert_optional WITH replication = {\\'class\\': \\'SimpleStrategy\\', \\'replication_factor\\': \\'1\\'}  AND durable_writes = true;' in ccmsslkeyspace_cert_optional.stdout"
 
 - name: Creating a keyspace with ssl=True and ssl_cert_reqs=CERT_OPTIONAL on an SSL enabled cluster with wrong ssl_ca_certs should fail
-  cassandra_keyspace:
+  community.cassandra.cassandra_keyspace:
     name: ccmsslkeyspace_cert_optional_f
     state: present
     ssl: True
@@ -201,12 +201,12 @@
   register: ccmsslkeyspace_cert_optional_f
 
 - name: Assert ccmsslkeyspace_cert_optional_f fails
-  assert:
+  ansible.builtin.assert:
     that:
       - "'ssl_ca_certs certificate: File not found' in ccmsslkeyspace_cert_optional_f.msg"    
 
 - name: Creating a keyspace with ssl=True and ssl_cert_reqs=CERT_REQUIRED on an SSL enabled cluster with wrong ssl_ca_certs should fail
-  cassandra_keyspace:
+  community.cassandra.cassandra_keyspace:
     name: ccmsslkeyspace_cert_required_f
     state: present
     ssl: True
@@ -216,12 +216,12 @@
   register: ccmsslkeyspace_cert_required_f
 
 - name: Assert ccmsslkeyspace_cert_required_f fails
-  assert:
+  ansible.builtin.assert:
     that:
       - "'ssl_ca_certs certificate: File not found' in ccmsslkeyspace_cert_required_f.msg" 
 
 - name: Creating a keyspace with ssl=True and ssl_cert_reqs=CERT_REQUIRED on an SSL enabled cluster should succeed
-  cassandra_keyspace:
+  community.cassandra.cassandra_keyspace:
     name: ccmsslkeyspace_cert_required
     state: present
     ssl: True
@@ -229,16 +229,16 @@
     ssl_ca_certs: '/home/ssl-test-cluster/ssl-test.cer.pem' 
   
 - name: Get output of DESC KEYSPACE ccmsslkeyspace_cert_required
-  shell: export SSL_CERTFILE=/home/ssl-test-cluster/ssl-test.cer.pem; cqlsh --ssl --execute "DESC KEYSPACE ccmsslkeyspace_cert_required"
+  ansible.builtin.shell: export SSL_CERTFILE=/home/ssl-test-cluster/ssl-test.cer.pem; cqlsh --ssl --execute "DESC KEYSPACE ccmsslkeyspace_cert_required"
   register: ccmsslkeyspace_cert_required
 
 - name: Assert ccmsslkeyspace_cert_required exists 3
-  assert:
+  ansible.builtin.assert:
     that:
       - "'\\nCREATE KEYSPACE ccmsslkeyspace_cert_required WITH replication = {\\'class\\': \\'SimpleStrategy\\', \\'replication_factor\\': \\'1\\'}  AND durable_writes = true;' in ccmsslkeyspace_cert_required.stdout"          
 
 - name: Creating a keyspace for table tests with ssl:True and ssl_cert_reqs:CERT_NONE should succeed
-  cassandra_keyspace:
+  community.cassandra.cassandra_keyspace:
     ssl: True
     ssl_cert_reqs: 'CERT_NONE'
     name: myappssl
@@ -265,7 +265,7 @@
   ignore_errors: yes
 
 - name: Assert create_table_required fails
-  assert:
+  ansible.builtin.assert:
     that:
       - "'ssl_ca_certs certificate: File not found' in create_table_required.msg"  
 
@@ -290,7 +290,7 @@
   ignore_errors: yes
 
 - name: Assert create_table_optional fails
-  assert:
+  ansible.builtin.assert:
     that:
       - "'ssl_ca_certs certificate: File not found' in create_table_optional.msg"
 
@@ -312,21 +312,21 @@
       - username
   register: create_users
 
-- assert:
+- ansible.builtin.assert:
     that:
       - "create_users.changed == True"
       - "create_users.cql == 'CREATE TABLE myappssl.users ( id uuid, username text, encrypted_password blob, first_name text, last_name text, dob date, PRIMARY KEY (username))'"
 
 - name: Get output of DESC KEYSPACE myappssl
-  shell: " export SSL_CERTFILE=/home/ssl-test-cluster/ssl-test.cer.pem; cqlsh --ssl --execute 'DESC KEYSPACE myappssl'"
+  ansible.builtin.shell: " export SSL_CERTFILE=/home/ssl-test-cluster/ssl-test.cer.pem; cqlsh --ssl --execute 'DESC KEYSPACE myappssl'"
   register: myappssl
 
-- assert:
+- ansible.builtin.assert:
     that:
       - "'CREATE TABLE myappssl.users' in myappssl.stdout"
 
 - name: Creating a keyspace for table tests with ssl:True and ssl_cert_reqs:CERT_REQUIRED should succeed
-  cassandra_keyspace:
+  community.cassandra.cassandra_keyspace:
     ssl: True
     ssl_cert_reqs: 'CERT_REQUIRED'
     ssl_ca_certs: '/home/ssl-test-cluster/ssl-test.cer.pem' 
@@ -352,21 +352,21 @@
       - username
   register: create_users_cert_required
 
-- assert:
+- ansible.builtin.assert:
     that:
       - "create_users_cert_required.changed == True"
       - "create_users_cert_required.cql == 'CREATE TABLE myappssl_cert_required.users ( id uuid, username text, encrypted_password blob, first_name text, last_name text, dob date, PRIMARY KEY (username))'"
 
 - name: Get output of DESC KEYSPACE myappssl_cert_required
-  shell: " export SSL_CERTFILE=/home/ssl-test-cluster/ssl-test.cer.pem; cqlsh --ssl --execute 'DESC KEYSPACE myappssl_cert_required'"
+  ansible.builtin.shell: " export SSL_CERTFILE=/home/ssl-test-cluster/ssl-test.cer.pem; cqlsh --ssl --execute 'DESC KEYSPACE myappssl_cert_required'"
   register: myappssl_cert_required
 
-- assert:
+- ansible.builtin.assert:
     that:
       - "'CREATE TABLE myappssl_cert_required.users' in myappssl_cert_required.stdout"
 
 - name: Creating a keyspace for table tests with ssl:True and ssl_cert_reqs:CERT_OPTIONAL should succeed
-  cassandra_keyspace:
+  community.cassandra.cassandra_keyspace:
     ssl: True
     ssl_cert_reqs: 'CERT_OPTIONAL'
     ssl_ca_certs: '/home/ssl-test-cluster/ssl-test.cer.pem' 
@@ -392,21 +392,21 @@
       - username
   register: create_users_cert_required
 
-- assert:
+- ansible.builtin.assert:
     that:
       - "create_users_cert_required.changed == True"
       - "create_users_cert_required.cql == 'CREATE TABLE myappssl_cert_optional.users ( id uuid, username text, encrypted_password blob, first_name text, last_name text, dob date, PRIMARY KEY (username))'"
 
 - name: Get output of DESC KEYSPACE myappssl_cert_optional
-  shell: " export SSL_CERTFILE=/home/ssl-test-cluster/ssl-test.cer.pem; cqlsh --ssl --execute 'DESC KEYSPACE myappssl_cert_optional'"
+  ansible.builtin.shell: " export SSL_CERTFILE=/home/ssl-test-cluster/ssl-test.cer.pem; cqlsh --ssl --execute 'DESC KEYSPACE myappssl_cert_optional'"
   register: myappssl_cert_optional
 
-- assert:
+- ansible.builtin.assert:
     that:
       - "'CREATE TABLE myappssl_cert_optional.users' in myappssl_cert_optional.stdout"
 
 - name: Remove previous ssl-test cluster from CCM to allow testing for authenticated SSL enabled cluster
-  shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd }} remove ssl-test-cluster > /dev/null\""
+  ansible.builtin.shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd }} remove ssl-test-cluster > /dev/null\""
   become_user: cassandra
   args:
     chdir: /home/cassandra
@@ -417,7 +417,7 @@
     PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin      
 
 - name: Wait until the removed cluster's storage ports are free
-  wait_for:
+  ansible.builtin.wait_for:
     host: "{{ item.ip }}"
     port: 7000
     state: stopped
@@ -425,7 +425,7 @@
   with_items: "{{ cassandra_nodes }}"
 
 - name: Create Authenticated and SSL enabled Cassandra cluster via ccm tool
-  shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd }} create ssl-test-cluster-auth -v {{ cassandra_version }} --ssl /home/ssl-test-cluster/ --pwd-auth > /dev/null\""
+  ansible.builtin.shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd }} create ssl-test-cluster-auth -v {{ cassandra_version }} --ssl /home/ssl-test-cluster/ --pwd-auth > /dev/null\""
   become_user: cassandra
   args:
     chdir: /home/cassandra
@@ -435,7 +435,7 @@
     PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin  
 
 - name: Add nodes to the Cassandra Cluster
-  shell: "sudo -E -u cassandra bash -c '{{ ccm_cmd }} add {{ item.node }} -i {{ item.ip }} -j {{ item.port }} -b --data-center={{ item.dc }} --remote-debug-port {{ item.debug_port }} {{ item.args }}'"
+  ansible.builtin.shell: "sudo -E -u cassandra bash -c '{{ ccm_cmd }} add {{ item.node }} -i {{ item.ip }} -j {{ item.port }} -b --data-center={{ item.dc }} --remote-debug-port {{ item.debug_port }} {{ item.args }}'"
   become_user: cassandra
   args:
     chdir: /home/cassandra
@@ -446,7 +446,7 @@
   with_items: "{{ cassandra_nodes }}"
 
 - name: Update endpoint_snitch
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: "/home/cassandra/config/test/{{ item.node }}/conf/cassandra.yaml"
     regexp: "^endpoint_snitch"
     line: "endpoint_snitch: GossipingPropertyFileSnitch"
@@ -454,7 +454,7 @@
   no_log: yes
 
 - name: Update rack info
-  copy:
+  ansible.builtin.copy:
     content: |
       dc={{ item.dc }}
       rack=rack1
@@ -472,17 +472,17 @@
     group: cassandra
   with_items: "{{ cassandra_nodes }}"
 
-- set_fact:
+- ansible.builtin.set_fact:
     cassandra_node_delay: 120
   when: ansible_os_family == "RedHat"
 
 - name: Start the ccm cluster
-  include_tasks: start_ccm_cluster.yml
+  ansible.builtin.include_tasks: start_ccm_cluster.yml
   vars:
     ccm_cluster: ssl-test-cluster-auth
 
 - name: Get cluster status
-  shell: sudo -E -u cassandra bash -c "{{ ccm_cmd }} status"
+  ansible.builtin.shell: sudo -E -u cassandra bash -c "{{ ccm_cmd }} status"
   become_user: cassandra
   args:
     chdir: /home/cassandra
@@ -492,11 +492,11 @@
     CASSANDRA_HOME: "/home/cassandra"
     PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
-- debug:
+- ansible.builtin.debug:
     msg: "{{ cluster_status.stdout }}"
 
 - name: Wait for the cql port to become active
-  wait_for:
+  ansible.builtin.wait_for:
     port: 9042
     host: "{{ item.ip }}"
     delay: 30
@@ -514,7 +514,7 @@
     login_password: "{{ cassandra_admin_pwd }}"
   register: create_role
 
-- assert:
+- ansible.builtin.assert:
     that:
       - 'create_role.changed == True'
 
@@ -530,11 +530,11 @@
   check_mode: yes
 
 - name: Get output of list roles
-  shell: export SSL_CERTFILE=/home/ssl-test-cluster/ssl-test.cer.pem; cqlsh --ssl --username "{{ cassandra_admin_user }}" --password "{{ cassandra_admin_pwd }}" --execute "LIST ROLES"
+  ansible.builtin.shell: export SSL_CERTFILE=/home/ssl-test-cluster/ssl-test.cer.pem; cqlsh --ssl --username "{{ cassandra_admin_user }}" --password "{{ cassandra_admin_pwd }}" --execute "LIST ROLES"
   register: myrole
 
 - name: Assert app_user exists in output
-  assert:
+  ansible.builtin.assert:
     that:
       - "'app_user' in myrole.stdout"  
 
@@ -551,7 +551,7 @@
     login_password: "{{ cassandra_admin_pwd }}"
   register: create_role_required
 
-- assert:
+- ansible.builtin.assert:
     that:
       - 'create_role_required.changed == True'
 
@@ -569,11 +569,11 @@
   check_mode: yes
 
 - name: Get output of list roles
-  shell: export SSL_CERTFILE=/home/ssl-test-cluster/ssl-test.cer.pem; cqlsh --ssl --username "{{ cassandra_admin_user }}" --password "{{ cassandra_admin_pwd }}" --execute "LIST ROLES"
+  ansible.builtin.shell: export SSL_CERTFILE=/home/ssl-test-cluster/ssl-test.cer.pem; cqlsh --ssl --username "{{ cassandra_admin_user }}" --password "{{ cassandra_admin_pwd }}" --execute "LIST ROLES"
   register: myrole_required
 
 - name: Assert app_user_c_r exists in output
-  assert:
+  ansible.builtin.assert:
     that:
       - "'app_user_c_r' in myrole_required.stdout"  
 
@@ -590,7 +590,7 @@
     login_password: "{{ cassandra_admin_pwd }}"
   register: create_role_optional
 
-- assert:
+- ansible.builtin.assert:
     that:
       - 'create_role_optional.changed == True'
 
@@ -608,11 +608,11 @@
   check_mode: yes
 
 - name: Get output of list roles
-  shell: export SSL_CERTFILE=/home/ssl-test-cluster/ssl-test.cer.pem; cqlsh --ssl --username "{{ cassandra_admin_user }}" --password "{{ cassandra_admin_pwd }}" --execute "LIST ROLES"
+  ansible.builtin.shell: export SSL_CERTFILE=/home/ssl-test-cluster/ssl-test.cer.pem; cqlsh --ssl --username "{{ cassandra_admin_user }}" --password "{{ cassandra_admin_pwd }}" --execute "LIST ROLES"
   register: myrole_optional
 
 - name: Assert app_user_c_o exists in output
-  assert:
+  ansible.builtin.assert:
     that:
       - "'app_user_c_o' in myrole_optional.stdout"  
 
@@ -630,7 +630,7 @@
   register: create_role_required_fail
   ignore_errors: yes
 
-- assert:
+- ansible.builtin.assert:
     that:
       - "'ssl_ca_certs certificate: File not found' in create_role_required_fail.msg"
 
@@ -648,7 +648,7 @@
   register: create_role_optional_fail
   ignore_errors: yes
 
-- assert:
+- ansible.builtin.assert:
     that:
       - "'ssl_ca_certs certificate: File not found' in create_role_optional_fail.msg"
 
