@@ -72,20 +72,7 @@ __metaclass__ = type
 
 from ansible_collections.community.cassandra.plugins.module_utils.nodetool_cmd_objects import NodeToolCommandSimple
 from ansible_collections.community.cassandra.plugins.module_utils.cassandra_common_options import cassandra_common_argument_spec
-
-
-def parse_netstats(stdout):
-    """mode, and the stream session lines between the mode line and the read repair statistics."""
-    mode, streams = "", []
-    for line in stdout.splitlines():
-        if line.startswith("Mode:"):
-            mode = line.split(":", 1)[1].strip()
-            continue
-        if line.startswith(("Read Repair Statistics", "Pool Name")):
-            break
-        if mode and line.strip() and line.strip() != "Not sending any streams.":
-            streams.append(line)
-    return mode, streams
+from ansible_collections.community.cassandra.plugins.module_utils.nodetool_netstats import parse_netstats
 
 
 def main():
