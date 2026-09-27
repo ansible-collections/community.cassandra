@@ -4,10 +4,10 @@
 - name: SSL tests
   block:
     - name: Run the tests
-      include_tasks: tests.yml
+      ansible.builtin.include_tasks: tests.yml
   always:
     - name: Remove the ccm clusters
-      shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd }} remove {{ item }} > /dev/null\""
+      ansible.builtin.shell: "sudo -E -u cassandra bash -c \"{{ ccm_cmd }} remove {{ item }} > /dev/null\""
       become_user: cassandra
       args:
         chdir: /home/cassandra
@@ -19,7 +19,7 @@
       failed_when: false
 
     - name: Wait until the nodes' storage ports are free
-      wait_for:
+      ansible.builtin.wait_for:
         host: "{{ item.ip }}"
         port: 7000
         state: stopped
