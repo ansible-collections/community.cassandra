@@ -101,6 +101,7 @@ jobs:
       - uses: codecov/codecov-action@v7.0.0
         with:
           fail_ci_if_error: false
+          flags: units
 
       - name: Upload Coverage data
         run: tests/coverage.sh
@@ -178,6 +179,7 @@ jobs:
       run:
         working-directory: ansible_collections/community/cassandra
     strategy:
+      fail-fast: false  # a failing target must not stop the others uploading their coverage
       matrix:
         versions:
           - python_version: "3.10"
@@ -242,6 +244,7 @@ jobs:
       - uses: codecov/codecov-action@v7.0.0
         with:
           fail_ci_if_error: false
+          flags: ${{ matrix.cassandra_module }}
 
       - name: Upload Coverage data
         run: tests/coverage.sh
@@ -254,6 +257,7 @@ jobs:
       run:
         working-directory: ansible_collections/community/cassandra
     strategy:
+      fail-fast: false
       matrix:
         versions:
           - python_version: "3.10"
@@ -318,6 +322,7 @@ jobs:
       - uses: codecov/codecov-action@v7.0.0
         with:
           fail_ci_if_error: false
+          flags: ${{ matrix.cassandra_module }}
 
       - name: Upload Coverage data
         run: tests/coverage.sh
@@ -330,6 +335,7 @@ jobs:
       run:
         working-directory: ansible_collections/community/cassandra
     strategy:
+      fail-fast: false
       matrix:
         versions:
           - python_version: "3.10"
@@ -387,6 +393,7 @@ jobs:
       - uses: codecov/codecov-action@v7.0.0
         with:
           fail_ci_if_error: false
+          flags: ${{ matrix.cassandra_module }}
 
       - name: Upload Coverage data
         run: tests/coverage.sh
