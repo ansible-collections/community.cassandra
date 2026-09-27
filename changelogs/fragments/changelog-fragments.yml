@@ -1,0 +1,2 @@
+trivial:
+  - Changelog managed with antsibull-changelog; changelog fragments in changelogs/fragments (https://github.com/ansible-collections/community.cassandra/issues/334).

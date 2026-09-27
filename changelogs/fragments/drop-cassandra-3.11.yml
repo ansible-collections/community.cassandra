@@ -1,0 +1,2 @@
+breaking_changes:
+  - Cassandra 3.11 is no longer supported or tested (https://github.com/ansible-collections/community.cassandra/issues/310).

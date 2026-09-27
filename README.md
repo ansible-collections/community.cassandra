@@ -98,6 +98,7 @@ If the chosen consistency level is not supported, by either read or write, then 
 Any contribution is welcome and we only ask contributors to:
 * Provide *at least* integration tests for any contribution.
 * Create an issues for any significant contribution that would change a large portion of the code base.
+* Add a changelog fragment in `changelogs/fragments/` for any user-visible change (see the [format](https://github.com/ansible-community/antsibull-changelog/blob/main/docs/changelogs.md#changelog-fragment-categories)). A new module needs no fragment, but a `version_added` in its documentation.
 
 ## Running integration tests locally
 
