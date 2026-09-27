@@ -29,7 +29,7 @@
       register: status_result
 
     - name: Assert module output reports all nodes up
-      assert:
+      ansible.builtin.assert:
         that:
           - "status_result.cluster_status['london']['down'] | length == 0"
           - "status_result.cluster_status['london']['up'] | length == 2"
@@ -55,7 +55,7 @@
         CCM_CONFIG_DIR: "/home/cassandra/config"
         CASSANDRA_HOME: "/home/cassandra"
 
-    - pause:
+    - ansible.builtin.pause:
         seconds: 5
 
     # jmx port only open on ccm node1
@@ -68,7 +68,7 @@
       register: status_result
 
     - name: Assert module output reports node2 down
-      assert:
+      ansible.builtin.assert:
         that:
           - "status_result.cluster_status['marlow']['down'] | length == 1"
           - "status_result.cluster_status['marlow']['up'] | length == 0"
@@ -98,7 +98,7 @@
       register: status_result
 
     - name: Assert module all nodes are up
-      assert:
+      ansible.builtin.assert:
         that:
           - "status_result.cluster_status['marlow']['down'] | length == 0"
           - "status_result.cluster_status['marlow']['up'] | length == 1"
@@ -126,7 +126,7 @@
       register: status_result
 
     - name: Assert cluster status 127.0.0.2 is down
-      assert:
+      ansible.builtin.assert:
         that:
           - "status_result.cluster_status['london']['down'] | length == 1"
           - "status_result.cluster_status['london']['up'] | length == 1"
@@ -142,7 +142,7 @@
       ignore_errors: yes
 
     - name: Assert cluster status 127.0.0.2 is down
-      assert:
+      ansible.builtin.assert:
         that:
           - "status_result.cluster_status['london']['down'] | length == 1"
           - "status_result.cluster_status['london']['up'] | length == 1"
