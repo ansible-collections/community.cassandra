@@ -85,7 +85,7 @@ If the chosen consistency level is not supported, by either read or write, then 
 * 5.0.X
 * 4.1.X
 * 4.0.X
-* 3.11.X
+* ~~3.11.X~~ Dropped in 2.1.0.
 * ~~2.2.X~~ Dropped on 21.10.2021.
 
 ## GitHub workflow

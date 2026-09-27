@@ -4,6 +4,11 @@ on:
   schedule:
     - cron: "0 6 * * *"
 
+# A new push to a pull request cancels its runs still going
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
 
   roles_matrix:
@@ -74,12 +79,16 @@ jobs:
           command: |
             pip install molecule molecule-docker pytest-testinfra
 
+      # Galaxy has short outages: fall back to the release on GitHub, and retry both for a few minutes
       - name: Install ansible.posix
         uses: nick-invision/retry@v3
         with:
           timeout_minutes: 3
-          max_attempts: 3
-          command: ansible-galaxy collection install ansible.posix -p ansible_collections/
+          max_attempts: 5
+          retry_wait_seconds: 60
+          command: >-
+            ansible-galaxy collection install ansible.posix -p ansible_collections/
+            || ansible-galaxy collection install --no-deps git+https://github.com/ansible-collections/ansible.posix.git,2.2.2 -p ansible_collections/
 
       - name: Add molecule location to path
         run: echo "${HOME}/.local/bin" >> $GITHUB_PATH
@@ -90,8 +99,15 @@ jobs:
       - name: Rename the build artifact
         run: mv community-cassandra-*.tar.gz community-cassandra-latest.tar.gz
 
+      # Its dependencies come from Galaxy: 10 attempts, a minute apart
       - name: Install collection
-        run: ansible-galaxy collection install community-cassandra-*.tar.gz
+        uses: nick-invision/retry@v3
+        with:
+          timeout_minutes: 5
+          max_attempts: 10
+          retry_wait_seconds: 60
+          # uses: steps don't get the job's working-directory
+          command: cd ansible_collections/community/cassandra && ansible-galaxy collection install community-cassandra-*.tar.gz
 
       - name: Run molecule test for ${{ matrix.cassandra_role }}
         run: molecule test

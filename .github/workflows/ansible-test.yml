@@ -1,12 +1,18 @@
 name: CI
 on:
   pull_request:
+  workflow_dispatch:  # manual full run
   schedule:
     - cron: "0 3 * * *"
 
 env:
   setup_cassandra_version_file: "./tests/integration/targets/setup_cassandra/defaults/main.yml"
   setup_ccm_version_file: "./tests/integration/targets/setup_cassandra_cluster_manager/defaults/main.yml"
+
+# A new push to a pull request cancels its runs still going
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   sanity:
@@ -114,9 +120,48 @@ jobs:
         with:
           path: ansible_collections/community/cassandra
 
+      # Pull requests test what they change; scheduled and manual runs test everything
+      - name: Find changed files
+        if: github.event_name == 'pull_request'
+        uses: dorny/paths-filter@v4
+        id: changes
+        with:
+          list-files: shell
+          filters: |
+            global:
+              - 'plugins/module_utils/**'
+              - 'plugins/doc_fragments/**'
+              - 'tests/integration/targets/setup_*/**'
+              - 'tests/coverage.sh'
+              - 'meta/runtime.yml'
+              - '.github/workflows/ansible-test.yml'
+              - 'galaxy.yml'
+            modules:
+              - 'plugins/modules/*.py'
+            targets:
+              - 'tests/integration/targets/**'
+
       - name: Generate module list
+        env:
+          TEST_ALL: ${{ github.event_name != 'pull_request' || steps.changes.outputs.global == 'true' }}
+          MODULES: ${{ steps.changes.outputs.modules_files }}
+          TARGETS: ${{ steps.changes.outputs.targets_files }}
         run: |
-          find tests/integration/targets -type d -maxdepth 1 -not -name 'setup*' | cut -d '/' -f4 | sort | awk NF | jq -sRc 'split("\n") | map(select(length > 0))' > int_test_modules.json
+          all=$(ls tests/integration/targets | grep -v '^setup_')
+          if [ "$TEST_ALL" = true ]; then
+            selected="$all"
+          else
+            selected=$(
+              # plugins/modules/cassandra_role.py -> cassandra_role
+              for f in $MODULES; do basename "$f" .py; done
+              # tests/integration/targets/cassandra_role/tasks/main.yml -> cassandra_role
+              for f in $TARGETS; do echo "$f" | cut -d/ -f4; done
+              # the targets that use a changed module (cassandra_keyspace -> cassandra_table...)
+              for f in $MODULES; do grep -rlw "$(basename "$f" .py):" tests/integration/targets || true; done | cut -d/ -f4
+            )
+          fi
+          # drop names that are not test targets (modules without tests, setup_* dirs), as a JSON list
+          echo "$selected" | sort -u | { grep -Fx "$all" || true; } | jq -nRc '[inputs]' > int_test_modules.json
 
       - name: Set output variable
         id: json-list
@@ -125,72 +170,9 @@ jobs:
           echo "modules-to-test=$output" >> $GITHUB_OUTPUT
           echo "$output"
 
-  integration_311x:
-    needs: integration_matrix
-    runs-on: ubuntu-24.04
-    defaults:
-      run:
-        working-directory: ansible_collections/community/cassandra
-    strategy:
-      matrix:
-        versions:
-          - python_version: "3.10"
-            ansible_version: "stable-2.16"
-          - python_version: "3.10"
-            ansible_version: "stable-2.17"
-        cassandra_version:
-          - package_version: "311x"
-            tar_version: "3.11.17"
-        test_scenario:
-          - docker_image: "default"
-            python_version: "3.10"
-            ansible_test_options: ""
-        cassandra_module: ${{ fromJson(needs.integration_matrix.outputs.matrix) }}
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v6
-        with:
-          path: ansible_collections/community/cassandra
-
-      - name: Set up Python ${{ matrix.versions.python_version }}
-        uses: actions/setup-python@v6
-        with:
-          python-version: ${{ matrix.versions.python_version }}
-
-      - name: Install ansible-base (${{ matrix.versions.ansible_version }})
-        uses: nick-invision/retry@v4
-        with:
-          timeout_minutes: 3
-          max_attempts: 3
-          command: pip install https://github.com/ansible/ansible/archive/${{ matrix.versions.ansible_version }}.tar.gz --disable-pip-version-check
-
-      - name: Ensure cassandra versions are set to ${{ matrix.cassandra_version.package_version }} | ${{ matrix.cassandra_version.tar_version }}
-        run: |
-          sed -i 's/^cassandra_version:.*/cassandra_version: \"${{ matrix.cassandra_version.package_version }}\"/g' ${{ env.setup_cassandra_version_file }}
-          sed -i 's/^cassandra_version:.*/cassandra_version: \"${{ matrix.cassandra_version.tar_version }}\"/g' ${{ env.setup_ccm_version_file }}
-
-      - name: Install ansible.posix
-        uses: nick-invision/retry@v4
-        with:
-          timeout_minutes: 3
-          max_attempts: 3
-          command: ansible-galaxy collection install ansible.posix -p ansible_collections/
-
-      - name: Run integration tests on Python ${{ matrix.test_scenario.python_version }} | ${{ matrix.test_scenario.docker_image }} | ${{ matrix.versions.ansible_version }} | ${{ matrix.cassandra_module }} | ${{ matrix.cassandra_version.package_version }}
-        run: ansible-test integration --docker ${{ matrix.test_scenario.docker_image }} ${{ matrix.test_scenario.ansible_test_options }} -v --color --retry-on-error --python ${{ matrix.test_scenario.python_version }} --continue-on-error --diff --coverage  ${{ matrix.cassandra_module }}
-
-      - name: Generate coverage report.
-        run: ansible-test coverage xml -v --requirements --group-by command --group-by version
-
-      - uses: codecov/codecov-action@v7.0.0
-        with:
-          fail_ci_if_error: false
-
-      - name: Upload Coverage data
-        run: tests/coverage.sh
-
   integration_40x:
     needs: integration_matrix
+    if: needs.integration_matrix.outputs.matrix != '[]'
     runs-on: ubuntu-24.04
     defaults:
       run:
@@ -235,12 +217,16 @@ jobs:
           max_attempts: 3
           command: pip install https://github.com/ansible/ansible/archive/${{ matrix.versions.ansible_version }}.tar.gz --disable-pip-version-check
 
+      # Galaxy has short outages: fall back to the release on GitHub, and retry both for a few minutes
       - name: Install ansible.posix
         uses: nick-invision/retry@v4
         with:
           timeout_minutes: 3
-          max_attempts: 3
-          command: ansible-galaxy collection install ansible.posix -p ansible_collections/
+          max_attempts: 5
+          retry_wait_seconds: 60
+          command: >-
+            ansible-galaxy collection install ansible.posix -p ansible_collections/
+            || ansible-galaxy collection install --no-deps git+https://github.com/ansible-collections/ansible.posix.git,2.2.2 -p ansible_collections/
 
       - name: Ensure cassandra versions are set to ${{ matrix.cassandra_version.package_version }} | ${{ matrix.cassandra_version.tar_version }}
         run: |
@@ -262,6 +248,7 @@ jobs:
 
   integration_41x:
     needs: integration_matrix
+    if: needs.integration_matrix.outputs.matrix != '[]'
     runs-on: ubuntu-24.04
     defaults:
       run:
@@ -306,12 +293,16 @@ jobs:
           max_attempts: 3
           command: pip install https://github.com/ansible/ansible/archive/${{ matrix.versions.ansible_version }}.tar.gz --disable-pip-version-check
 
+      # Galaxy has short outages: fall back to the release on GitHub, and retry both for a few minutes
       - name: Install ansible.posix
         uses: nick-invision/retry@v4
         with:
           timeout_minutes: 3
-          max_attempts: 3
-          command: ansible-galaxy collection install ansible.posix -p ansible_collections/
+          max_attempts: 5
+          retry_wait_seconds: 60
+          command: >-
+            ansible-galaxy collection install ansible.posix -p ansible_collections/
+            || ansible-galaxy collection install --no-deps git+https://github.com/ansible-collections/ansible.posix.git,2.2.2 -p ansible_collections/
 
       - name: Ensure cassandra versions are set to ${{ matrix.cassandra_version.package_version }} | ${{ matrix.cassandra_version.tar_version }}
         run: |
@@ -333,6 +324,7 @@ jobs:
 
   integration_50x:
     needs: integration_matrix
+    if: needs.integration_matrix.outputs.matrix != '[]'
     runs-on: ubuntu-24.04
     defaults:
       run:
@@ -370,12 +362,16 @@ jobs:
           max_attempts: 3
           command: pip install https://github.com/ansible/ansible/archive/${{ matrix.versions.ansible_version }}.tar.gz --disable-pip-version-check
 
+      # Galaxy has short outages: fall back to the release on GitHub, and retry both for a few minutes
       - name: Install ansible.posix
         uses: nick-invision/retry@v4
         with:
           timeout_minutes: 3
-          max_attempts: 3
-          command: ansible-galaxy collection install ansible.posix -p ansible_collections/
+          max_attempts: 5
+          retry_wait_seconds: 60
+          command: >-
+            ansible-galaxy collection install ansible.posix -p ansible_collections/
+            || ansible-galaxy collection install --no-deps git+https://github.com/ansible-collections/ansible.posix.git,2.2.2 -p ansible_collections/
 
       - name: Ensure cassandra versions are set to ${{ matrix.cassandra_version.package_version }} | ${{ matrix.cassandra_version.tar_version }}
         run: |
