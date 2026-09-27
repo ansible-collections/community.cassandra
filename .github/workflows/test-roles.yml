@@ -56,10 +56,10 @@ jobs:
         with:
           path: ansible_collections/community/cassandra
 
-      - name: Set up Python ${{ matrix.test_scenario.python_version }}
+      - name: Set up Python ${{ matrix.python_version }}
         uses: actions/setup-python@v6
         with:
-          python-version: ${{ matrix.test_scenario.python_version }}
+          python-version: ${{ matrix.python_version }}
 
       - name: Uninstall existing ansible
         run: sudo apt remove ansible
