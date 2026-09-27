@@ -12,23 +12,23 @@
       JAVA_HOME: "{{ (ansible_os_family == 'RedHat') | ternary('/usr/lib/jvm/java-' ~ j_version ~ '-openjdk', '/usr/lib/jvm/java-' ~ j_version ~ '-openjdk-amd64') }}"
   block:
     - name: Start the ccm cluster
-      shell: sudo -E -u cassandra bash -c "{{ ccm_cmd }} start {{ ccm_cluster }} --root"
+      ansible.builtin.shell: sudo -E -u cassandra bash -c "{{ ccm_cmd }} start {{ ccm_cluster }} --root"
       become_user: cassandra
       args:
         chdir: /home/cassandra
       environment: *ccm_env
   rescue:
     - name: Show the end of each node's log
-      shell: "tail -n 40 /home/cassandra/config/{{ ccm_cluster }}/{{ item.node }}/logs/system.log"
+      ansible.builtin.shell: "tail -n 40 /home/cassandra/config/{{ ccm_cluster }}/{{ item.node }}/logs/system.log"
       with_items: "{{ cassandra_nodes }}"
       failed_when: false
 
     - name: Show the memory left
-      command: free -m
+      ansible.builtin.command: free -m
       failed_when: false
 
     - name: Stop what started
-      shell: sudo -E -u cassandra bash -c "{{ ccm_cmd }} stop {{ ccm_cluster }}"
+      ansible.builtin.shell: sudo -E -u cassandra bash -c "{{ ccm_cmd }} stop {{ ccm_cluster }}"
       become_user: cassandra
       args:
         chdir: /home/cassandra
@@ -36,7 +36,7 @@
       failed_when: false
 
     - name: Wait until the nodes' storage ports are free
-      wait_for:
+      ansible.builtin.wait_for:
         host: "{{ item.ip }}"
         port: 7000
         state: stopped
@@ -44,7 +44,7 @@
       with_items: "{{ cassandra_nodes }}"
 
     - name: Start the ccm cluster again
-      shell: sudo -E -u cassandra bash -c "{{ ccm_cmd }} start {{ ccm_cluster }} --root"
+      ansible.builtin.shell: sudo -E -u cassandra bash -c "{{ ccm_cmd }} start {{ ccm_cluster }} --root"
       become_user: cassandra
       args:
         chdir: /home/cassandra
