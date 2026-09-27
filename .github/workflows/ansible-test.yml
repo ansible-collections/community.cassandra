@@ -195,12 +195,16 @@ jobs:
           max_attempts: 3
           command: pip install https://github.com/ansible/ansible/archive/${{ matrix.versions.ansible_version }}.tar.gz --disable-pip-version-check
 
+      # Galaxy has short outages: fall back to the release on GitHub, and retry both for a few minutes
       - name: Install ansible.posix
         uses: nick-invision/retry@v4
         with:
           timeout_minutes: 3
-          max_attempts: 3
-          command: ansible-galaxy collection install ansible.posix -p ansible_collections/
+          max_attempts: 5
+          retry_wait_seconds: 60
+          command: >-
+            ansible-galaxy collection install ansible.posix -p ansible_collections/
+            || ansible-galaxy collection install --no-deps git+https://github.com/ansible-collections/ansible.posix.git,2.2.2 -p ansible_collections/
 
       - name: Ensure cassandra versions are set to ${{ matrix.cassandra_version.package_version }} | ${{ matrix.cassandra_version.tar_version }}
         run: |
@@ -267,12 +271,16 @@ jobs:
           max_attempts: 3
           command: pip install https://github.com/ansible/ansible/archive/${{ matrix.versions.ansible_version }}.tar.gz --disable-pip-version-check
 
+      # Galaxy has short outages: fall back to the release on GitHub, and retry both for a few minutes
       - name: Install ansible.posix
         uses: nick-invision/retry@v4
         with:
           timeout_minutes: 3
-          max_attempts: 3
-          command: ansible-galaxy collection install ansible.posix -p ansible_collections/
+          max_attempts: 5
+          retry_wait_seconds: 60
+          command: >-
+            ansible-galaxy collection install ansible.posix -p ansible_collections/
+            || ansible-galaxy collection install --no-deps git+https://github.com/ansible-collections/ansible.posix.git,2.2.2 -p ansible_collections/
 
       - name: Ensure cassandra versions are set to ${{ matrix.cassandra_version.package_version }} | ${{ matrix.cassandra_version.tar_version }}
         run: |
@@ -332,12 +340,16 @@ jobs:
           max_attempts: 3
           command: pip install https://github.com/ansible/ansible/archive/${{ matrix.versions.ansible_version }}.tar.gz --disable-pip-version-check
 
+      # Galaxy has short outages: fall back to the release on GitHub, and retry both for a few minutes
       - name: Install ansible.posix
         uses: nick-invision/retry@v4
         with:
           timeout_minutes: 3
-          max_attempts: 3
-          command: ansible-galaxy collection install ansible.posix -p ansible_collections/
+          max_attempts: 5
+          retry_wait_seconds: 60
+          command: >-
+            ansible-galaxy collection install ansible.posix -p ansible_collections/
+            || ansible-galaxy collection install --no-deps git+https://github.com/ansible-collections/ansible.posix.git,2.2.2 -p ansible_collections/
 
       - name: Ensure cassandra versions are set to ${{ matrix.cassandra_version.package_version }} | ${{ matrix.cassandra_version.tar_version }}
         run: |
