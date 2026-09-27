@@ -119,27 +119,49 @@ jobs:
         uses: actions/checkout@v6
         with:
           path: ansible_collections/community/cassandra
-          fetch-depth: 0
 
-      # Pull requests test the targets of the modules they change; changes shared by
-      # every module (module_utils, test setup, this workflow...), scheduled and manual runs test all
+      # Pull requests test what they change; scheduled and manual runs test everything
+      - name: Find changed files
+        if: github.event_name == 'pull_request'
+        uses: dorny/paths-filter@v4
+        id: changes
+        with:
+          list-files: shell
+          filters: |
+            global:
+              - 'plugins/module_utils/**'
+              - 'plugins/doc_fragments/**'
+              - 'tests/integration/targets/setup_*/**'
+              - 'tests/coverage.sh'
+              - 'meta/runtime.yml'
+              - '.github/workflows/ansible-test.yml'
+              - 'galaxy.yml'
+            modules:
+              - 'plugins/modules/*.py'
+            targets:
+              - 'tests/integration/targets/**'
+
       - name: Generate module list
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          TEST_ALL: ${{ github.event_name != 'pull_request' || steps.changes.outputs.global == 'true' }}
+          MODULES: ${{ steps.changes.outputs.modules_files }}
+          TARGETS: ${{ steps.changes.outputs.targets_files }}
         run: |
-          all=$(find tests/integration/targets -mindepth 1 -maxdepth 1 -type d -not -name 'setup*' | cut -d '/' -f4 | sort)
-          targets="$all"
-          if [ -n "$BASE_SHA" ]; then
-            changed=$(git diff --name-only "$BASE_SHA" HEAD)
-            if ! echo "$changed" | grep -qE '^(plugins/module_utils/|plugins/doc_fragments/|tests/integration/targets/setup_|tests/coverage\.sh|meta/runtime\.yml|\.github/workflows/ansible-test\.yml|galaxy\.yml)'; then
-              modules=$(echo "$changed" | sed -nE 's#^plugins/modules/([^/]+)\.py$#\1#p')
-              # the targets of the changed modules and of their tests, and the targets that use them
-              targets=$( { echo "$modules"; echo "$changed" | sed -nE 's#^tests/integration/targets/([^/]+)/.*#\1#p'
-                for m in $modules; do grep -rlE "^[[:space:]-]*(community\.cassandra\.)?$m:[[:space:]]*$" tests/integration/targets | cut -d/ -f4; done
-              } | sort -u | grep -Fx -f <(echo "$all") || true)
-            fi
+          all=$(ls tests/integration/targets | grep -v '^setup_')
+          if [ "$TEST_ALL" = true ]; then
+            selected="$all"
+          else
+            selected=$(
+              # plugins/modules/cassandra_role.py -> cassandra_role
+              for f in $MODULES; do basename "$f" .py; done
+              # tests/integration/targets/cassandra_role/tasks/main.yml -> cassandra_role
+              for f in $TARGETS; do echo "$f" | cut -d/ -f4; done
+              # the targets that use a changed module (cassandra_keyspace -> cassandra_table...)
+              for f in $MODULES; do grep -rlw "$(basename "$f" .py):" tests/integration/targets || true; done | cut -d/ -f4
+            )
           fi
-          echo "$targets" | awk NF | jq -sRc 'split("\n") | map(select(length > 0))' > int_test_modules.json
+          # drop names that are not test targets (modules without tests, setup_* dirs), as a JSON list
+          echo "$selected" | sort -u | { grep -Fx "$all" || true; } | jq -nRc '[inputs]' > int_test_modules.json
 
       - name: Set output variable
         id: json-list
