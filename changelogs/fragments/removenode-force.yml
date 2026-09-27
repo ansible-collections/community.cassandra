@@ -1,0 +1,4 @@
+bugfixes:
+  - cassandra_removenode - ``force=true`` ran ``nodetool removenode -- force <host_id>``, which nodetool reads as a plain ``removenode <host_id>``, so nothing was forced. It now runs ``nodetool removenode force``, only when ``host_id`` is ``DL`` in ``nodetool status`` and no other node is leaving, since that command forces every pending removal. When ``host_id`` is in any other state, or another node is leaving, it fails and forces nothing.
+minor_changes:
+  - cassandra_removenode - ``host_id`` is now stripped and lowercased, and must be a whole UUID (trailing characters are rejected).
