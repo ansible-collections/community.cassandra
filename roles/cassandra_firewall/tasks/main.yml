@@ -17,7 +17,7 @@
     enabled: yes
 
 - name: Ensure ports for cassandra open (RedHat)
-  ansible.builtin.firewalld:
+  ansible.posix.firewalld:
     port: "{{ item }}"
     permanent: yes
     immediate: yes
@@ -27,7 +27,7 @@
   when: ansible_facts['os_family'] == "RedHat"
 
 - name: Ensure ports for cassandra open (Debian)
-  ansible.builtin.ufw:
+  community.general.ufw:
     port: "{{ item | split('/') | first }}"
     proto: "{{ item | split('/') | last }}"
     rule: "allow"
