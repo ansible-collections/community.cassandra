@@ -1,0 +1,39 @@
+---
+- name: Side effect
+  hosts: all
+  tasks:
+    - name: Leave the policy-rc.d of an interrupted run (Debian)
+      ansible.builtin.copy:
+        content: "#!/bin/sh\n# Managed by Ansible (cassandra_install), removed after the install\nexit 101\n"
+        dest: /usr/sbin/policy-rc.d
+        mode: "0755"
+      when: ansible_facts['os_family'] == 'Debian'
+
+    - name: Install a cqlsh by hand in /usr/local/bin
+      ansible.builtin.copy:
+        content: "#!/bin/sh\n# installed by hand\nexec /usr/bin/cqlsh \"$@\"\n"
+        dest: /usr/local/bin/cqlsh
+        mode: "0755"
+
+    - name: Run the role again
+      ansible.builtin.include_role:
+        name: community.cassandra.cassandra_install
+
+    - name: A Java package missing from the repositories is refused early (Debian)
+      when: ansible_facts['os_family'] == 'Debian'
+      block:
+        - name: Run the role with a Java package no repository has
+          ansible.builtin.include_role:
+            name: community.cassandra.cassandra_install
+          vars:
+            cassandra_java_package: openjdk-99-jre-headless
+
+        - name: Should not be reached
+          ansible.builtin.fail:
+            msg: a missing Java package was not detected
+      rescue:
+        - name: Check the refusal came from the Java check
+          ansible.builtin.assert:
+            that:
+              - "'openjdk-99-jre-headless: not in the apt repositories' in ansible_failed_result.msg"
+              - "'cassandra_java_package' in ansible_failed_result.msg"
