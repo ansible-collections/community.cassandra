@@ -1,0 +1,2 @@
+minor_changes:
+  - cassandra_linux - new opt-in tuning of the Cassandra data disk with cassandra_linux_tune_data_disk (default false), on cassandra_data_block_device or else the disk of cassandra_data_dir - read-ahead (cassandra_data_readahead_kb, 4 KB), and the none IO scheduler on SSD/NVMe, applied now (unless cassandra_linux_apply_live is false) and kept across reboots with a udev rule. LVM, dm-crypt and unpartitioned md RAID volumes are not tuned.

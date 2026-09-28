@@ -1,0 +1,13 @@
+# Managed by Ansible (community.cassandra.cassandra_linux): change the role variables, not this file.
+# After 60-persistent-storage.rules, which sets the ID_* properties.
+{# the disk's first stable id udev knows (WWN, serial, path), else its kernel name;
+   WWN first: an NVMe serial is shared by the namespaces of a drive; on SCSI,
+   ID_WWN is only the NAA prefix, shared by the LUNs of an array: with its extension #}
+{% set ns = namespace(match='KERNEL=="' ~ _cassandra_data_disk ~ '"') %}
+{% for key in ['ID_PATH', 'ID_SERIAL', 'ID_WWN', 'ID_WWN_WITH_EXTENSION'] %}
+{% for line in cassandra_data_udev.stdout_lines | default([]) if line.startswith(key ~ '=') and line | length > key | length + 1 %}
+{% set ns.match = 'ENV{' ~ key ~ '}=="' ~ line[key | length + 1:] ~ '"' %}
+{% endfor %}
+{% endfor %}
+ACTION=="add|change", SUBSYSTEM=="block", ENV{DEVTYPE}=="disk", {{ ns.match }}, ATTR{queue/read_ahead_kb}="{{ cassandra_data_readahead_kb | int }}"
+ACTION=="add|change", SUBSYSTEM=="block", ENV{DEVTYPE}=="disk", {{ ns.match }}, ATTR{queue/rotational}=="0", ATTR{queue/scheduler}="none"
