@@ -13,11 +13,18 @@ good idea to mention in this section that the boto package is required.
 Role Variables
 --------------
 
-A description of the settable variables for this role should go here, including
-any variables that are in defaults/main.yml, vars/main.yml, and any variables
-that can/should be set via parameters to the role. Any variables that are read
-from other roles and/or the global scope (ie. hostvars, group vars, etc.) should
-be mentioned here as well.
+* `cassandra_linux_apply_live`: apply the kernel settings (sysctl, swapoff,
+  THP) live, not only persist them. Defaults to `auto`: live everywhere
+  except in containers (Ansible's virtualization facts, and
+  `cassandra_linux_container_types`), where `/proc/sys` and `/sys` belong to
+  the host; the THP unit is not enabled at boot there either. Set `true` to
+  tune the host from a dedicated privileged container, `false` to only
+  persist (in containers, only the files). Ansible doesn't detect every
+  container (e.g. Kubernetes pods on cgroup v2): set `false` there, the THP
+  unit is then still enabled at boot.
+* `cassandra_linux_container_types`: `virtualization_type` values taken as
+  containers, besides Ansible's own container detection. Defaults to
+  `docker`, `podman`, `container`, `containerd`, `lxc`.
 
 Dependencies
 ------------
@@ -55,8 +62,3 @@ The following sources of information were used extensively for this role:
 * https://docs.datastax.com/en/docker/doc/docker/dockerRecommendedSettings.html
 * https://docs.datastax.com/en/cassandra/3.0/cassandra/install/installRecommendSettings.html
 * https://docs.datastax.com/en/dse/5.1/dse-admin/datastax_enterprise/config/configRecommendedSettings.html
-
-TODO
-----
-
-* Need to check the tasked marked with is_docker tests to ensure they function in a non-docker environment.

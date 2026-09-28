@@ -1,9 +1,46 @@
 ---
 - name: Converge
   hosts: all
-  roles:
-    - role: community.cassandra.cassandra_linux
   tasks:
+    - name: Run cassandra_linux with the defaults
+      ansible.builtin.include_role:
+        name: community.cassandra.cassandra_linux
+
+    - name: Check the container is detected, nothing applied live or at boot
+      ansible.builtin.assert:
+        that:
+          - _cassandra_linux_container is true
+          - _cassandra_linux_live is false
+          - _cassandra_linux_boot is false
+
+    - name: Run cassandra_linux with cassandra_linux_apply_live false
+      ansible.builtin.include_role:
+        name: community.cassandra.cassandra_linux
+      vars:
+        cassandra_linux_apply_live: false
+
+    - name: Check nothing is applied live or at boot
+      ansible.builtin.assert:
+        that:
+          - _cassandra_linux_live is false
+          - _cassandra_linux_boot is false
+
+    - name: A cassandra_linux_apply_live that is not auto or a boolean is refused
+      block:
+        - name: Run cassandra_linux with cassandra_linux_apply_live maybe
+          ansible.builtin.include_role:
+            name: community.cassandra.cassandra_linux
+          vars:
+            cassandra_linux_apply_live: maybe
+
+        - name: Should not be reached
+          ansible.builtin.fail:
+            msg: cassandra_linux_apply_live maybe was accepted
+      rescue:
+        - name: Check the refusal
+          ansible.builtin.assert:
+            that: "'must be auto, true or false' in ansible_failed_result.msg"
+
     # The role's own swap-removal task never runs in this test scenario
     # (always skipped), so it never actually proved ansible.posix.mount
     # resolves. This does, directly.
