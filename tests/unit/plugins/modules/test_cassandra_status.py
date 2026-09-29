@@ -67,10 +67,10 @@ class TestClusterUpDown:
 
     def test_vnodes_normal(self, vnodes_status):
         dc = cluster_up_down(vnodes_status)["datacenter1"]
-        assert dc["up"] == ["10.118.154.136"]
-        assert dc["down"] == ["10.118.154.139"]
+        assert dc["up"] == ["10.100.100.136"]
+        assert dc["down"] == ["10.100.100.139"]
         assert dc["nodes"][0] == {
-            "address": "10.118.154.136",
+            "address": "10.100.100.136",
             "load": "287.59 KiB",
             "tokens": "16",
             "owns": "43.2%",
@@ -86,9 +86,9 @@ class TestClusterUpDown:
         # than 8 tokens, crashing fixed positional indexing with an
         # IndexError. Column-offset parsing must degrade gracefully instead.
         dc = cluster_up_down(vnodes_freshly_joined_status)["datacenter1"]
-        assert "10.118.154.136" in dc["up"]
-        assert "10.118.154.137" in dc["up"]
-        joining_node = [n for n in dc["nodes"] if n["address"] == "10.118.154.137"][0]
+        assert "10.100.100.136" in dc["up"]
+        assert "10.100.100.137" in dc["up"]
+        joining_node = [n for n in dc["nodes"] if n["address"] == "10.100.100.137"][0]
         assert joining_node["tokens"] == "16"
         assert joining_node["owns"] == ""
         assert joining_node["host_id"] == ""

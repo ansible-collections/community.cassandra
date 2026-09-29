@@ -23,8 +23,8 @@ STATUS = """Datacenter: datacenter1
 Status=Up/Down
 |/ State=Normal/Leaving/Joining/Moving
 --  Address         Load        Tokens  Owns (effective)  Host ID                               Rack
-UN  10.118.154.136  287.59 KiB  16      43.2%             ddf13452-4c9d-47af-a7ed-94f78acd1c6d  rack1
-{state}  10.118.154.139  222.39 KiB  16      38.1%             {host_id}  rack1
+UN  10.100.100.136  287.59 KiB  16      43.2%             ddf13452-4c9d-47af-a7ed-94f78acd1c6d  rack1
+{state}  10.100.100.139  222.39 KiB  16      38.1%             {host_id}  rack1
 """
 
 
