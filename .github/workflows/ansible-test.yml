@@ -103,9 +103,6 @@ jobs:
           fail_ci_if_error: false
           flags: units
 
-      - name: Upload Coverage data
-        run: tests/coverage.sh
-
   integration_matrix:
     runs-on: ubuntu-24.04
     defaults:
@@ -133,7 +130,6 @@ jobs:
               - 'plugins/module_utils/**'
               - 'plugins/doc_fragments/**'
               - 'tests/integration/targets/setup_*/**'
-              - 'tests/coverage.sh'
               - 'meta/runtime.yml'
               - '.github/workflows/ansible-test.yml'
               - 'galaxy.yml'
@@ -246,9 +242,6 @@ jobs:
           fail_ci_if_error: false
           flags: ${{ matrix.cassandra_module }}
 
-      - name: Upload Coverage data
-        run: tests/coverage.sh
-
   integration_41x:
     needs: integration_matrix
     if: needs.integration_matrix.outputs.matrix != '[]'
@@ -324,9 +317,6 @@ jobs:
           fail_ci_if_error: false
           flags: ${{ matrix.cassandra_module }}
 
-      - name: Upload Coverage data
-        run: tests/coverage.sh
-
   integration_50x:
     needs: integration_matrix
     if: needs.integration_matrix.outputs.matrix != '[]'
@@ -394,6 +384,3 @@ jobs:
         with:
           fail_ci_if_error: false
           flags: ${{ matrix.cassandra_module }}
-
-      - name: Upload Coverage data
-        run: tests/coverage.sh
