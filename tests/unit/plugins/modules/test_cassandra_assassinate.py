@@ -4,7 +4,7 @@ __metaclass__ = type
 import pytest
 
 from ansible_collections.community.cassandra.plugins.modules import cassandra_assassinate
-from ansible_collections.community.cassandra.plugins.modules.cassandra_assassinate import (
+from ansible_collections.community.cassandra.plugins.module_utils.nodetool_status import (
     address_part,
     gossip_status,
     ring_state,

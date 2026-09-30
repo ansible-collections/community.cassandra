@@ -6,9 +6,9 @@ import os
 import pytest
 
 from ansible_collections.community.cassandra.plugins.modules import cassandra_removenode
+from ansible_collections.community.cassandra.plugins.module_utils.nodetool_status import node_state
 from ansible_collections.community.cassandra.plugins.modules.cassandra_removenode import (
     leaving_nodes,
-    node_state,
     removenode_cmd,
     valid_uuid,
 )
