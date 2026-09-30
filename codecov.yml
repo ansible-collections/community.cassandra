@@ -1,0 +1,11 @@
+# Pull requests only run the integration targets they touch: each target uploads
+# under its own flag, and the targets a run skips keep their last coverage.
+flag_management:
+  default_rules:
+    carryforward: true
+
+coverage:
+  status:
+    project:
+      default:
+        threshold: 1%
