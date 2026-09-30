@@ -30,7 +30,17 @@ options:
     required: true
   force:
     description:
-      - Forces completion of the pending removal.
+      - Forces completion of a pending removal (runs C(nodetool removenode force)).
+      - Use it when a previous removal of host_id is stuck.
+      - C(nodetool removenode force) takes no host id and finishes B(every) pending
+        removal on the cluster, not only the one of host_id.
+      - It only runs when host_id is down and leaving (C(DL)) in nodetool status,
+        that is a dead node being removed (or a decommissioning node that went down).
+        The module fails when host_id is in the ring in any other state, including
+        C(UL) (a live node decommissioning), and reports no change when host_id is
+        no longer in the ring.
+      - With host_id C(DL), it also fails, forcing nothing, when any other node is
+        leaving (C(UL), C(DL) or C(?L)).
     type: bool
     default: false
   debug:
@@ -45,10 +55,10 @@ EXAMPLES = '''
   community.cassandra.cassandra_removenode:
     host_id: "2d29b2bc-faa5-4837-935c-41c3945119e2"
 
-- name: Force removal of a node
+- name: Force completion of a pending removal
   community.cassandra.cassandra_removenode:
     host_id: "07a8a3b1-98e7-4ed9-8481-b328489ad711"
-    force: yes
+    force: true
 '''
 
 RETURN = '''
@@ -73,9 +83,37 @@ from ansible_collections.community.cassandra.plugins.module_utils.cassandra_comm
 
 # TODO add to common and unit test
 def valid_uuid(uuid):
-    regex = re.compile('[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}', re.I)
+    regex = re.compile(r'[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}\Z', re.I)
     match = regex.match(uuid)
     return bool(match)
+
+
+NODE_RE = re.compile(r'^[UD?][NLJM]\s+')
+
+
+def node_state(status_out, host_id):
+    """Return the status and state (UN, DL...) of host_id in nodetool status
+    output, or None when host_id is not in the ring."""
+    for line in status_out.splitlines():
+        if NODE_RE.match(line) and host_id in line.split():
+            return line[:2]
+    return None
+
+
+def leaving_nodes(status_out):
+    """Return the host ids of the nodes leaving (UL, DL or ?L) in nodetool status output."""
+    leaving = []
+    for line in status_out.splitlines():
+        if NODE_RE.match(line) and line[1] == "L":
+            leaving.extend(f for f in line.split() if valid_uuid(f))
+    return leaving
+
+
+def removenode_cmd(host_id, force):
+    # nodetool removenode force takes no host id: it forces every pending removal
+    if force:
+        return "removenode force"
+    return "removenode -- {0}".format(host_id)
 
 
 def main():
@@ -90,7 +128,7 @@ def main():
         supports_check_mode=True,
     )
 
-    host_id = module.params['host_id']
+    host_id = module.params['host_id'].strip().lower()
     force = module.params['force']
     if not valid_uuid(host_id):
         module.fail_json(msg="host_id is not a valid uuid")
@@ -116,11 +154,27 @@ def main():
             result['stderr'] = err
 
     if rc == 0:
-        if host_id in out:  # host is still in ring
-            if force:
-                cmd = "removenode -- force {0}".format(host_id)
-            else:
-                cmd = "removenode -- {0}".format(host_id)
+        state = node_state(out, host_id)
+        if force and state == "UL":
+            result['msg'] = ("{0} is UL: a live node leaving (decommission), "
+                             "not a removal; nothing forced".format(host_id))
+            module.fail_json(**result)
+        if force and state == "DN":
+            result['msg'] = ("no removal of {0} in progress: "
+                             "run it without force first".format(host_id))
+            module.fail_json(**result)
+        if force and state is not None and state != "DL":
+            result['msg'] = ("{0} is {1}, not a removal in progress; "
+                             "nothing forced".format(host_id, state))
+            module.fail_json(**result)
+        if force and state == "DL":
+            others = [h for h in leaving_nodes(out) if h != host_id]
+            if others:
+                result['msg'] = ("other nodes are leaving ({0}): removenode force "
+                                 "would force them too; nothing forced".format(", ".join(others)))
+                module.fail_json(**result)
+        if state is not None:  # host is still in ring
+            cmd = removenode_cmd(host_id, force)
             n = NodeToolCommandSimple(module, cmd)
             if not module.check_mode:
                 (rc, out, err) = n.run_command()

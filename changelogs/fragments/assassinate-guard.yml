@@ -1,0 +1,6 @@
+breaking_changes:
+  - cassandra_assassinate - ``ip_address`` must be an IP address; a hostname or an address with a port now fails without running nodetool, instead of being passed to ``nodetool assassinate``.
+bugfixes:
+  - cassandra_assassinate - fail without running ``nodetool assassinate`` when ``ip_address`` is up in ``nodetool status``, and report no change when it is not in the ring and is unknown to gossip or already ``LEFT`` or ``removed`` there, instead of assassinating it again.
+minor_changes:
+  - cassandra_assassinate - support check mode.

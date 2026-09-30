@@ -1,0 +1,4 @@
+minor_changes:
+  - cassandra_linux - in containers, kernel settings (sysctl, swapoff, transparent huge pages) are no longer applied live, where they belong to the host, and the THP unit is no longer enabled at boot there; the files are still written. Containers are detected from Ansible's virtualization facts and the new cassandra_linux_container_types; cassandra_linux_apply_live forces it either way, and ``false`` persists the settings without applying them live.
+bugfixes:
+  - cassandra_linux - ``--check`` on a fresh host no longer stops at the time sync service or the THP unit, whose package and file are not really installed in check mode.

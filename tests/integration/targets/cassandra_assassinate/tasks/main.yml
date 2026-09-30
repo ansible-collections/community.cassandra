@@ -18,21 +18,49 @@
 
 # ===========================================================
 
-- name: Assassinate the node
+- name: Get the address of the local node
+  ansible.builtin.shell: nodetool status | awk '/^UN/ {print $2; exit}'
+  register: local_node
+
+- name: Assassinate the local node, which is alive
+  community.cassandra.cassandra_assassinate:
+    ip_address: "{{ local_node.stdout }}"
+  register: assass
+  ignore_errors: true
+
+- ansible.builtin.assert:
+    that:
+      - assass.failed
+      - assass.changed == False
+      - "'a live node' in assass.msg"
+
+- name: Assassinate a node that is not in the cluster - check mode
+  community.cassandra.cassandra_assassinate:
+    ip_address: 192.168.0.1
+    debug: true
+  check_mode: true
+  register: assass
+
+- ansible.builtin.assert:
+    that:
+      - "assass.msg == '192.168.0.1 is not in the cluster'"
+      - "assass.changed == False"
+
+- name: Assassinate a node that is not in the cluster
   community.cassandra.cassandra_assassinate:
     ip_address: 192.168.0.1
     debug: true
   register: assass
 
-- assert:
+- ansible.builtin.assert:
     that:
-      - "assass.msg == 'nodetool assassinate executed successfully for endpoint: 192.168.0.1'"
-      - "assass.changed == True"
+      - "assass.msg == '192.168.0.1 is not in the cluster'"
+      - "assass.changed == False"
 
-- include_tasks: ../../setup_cassandra/tasks/cassandra_auth.yml
+- ansible.builtin.include_tasks: ../../setup_cassandra/tasks/cassandra_auth.yml
   when: cassandra_auth_tests == True
 
-- name: Assassinate the node - with auth
+- name: Assassinate a node that is not in the cluster - with auth
   community.cassandra.cassandra_assassinate:
     username: "{{ cassandra_admin_user }}"
     password: "{{ cassandra_admin_pwd }}"
@@ -40,10 +68,10 @@
     debug: true
   register: assass
 
-- assert:
+- ansible.builtin.assert:
     that:
-      - "assass.msg == 'nodetool assassinate executed successfully for endpoint: 192.168.0.1'"
-      - "assass.changed == True"
+      - "assass.msg == '192.168.0.1 is not in the cluster'"
+      - "assass.changed == False"
 
 - name: Test login failure handling
   community.cassandra.cassandra_assassinate:
@@ -56,7 +84,7 @@
   when: cassandra_auth_tests == True
 
 - name: Assert failed login
-  assert:
+  ansible.builtin.assert:
     that:
       - login_status.failed == True
       - "'Invalid username or password' in login_status.stderr"
@@ -74,6 +102,123 @@
   when: cassandra_auth_tests == True
 
 - name: Assert no such file
-  assert:
+  ansible.builtin.assert:
     that:
       - "'Error executing command' in nodetool_path_error.msg or 'No such file or directory' in nodetool_path_error.msg"
+
+
+# A multi-node ccm cluster to assassinate a real dead node
+- name: Use the ccm Cassandra version
+  ansible.builtin.include_vars:
+    file: ../setup_cassandra_cluster_manager/defaults/main.yml
+
+- name: Set up the ccm cluster
+  ansible.builtin.include_role:
+    name: setup_cassandra_cluster_manager
+    public: true
+
+- name: Run module tests against the ccm cluster
+  vars:
+    ccm_nodetool: /home/cassandra/config/repository/{{ cassandra_version }}/bin
+  block:
+
+    - name: Assassinate node 1, which is alive
+      community.cassandra.cassandra_assassinate:
+        host: 127.0.0.1
+        port: 7100
+        ip_address: 127.0.0.1
+        nodetool_path: "{{ ccm_nodetool }}"
+      register: assass
+      ignore_errors: true
+
+    - ansible.builtin.assert:
+        that:
+          - assass.failed
+          - "assass.msg == '127.0.0.1 is UN, a live node: assassinate only removes a dead one. Decommission it, or stop it and use removenode'"
+
+    - name: Shutdown node 2 - listen on 127.0.0.1 7200
+      community.cassandra.cassandra_stopdaemon:
+        host: 127.0.0.1
+        port: 7200
+
+    - name: Wait for node 2 to be down as seen from node 1
+      ansible.builtin.shell: "{{ ccm_nodetool }}/nodetool --port 7100 status | grep '^DN  127.0.0.2 '"
+      register: node2_down
+      until: node2_down.rc == 0
+      retries: 30
+      delay: 5
+
+    - name: Assassinate node 2 - check mode
+      community.cassandra.cassandra_assassinate:
+        host: 127.0.0.1
+        port: 7100
+        ip_address: 127.0.0.2
+        nodetool_path: "{{ ccm_nodetool }}"
+      check_mode: true
+      register: assass
+
+    - name: Get status
+      ansible.builtin.command: "{{ ccm_nodetool }}/nodetool --port 7100 status"
+      register: nodetool_status
+
+    - ansible.builtin.assert:
+        that:
+          - assass.changed
+          - "assass.msg == 'nodetool assassinate executed successfully for endpoint: 127.0.0.2 (check mode)'"
+          - "'127.0.0.2' in nodetool_status.stdout"
+
+    - name: Assassinate node 2 - check mode, nodetool printing ports
+      community.cassandra.cassandra_assassinate:
+        host: 127.0.0.1
+        port: 7100
+        ip_address: 127.0.0.2
+        nodetool_path: "{{ ccm_nodetool }}"
+        nodetool_flags: "-Dcom.sun.jndi.rmiURLParsing=legacy -pp"
+      check_mode: true
+      register: assass
+
+    - ansible.builtin.assert:
+        that:
+          - assass.changed
+
+    - name: Assassinate node 2
+      community.cassandra.cassandra_assassinate:
+        host: 127.0.0.1
+        port: 7100
+        ip_address: 127.0.0.2
+        nodetool_path: "{{ ccm_nodetool }}"
+      register: assass
+
+    - name: Get status
+      ansible.builtin.command: "{{ ccm_nodetool }}/nodetool --port 7100 status"
+      register: nodetool_status
+
+    - ansible.builtin.assert:
+        that:
+          - assass.changed
+          - "assass.msg == 'nodetool assassinate executed successfully for endpoint: 127.0.0.2'"
+          - "'127.0.0.2' not in nodetool_status.stdout"
+
+    - name: Assassinate node 2 again
+      community.cassandra.cassandra_assassinate:
+        host: 127.0.0.1
+        port: 7100
+        ip_address: 127.0.0.2
+        nodetool_path: "{{ ccm_nodetool }}"
+      register: assass
+
+    - ansible.builtin.assert:
+        that:
+          - assass.changed == False
+          - "assass.msg == '127.0.0.2 is not in the cluster'"
+
+  always:
+    - name: Cleanup any ccm stuff
+      ansible.builtin.shell: "sudo -E -u cassandra bash -c \"ccm stop test && ccm remove test > /dev/null\""
+      become_user: cassandra
+      args:
+        chdir: /home/cassandra
+      environment:
+        CCM_CONFIG_DIR: "/home/cassandra/config"
+        CASSANDRA_HOME: "/home/cassandra"
+      ignore_errors: true

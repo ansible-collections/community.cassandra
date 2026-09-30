@@ -1,0 +1,14 @@
+---
+# Apply kernel settings (sysctl, swapoff, THP) live, not just persist them.
+# "auto": live everywhere except containers (Ansible's virtualization facts,
+# or a virtualization_type listed below), where /proc/sys and /sys are the
+# host's. true/false forces it (e.g. true on a dedicated privileged
+# container host that should be tuned from inside; false persists only,
+# and in containers only the files).
+cassandra_linux_apply_live: auto
+cassandra_linux_container_types:
+  - docker
+  - podman
+  - container
+  - containerd
+  - lxc

@@ -33,7 +33,7 @@
       register: rhys
 
     - name: Assert decommission successful
-      assert:
+      ansible.builtin.assert:
         that:
           - rhys.failed
           - "rhys.msg == 'host_id is not a valid uuid'"
@@ -53,7 +53,7 @@
       register: rhys
 
     - name: Assert module has failed
-      assert:
+      ansible.builtin.assert:
         that:
           - rhys.failed
           - "rhys.msg == 'removenode command failed'"
@@ -69,7 +69,7 @@
       register: rhys
 
     - name: Assert module has performed no action
-      assert:
+      ansible.builtin.assert:
         that:
           - rhys.changed == False
           - "rhys.msg == 'host_id does not exist in the cluster'"
@@ -84,7 +84,7 @@
         port: 7200
         
     - name: Wait for node 2 cassandra to shutdown
-      wait_for:
+      ansible.builtin.wait_for:
         host: 127.0.0.2
         port: 9042
         state: "drained"
@@ -99,7 +99,7 @@
       check_mode: yes
       register: rhys
 
-    - assert:
+    - ansible.builtin.assert:
         that:
           - rhys.changed
           - "rhys.msg == 'removenode command succeeded'"
@@ -109,7 +109,7 @@
       register: nodetool_status
 
     - name: Verifiy that check mode works and the host id is still in the cluster
-      assert:
+      ansible.builtin.assert:
         that:
           - "'127.0.0.2' in nodetool_status.stdout"
 
@@ -123,15 +123,19 @@
       check_mode: no
       register: rhys
 
-    - assert:
+    - ansible.builtin.assert:
         that:
           - rhys.changed
           - "rhys.msg == 'removenode command succeeded'"
 
-    - name: Verifiy that 127.0.0.2 is not in the output
-      assert:
+    - name: Get status after the removal
+      ansible.builtin.shell: nodetool status --port 7100
+      register: nodetool_status
+
+    - name: Verify that 127.0.0.2 is no longer in the ring
+      ansible.builtin.assert:
         that:
-          - "'127.0.0.2' not in nodetool.stdout"
+          - "'127.0.0.2' not in nodetool_status.stdout"
 
     - name: Run module with same host_id again - force completion
       community.cassandra.cassandra_removenode:
@@ -141,6 +145,13 @@
         force: yes
         nodetool_path: /home/cassandra/config/repository/{{ cassandra_version }}/bin
         debug: yes
+      register: rhys
+
+    - name: Assert force completion made no change (host_id is gone)
+      ansible.builtin.assert:
+        that:
+          - rhys.changed == False
+          - "rhys.msg == 'host_id does not exist in the cluster'"
 
     - name: Run module with same host_id again - should be absent and result in no change
       community.cassandra.cassandra_removenode:
@@ -151,7 +162,7 @@
         debug: yes
       register: rhys
 
-    - assert:
+    - ansible.builtin.assert:
         that:
           - rhys.changed == False
           - "rhys.msg == 'host_id does not exist in the cluster'"
