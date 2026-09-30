@@ -1,0 +1,2 @@
+trivial:
+  - CI - test ansible-core 2.19, 2.20 and 2.21 (sanity and unit tests on all three, integration tests on 2.21) instead of the end-of-life 2.17 and 2.18.

@@ -25,10 +25,12 @@ jobs:
         versions:
           - python_version: "3.10"
             ansible_version: "stable-2.16"
-          - python_version: "3.11"
-            ansible_version: "stable-2.17"
           - python_version: "3.12"
-            ansible_version: "stable-2.18"
+            ansible_version: "stable-2.19"
+          - python_version: "3.13"
+            ansible_version: "stable-2.20"
+          - python_version: "3.14"
+            ansible_version: "stable-2.21"
           #- python_version: "3.12"
           #  ansible_version: "devel"
     steps:
@@ -63,10 +65,12 @@ jobs:
         versions:
           - python_version: "3.10"
             ansible_version: "stable-2.16"
-          - python_version: "3.11"
-            ansible_version: "stable-2.17"
           - python_version: "3.12"
-            ansible_version: "stable-2.18"
+            ansible_version: "stable-2.19"
+          - python_version: "3.13"
+            ansible_version: "stable-2.20"
+          - python_version: "3.14"
+            ansible_version: "stable-2.21"
     steps:
 
       - name: Check out code
@@ -180,12 +184,8 @@ jobs:
         versions:
           - python_version: "3.10"
             ansible_version: "stable-2.16"
-          - python_version: "3.10"
-            ansible_version: "stable-2.17"
-          #- python_version: "3.12"
-          #  ansible_version: "stable-2.18"
-          #- python_version: "3.12"
-          #  ansible_version: "milestone"
+          - python_version: "3.14"
+            ansible_version: "stable-2.21"
         cassandra_version:
           - package_version: "40x"
             tar_version: "4.0.9"
@@ -255,12 +255,8 @@ jobs:
         versions:
           - python_version: "3.10"
             ansible_version: "stable-2.16"
-          - python_version: "3.10"
-            ansible_version: "stable-2.17"
-          #- python_version: "3.12" ccm issues with six older python https://github.com/apache/cassandra-ccm/pull/800
-          #  ansible_version: "stable-2.18"
-          #- python_version: "3.12"
-          #  ansible_version: "milestone"
+          - python_version: "3.14"
+            ansible_version: "stable-2.21"
         cassandra_version:
           - package_version: "41x"
             tar_version: "4.1.7"
@@ -330,8 +326,8 @@ jobs:
         versions:
           - python_version: "3.10"
             ansible_version: "stable-2.16"
-          - python_version: "3.10"
-            ansible_version: "stable-2.17"
+          - python_version: "3.14"
+            ansible_version: "stable-2.21"
         cassandra_version:
           - package_version: "50x"
             tar_version: "5.0.8"
