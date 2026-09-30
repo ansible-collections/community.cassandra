@@ -32,7 +32,7 @@
       register: rhys
 
     - name: Assert decommission successful
-      assert:
+      ansible.builtin.assert:
         that:
           - rhys.changed
           - "rhys.msg == 'decommission command succeeded'"
@@ -42,9 +42,9 @@
       register: nodetool
 
     - name: Confirm that check mode works and the node is still in the ring
-      assert:
+      ansible.builtin.assert:
         that:
-          - "'127.0.0.1' in nodetool.stdout"    
+          - "'127.0.0.1' in nodetool.stdout"
 
     - name: Execute module against the first ccm node
       community.cassandra.cassandra_decommission:
@@ -55,7 +55,7 @@
       register: rhys
 
     - name: Assert decommission successful
-      assert:
+      ansible.builtin.assert:
         that:
           - rhys.changed
           - "rhys.msg == 'decommission command succeeded'"
@@ -69,19 +69,54 @@
       register: rhys
 
     - name: Assert decommission successful
-      assert:
+      ansible.builtin.assert:
         that:
           - rhys.changed == False
-          - "rhys.msg == 'Node appears to be already decommissioned'"
+          - "rhys.msg == 'already decommissioned'"
 
     - name: Get info
       ansible.builtin.shell: nodetool -h 127.0.0.1 --port 7100 ring
       register: nodetool
 
     - name: Confirm that node has been decommissioned
-      assert:
+      ansible.builtin.assert:
         that:
           - "'127.0.0.1' not in nodetool.stdout"
+
+    # Node 2 (127.0.0.2) through the default JMX host 127.0.0.1: the host
+    # is not the node's address in the ring
+    - name: Decommission node 2 with the default host
+      community.cassandra.cassandra_decommission:
+        port: 7200
+        nodetool_path: /home/cassandra/config/repository/{{ cassandra_version }}/bin
+      register: rhys
+
+    - name: Assert node 2 decommission successful
+      ansible.builtin.assert:
+        that:
+          - rhys.changed
+          - "rhys.msg == 'decommission command succeeded'"
+
+    - name: Run module again on node 2
+      community.cassandra.cassandra_decommission:
+        port: 7200
+        nodetool_path: /home/cassandra/config/repository/{{ cassandra_version }}/bin
+      register: rhys
+
+    - name: Assert node 2 is already decommissioned
+      ansible.builtin.assert:
+        that:
+          - rhys.changed == False
+          - "rhys.msg == 'already decommissioned'"
+
+    - name: Get the ring from node 3
+      ansible.builtin.shell: nodetool -h 127.0.0.1 --port 7300 ring
+      register: nodetool
+
+    - name: Confirm that node 2 has left the ring
+      ansible.builtin.assert:
+        that:
+          - "'127.0.0.2' not in nodetool.stdout"
 
 # TODO - Add tests with auth
 #- include_tasks: ../../setup_cassandra/tasks/cassandra_auth.yml
