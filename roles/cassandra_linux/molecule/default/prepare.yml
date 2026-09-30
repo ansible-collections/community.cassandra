@@ -1,4 +1,13 @@
 ---
+# UBI 8 only ships platform-python 3.6, below ansible-core's target minimum
+- name: Bootstrap Python on RHEL 8
+  hosts: rhel810
+  gather_facts: false
+  tasks:
+    - name: Install python3.12
+      ansible.builtin.raw: test -x /usr/bin/python3.12 || dnf -y install python3.12
+      changed_when: false
+
 - name: Prepare
   hosts: all
 
@@ -12,10 +21,14 @@
     ansible.builtin.shell: apt-get update && apt-get clean
     when: ansible_facts['os_family'] == 'Debian'
 
-  - name: Are we in docker?
-    ansible.builtin.shell: "grep :/docker /proc/self/cgroup | wc -l"
-
-  - name: Create is_docker.txt file
-    ansible.builtin.file:
-      path: is_docker.txt
-      state: touch
+  # UBI repos don't carry chrony (real RHEL does, via subscription): pull it
+  # from the matching Rocky BaseOS instead. Test scaffolding only.
+  - name: Add Rocky BaseOS repo for chrony on UBI
+    ansible.builtin.yum_repository:
+      name: rocky-baseos-chrony
+      description: Rocky BaseOS (chrony only)
+      baseurl: "https://dl.rockylinux.org/pub/rocky/{{ ansible_facts['distribution_major_version'] }}/BaseOS/$basearch/os/"
+      gpgcheck: true
+      gpgkey: "https://dl.rockylinux.org/pub/rocky/RPM-GPG-KEY-Rocky-{{ ansible_facts['distribution_major_version'] }}"
+      includepkgs: chrony
+    when: ansible_facts['distribution'] == 'RedHat'

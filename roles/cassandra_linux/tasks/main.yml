@@ -4,35 +4,71 @@
   ansible.builtin.include_vars:
     file: "{{ ansible_facts['os_family'] }}.yml"
 
-- name: Check is_docker.txt file exists
-  ansible.builtin.stat:
-    path: is_docker.txt
-  register: is_docker
+# Persistent settings (sysctl.conf, fstab, THP unit) are always written;
+# applying them live is skipped in containers, where /proc/sys and /sys
+# belong to the host kernel (read-only, or worse, the host's if privileged).
+# What runs at boot (THP unit enabled) is skipped there too.
+- name: Gather the virtualization facts (not in every gather_subset)
+  ansible.builtin.setup:
+    gather_subset: ['!all', '!min', 'virtual']
+  when: "'virtualization_type' not in ansible_facts"
+
+- name: Check cassandra_linux_apply_live
+  ansible.builtin.assert:
+    that: cassandra_linux_apply_live | string | lower in ['auto', 'true', 'false', 'yes', 'no', 'on', 'off', '1', '0']
+    fail_msg: "cassandra_linux_apply_live must be auto, true or false, not {{ cassandra_linux_apply_live | default('') }}"
+    quiet: true
+
+- name: Detect a container
+  ansible.builtin.set_fact:
+    _cassandra_linux_container: >-
+      {{ 'container' in ansible_facts['virtualization_tech_guest'] | default([])
+         or ansible_facts['virtualization_type'] | default('') in cassandra_linux_container_types }}
+
+- name: Decide whether kernel settings are applied live
+  ansible.builtin.set_fact:
+    _cassandra_linux_live: >-
+      {{ not (_cassandra_linux_container | bool) if cassandra_linux_apply_live | string | lower == 'auto'
+         else cassandra_linux_apply_live | bool }}
+
+- name: Decide whether what runs at boot is set up
+  ansible.builtin.set_fact:
+    _cassandra_linux_boot: "{{ _cassandra_linux_live | bool or not (_cassandra_linux_container | bool) }}"
 
 - name: Disable Swap
   ansible.builtin.command: swapoff -a
   when:
-    - is_docker.stat.exists == False
-    - ansible_swaptotal_mb > 0
+    - _cassandra_linux_live | bool
+    - ansible_facts['swaptotal_mb'] > 0
 
 - name: Remove swap partitions
   ansible.posix.mount:
     path: swap
     state: absent
 
-- name: Ensure Swappiness is 1
+- name: Kernel settings for Cassandra
   ansible.builtin.sysctl:
-    name: vm.swappiness
-    value: "1"
-    sysctl_set: yes
-    reload: yes
-
-- name: Ensure max_map_count is 1048575
-  ansible.builtin.sysctl:
-    name: vm.max_map_count
-    value: "1048575"
-    sysctl_set: yes
-    reload: yes
+    name: "{{ item.key }}"
+    value: "{{ item.value }}"
+    state: present
+    sysctl_file: /etc/sysctl.conf
+    sysctl_set: "{{ _cassandra_linux_live }}"
+    reload: "{{ _cassandra_linux_live }}"
+  loop:
+    - { key: vm.swappiness, value: 1 }
+    - { key: vm.max_map_count, value: 1048575 }
+    - { key: vm.zone_reclaim_mode, value: 0 }
+    # TCP settings to prevent timeouts and handle many connections
+    - { key: net.ipv4.tcp_keepalive_time, value: 60 }
+    - { key: net.ipv4.tcp_keepalive_probes, value: 3 }
+    - { key: net.ipv4.tcp_keepalive_intvl, value: 10 }
+    - { key: net.core.rmem_max, value: 16777216 }
+    - { key: net.core.wmem_max, value: 16777216 }
+    - { key: net.core.rmem_default, value: 16777216 }
+    - { key: net.core.wmem_default, value: 16777216 }
+    - { key: net.core.optmem_max, value: 40960 }
+    - { key: net.ipv4.tcp_rmem, value: "4096 87380 16777216" }
+    - { key: net.ipv4.tcp_wmem, value: "4096 65536 16777216" }
 
 - name: Install time sync package
   ansible.builtin.package:
@@ -45,6 +81,8 @@
     name: "{{ (ansible_facts['os_family'] == 'Debian') | ternary('systemd-timesyncd', 'chronyd') }}"
     enabled: yes
     state: started
+  # in check mode the package above is not really installed yet
+  ignore_errors: "{{ ansible_check_mode }}"
   tags:
   - molecule-idempotence-notest # Ubuntu 2404 timesyncd issue
 
@@ -67,47 +105,39 @@
     create: yes
   when: ansible_facts['os_family'] == "RedHat"
 
-- name: TCP setting for prevents timeouts and handling many connections
-  ansible.builtin.sysctl:
-    name: "{{ item.key }}"
-    value: "{{ item.value }}"
-    state: present
-    sysctl_file: /etc/sysctl.conf
-    reload: yes
-  with_items:
-    - { key: net.ipv4.tcp_keepalive_time, value: 60 }
-    - { key: net.ipv4.tcp_keepalive_probes, value: 3 }
-    - { key: net.ipv4.tcp_keepalive_intvl, value: 10 }
-    - { key: net.core.rmem_max, value: 16777216 }
-    - { key: net.core.wmem_max, value: 16777216 }
-    - { key: net.core.rmem_default, value: 16777216 }
-    - { key: net.core.wmem_default, value: 16777216 }
-    - { key: net.core.optmem_max, value: 40960 }
-    - { key: net.ipv4.tcp_rmem, value: "4096 87380 16777216" }
-    - { key: net.ipv4.tcp_wmem, value: "4096 65536 16777216" }
-  when:
-    - is_docker.stat.exists == False
-
-- name: Disable zone_reclaim_mode
-  ansible.builtin.sysctl:
-    name: vm.zone_reclaim_mode
-    value: 0
-    state: present
-    sysctl_file: /etc/sysctl.conf
-    reload: yes
-  when:
-    - is_docker.stat.exists == False
-
 - name: Ensure disable-thp service file exists
   ansible.builtin.copy:
     src: disable-thp.service
     dest: /etc/systemd/system/
+    mode: "0644"
   register: thp
 
-- name: Ensure service to disable THP exists
+- name: Ensure service to disable THP is enabled at boot
   ansible.builtin.systemd:
     name: disable-thp
-    daemon-reload: yes
+    daemon_reload: "{{ thp.changed }}"
+    enabled: true
+  register: thp_enabled
+  # in check mode on a fresh host the unit file is not really there yet
+  ignore_errors: "{{ ansible_check_mode }}"
+  when: _cassandra_linux_boot | bool
+
+# The unit exits once THP is off: started again only while THP is still on
+- name: Read the THP setting
+  ansible.builtin.command:
+    argv: [cat, /sys/kernel/mm/transparent_hugepage/enabled]
+  register: thp_now
+  changed_when: false
+  failed_when: false
+  check_mode: false
+  when: _cassandra_linux_live | bool
+
+- name: Ensure service to disable THP is started
+  ansible.builtin.systemd:
+    name: disable-thp
     state: started
-    enabled: yes
-  when: thp.changed == True
+  ignore_errors: "{{ ansible_check_mode }}"
+  when:
+    - _cassandra_linux_live | bool
+    - thp_now.rc | default(1) == 0
+    - "'[never]' not in thp_now.stdout"
