@@ -1,5 +1,10 @@
 ---
-- name: Remove cassandra rpm
-  apt:
+- name: Remove cassandra deb package
+  ansible.builtin.apt:
     name: "{{ cassandra_deb_pkg }}"
+    state: absent
+
+- name: Remove the cqlsh wrapper
+  ansible.builtin.file:
+    path: /usr/local/bin/cqlsh
     state: absent
