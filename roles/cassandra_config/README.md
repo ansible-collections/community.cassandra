@@ -27,7 +27,8 @@ here what would be reverted.
 With `cassandra_config_confirm: auto` (default), a node that was already
 initialized (a `system` keyspace in `cassandra_data_file_directories`, in
 the data directories or `local_system_data_file_directory` of its live
-`cassandra.yaml`, or Cassandra running) is only changed after you
+`cassandra.yaml` (`/var/lib/cassandra/data` when it sets none; a value it
+cannot read for sure counts as initialized), or Cassandra running) is only changed after you
 type `yes` at a single prompt listing every host and file concerned; a
 first install is not blocked. `true` asks whenever a file changes, `false`
 never does. The JMX users files are written without that preview. With
@@ -74,11 +75,14 @@ Role Variables
   default with a package install: the package's `cassandra.in.sh`
   hardcodes that path for Cassandra and its tools, anything else is not read.
 * `cassandra_rpm_conf_alternative` (RedHat): conf dir seeded once from the
-  package's `default.conf` and selected with `alternatives` (priority
-  `cassandra_rpm_conf_alternative_priority`, 100), so `/etc/cassandra/conf`
-  points to it and `default.conf` stays as shipped (`rpm -V` clean, package
-  upgrades never touch the live config). Default `/etc/cassandra/ansible.conf`;
-  `""` writes into `default.conf` instead (it does not switch back a node already moved to its own dir).
+  one `/etc/cassandra/conf` points to (the package's `default.conf` on a new
+  install; on a node already run from another dir, its keystores and other
+  files come along, owners and modes kept) and selected with `alternatives`
+  (priority `cassandra_rpm_conf_alternative_priority`, 100), so
+  `/etc/cassandra/conf` points to it and `default.conf` stays as shipped
+  (`rpm -V` clean, package upgrades never touch the live config). Default
+  `/etc/cassandra/ansible.conf`; `""` writes into the dir in use instead
+  (`default.conf` on a new install; it does not switch back a node already moved to its own dir).
 * `cassandra_user`, `cassandra_group` (default `cassandra`): the account
   the Cassandra service runs as and a group it is in (set both together).
   The deb and rpm packages create `cassandra` and their init scripts run

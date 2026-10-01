@@ -90,7 +90,40 @@ def test_secrets_masked_in_the_diff(tmp_path, live, new, shown):
     assert changed_lines(preview(tmp_path, "cassandra.yaml", live, new)) == shown
 
 
+# an ASCII locale (LANG=C, no UTF-8 mode, as on Python 3.6) and a UTF-8 one
+LOCALES = [dict(os.environ, LC_ALL="C", PYTHONUTF8="0", PYTHONCOERCECLOCALE="0"), dict(os.environ, LC_ALL="C.UTF-8")]
+
+
+@pytest.mark.parametrize("env", LOCALES)
+@pytest.mark.parametrize("live", [b"# caf\xe9\nnum_tokens: 16\n", u"# caf\xe9\nnum_tokens: 16\n".encode("utf-8")])
+def test_diff_reads_any_live_file(tmp_path, env, live):
+    # a Latin-1 comment, or any UTF-8 text under an ASCII locale: read as UTF-8, a bad byte replaced
+    (tmp_path / "live").write_bytes(live)
+    (tmp_path / "new").write_bytes(u"# caf\xe9\nnum_tokens: 8\n".encode("utf-8"))
+    out = subprocess.run([sys.executable, "-c", SCRIPT, str(tmp_path / "live"), str(tmp_path / "new")],
+                         stdout=subprocess.PIPE, check=True, env=env).stdout.decode("utf-8")
+    assert {"-num_tokens: 16", "+num_tokens: 8"} <= set(changed_lines(out))
+
+
+def test_diff_of_a_path_not_in_utf8(tmp_path):
+    # the live path is in the diff header: the output stays valid UTF-8 with an undecodable byte there
+    d = os.path.join(str(tmp_path).encode(), b"caf\xe9")
+    os.mkdir(d)
+    for name, text in ((b"live", b"num_tokens: 16\n"), (b"new", b"num_tokens: 8\n")):
+        with open(os.path.join(d, name), "wb") as f:
+            f.write(text)
+    out = subprocess.run([sys.executable.encode(), b"-c", SCRIPT.encode(), os.path.join(d, b"live"), os.path.join(d, b"new")],
+                         stdout=subprocess.PIPE, check=True, env=LOCALES[0]).stdout.decode("utf-8")
+    assert {"-num_tokens: 16", "+num_tokens: 8"} <= set(changed_lines(out))
+
+
 VALIDATE = task("Check the new cassandra.yaml is valid YAML")["ansible.builtin.command"]["argv"][2]
+
+
+@pytest.mark.parametrize("env", LOCALES)
+def test_yaml_validation_of_utf8_text(tmp_path, env):
+    (tmp_path / "cassandra.yaml").write_bytes(u"cluster_name: 'caf\xe9'\n".encode("utf-8"))
+    subprocess.run([sys.executable, "-c", VALIDATE, str(tmp_path / "cassandra.yaml")], check=True, env=env)
 
 
 @pytest.mark.parametrize("text, error", [
@@ -115,7 +148,7 @@ def system_dirs(tmp_path, live, inventory_dirs, system_in, pyyaml=True):
     if live is not None:
         (tmp_path / "cassandra.yaml").write_text(live.replace("@", str(tmp_path) + "/"))
     # -S: no site-packages, so no PyYAML: the script's own parser
-    args = [str(tmp_path / "cassandra.yaml"), json.dumps([str(tmp_path / d) for d in inventory_dirs])]
+    args = [str(tmp_path / "cassandra.yaml"), json.dumps([str(tmp_path / d) for d in inventory_dirs]), str(tmp_path / "default")]
     argv = [sys.executable] + ([] if pyyaml else ["-S"]) + ["-c", SYSTEM] + args
     out = subprocess.run(argv, stdout=subprocess.PIPE, universal_newlines=True, check=True).stdout
     # the dirs found (a "(key in the live cassandra.yaml)" line: see test_initialized_when_live_dirs_not_read)
@@ -141,6 +174,10 @@ def system_dirs(tmp_path, live, inventory_dirs, system_in, pyyaml=True):
     ("data_file_directories:\n  - @h#1\n", ["d1"], ["h#1"], ["h#1"]),  # a comment starts after a space only
     ("data_file_directories: [@old0]\nnum_tokens: 16\ndata_file_directories: [@old0,\n@old1]\n", ["d1"], ["old0", "old1"],
      ["old0", "old1"]),  # set twice: the last one
+    # none set: Cassandra's default data dir
+    ("cluster_name: x\n# data_file_directories:\n#     - @old1\n", ["d1"], ["default"], ["default"]),
+    ("data_file_directories:\nnum_tokens: 16\n", ["d1"], ["default"], ["default"]),
+    ("data_file_directories:\n  - @old1\n", ["d1"], ["default"], []),  # set: not the default
 ])
 @pytest.mark.parametrize("pyyaml", [True, False])
 def test_initialized_node_found(tmp_path, live, inventory_dirs, system_in, found, pyyaml):
@@ -155,9 +192,25 @@ def test_initialized_node_found(tmp_path, live, inventory_dirs, system_in, found
 def test_initialized_when_live_dirs_not_read(tmp_path, live, key):
     # without PyYAML, a value it cannot read for sure counts as initialized: one prompt too many at worst
     (tmp_path / "cassandra.yaml").write_text(live.replace("@", str(tmp_path) + "/"))
-    out = subprocess.run([sys.executable, "-S", "-c", SYSTEM, str(tmp_path / "cassandra.yaml"), "[]"],
+    out = subprocess.run([sys.executable, "-S", "-c", SYSTEM, str(tmp_path / "cassandra.yaml"), "[]", "/nonexistent"],
                          stdout=subprocess.PIPE, universal_newlines=True, check=True).stdout
     assert out.split("\n")[0] == "(%s in the live cassandra.yaml)" % key
+
+
+@pytest.mark.parametrize("live, key", [
+    ("data_file_directories:\n  - data\n", "data_file_directories"),  # relative: to a cwd not known here
+    ("data_file_directories:\n  - @d\n  - data\n", "data_file_directories"),
+    ("data_file_directories: @d\n", "data_file_directories"),  # a single value, not a list
+    ("data_file_directories: '/'\n", "data_file_directories"),
+    ("local_system_data_file_directory: sys\n", "local_system_data_file_directory"),
+])
+@pytest.mark.parametrize("pyyaml", [True, False])
+def test_initialized_when_live_dirs_relative_or_single(tmp_path, live, key, pyyaml):
+    (tmp_path / "d").mkdir()  # exists, without a system keyspace
+    (tmp_path / "cassandra.yaml").write_text(live.replace("@", str(tmp_path) + "/"))
+    argv = [sys.executable] + ([] if pyyaml else ["-S"]) + ["-c", SYSTEM, str(tmp_path / "cassandra.yaml"), "[]", "/nonexistent"]
+    out = subprocess.run(argv, stdout=subprocess.PIPE, universal_newlines=True, check=True, cwd=str(tmp_path)).stdout
+    assert "(%s in the live cassandra.yaml)" % key in out.split("\n")
 
 
 def test_new_node_not_initialized_without_pyyaml(tmp_path):
@@ -165,7 +218,7 @@ def test_new_node_not_initialized_without_pyyaml(tmp_path):
     (tmp_path / "data").mkdir()
     (tmp_path / "cassandra.yaml").write_text("data_file_directories:  # JBOD\n    - %s/data\n# local_system_data_file_directory: /x\n"
                                              "commitlog_directory: /c\n" % tmp_path)
-    out = subprocess.run([sys.executable, "-S", "-c", SYSTEM, str(tmp_path / "cassandra.yaml"), "[]"],
+    out = subprocess.run([sys.executable, "-S", "-c", SYSTEM, str(tmp_path / "cassandra.yaml"), "[]", "/nonexistent"],
                          stdout=subprocess.PIPE, universal_newlines=True, check=True).stdout
     assert out.strip() == ""
 
@@ -174,7 +227,7 @@ def test_live_file_not_utf8(tmp_path):
     (tmp_path / "cassandra.yaml").write_bytes(b"# caf\xe9\ndata_file_directories:\n  - " + str(tmp_path).encode() + b"/d\n")
     (tmp_path / "d" / "system").mkdir(parents=True)
     for argv in ([sys.executable], [sys.executable, "-S"]):
-        out = subprocess.run(argv + ["-c", SYSTEM, str(tmp_path / "cassandra.yaml"), "[]"], stdout=subprocess.PIPE,
+        out = subprocess.run(argv + ["-c", SYSTEM, str(tmp_path / "cassandra.yaml"), "[]", "/nonexistent"], stdout=subprocess.PIPE,
                              universal_newlines=True, check=True, env=dict(os.environ, LC_ALL="C", PYTHONUTF8="0")).stdout
         assert out.split() == [str(tmp_path / "d")]
 
@@ -211,6 +264,16 @@ def identity_changes(tmp_path, live, new, live_rackdc="dc=d\n", new_rackdc="dc=d
     out = subprocess.run([sys.executable, "-c", IDENTITY] + [str(tmp_path / n) for n in ("live.yaml", "new.yaml", "live.p", "new.p")],
                          stdout=subprocess.PIPE, universal_newlines=True, check=True)
     return json.loads(out.stdout)
+
+
+@pytest.mark.parametrize("env", LOCALES)
+def test_identity_reads_any_live_file(tmp_path, env):
+    for name, text in (("live.yaml", b"# caf\xe9\ncluster_name: 'X'\n"), ("new.yaml", u"# caf\xe9\ncluster_name: 'Y'\n".encode("utf-8")),
+                       ("live.p", u"dc=d\xe9\n".encode("utf-8")), ("new.p", b"dc=d\xe9\n")):
+        (tmp_path / name).write_bytes(text)
+    out = subprocess.run([sys.executable, "-c", IDENTITY] + [str(tmp_path / n) for n in ("live.yaml", "new.yaml", "live.p", "new.p")],
+                         stdout=subprocess.PIPE, check=True, env=env)
+    assert json.loads(out.stdout.decode()) == [u"cluster_name: X -> Y", u"dc: d\xe9 -> d\ufffd"]
 
 
 def test_rack_comment_is_part_of_the_value(tmp_path):
@@ -305,3 +368,36 @@ def test_installed_series(installed, series, ok):
 def test_restart_warning_on_a_running_node(services, warn):
     when = task("Warn that a restart is needed")["when"][1]
     assert render("{{ %s }}" % when, ansible_facts={"services": services}) is warn
+
+
+SEED = task("Seed the alternative conf dir from the one in use")["ansible.builtin.command"]["argv"][2]
+
+
+def seed(src, dest):
+    return subprocess.run(["sh", "-c", SEED, "sh", str(src), str(dest)], stderr=subprocess.PIPE, universal_newlines=True, check=False)
+
+
+def test_seed_copies_the_dir_in_use(tmp_path):
+    # RHEL: the role's conf dir starts as a copy of the one in use, keystores and modes included
+    (tmp_path / "prod.conf").mkdir()
+    (tmp_path / "prod.conf" / ".keystore").write_text("k")
+    (tmp_path / "prod.conf" / ".keystore").chmod(0o400)
+    (tmp_path / "new" / "ansible.conf.seed").mkdir(parents=True)  # left by an interrupted run
+    (tmp_path / "new" / "ansible.conf.seed" / "stale").write_text("x")
+    assert seed(tmp_path / "prod.conf", tmp_path / "new" / "ansible.conf").returncode == 0
+    assert sorted(os.listdir(str(tmp_path / "new"))) == ["ansible.conf"]
+    assert os.listdir(str(tmp_path / "new" / "ansible.conf")) == [".keystore"]
+    assert os.stat(str(tmp_path / "new" / "ansible.conf" / ".keystore")).st_mode & 0o777 == 0o400
+
+
+def test_seed_parent_created(tmp_path):
+    (tmp_path / "prod.conf").mkdir()
+    assert seed(tmp_path / "prod.conf", tmp_path / "a" / "b" / "conf").returncode == 0
+    assert (tmp_path / "a" / "b" / "conf").is_dir()
+
+
+def test_seed_refused_when_the_dir_in_use_is_missing(tmp_path):
+    # /etc/cassandra/conf pointing to a removed dir: say so, create nothing
+    out = seed(tmp_path / "gone", tmp_path / "ansible.conf")
+    assert out.returncode == 1 and "conf dir in use (%s) missing" % (tmp_path / "gone") in out.stderr
+    assert not (tmp_path / "ansible.conf").exists()
