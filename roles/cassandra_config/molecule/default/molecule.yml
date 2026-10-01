@@ -1,0 +1,67 @@
+---
+driver:
+  name: docker
+platforms:
+  - name: amazon2023
+    image: geerlingguy/docker-amazonlinux2023-ansible
+    command: ${MOLECULE_DOCKER_COMMAND:-""}
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+    cgroupns_mode: host
+    privileged: true
+    pre_build_image: true
+    user: root
+  - name: ubuntu2404
+    image: geerlingguy/docker-ubuntu2404-ansible
+    command: ${MOLECULE_DOCKER_COMMAND:-""}
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+    cgroupns_mode: host
+    privileged: true
+    pre_build_image: true
+    user: root
+  - name: almalinux9
+    image: mullholland/docker-almalinux-systemd:9
+    command: ${MOLECULE_DOCKER_COMMAND:-""}
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+    cgroupns_mode: host
+    privileged: true
+    pre_build_image: true
+    user: root
+  - name: rockylinux9
+    image: geerlingguy/docker-rockylinux9-ansible
+    command: ${MOLECULE_DOCKER_COMMAND:-""}
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+    cgroupns_mode: host
+    privileged: true
+    pre_build_image: true
+    user: root
+  - name: rhel810
+    image: registry.access.redhat.com/ubi8/ubi-init:8.10
+    command: ${MOLECULE_DOCKER_COMMAND:-""}
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+    cgroupns_mode: host
+    privileged: true
+    pre_build_image: true
+    user: root
+  - name: rhel9
+    image: registry.access.redhat.com/ubi9/ubi-init:latest
+    command: ${MOLECULE_DOCKER_COMMAND:-""}
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+    cgroupns_mode: host
+    privileged: true
+    pre_build_image: true
+    user: root
+provisioner:
+  name: ansible
+  inventory:
+    host_vars:
+      # platform-python 3.6 is below ansible-core's target minimum (3.9)
+      rhel810:
+        ansible_python_interpreter: /usr/bin/python3.12
+verifier:
+  name: testinfra

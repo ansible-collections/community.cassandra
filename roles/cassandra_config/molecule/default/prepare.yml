@@ -1,0 +1,60 @@
+---
+# UBI 8 only ships platform-python 3.6, below ansible-core's target minimum
+- name: Bootstrap Python on RHEL 8
+  hosts: rhel810
+  gather_facts: false
+  tasks:
+    - name: Install python3.12
+      ansible.builtin.raw: test -x /usr/bin/python3.12 || dnf -y install python3.12
+      changed_when: false
+
+- name: Prepare
+  hosts: all
+  tasks:
+    - name: Create the cassandra group (normally created by the Cassandra package)
+      ansible.builtin.group:
+        name: cassandra
+        system: true
+
+    - name: Create the cassandra user (normally created by the Cassandra package)
+      ansible.builtin.user:
+        name: cassandra
+        group: cassandra
+        system: true
+        create_home: false
+
+    - name: Create another service group (cassandra_group), for the JMX users case
+      ansible.builtin.group:
+        name: dbgrp
+        system: true
+
+    - name: Create another service user (cassandra_user), for the JMX users case
+      ansible.builtin.user:
+        name: dbsvc
+        group: dbgrp
+        system: true
+        create_home: false
+
+    - name: Create config dirs (normally created by the Cassandra package)
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        mode: "0755"
+      loop:
+        - "{{ '/etc/cassandra/default.conf' if ansible_facts['os_family'] == 'RedHat' else '/etc/cassandra' }}"
+        - /tmp/cassandra-override
+        - /tmp/cassandra-40x
+        - /tmp/cassandra-41x
+        - /tmp/cassandra-40x-override
+        - /tmp/cassandra-40x-G1
+        - /tmp/cassandra-41x-G1
+        - /tmp/cassandra-50x-CMS
+        - /tmp/cassandra-secret
+        - /tmp/cassandra-access
+        - /tmp/cassandra-no-account
+
+    # What the rpm's %post does: /etc/cassandra/conf -> alternatives -> default.conf
+    - name: Register default.conf as the cassandra alternative (RedHat)
+      ansible.builtin.command: alternatives --install /etc/cassandra/conf cassandra /etc/cassandra/default.conf/ 0
+      changed_when: true
+      when: ansible_facts['os_family'] == 'RedHat'

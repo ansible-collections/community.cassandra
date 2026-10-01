@@ -1,0 +1,1114 @@
+---
+argument_specs:
+  main:
+    short_description: Template the Cassandra configuration files.
+    description:
+    - Templates C(cassandra.yaml), C(cassandra-env.sh), the JVM options files, C(cassandra-rackdc.properties) and C(logback.xml)
+      for Cassandra 4.0, 4.1 and 5.0.
+    - Rendered with the defaults, the files match the stock ones, except for the values the deb and rpm packages change.
+    - Writes the files without a preview or a confirmation, for a node that has not started yet.
+    options:
+      cassandra_version:
+        type: str
+        default: 50x
+        choices:
+        - 40x
+        - 41x
+        - 50x
+        description:
+        - Cassandra release series. Selects the templates to use.
+      cassandra_conf_dir:
+        type: path
+        description:
+        - Directory the files are written to.
+        - 'Defaults to where the package makes Cassandra read its config: C(/etc/cassandra/conf) on RedHat family systems,
+          C(/etc/cassandra) on Debian and Ubuntu. Keep the default with a package install.'
+      cassandra_user:
+        type: str
+        default: cassandra
+        description:
+        - Account the Cassandra service runs as (the deb and rpm packages create and use C(cassandra)); it must exist and
+          be in O(cassandra_group). The role does not create it nor set it in the service unit.
+        - Owner of the data, commitlog, hints, saved caches and log directories the role creates, and of the JMX users
+          files.
+      cassandra_group:
+        type: str
+        default: cassandra
+        description:
+        - A group of the account the Cassandra service runs as (set it with O(cassandra_user)), by name.
+        - Group of those directories and files, and of the config files (O(cassandra_config_group)).
+      cassandra_data_dir:
+        type: path
+        default: /var/lib/cassandra/data
+        description:
+        - Data directory (C(data_file_directories)).
+      cassandra_cluster_name:
+        type: str
+        default: Test Cluster
+        description:
+        - Cluster name. Same value on every node of a cluster.
+      cassandra_num_tokens:
+        type: int
+        default: 16
+        description:
+        - C(num_tokens) in C(cassandra.yaml).
+      cassandra_allocate_tokens_for_local_replication_factor:
+        type: int
+        default: 3
+        description:
+        - C(allocate_tokens_for_local_replication_factor) in C(cassandra.yaml).
+      cassandra_hinted_handoff_enabled:
+        type: bool
+        default: true
+        description:
+        - C(hinted_handoff_enabled) in C(cassandra.yaml).
+      cassandra_max_hint_window:
+        type: str
+        default: 3h
+        description:
+        - C(max_hint_window) in C(cassandra.yaml).
+      cassandra_hinted_handoff_throttle:
+        type: str
+        default: 1024KiB
+        description:
+        - C(hinted_handoff_throttle) in C(cassandra.yaml).
+      cassandra_max_hints_delivery_threads:
+        type: int
+        default: 2
+        description:
+        - C(max_hints_delivery_threads) in C(cassandra.yaml).
+      cassandra_hints_flush_period:
+        type: str
+        default: 10000ms
+        description:
+        - C(hints_flush_period) in C(cassandra.yaml).
+      cassandra_max_hints_file_size:
+        type: str
+        default: 128MiB
+        description:
+        - C(max_hints_file_size) in C(cassandra.yaml).
+      cassandra_auto_hints_cleanup_enabled:
+        type: bool
+        default: false
+        description:
+        - C(auto_hints_cleanup_enabled) in C(cassandra.yaml).
+      cassandra_batchlog_replay_throttle:
+        type: str
+        default: 1024KiB
+        description:
+        - C(batchlog_replay_throttle) in C(cassandra.yaml).
+      cassandra_authenticator:
+        type: str
+        default: AllowAllAuthenticator
+        description:
+        - C(authenticator) in C(cassandra.yaml).
+      cassandra_authorizer:
+        type: str
+        default: AllowAllAuthorizer
+        description:
+        - C(authorizer) in C(cassandra.yaml).
+      cassandra_role_manager:
+        type: str
+        default: CassandraRoleManager
+        description:
+        - C(role_manager) in C(cassandra.yaml).
+      cassandra_network_authorizer:
+        type: str
+        default: AllowAllNetworkAuthorizer
+        description:
+        - C(network_authorizer) in C(cassandra.yaml).
+      cassandra_cidr_authorizer_class_name:
+        type: str
+        default: AllowAllCIDRAuthorizer
+        description:
+        - CIDR authorizer class (5.0).
+      cassandra_roles_validity:
+        type: str
+        default: 2000ms
+        description:
+        - C(roles_validity) in C(cassandra.yaml).
+      cassandra_permissions_validity:
+        type: str
+        default: 2000ms
+        description:
+        - C(permissions_validity) in C(cassandra.yaml).
+      cassandra_credentials_validity:
+        type: str
+        default: 2000ms
+        description:
+        - C(credentials_validity) in C(cassandra.yaml).
+      cassandra_partitioner:
+        type: str
+        default: org.apache.cassandra.dht.Murmur3Partitioner
+        description:
+        - C(partitioner) in C(cassandra.yaml).
+      cassandra_cdc_enabled:
+        type: bool
+        default: false
+        description:
+        - C(cdc_enabled) in C(cassandra.yaml).
+      cassandra_disk_failure_policy:
+        type: str
+        default: stop
+        description:
+        - C(disk_failure_policy) in C(cassandra.yaml).
+      cassandra_commit_failure_policy:
+        type: str
+        default: stop
+        description:
+        - C(commit_failure_policy) in C(cassandra.yaml).
+      cassandra_prepared_statements_cache_size:
+        type: str
+        default: ''
+        description:
+        - C(prepared_statements_cache_size) in C(cassandra.yaml).
+      cassandra_key_cache_size:
+        type: str
+        default: ''
+        description:
+        - C(key_cache_size) in C(cassandra.yaml).
+      cassandra_key_cache_save_period:
+        type: raw
+        description:
+        - C(key_cache_save_period) in C(cassandra.yaml). Defaults to the series' stock value (seconds on 4.0, a duration on
+          4.1 and 5.0).
+      cassandra_row_cache_size:
+        type: str
+        default: 0MiB
+        description:
+        - C(row_cache_size) in C(cassandra.yaml).
+      cassandra_row_cache_save_period:
+        type: raw
+        description:
+        - C(row_cache_save_period) in C(cassandra.yaml). Defaults to the series' stock value.
+      cassandra_counter_cache_size:
+        type: str
+        default: ''
+        description:
+        - C(counter_cache_size) in C(cassandra.yaml).
+      cassandra_counter_cache_save_period:
+        type: raw
+        description:
+        - C(counter_cache_save_period) in C(cassandra.yaml). Defaults to the series' stock value.
+      cassandra_commitlog_sync:
+        type: str
+        default: periodic
+        description:
+        - C(commitlog_sync) in C(cassandra.yaml).
+      cassandra_commitlog_sync_period:
+        type: str
+        default: 10000ms
+        description:
+        - C(commitlog_sync_period) in C(cassandra.yaml).
+      cassandra_commitlog_segment_size:
+        type: str
+        default: 32MiB
+        description:
+        - C(commitlog_segment_size) in C(cassandra.yaml).
+      cassandra_commitlog_disk_access_mode:
+        type: str
+        default: legacy
+        description:
+        - C(commitlog_disk_access_mode) in C(cassandra.yaml).
+      cassandra_seed_provider_class_name:
+        type: str
+        default: org.apache.cassandra.locator.SimpleSeedProvider
+        description:
+        - Seed provider class in C(cassandra.yaml).
+      cassandra_seeds:
+        type: raw
+        default: 127.0.0.1:7000
+        description:
+        - 'Seed nodes: a list, or a comma separated string, of addresses (C(host) or C(host:port)).'
+        - Same list on every node of the cluster. A new node joining an existing cluster must not be in it.
+      cassandra_concurrent_reads:
+        type: int
+        default: 32
+        description:
+        - C(concurrent_reads) in C(cassandra.yaml).
+      cassandra_concurrent_writes:
+        type: int
+        default: 32
+        description:
+        - C(concurrent_writes) in C(cassandra.yaml).
+      cassandra_concurrent_counter_writes:
+        type: int
+        default: 32
+        description:
+        - C(concurrent_counter_writes) in C(cassandra.yaml).
+      cassandra_concurrent_materialized_view_writes:
+        type: int
+        default: 32
+        description:
+        - C(concurrent_materialized_view_writes) in C(cassandra.yaml).
+      cassandra_memtable_default:
+        type: str
+        default: skiplist
+        description:
+        - Memtable implementation inherited by the default memtable configuration (5.0).
+      cassandra_memtable_allocation_type:
+        type: str
+        default: heap_buffers
+        description:
+        - C(memtable_allocation_type) in C(cassandra.yaml).
+      cassandra_index_summary_capacity:
+        type: str
+        default: ''
+        description:
+        - C(index_summary_capacity) in C(cassandra.yaml).
+      cassandra_index_summary_resize_interval:
+        type: str
+        default: 60m
+        description:
+        - C(index_summary_resize_interval) in C(cassandra.yaml).
+      cassandra_trickle_fsync:
+        type: bool
+        default: false
+        description:
+        - C(trickle_fsync) in C(cassandra.yaml).
+      cassandra_trickle_fsync_interval:
+        type: str
+        default: 10240KiB
+        description:
+        - C(trickle_fsync_interval) in C(cassandra.yaml).
+      cassandra_storage_port:
+        type: int
+        default: 7000
+        description:
+        - C(storage_port) in C(cassandra.yaml).
+      cassandra_ssl_storage_port:
+        type: int
+        default: 7001
+        description:
+        - C(ssl_storage_port) in C(cassandra.yaml).
+      cassandra_listen_address:
+        type: str
+        default: localhost
+        description:
+        - C(listen_address) in C(cassandra.yaml), usually set per node.
+      cassandra_start_native_transport:
+        type: bool
+        default: true
+        description:
+        - C(start_native_transport) in C(cassandra.yaml).
+      cassandra_native_transport_port:
+        type: int
+        default: 9042
+        description:
+        - C(native_transport_port) in C(cassandra.yaml).
+      cassandra_native_transport_allow_older_protocols:
+        type: bool
+        default: true
+        description:
+        - C(native_transport_allow_older_protocols) in C(cassandra.yaml).
+      cassandra_rpc_address:
+        type: str
+        default: localhost
+        description:
+        - C(rpc_address) in C(cassandra.yaml), usually set per node.
+      cassandra_rpc_keepalive:
+        type: bool
+        default: true
+        description:
+        - C(rpc_keepalive) in C(cassandra.yaml).
+      cassandra_incremental_backups:
+        type: bool
+        default: false
+        description:
+        - C(incremental_backups) in C(cassandra.yaml).
+      cassandra_snapshot_before_compaction:
+        type: bool
+        default: false
+        description:
+        - C(snapshot_before_compaction) in C(cassandra.yaml).
+      cassandra_auto_snapshot:
+        type: bool
+        default: true
+        description:
+        - C(auto_snapshot) in C(cassandra.yaml).
+      cassandra_snapshot_links_per_second:
+        type: int
+        default: 0
+        description:
+        - C(snapshot_links_per_second) in C(cassandra.yaml).
+      cassandra_column_index_cache_size:
+        type: str
+        default: 2KiB
+        description:
+        - C(column_index_cache_size) in C(cassandra.yaml).
+      cassandra_concurrent_materialized_view_builders:
+        type: int
+        default: 1
+        description:
+        - C(concurrent_materialized_view_builders) in C(cassandra.yaml).
+      cassandra_compaction_throughput:
+        type: str
+        default: 64MiB/s
+        description:
+        - C(compaction_throughput) in C(cassandra.yaml).
+      cassandra_sstable_preemptive_open_interval:
+        type: str
+        default: 50MiB
+        description:
+        - C(sstable_preemptive_open_interval) in C(cassandra.yaml).
+      cassandra_uuid_sstable_identifiers_enabled:
+        type: bool
+        default: false
+        description:
+        - C(uuid_sstable_identifiers_enabled) in C(cassandra.yaml).
+      cassandra_read_request_timeout:
+        type: str
+        default: 5000ms
+        description:
+        - C(read_request_timeout) in C(cassandra.yaml).
+      cassandra_range_request_timeout:
+        type: str
+        default: 10000ms
+        description:
+        - C(range_request_timeout) in C(cassandra.yaml).
+      cassandra_write_request_timeout:
+        type: str
+        default: 2000ms
+        description:
+        - C(write_request_timeout) in C(cassandra.yaml).
+      cassandra_counter_write_request_timeout:
+        type: str
+        default: 5000ms
+        description:
+        - C(counter_write_request_timeout) in C(cassandra.yaml).
+      cassandra_cas_contention_timeout:
+        type: str
+        default: 1000ms
+        description:
+        - C(cas_contention_timeout) in C(cassandra.yaml).
+      cassandra_truncate_request_timeout:
+        type: str
+        default: 60000ms
+        description:
+        - C(truncate_request_timeout) in C(cassandra.yaml).
+      cassandra_request_timeout:
+        type: str
+        default: 10000ms
+        description:
+        - C(request_timeout) in C(cassandra.yaml).
+      cassandra_slow_query_log_timeout:
+        type: str
+        default: 500ms
+        description:
+        - C(slow_query_log_timeout) in C(cassandra.yaml).
+      cassandra_endpoint_snitch:
+        type: str
+        default: SimpleSnitch
+        description:
+        - C(endpoint_snitch) in C(cassandra.yaml). Use C(GossipingPropertyFileSnitch) with O(cassandra_dc) and O(cassandra_rack).
+      cassandra_dynamic_snitch_update_interval:
+        type: str
+        default: 100ms
+        description:
+        - C(dynamic_snitch_update_interval) in C(cassandra.yaml).
+      cassandra_dynamic_snitch_reset_interval:
+        type: str
+        default: 600000ms
+        description:
+        - C(dynamic_snitch_reset_interval) in C(cassandra.yaml).
+      cassandra_dynamic_snitch_badness_threshold:
+        type: float
+        default: 1.0
+        description:
+        - C(dynamic_snitch_badness_threshold) in C(cassandra.yaml).
+      cassandra_crypto_provider_class_name:
+        type: str
+        default: org.apache.cassandra.security.DefaultCryptoProvider
+        description:
+        - Crypto provider class (5.0).
+      cassandra_crypto_provider_fail_on_missing_provider:
+        type: raw
+        default: 'false'
+        description:
+        - C(fail_on_missing_provider) of the crypto provider (5.0).
+      cassandra_internode_encryption:
+        type: str
+        default: none
+        description:
+        - 'C(server_encryption_options.internode_encryption): V(none), V(dc), V(rack) or V(all).'
+      cassandra_legacy_ssl_storage_port_enabled:
+        type: bool
+        default: false
+        description:
+        - C(server_encryption_options.legacy_ssl_storage_port_enabled).
+      cassandra_server_keystore:
+        type: str
+        default: conf/.keystore
+        description:
+        - C(server_encryption_options.keystore).
+      cassandra_server_require_client_auth:
+        type: bool
+        default: false
+        description:
+        - C(server_encryption_options.require_client_auth) (mutual TLS between nodes).
+      cassandra_truststore:
+        type: str
+        default: conf/.truststore
+        description:
+        - C(server_encryption_options.truststore).
+      cassandra_require_endpoint_verification:
+        type: bool
+        default: false
+        description:
+        - C(server_encryption_options.require_endpoint_verification).
+      cassandra_client_encryption_enabled:
+        type: bool
+        default: false
+        description:
+        - C(client_encryption_options.enabled).
+      cassandra_client_keystore:
+        type: str
+        default: conf/.keystore
+        description:
+        - C(client_encryption_options.keystore).
+      cassandra_client_require_client_auth:
+        type: bool
+        default: false
+        description:
+        - C(client_encryption_options.require_client_auth).
+      cassandra_internode_compression:
+        type: str
+        default: dc
+        description:
+        - C(internode_compression) in C(cassandra.yaml).
+      cassandra_inter_dc_tcp_nodelay:
+        type: bool
+        default: false
+        description:
+        - C(inter_dc_tcp_nodelay) in C(cassandra.yaml).
+      cassandra_trace_type_query_ttl:
+        type: str
+        default: 1d
+        description:
+        - C(trace_type_query_ttl) in C(cassandra.yaml).
+      cassandra_trace_type_repair_ttl:
+        type: str
+        default: 7d
+        description:
+        - C(trace_type_repair_ttl) in C(cassandra.yaml).
+      cassandra_user_defined_functions_enabled:
+        type: bool
+        default: false
+        description:
+        - C(user_defined_functions_enabled) in C(cassandra.yaml).
+      cassandra_tde_enabled:
+        type: bool
+        default: false
+        description:
+        - C(transparent_data_encryption_options.enabled).
+      cassandra_tde_chunk_length_kb:
+        type: int
+        default: 64
+        description:
+        - C(transparent_data_encryption_options.chunk_length_kb).
+      cassandra_tde_cipher:
+        type: str
+        default: AES/CBC/PKCS5Padding
+        description:
+        - C(transparent_data_encryption_options.cipher).
+      cassandra_tde_key_alias:
+        type: str
+        default: testing:1
+        description:
+        - C(transparent_data_encryption_options.key_alias).
+      cassandra_tde_key_provider_class_name:
+        type: str
+        default: org.apache.cassandra.security.JKSKeyProvider
+        description:
+        - C(transparent_data_encryption_options.key_provider) class.
+      cassandra_tde_keystore:
+        type: str
+        default: conf/.keystore
+        description:
+        - Keystore of the transparent data encryption key provider.
+      cassandra_tde_keystore_password:
+        type: str
+        default: cassandra
+        description:
+        - Keystore password of the transparent data encryption key provider.
+      cassandra_tde_store_type:
+        type: str
+        default: JCEKS
+        description:
+        - Store type of the transparent data encryption key provider.
+      cassandra_tde_key_password:
+        type: str
+        default: cassandra
+        description:
+        - Key password of the transparent data encryption key provider.
+      cassandra_tombstone_warn_threshold:
+        type: int
+        default: 1000
+        description:
+        - C(tombstone_warn_threshold) in C(cassandra.yaml).
+      cassandra_tombstone_failure_threshold:
+        type: int
+        default: 100000
+        description:
+        - C(tombstone_failure_threshold) in C(cassandra.yaml).
+      cassandra_cached_rows_warn_threshold:
+        type: int
+        default: 2000
+        description:
+        - C(cached_rows_warn_threshold) in C(cassandra.yaml).
+      cassandra_cached_rows_fail_threshold:
+        type: int
+        default: 32000
+        description:
+        - C(cached_rows_fail_threshold) in C(cassandra.yaml).
+      cassandra_batch_size_warn_threshold:
+        type: str
+        default: 5KiB
+        description:
+        - C(batch_size_warn_threshold) in C(cassandra.yaml).
+      cassandra_batch_size_fail_threshold:
+        type: str
+        default: 50KiB
+        description:
+        - C(batch_size_fail_threshold) in C(cassandra.yaml).
+      cassandra_unlogged_batch_across_partitions_warn_threshold:
+        type: int
+        default: 10
+        description:
+        - C(unlogged_batch_across_partitions_warn_threshold) in C(cassandra.yaml).
+      cassandra_audit_logging_enabled:
+        type: bool
+        default: false
+        description:
+        - C(audit_logging_options.enabled).
+      cassandra_audit_logger_class_name:
+        type: str
+        default: BinAuditLogger
+        description:
+        - C(audit_logging_options.logger) class.
+      cassandra_diagnostic_events_enabled:
+        type: bool
+        default: false
+        description:
+        - C(diagnostic_events_enabled) in C(cassandra.yaml).
+      cassandra_repaired_data_tracking_for_range_reads_enabled:
+        type: bool
+        default: false
+        description:
+        - C(repaired_data_tracking_for_range_reads_enabled) in C(cassandra.yaml).
+      cassandra_repaired_data_tracking_for_partition_reads_enabled:
+        type: bool
+        default: false
+        description:
+        - C(repaired_data_tracking_for_partition_reads_enabled) in C(cassandra.yaml).
+      cassandra_report_unconfirmed_repaired_data_mismatches:
+        type: bool
+        default: false
+        description:
+        - C(report_unconfirmed_repaired_data_mismatches) in C(cassandra.yaml).
+      cassandra_materialized_views_enabled:
+        type: bool
+        default: false
+        description:
+        - C(materialized_views_enabled) in C(cassandra.yaml).
+      cassandra_sasi_indexes_enabled:
+        type: bool
+        default: false
+        description:
+        - C(sasi_indexes_enabled) in C(cassandra.yaml).
+      cassandra_transient_replication_enabled:
+        type: bool
+        default: false
+        description:
+        - C(transient_replication_enabled) in C(cassandra.yaml).
+      cassandra_drop_compact_storage_enabled:
+        type: bool
+        default: false
+        description:
+        - C(drop_compact_storage_enabled) in C(cassandra.yaml).
+      cassandra_storage_compatibility_mode:
+        type: str
+        default: NONE
+        choices: [CASSANDRA_4, UPGRADING, NONE]
+        description:
+        - C(storage_compatibility_mode) in C(cassandra.yaml) (5.0 only).
+        - C(NONE) (5.0 formats and features) suits a new cluster. A cluster
+          upgraded from 4.x sets C(CASSANDRA_4), then moves through
+          C(UPGRADING) to C(NONE) with rolling restarts.
+      cassandra_hints_dir:
+        type: path
+        default: /var/lib/cassandra/hints
+        description:
+        - C(hints_directory) in C(cassandra.yaml).
+      cassandra_commitlog_dir:
+        type: path
+        default: /var/lib/cassandra/commitlog
+        description:
+        - C(commitlog_directory) in C(cassandra.yaml).
+      cassandra_saved_caches_dir:
+        type: path
+        default: /var/lib/cassandra/saved_caches
+        description:
+        - C(saved_caches_directory) in C(cassandra.yaml).
+      cassandra_server_keystore_password:
+        type: str
+        description:
+        - C(server_encryption_options.keystore_password). On 5.0 the stock line is commented out; it is set when this is not
+          empty.
+      cassandra_truststore_password:
+        type: str
+        description:
+        - C(server_encryption_options.truststore_password). On 5.0 the stock line is commented out; it is set when this is
+          not empty.
+      cassandra_client_keystore_password:
+        type: str
+        description:
+        - C(client_encryption_options.keystore_password). On 5.0 the stock line is commented out; it is set when this is not
+          empty.
+      cassandra_server_encryption_optional:
+        type: raw
+        default: ''
+        description:
+        - C(server_encryption_options.optional). Left commented out when empty.
+      cassandra_server_outbound_keystore:
+        type: str
+        default: ''
+        description:
+        - 'C(server_encryption_options.outbound_keystore) (5.0): client certificate for outbound connections between nodes.
+          Left commented out when empty.'
+      cassandra_server_outbound_keystore_password:
+        type: str
+        default: ''
+        description:
+        - C(server_encryption_options.outbound_keystore_password) (5.0). Left commented out when empty.
+      cassandra_client_encryption_optional:
+        type: raw
+        default: ''
+        description:
+        - C(client_encryption_options.optional). Left commented out when empty.
+      cassandra_client_truststore:
+        type: str
+        default: ''
+        description:
+        - C(client_encryption_options.truststore). Left commented out when empty.
+      cassandra_client_truststore_password:
+        type: str
+        default: ''
+        description:
+        - C(client_encryption_options.truststore_password). Left commented out when empty.
+      cassandra_column_index_size:
+        type: str
+        default: 64KiB
+        description:
+        - C(column_index_size) in C(cassandra.yaml) (4.1 only).
+      cassandra_scripted_user_defined_functions_enabled:
+        type: bool
+        default: false
+        description:
+        - C(scripted_user_defined_functions_enabled) in C(cassandra.yaml) (4.1 only).
+      cassandra_compaction_large_partition_warning_threshold:
+        type: str
+        default: 100MiB
+        description:
+        - C(compaction_large_partition_warning_threshold) in C(cassandra.yaml) (4.1 only).
+      cassandra_compaction_tombstone_warning_threshold:
+        type: int
+        default: 100000
+        description:
+        - C(compaction_tombstone_warning_threshold) in C(cassandra.yaml) (4.1 only).
+      cassandra_max_hint_window_in_ms:
+        type: int
+        default: 10800000
+        description:
+        - C(max_hint_window_in_ms) in C(cassandra.yaml) (4.0 only).
+      cassandra_hinted_handoff_throttle_in_kb:
+        type: int
+        default: 1024
+        description:
+        - C(hinted_handoff_throttle_in_kb) in C(cassandra.yaml) (4.0 only).
+      cassandra_hints_flush_period_in_ms:
+        type: int
+        default: 10000
+        description:
+        - C(hints_flush_period_in_ms) in C(cassandra.yaml) (4.0 only).
+      cassandra_max_hints_file_size_in_mb:
+        type: int
+        default: 128
+        description:
+        - C(max_hints_file_size_in_mb) in C(cassandra.yaml) (4.0 only).
+      cassandra_batchlog_replay_throttle_in_kb:
+        type: int
+        default: 1024
+        description:
+        - C(batchlog_replay_throttle_in_kb) in C(cassandra.yaml) (4.0 only).
+      cassandra_roles_validity_in_ms:
+        type: int
+        default: 2000
+        description:
+        - C(roles_validity_in_ms) in C(cassandra.yaml) (4.0 only).
+      cassandra_permissions_validity_in_ms:
+        type: int
+        default: 2000
+        description:
+        - C(permissions_validity_in_ms) in C(cassandra.yaml) (4.0 only).
+      cassandra_credentials_validity_in_ms:
+        type: int
+        default: 2000
+        description:
+        - C(credentials_validity_in_ms) in C(cassandra.yaml) (4.0 only).
+      cassandra_row_cache_size_in_mb:
+        type: int
+        default: 0
+        description:
+        - C(row_cache_size_in_mb) in C(cassandra.yaml) (4.0 only).
+      cassandra_commitlog_sync_period_in_ms:
+        type: int
+        default: 10000
+        description:
+        - C(commitlog_sync_period_in_ms) in C(cassandra.yaml) (4.0 only).
+      cassandra_commitlog_segment_size_in_mb:
+        type: int
+        default: 32
+        description:
+        - C(commitlog_segment_size_in_mb) in C(cassandra.yaml) (4.0 only).
+      cassandra_index_summary_resize_interval_in_minutes:
+        type: int
+        default: 60
+        description:
+        - C(index_summary_resize_interval_in_minutes) in C(cassandra.yaml) (4.0 only).
+      cassandra_trickle_fsync_interval_in_kb:
+        type: int
+        default: 10240
+        description:
+        - C(trickle_fsync_interval_in_kb) in C(cassandra.yaml) (4.0 only).
+      cassandra_column_index_size_in_kb:
+        type: int
+        default: 64
+        description:
+        - C(column_index_size_in_kb) in C(cassandra.yaml) (4.0 only).
+      cassandra_column_index_cache_size_in_kb:
+        type: int
+        default: 2
+        description:
+        - C(column_index_cache_size_in_kb) in C(cassandra.yaml) (4.0 only).
+      cassandra_compaction_throughput_mb_per_sec:
+        type: int
+        default: 64
+        description:
+        - C(compaction_throughput_mb_per_sec) in C(cassandra.yaml) (4.0 only).
+      cassandra_sstable_preemptive_open_interval_in_mb:
+        type: int
+        default: 50
+        description:
+        - C(sstable_preemptive_open_interval_in_mb) in C(cassandra.yaml) (4.0 only).
+      cassandra_read_request_timeout_in_ms:
+        type: int
+        default: 5000
+        description:
+        - C(read_request_timeout_in_ms) in C(cassandra.yaml) (4.0 only).
+      cassandra_range_request_timeout_in_ms:
+        type: int
+        default: 10000
+        description:
+        - C(range_request_timeout_in_ms) in C(cassandra.yaml) (4.0 only).
+      cassandra_write_request_timeout_in_ms:
+        type: int
+        default: 2000
+        description:
+        - C(write_request_timeout_in_ms) in C(cassandra.yaml) (4.0 only).
+      cassandra_counter_write_request_timeout_in_ms:
+        type: int
+        default: 5000
+        description:
+        - C(counter_write_request_timeout_in_ms) in C(cassandra.yaml) (4.0 only).
+      cassandra_cas_contention_timeout_in_ms:
+        type: int
+        default: 1000
+        description:
+        - C(cas_contention_timeout_in_ms) in C(cassandra.yaml) (4.0 only).
+      cassandra_truncate_request_timeout_in_ms:
+        type: int
+        default: 60000
+        description:
+        - C(truncate_request_timeout_in_ms) in C(cassandra.yaml) (4.0 only).
+      cassandra_request_timeout_in_ms:
+        type: int
+        default: 10000
+        description:
+        - C(request_timeout_in_ms) in C(cassandra.yaml) (4.0 only).
+      cassandra_slow_query_log_timeout_in_ms:
+        type: int
+        default: 500
+        description:
+        - C(slow_query_log_timeout_in_ms) in C(cassandra.yaml) (4.0 only).
+      cassandra_dynamic_snitch_update_interval_in_ms:
+        type: int
+        default: 100
+        description:
+        - C(dynamic_snitch_update_interval_in_ms) in C(cassandra.yaml) (4.0 only).
+      cassandra_dynamic_snitch_reset_interval_in_ms:
+        type: int
+        default: 600000
+        description:
+        - C(dynamic_snitch_reset_interval_in_ms) in C(cassandra.yaml) (4.0 only).
+      cassandra_enable_legacy_ssl_storage_port:
+        type: bool
+        default: false
+        description:
+        - C(enable_legacy_ssl_storage_port) in C(cassandra.yaml) (4.0 only).
+      cassandra_tracetype_query_ttl:
+        type: int
+        default: 86400
+        description:
+        - C(tracetype_query_ttl) in C(cassandra.yaml) (4.0 only).
+      cassandra_tracetype_repair_ttl:
+        type: int
+        default: 604800
+        description:
+        - C(tracetype_repair_ttl) in C(cassandra.yaml) (4.0 only).
+      cassandra_enable_user_defined_functions:
+        type: bool
+        default: false
+        description:
+        - C(enable_user_defined_functions) in C(cassandra.yaml) (4.0 only).
+      cassandra_enable_scripted_user_defined_functions:
+        type: bool
+        default: false
+        description:
+        - C(enable_scripted_user_defined_functions) in C(cassandra.yaml) (4.0 only).
+      cassandra_windows_timer_interval:
+        type: int
+        default: 1
+        description:
+        - C(windows_timer_interval) in C(cassandra.yaml) (4.0 only).
+      cassandra_batch_size_warn_threshold_in_kb:
+        type: int
+        default: 5
+        description:
+        - C(batch_size_warn_threshold_in_kb) in C(cassandra.yaml) (4.0 only).
+      cassandra_batch_size_fail_threshold_in_kb:
+        type: int
+        default: 50
+        description:
+        - C(batch_size_fail_threshold_in_kb) in C(cassandra.yaml) (4.0 only).
+      cassandra_compaction_large_partition_warning_threshold_mb:
+        type: int
+        default: 100
+        description:
+        - C(compaction_large_partition_warning_threshold_mb) in C(cassandra.yaml) (4.0 only).
+      cassandra_enable_materialized_views:
+        type: bool
+        default: false
+        description:
+        - C(enable_materialized_views) in C(cassandra.yaml) (4.0 only).
+      cassandra_enable_sasi_indexes:
+        type: bool
+        default: false
+        description:
+        - C(enable_sasi_indexes) in C(cassandra.yaml) (4.0 only).
+      cassandra_enable_transient_replication:
+        type: bool
+        default: false
+        description:
+        - C(enable_transient_replication) in C(cassandra.yaml) (4.0 only).
+      cassandra_enable_drop_compact_storage:
+        type: bool
+        default: false
+        description:
+        - C(enable_drop_compact_storage) in C(cassandra.yaml) (4.0 only).
+      cassandra_log_dir:
+        type: path
+        default: /var/log/cassandra
+        description:
+        - C(CASSANDRA_LOG_DIR) in C(cassandra-env.sh). Defaults to the value the deb and rpm packages use.
+      cassandra_heap_size:
+        type: str
+        default: ''
+        description:
+        - 'C(MAX_HEAP_SIZE) in C(cassandra-env.sh), for example C(8G). Empty: the stock automatic sizing.'
+        - Without G1 (CMS is the 4.x default), set O(cassandra_heap_newsize) as well on 4.x; on 5.0 it can only be set with
+          G1 (its C(cassandra-env.sh) has no C(HEAP_NEWSIZE)). The role refuses other combinations.
+      cassandra_heap_newsize:
+        type: str
+        default: ''
+        description:
+        - C(HEAP_NEWSIZE) in C(cassandra-env.sh) (4.x). Without G1, it must be set together with O(cassandra_heap_size).
+      cassandra_max_direct_memory_size:
+        type: str
+        default: ''
+        description:
+        - 'C(MAX_DIRECT_MEMORY_SIZE) in C(cassandra-env.sh) (5.0). Empty: stock default.'
+      cassandra_heap_dump_dir:
+        type: path
+        default: $CASSANDRA_LOG_DIR
+        description:
+        - C(CASSANDRA_HEAPDUMP_DIR) in C(cassandra-env.sh) (5.0).
+      cassandra_local_jmx:
+        type: bool
+        default: true
+        description:
+        - JMX only on localhost (C(LOCAL_JMX=yes)). V(false) enables remote JMX, with authentication.
+      cassandra_jmx_port:
+        type: int
+        default: 7199
+        description:
+        - C(JMX_PORT) in C(cassandra-env.sh).
+      cassandra_jmx_rmi_hostname:
+        type: str
+        default: ''
+        description:
+        - C(java.rmi.server.hostname) for remote JMX. Left commented out when empty.
+      cassandra_jvm_gc:
+        type: str
+        choices:
+        - G1
+        - CMS
+        - custom
+        description:
+        - 'Garbage collector: V(G1), V(CMS) or V(custom). Defaults to the series'' stock GC (CMS on 4.x, G1 on 5.0).'
+        - V(CMS) needs Java 8 or 11. V(custom) comments out both GC blocks; set your own flags with the C(cassandra_jvm<N>_extra_options)
+          variables.
+        - C(cassandra_jvm<N>_gc), for example C(cassandra_jvm11_gc), overrides it for one file.
+      cassandra_jvm_cms_initiating_occupancy_fraction:
+        type: int
+        default: 75
+        description:
+        - C(-XX:CMSInitiatingOccupancyFraction) with CMS.
+      cassandra_jvm_max_tenuring_threshold:
+        type: int
+        default: 2
+        description:
+        - C(-XX:MaxTenuringThreshold) with G1.
+      cassandra_jvm_g1_heap_region_size:
+        type: str
+        default: 16m
+        description:
+        - C(-XX:G1HeapRegionSize) with G1.
+      cassandra_jvm_g1_new_size_percent:
+        type: int
+        default: 50
+        description:
+        - C(-XX:G1NewSizePercent) with G1.
+      cassandra_jvm_max_gc_pause_millis:
+        type: int
+        default: 300
+        description:
+        - C(-XX:MaxGCPauseMillis) with G1.
+      cassandra_jvm_initiating_heap_occupancy_percent:
+        type: int
+        default: 70
+        description:
+        - C(-XX:InitiatingHeapOccupancyPercent) with G1.
+      cassandra_jvm_parallel_gc_threads:
+        type: raw
+        default: ''
+        description:
+        - 'C(-XX:ParallelGCThreads). Empty: JVM default.'
+      cassandra_jvm_conc_gc_threads:
+        type: raw
+        default: ''
+        description:
+        - 'C(-XX:ConcGCThreads). Empty: JVM default.'
+      cassandra_extra_settings:
+        type: dict
+        default: {}
+        description:
+        - 'Settings no variable covers, written as-is at the end of C(cassandra.yaml), e.g. C({commitlog_total_space: 8192MiB}).'
+        - Keys the template already has are refused (set them with their variable). Cassandra refuses unknown keys at startup.
+      cassandra_jvm_extra_options:
+        type: list
+        elements: str
+        default: []
+        description:
+        - Extra lines appended to C(jvm-server.options) (all Java versions).
+      cassandra_jvm8_extra_options:
+        type: list
+        elements: str
+        default: []
+        description:
+        - Extra lines appended to C(jvm8-server.options) (4.x).
+      cassandra_jvm11_extra_options:
+        type: list
+        elements: str
+        default: []
+        description:
+        - Extra lines appended to C(jvm11-server.options).
+      cassandra_jvm17_extra_options:
+        type: list
+        elements: str
+        default: []
+        description:
+        - Extra lines appended to C(jvm17-server.options) (5.0).
+      cassandra_dc:
+        type: str
+        default: dc1
+        description:
+        - Datacenter in C(cassandra-rackdc.properties), usually set per datacenter group.
+      cassandra_rack:
+        type: str
+        default: rack1
+        description:
+        - Rack in C(cassandra-rackdc.properties), usually set per node.
+      cassandra_prefer_local:
+        type: bool
+        default: false
+        description:
+        - C(prefer_local) in C(cassandra-rackdc.properties).
+      cassandra_log_level:
+        type: str
+        default: INFO
+        description:
+        - Root log level in C(logback.xml).
+      cassandra_log_level_cassandra:
+        type: str
+        default: DEBUG
+        description:
+        - Level of the C(org.apache.cassandra) logger in C(logback.xml), which feeds C(debug.log).
+      cassandra_debug_log_enabled:
+        type: bool
+        default: true
+        description:
+        - Write C(debug.log).
+      cassandra_log_console:
+        type: bool
+        default: false
+        description:
+        - Also send the logs to stdout (the C(STDOUT) appender of C(logback.xml)).
+          Under systemd that is a second copy of C(system.log) in journald; JVM
+          errors before logback starts go to stdout either way.
+      cassandra_config_owner:
+        type: str
+        default: root
+        description:
+        - Owner of the config files; it must exist. With the default, the service reads them but cannot rewrite them.
+      cassandra_config_group:
+        type: str
+        description:
+        - Group of the config files (Cassandra reads them through it); it must exist. Defaults to O(cassandra_group).
+      cassandra_config_mode:
+        type: str
+        default: "0640"
+        description:
+        - Mode of the config files. C(cassandra.yaml) may hold keystore passwords.
+      cassandra_jmx_users:
+        type: list
+        elements: dict
+        default: []
+        description:
+        - Remote JMX users (with O(cassandra_local_jmx) false), written to
+          C(/etc/cassandra/jmxremote.password) and C(jmxremote.access), readable
+          by O(cassandra_user) only. Each item has C(name), C(password) and C(access)
+          (C(readwrite), the default, or C(readonly)). A C(readwrite) user also gets the C(create) and
+          C(unregister) rights of the JDK's controlRole, unless C(create_unregister) is false. Keep the passwords
+          in a vault.
+      cassandra_config_backup:
+        type: bool
+        default: true
+        description:
+        - Keep a timestamped copy of each file the role replaces, next to it.
+      cassandra_data_file_directories:
+        type: list
+        elements: path
+        description:
+        - C(data_file_directories) in C(cassandra.yaml), one per disk (JBOD).
+          Defaults to O(cassandra_data_dir) alone. The system keyspaces live in the first one.

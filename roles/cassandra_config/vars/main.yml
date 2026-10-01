@@ -1,0 +1,19 @@
+---
+_cassandra_config_series: "{{ cassandra_version[0] }}.{{ cassandra_version[1] }}"
+_cassandra_config_files:
+  "5.0": [cassandra.yaml, cassandra-env.sh, jvm-server.options, jvm11-server.options, jvm17-server.options,
+          cassandra-rackdc.properties, logback.xml]
+  "4.1": [cassandra.yaml, cassandra-env.sh, jvm-server.options, jvm8-server.options, jvm11-server.options,
+          cassandra-rackdc.properties, logback.xml]
+  "4.0": [cassandra.yaml, cassandra-env.sh, jvm-server.options, jvm8-server.options, jvm11-server.options,
+          cassandra-rackdc.properties, logback.xml]
+# GC of each jvm<N>-server.options file of the series
+_cassandra_config_gcs: >-
+  {{ [cassandra_jvm8_gc | default(cassandra_jvm_gc), cassandra_jvm11_gc | default(cassandra_jvm_gc)]
+     if cassandra_version in ['40x', '41x']
+     else [cassandra_jvm11_gc | default(cassandra_jvm_gc), cassandra_jvm17_gc | default(cassandra_jvm_gc)] }}
+# Where the package puts its config (RedHat: the alternatives target it ships)
+_cassandra_config_pkg_conf_dir: "{{ '/etc/cassandra/default.conf' if ansible_facts['os_family'] == 'RedHat' else cassandra_conf_dir }}"
+# A value (a password) that YAML would not read back as the same plain string:
+# single-quoted in cassandra.yaml
+_cassandra_config_quote: '(?s)^(?!(?!(?i:y|n|yes|no|true|false|on|off|null)$)[A-Za-z][A-Za-z0-9_./+=@-]*$)(.*)$'

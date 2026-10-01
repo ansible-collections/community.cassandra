@@ -1,0 +1,18 @@
+---
+galaxy_info:
+  author: Alain Rodriguez
+  description: Template Cassandra 4.0, 4.1 and 5.0 config files (cassandra.yaml, cassandra-env.sh, jvm*-server.options, rackdc, logback) from verified stock defaults, with every active setting exposed as a variable.
+  platforms:
+    - name: RedHat
+      versions:
+      - all
+    - name: Debian
+      versions:
+      - all
+    - name: Ubuntu
+      versions:
+      - all
+
+  galaxy_tags:
+    - cassandra
+    - database
