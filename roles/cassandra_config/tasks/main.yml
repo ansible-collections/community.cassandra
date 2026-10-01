@@ -186,8 +186,9 @@
 
     # A node that holds a system keyspace has been initialized: in one of the
     # data directories of the inventory or of the live cassandra.yaml (an
-    # inventory that does not match the node yet), or in its
-    # local_system_data_file_directory. A running Cassandra counts too.
+    # inventory that does not match the node yet; none set there: Cassandra's
+    # default), or in its local_system_data_file_directory. A running
+    # Cassandra counts too.
     - name: Look for the system keyspace of an initialized node
       ansible.builtin.command:
         argv:
@@ -201,8 +202,14 @@
                 try:  # as Cassandra reads it, when PyYAML is there
                     import yaml
                     conf = yaml.safe_load(text) or {}
-                    dirs += [str(d) for d in conf.get("data_file_directories") or []]
-                    dirs += [str(conf.get("local_system_data_file_directory") or "")]
+                    local = conf.get("local_system_data_file_directory")
+                    for key, value in (("data_file_directories", conf.get("data_file_directories") or [sys.argv[3]]),
+                                       ("local_system_data_file_directory", [local] if local else [])):
+                        # a single value, or a relative dir: not read here for sure, count the node as initialized
+                        if not isinstance(value, list) or not all(str(d).startswith("/") for d in value):
+                            print("(%s in the live cassandra.yaml)" % key)
+                        else:
+                            dirs += [str(d) for d in value]
                 except Exception:  # no PyYAML, or a file Cassandra can't read either
                     # the text of each top-level key, up to the next one (the last one wins, as in YAML)
                     values, key = {}, None
@@ -217,12 +224,17 @@
                         value = re.sub(r"(?m)(^|\s)#.*$", "", values.get(key, ""))
                         found = re.findall(r"/[^\s,\]'\"]*", value)
                         dirs += found
-                        # set, but not read here for sure: count the node as initialized
-                        if value.strip() and not (found and all(os.path.isdir(d) for d in found)):
+                        if key == "data_file_directories" and not value.strip():  # none set: Cassandra's default
+                            dirs.append(sys.argv[3])
+                        # set, but not read here for sure (a single value, a relative dir...): count the node as initialized
+                        single = key == "data_file_directories" and value.strip()[:1] not in ("", "-", "[")
+                        rest = re.sub(r"[\s\-\[\],'\"]", "", re.sub(r"/[^\s,\]'\"]*", "", value))
+                        if single or rest or value.strip() and not (found and all(os.path.isdir(d) for d in found)):
                             print("(%s in the live cassandra.yaml)" % key)
             print("\n".join(d for d in dirs if d and os.path.isdir(os.path.join(d, "system"))))
           - "{{ cassandra_conf_dir }}/cassandra.yaml"
           - "{{ cassandra_data_file_directories | to_json }}"
+          - "{{ _cassandra_config_default_data_dir }}"
       register: cassandra_config_system
       changed_when: false
       check_mode: false
@@ -277,9 +289,9 @@
               - "{{ _cassandra_config_python }}"
               - -c
               - |
-                import sys, yaml
+                import io, sys, yaml
                 try:
-                    yaml.safe_load(open(sys.argv[1]))
+                    yaml.safe_load(io.open(sys.argv[1], encoding="utf-8", errors="replace"))
                 except yaml.YAMLError as e:  # its line only: the text may hold a password
                     mark = getattr(e, "problem_mark", None)
                     sys.exit("the new cassandra.yaml is not valid YAML (line %s)" % (mark.line + 1 if mark else "?"))
@@ -297,13 +309,16 @@
               - |
                 import difflib, io, os, re, sys
                 live, new = sys.argv[1], sys.argv[2]
-                # newline="": a CRLF line differs from the LF one (bash reads X=8G\r as "8G\r")
-                a = io.open(live, newline="").read().splitlines(True) if os.path.exists(live) else []
-                b = io.open(new, newline="").read().splitlines(True)
+                # UTF-8 whatever the locale; newline="": a CRLF line differs from the LF one (bash reads X=8G\r as "8G\r")
+                def read(path):
+                    return io.open(path, encoding="utf-8", errors="replace", newline="").read().splitlines(True)
+                a = read(live) if os.path.exists(live) else []
+                b = read(new)
                 # values of password/secret keys never reach the output: all of the line after the key
                 secret = re.compile(r"(?i)([\w.-]*(?:password|passwd|secret)[\w.-]*[ \t]*[:=][ \t]*)\S[^\r\n]*")
                 d = difflib.unified_diff(a, b, live + " (live)", "(new)")
-                sys.stdout.write("".join(secret.sub(r"\1****", line) for line in d))
+                out = "".join(secret.sub(r"\1****", line) for line in d)
+                getattr(sys.stdout, "buffer", sys.stdout).write(out.encode("utf-8", "replace"))  # a path not in UTF-8 too
               - "{{ cassandra_conf_dir }}/{{ cassandra_config_file }}"
               - "{{ cassandra_config_tmp.path }}/{{ cassandra_config_file }}"
           loop: "{{ _cassandra_config_files[_cassandra_config_series] }}"
@@ -320,7 +335,9 @@
               - "{{ _cassandra_config_python }}"
               - -c
               - |
-                import json, os, re, sys
+                import io, json, os, re, sys
+                def text(path):  # UTF-8 whatever the locale
+                    return io.open(path, encoding="utf-8", errors="replace").read()
                 def value(v):  # a YAML scalar's text: quotes undone, trailing comment dropped
                     m = re.match(r"'((?:[^']|'')*)'|\"((?:[^\"\\]|\\.)*)\"", v)
                     if m:
@@ -330,7 +347,7 @@
                     return re.sub(r"\s+#.*$", "", v)
                 def read(path, pattern):  # properties: no inline comment and no quoting, as the snitch reads them
                     get = value if pattern == yaml else lambda v: v.strip()
-                    return {k: get(v.strip()) for k, v in re.findall(pattern, open(path).read(), re.M)}
+                    return {k: get(v.strip()) for k, v in re.findall(pattern, text(path), re.M)}
                 yaml = r"^(cluster_name|num_tokens|partitioner|endpoint_snitch|initial_token|storage_compatibility_mode):[ \t]*(.*?)[ \t]*$"
                 rackdc = r"^[ \t]*(dc|rack|dc_suffix|ec2_naming_scheme)[ \t]*=[ \t]*(.*?)[ \t]*$"
                 live, new = {}, {}
@@ -350,7 +367,7 @@
                 # 5.0 storage mode: one step forward at a time from what the file says, never back
                 steps = [("CASSANDRA_4", "UPGRADING"), ("UPGRADING", "NONE")]
                 mode = "storage_compatibility_mode"
-                if (live.get(mode), new.get(mode)) in steps and re.search(r"(?m)^" + mode + ":", open(sys.argv[1]).read()):
+                if (live.get(mode), new.get(mode)) in steps and re.search(r"(?m)^" + mode + ":", text(sys.argv[1])):
                     live[mode] = new[mode]
                 print(json.dumps(["%s: %s -> %s" % (k, live.get(k, "(unset)"), new.get(k, "(unset)"))
                                   for k in sorted(set(live) | set(new)) if live.get(k) != new.get(k)]))
@@ -435,13 +452,32 @@
             path: "{{ cassandra_rpm_conf_alternative }}"
           register: cassandra_rpm_conf_alternative_stat
 
-        # Only seeded once: later runs must not overwrite files the templates don't manage
-        - name: Seed the alternative conf dir from default.conf
-          ansible.builtin.copy:
-            src: /etc/cassandra/default.conf/
-            dest: "{{ cassandra_rpm_conf_alternative }}/"
-            remote_src: true
-            mode: preserve
+        - name: Find the conf dir in use
+          ansible.builtin.stat:
+            path: /etc/cassandra/conf
+          register: cassandra_rpm_conf_live
+          when: not cassandra_rpm_conf_alternative_stat.stat.exists
+
+        # Only seeded once: later runs must not overwrite files the templates
+        # don't manage. From the dir in use (default.conf on a new install,
+        # another alternative with keystores...), owners and modes kept; into
+        # a temp name first (<dir>.seed, replaced), so an interrupted copy is
+        # never selected.
+        - name: Seed the alternative conf dir from the one in use
+          ansible.builtin.command:
+            argv:
+              - sh
+              - -c
+              - >-
+                if [ ! -d "$1" ]; then echo "conf dir in use ($1) missing: restore it or pick another (alternatives --config cassandra)" >&2; exit 1; fi;
+                mkdir -p -- "$(dirname -- "$2")" && rm -rf -- "$2.seed" && cp -aT -- "$1" "$2.seed" && mv -T -- "$2.seed" "$2"
+              - sh
+              - "{{ cassandra_rpm_conf_live.stat.lnk_source | default('/etc/cassandra/conf')
+                    if cassandra_rpm_conf_live.stat.exists else '/etc/cassandra/default.conf' }}"
+              - "{{ _dest }}"
+            creates: "{{ _dest }}"
+          vars:
+            _dest: "{{ cassandra_rpm_conf_alternative | regex_replace('(?<=.)/+$', '') }}"
           when: not cassandra_rpm_conf_alternative_stat.stat.exists
 
         - name: Select the alternative conf dir

@@ -71,3 +71,26 @@
       ansible.builtin.command: alternatives --install /etc/cassandra/conf cassandra /etc/cassandra/default.conf/ 0
       changed_when: true
       when: ansible_facts['os_family'] == 'RedHat'
+
+    # A node already run from another conf dir, with a keystore only Cassandra reads:
+    # the role's dir must be seeded from it, not from default.conf (Rocky; the
+    # other RedHat platforms keep the new install case, seeded from default.conf)
+    - name: Run from another conf dir (Rocky)
+      when: ansible_facts['distribution'] == 'Rocky'
+      block:
+        - name: Copy default.conf to that dir
+          ansible.builtin.command: cp -a /etc/cassandra/default.conf /etc/cassandra/prod.conf
+          args:
+            creates: /etc/cassandra/prod.conf
+
+        - name: Add its keystore
+          ansible.builtin.copy:
+            content: "keystore\n"
+            dest: /etc/cassandra/prod.conf/.keystore
+            owner: cassandra
+            group: cassandra
+            mode: "0400"
+
+        - name: Select it
+          ansible.builtin.command: alternatives --install /etc/cassandra/conf cassandra /etc/cassandra/prod.conf 10
+          changed_when: true

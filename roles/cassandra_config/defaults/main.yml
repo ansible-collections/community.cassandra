@@ -12,9 +12,9 @@ cassandra_conf_dir: "{{ '/etc/cassandra/conf' if ansible_facts['os_family'] == '
 cassandra_user: cassandra
 cassandra_group: cassandra
 
-# RedHat: own conf dir, seeded from the package's default.conf and selected
-# through alternatives, so default.conf stays pristine. "" writes into
-# default.conf instead.
+# RedHat: own conf dir, seeded once from the dir /etc/cassandra/conf points to
+# (default.conf on a new install) and selected through alternatives, so the
+# package's files stay as shipped. "" writes into the dir in use instead.
 cassandra_rpm_conf_alternative: /etc/cassandra/ansible.conf
 cassandra_rpm_conf_alternative_priority: 100
 

@@ -215,6 +215,14 @@ def test_rpm_conf_alternative(host):
     assert "link currently points to /etc/cassandra/ansible.conf" in display
     assert host.file("/etc/cassandra/conf").linked_to == "/etc/cassandra/ansible.conf"
     assert host.file("/etc/cassandra/ansible.conf/cqlshrc.sample").content_string == "package file\n"  # seeded
+    # from the dir in use before (prepare on Rocky), not default.conf: its keystore came along, still Cassandra's only
+    keystore = host.file("/etc/cassandra/ansible.conf/.keystore")
+    if host.file("/etc/cassandra/prod.conf").exists:
+        assert (keystore.content_string, keystore.user, keystore.group, keystore.mode) == ("keystore\n", "cassandra", "cassandra", 0o400)
+        assert not host.file("/etc/cassandra/prod.conf/cassandra.yaml").exists  # the dir it came from, untouched
+    else:
+        assert not keystore.exists
+    assert not host.file("/etc/cassandra/ansible.conf.seed").exists  # the temp copy, moved in place
     assert host.file("/etc/cassandra/ansible.conf/cassandra.yaml").exists
     assert not host.file("/etc/cassandra/default.conf/cassandra.yaml").exists  # package dir untouched
 

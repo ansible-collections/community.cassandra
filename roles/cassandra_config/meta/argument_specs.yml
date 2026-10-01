@@ -41,8 +41,9 @@ argument_specs:
         type: str
         default: /etc/cassandra/ansible.conf
         description:
-        - 'RedHat family: config directory seeded once from the package''s C(default.conf) and selected with C(alternatives),
-          so C(default.conf) stays as shipped. An empty string writes into C(default.conf).'
+        - 'RedHat family: config directory seeded once from the one in use (the package''s C(default.conf) on a new install,
+          other files and owners included) and selected with C(alternatives), so C(default.conf) stays as shipped. An empty
+          string writes into the directory in use.'
       cassandra_rpm_conf_alternative_priority:
         type: int
         default: 100

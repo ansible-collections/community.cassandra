@@ -29,3 +29,6 @@ _cassandra_config_installed: "{{ (ansible_facts.packages['cassandra'] | default(
 # A value (a password) that YAML would not read back as the same plain string:
 # single-quoted in cassandra.yaml
 _cassandra_config_quote: '(?s)^(?!(?!(?i:y|n|yes|no|true|false|on|off|null)$)[A-Za-z][A-Za-z0-9_./+=@-]*$)(.*)$'
+# data_file_directories when cassandra.yaml has none: <cassandra.storagedir>/data,
+# /var/lib/cassandra with the deb and rpm packages (cassandra.in.sh)
+_cassandra_config_default_data_dir: /var/lib/cassandra/data
