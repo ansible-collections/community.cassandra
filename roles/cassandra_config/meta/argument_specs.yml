@@ -6,7 +6,7 @@ argument_specs:
     - Templates C(cassandra.yaml), C(cassandra-env.sh), the JVM options files, C(cassandra-rackdc.properties) and C(logback.xml)
       for Cassandra 4.0, 4.1 and 5.0.
     - Rendered with the defaults, the files match the stock ones, except for the values the deb and rpm packages change.
-    - Writes the files without a preview or a confirmation, for a node that has not started yet.
+    - Shows a diff of every file before changing it, and asks for confirmation on a node that is already initialized.
     options:
       cassandra_version:
         type: str
@@ -37,6 +37,26 @@ argument_specs:
         description:
         - A group of the account the Cassandra service runs as (set it with O(cassandra_user)), by name.
         - Group of those directories and files, and of the config files (O(cassandra_config_group)).
+      cassandra_rpm_conf_alternative:
+        type: str
+        default: /etc/cassandra/ansible.conf
+        description:
+        - 'RedHat family: config directory seeded once from the package''s C(default.conf) and selected with C(alternatives),
+          so C(default.conf) stays as shipped. An empty string writes into C(default.conf).'
+      cassandra_rpm_conf_alternative_priority:
+        type: int
+        default: 100
+        description:
+        - Priority of O(cassandra_rpm_conf_alternative) in C(alternatives).
+      cassandra_config_confirm:
+        type: raw
+        default: auto
+        description:
+        - Show the diff and ask for confirmation before changing the files.
+        - V(auto) asks only on a node that was already initialized (a C(system) keyspace in
+          O(cassandra_data_file_directories), in the data directories or C(local_system_data_file_directory) of the live
+          C(cassandra.yaml), or Cassandra running). V(true) asks whenever a file changes, V(false) never does. Any other
+          value is refused. Without a terminal to answer, a required confirmation fails the run.
       cassandra_data_dir:
         type: path
         default: /var/lib/cassandra/data
@@ -1110,6 +1130,14 @@ argument_specs:
         default: "0640"
         description:
         - Mode of the config files. C(cassandra.yaml) may hold keystore passwords.
+      cassandra_config_force_identity_change:
+        type: bool
+        default: false
+        description:
+        - Change C(cluster_name), C(num_tokens), C(initial_token), C(partitioner),
+          C(endpoint_snitch), C(dc), C(rack), C(dc_suffix) or C(ec2_naming_scheme) of a node that already joined a
+          cluster, or move C(storage_compatibility_mode) by more than one step. Refused otherwise; only for a
+          documented procedure (e.g. a snitch migration).
       cassandra_jmx_users:
         type: list
         elements: dict

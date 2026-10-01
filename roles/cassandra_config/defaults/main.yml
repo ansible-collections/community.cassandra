@@ -12,6 +12,19 @@ cassandra_conf_dir: "{{ '/etc/cassandra/conf' if ansible_facts['os_family'] == '
 cassandra_user: cassandra
 cassandra_group: cassandra
 
+# RedHat: own conf dir, seeded from the package's default.conf and selected
+# through alternatives, so default.conf stays pristine. "" writes into
+# default.conf instead.
+cassandra_rpm_conf_alternative: /etc/cassandra/ansible.conf
+cassandra_rpm_conf_alternative_priority: 100
+
+# Show the diff and ask ("yes") before changing files: auto = only on a node
+# that was already initialized (a system keyspace in its data directories, or
+# Cassandra running), so a first install is not blocked; true = whenever a
+# file changes; false = never. Without a terminal to answer, a required
+# confirmation fails the run.
+cassandra_config_confirm: auto
+
 # Cassandra's data directory.
 cassandra_data_dir: /var/lib/cassandra/data
 # data_file_directories (JBOD: one per disk); the first holds the system keyspaces
@@ -273,6 +286,13 @@ cassandra_config_group: "{{ cassandra_group }}"
 cassandra_config_mode: "0640"
 # Keep a timestamped copy of each file the role replaces, next to it (to roll back)
 cassandra_config_backup: true
+
+# Settings a node keeps for life once it has joined (cluster_name, num_tokens,
+# initial_token, partitioner, snitch, dc, rack, and 5.0's
+# storage_compatibility_mode one step at a time): changing them breaks it, so
+# the role refuses. true skips all these checks: only to follow a documented
+# procedure (e.g. a snitch migration).
+cassandra_config_force_identity_change: false
 
 # Remote JMX users (with cassandra_local_jmx: false), written to
 # /etc/cassandra/jmxremote.password and .access, readable by cassandra_user only:

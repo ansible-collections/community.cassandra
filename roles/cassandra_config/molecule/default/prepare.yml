@@ -52,11 +52,21 @@
         - /tmp/cassandra-40x-group
         - /tmp/cassandra-41x-group
         - /tmp/cassandra-50x-group
+        - /tmp/cassandra-confirm
+        - /tmp/cassandra-identity
         - /tmp/cassandra-secret
         - /tmp/cassandra-access
         - /tmp/cassandra-no-account
+        - /tmp/initialized-node/system
 
     # What the rpm's %post does: /etc/cassandra/conf -> alternatives -> default.conf
+    - name: Seed default.conf with a file the templates don't manage (RedHat)
+      ansible.builtin.copy:
+        content: "package file\n"
+        dest: /etc/cassandra/default.conf/cqlshrc.sample
+        mode: "0644"
+      when: ansible_facts['os_family'] == 'RedHat'
+
     - name: Register default.conf as the cassandra alternative (RedHat)
       ansible.builtin.command: alternatives --install /etc/cassandra/conf cassandra /etc/cassandra/default.conf/ 0
       changed_when: true
