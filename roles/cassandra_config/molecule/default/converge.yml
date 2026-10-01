@@ -1,6 +1,7 @@
 ---
 - name: Converge
   hosts: all
+  serial: 2  # the confirmation logic must cope with batches
   tasks:
     - name: Render with stock defaults
       ansible.builtin.include_role:
@@ -89,23 +90,123 @@
           ansible.builtin.assert:
             that: ansible_failed_task.name == "Assert heap settings are consistent"
 
-    # Not idempotent by design (it changes a password): first converge only
-    - name: Replace a file
+    - name: First render on an initialized node (confirmation disabled)
+      ansible.builtin.include_role:
+        name: community.cassandra.cassandra_config
+      vars:
+        cassandra_conf_dir: /tmp/cassandra-confirm
+        cassandra_data_dir: /tmp/initialized-node
+        cassandra_rpm_conf_alternative: ""
+        cassandra_config_confirm: false
+
+    - name: Change a setting on the initialized node, no terminal to confirm
+      block:
+        - name: Run the role, expecting the confirmation to fail
+          ansible.builtin.include_role:
+            name: community.cassandra.cassandra_config
+          vars:
+            cassandra_conf_dir: /tmp/cassandra-confirm
+            cassandra_data_dir: /tmp/initialized-node
+            cassandra_rpm_conf_alternative: ""
+            cassandra_extra_settings: {commitlog_total_space: 4096MiB}
+
+        - name: Fail if the change went through unconfirmed
+          ansible.builtin.fail:
+            msg: cassandra_config changed an initialized node without confirmation
+      rescue:
+        - name: Assert the failure came from the confirmation
+          ansible.builtin.assert:
+            that: ansible_failed_task.name == "Stop unless the changes were confirmed"
+
+    # The inventory does not point at its data yet: the live cassandra.yaml does
+    - name: Change the data dir of the initialized node, no terminal to confirm
+      block:
+        - name: Run the role, expecting the confirmation to fail
+          ansible.builtin.include_role:
+            name: community.cassandra.cassandra_config
+          vars:
+            cassandra_conf_dir: /tmp/cassandra-confirm
+            cassandra_data_dir: /tmp/not-initialized
+            cassandra_rpm_conf_alternative: ""
+
+        - name: Fail if the change went through unconfirmed
+          ansible.builtin.fail:
+            msg: cassandra_config changed a node initialized per its live cassandra.yaml without confirmation
+      rescue:
+        - name: Assert the failure came from the confirmation
+          ansible.builtin.assert:
+            that: ansible_failed_task.name == "Stop unless the changes were confirmed"
+
+    # Not idempotent by design (they change a joined node): first converge only
+    - name: Secrets and identity of a joined node
       tags: molecule-idempotence-notest
       block:
-        - name: First render
+        - name: First render of a joined node
           ansible.builtin.include_role:
             name: community.cassandra.cassandra_config
           vars:
-            cassandra_conf_dir: /tmp/cassandra-secret
+            cassandra_conf_dir: "{{ conf_dir }}"
+            cassandra_data_dir: /tmp/initialized-node
+            cassandra_rpm_conf_alternative: ""
+            cassandra_config_confirm: false
+          loop: [/tmp/cassandra-secret, /tmp/cassandra-identity]
+          loop_control:
+            loop_var: conf_dir
 
-        - name: Change a password
+        - name: Change a password on the joined node
           ansible.builtin.include_role:
             name: community.cassandra.cassandra_config
           vars:
             cassandra_conf_dir: /tmp/cassandra-secret
+            cassandra_data_dir: /tmp/initialized-node
+            cassandra_rpm_conf_alternative: ""
+            cassandra_config_confirm: false
             cassandra_internode_encryption: all
             cassandra_server_keystore_password: Molecule-K3ystore-Secret
+
+        - name: Check the password never reached the diff
+          ansible.builtin.assert:
+            that:
+              - _diff is search('keystore_password. \*\*\*\*')
+              - "'Molecule-K3ystore-Secret' not in _diff"
+              - "'Molecule-K3ystore-Secret' not in (cassandra_config_applied | to_json)"
+          vars:
+            _diff: "{{ cassandra_config_preview.results | map(attribute='stdout') | join }}"
+
+        - name: Change num_tokens and the rack of a joined node
+          block:
+            - name: Run the role, expecting the identity check to fail
+              ansible.builtin.include_role:
+                name: community.cassandra.cassandra_config
+              vars:
+                cassandra_conf_dir: /tmp/cassandra-identity
+                cassandra_data_dir: /tmp/initialized-node
+                cassandra_rpm_conf_alternative: ""
+                cassandra_config_confirm: false
+                cassandra_num_tokens: 8
+                cassandra_rack: rack2
+
+            - name: Fail if the identity change went through
+              ansible.builtin.fail:
+                msg: cassandra_config changed num_tokens and rack of a joined node
+          rescue:
+            - name: Assert the failure came from the identity check and names both settings
+              ansible.builtin.assert:
+                that:
+                  - ansible_failed_task.name == "Refuse to change the identity of a joined node"
+                  - "'num_tokens: 16 -> 8' in ansible_failed_result.msg"
+                  - "'rack: rack1 -> rack2' in ansible_failed_result.msg"
+
+        - name: Change the rack of a joined node, forced
+          ansible.builtin.include_role:
+            name: community.cassandra.cassandra_config
+          vars:
+            cassandra_conf_dir: /tmp/cassandra-identity
+            cassandra_data_dir: /tmp/initialized-node
+            cassandra_rpm_conf_alternative: ""
+            cassandra_config_confirm: false
+            cassandra_config_force_identity_change: true
+            cassandra_rack: rack2
 
     # The service runs as another account: the files and missing dirs follow it
     - name: JMX users, with another service account
@@ -118,6 +219,7 @@
         cassandra_data_dir: /data/account/data
         cassandra_log_dir: /data/account/log
         cassandra_commitlog_dir: /data/account/commitlog
+        cassandra_rpm_conf_alternative: ""
         cassandra_local_jmx: false
         cassandra_jmx_users:
           - {name: monitor, password: Mon1tor-Secret, access: readonly}

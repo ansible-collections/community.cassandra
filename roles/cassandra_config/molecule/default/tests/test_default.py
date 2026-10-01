@@ -187,10 +187,43 @@ def test_overrides_logback(host):
     assert '<!-- <appender-ref ref="ASYNCDEBUGLOG" /> -->' in logback
 
 
-def test_changed_password_applied(host):
+def test_rpm_conf_alternative(host):
+    if host.system_info.distribution in ("ubuntu", "debian"):
+        pytest.skip("RPM layout only")
+    display = host.run("alternatives --display cassandra").stdout
+
+    assert "link currently points to /etc/cassandra/ansible.conf" in display
+    assert host.file("/etc/cassandra/conf").linked_to == "/etc/cassandra/ansible.conf"
+    assert host.file("/etc/cassandra/ansible.conf/cqlshrc.sample").content_string == "package file\n"  # seeded
+    assert host.file("/etc/cassandra/ansible.conf/cassandra.yaml").exists
+    assert not host.file("/etc/cassandra/default.conf/cassandra.yaml").exists  # package dir untouched
+
+
+def test_unconfirmed_change_not_applied(host):
+    conf = yaml.safe_load(host.file("/tmp/cassandra-confirm/cassandra.yaml").content_string)
+
+    assert conf["num_tokens"] == 16
+    assert "commitlog_total_space" not in conf  # the unconfirmed change was refused
+    assert conf["data_file_directories"] == ["/tmp/initialized-node"]  # also when the inventory moved the data dir
+    assert not host.file("/tmp/not-initialized").exists
+
+
+def test_masked_password_applied(host):
     conf = yaml.safe_load(host.file("/tmp/cassandra-secret/cassandra.yaml").content_string)
 
     assert conf["server_encryption_options"]["keystore_password"] == "Molecule-K3ystore-Secret"
+
+
+def test_identity_change_only_when_forced(host):
+    conf = yaml.safe_load(host.file("/tmp/cassandra-identity/cassandra.yaml").content_string)
+    rackdc = lines(host, "/tmp/cassandra-identity/cassandra-rackdc.properties")
+
+    assert conf["num_tokens"] == 16  # refused
+    assert "rack=rack2" in rackdc  # forced
+
+
+def test_preview_leaves_no_temp_dir(host):
+    assert host.run("ls -d /tmp/*.cassandra_config").rc != 0
 
 
 def test_jmx_users(host):
