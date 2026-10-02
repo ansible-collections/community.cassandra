@@ -15,9 +15,291 @@
         dest: /usr/local/bin/cqlsh
         mode: "0755"
 
+    # dsbulk from a copy on the node (offline nodes), with its checksum
+    - name: Put an older dsbulk on the node
+      ansible.builtin.get_url:
+        url: https://github.com/datastax/dsbulk/releases/download/1.11.1/dsbulk-1.11.1.tar.gz
+        dest: /root/dsbulk-1.11.1.tar.gz
+        mode: "0644"
+      retries: 3
+      register: _dsbulk_copy
+      until: _dsbulk_copy is succeeded
+
+    - name: Run the role without dsbulk, on a version not installed
+      ansible.builtin.include_role:
+        name: community.cassandra.cassandra_install
+      vars:
+        cassandra_dsbulk_install: false
+        cassandra_dsbulk_version: "1.11.1"
+        cassandra_dsbulk_url: file:///nonexistent/dsbulk-1.11.1.tar.gz
+
+    - name: Read the dsbulk paths after the run without dsbulk
+      ansible.builtin.stat:
+        path: "{{ item }}"
+      loop: [/usr/share/dsbulk, /usr/share/dsbulk-1.11.1, /usr/share/dsbulk-1.11.2]
+      register: _dsbulk_paths
+
+    - name: Check the run without dsbulk touched nothing
+      ansible.builtin.assert:
+        that:
+          - _dsbulk_paths.results[0].stat.lnk_target == '/usr/share/dsbulk-1.11.2'
+          - not _dsbulk_paths.results[1].stat.exists
+          - _dsbulk_paths.results[2].stat.exists
+
+    - name: A wrong dsbulk checksum is refused
+      block:
+        - name: Run the role with a wrong dsbulk checksum
+          ansible.builtin.include_role:
+            name: community.cassandra.cassandra_install
+          vars:
+            cassandra_dsbulk_version: "1.11.1"
+            cassandra_dsbulk_url: file:///root/dsbulk-1.11.1.tar.gz
+            cassandra_dsbulk_checksum: "sha256:{{ '0' * 64 }}"
+
+        - name: Should not be reached
+          ansible.builtin.fail:
+            msg: a wrong dsbulk checksum was not detected
+      rescue:
+        - name: Check the refusal came from the checksum
+          ansible.builtin.assert:
+            that:
+              - "'checksum' in ansible_failed_result.msg"
+              - ansible_failed_task.name == 'Download dsbulk'
+
+    - name: Change the dsbulk version with check_mode
+      ansible.builtin.include_role:
+        name: community.cassandra.cassandra_install
+        apply:
+          check_mode: true
+      vars:
+        cassandra_dsbulk_version: "1.11.1"
+        cassandra_dsbulk_url: file:///root/dsbulk-1.11.1.tar.gz
+        cassandra_dsbulk_checksum: sha256:2aca596d8983dc4ad4a11ca6998f9872b05c32b55d74445dac2062c2f506cd68
+
+    - name: Read the dsbulk paths after check_mode
+      ansible.builtin.stat:
+        path: "{{ item }}"
+      loop: [/usr/share/dsbulk, /usr/share/dsbulk-1.11.1, /usr/share/dsbulk-1.11.1.tar.gz]
+      register: _dsbulk_paths
+
+    - name: Check check_mode changed nothing
+      ansible.builtin.assert:
+        that:
+          - _dsbulk_paths.results[0].stat.lnk_target == '/usr/share/dsbulk-1.11.2'
+          - not _dsbulk_paths.results[1].stat.exists
+          - not _dsbulk_paths.results[2].stat.exists
+
+    - name: A directory in the way of a dsbulk version is refused
+      block:
+        - name: Put a directory where dsbulk 1.11.1 goes
+          ansible.builtin.file:
+            path: /usr/share/dsbulk-1.11.1/conf
+            state: directory
+            mode: "0755"
+
+        - name: Run the role with dsbulk 1.11.1
+          ansible.builtin.include_role:
+            name: community.cassandra.cassandra_install
+          vars:
+            cassandra_dsbulk_version: "1.11.1"
+            cassandra_dsbulk_url: file:///root/dsbulk-1.11.1.tar.gz
+            cassandra_dsbulk_checksum: sha256:2aca596d8983dc4ad4a11ca6998f9872b05c32b55d74445dac2062c2f506cd68
+
+        - name: Should not be reached
+          ansible.builtin.fail:
+            msg: a directory in the way was not detected
+      rescue:
+        - name: Check the refusal came from the directory check
+          ansible.builtin.assert:
+            that:
+              - "'not installed by this role' in ansible_failed_result.msg"
+
+    - name: Look for the directory in the way
+      ansible.builtin.stat:
+        path: /usr/share/dsbulk-1.11.1/conf
+      register: _dsbulk_in_the_way
+
+    - name: Check it was left alone
+      ansible.builtin.assert:
+        that: _dsbulk_in_the_way.stat.exists
+
+    - name: Remove the directory in the way
+      ansible.builtin.file:
+        path: /usr/share/dsbulk-1.11.1
+        state: absent
+
+    - name: Leave what an interrupted dsbulk install would
+      ansible.builtin.copy:
+        src: /root/dsbulk-1.11.1.tar.gz
+        dest: /usr/share/dsbulk-1.11.1.tar.gz
+        remote_src: true
+        mode: "0600"
+
+    - name: Leave a half unpacked dsbulk
+      ansible.builtin.file:
+        path: /usr/share/dsbulk-1.11.1.new/stale
+        state: directory
+        mode: "0755"
+
+    - name: Change the dsbulk version with check_mode, after an interrupted run
+      ansible.builtin.include_role:
+        name: community.cassandra.cassandra_install
+        apply:
+          check_mode: true
+      vars:
+        cassandra_dsbulk_version: "1.11.1"
+        cassandra_dsbulk_url: file:///root/dsbulk-1.11.1.tar.gz
+        cassandra_dsbulk_checksum: sha256:2aca596d8983dc4ad4a11ca6998f9872b05c32b55d74445dac2062c2f506cd68
+
+    - name: Read the dsbulk paths after check_mode and the interrupted run
+      ansible.builtin.stat:
+        path: "{{ item }}"
+      loop: [/usr/share/dsbulk, /usr/share/dsbulk-1.11.1, /usr/share/dsbulk-1.11.2, /usr/share/dsbulk-1.11.1.new/stale]
+      register: _dsbulk_paths
+
+    - name: Check check_mode changed nothing, leftovers included
+      ansible.builtin.assert:
+        that:
+          - _dsbulk_paths.results[0].stat.lnk_target == '/usr/share/dsbulk-1.11.2'
+          - not _dsbulk_paths.results[1].stat.exists
+          - _dsbulk_paths.results[2].stat.exists
+          - _dsbulk_paths.results[3].stat.exists  # the leftovers too
+
+    - name: Unpack a dsbulk by hand in /usr/share
+      ansible.builtin.file:
+        path: /usr/share/dsbulk-1.0.0/bin
+        state: directory
+        mode: "0755"
+
+    - name: Change the dsbulk version
+      ansible.builtin.include_role:
+        name: community.cassandra.cassandra_install
+      vars:
+        cassandra_dsbulk_version: "1.11.1"
+        cassandra_dsbulk_url: file:///root/dsbulk-1.11.1.tar.gz
+        cassandra_dsbulk_checksum: sha256:2aca596d8983dc4ad4a11ca6998f9872b05c32b55d74445dac2062c2f506cd68
+
+    - name: Run dsbulk after the version change
+      ansible.builtin.command: dsbulk --version
+      register: _dsbulk_version
+      changed_when: false
+
+    - name: Look for the previous dsbulk version and the leftovers
+      ansible.builtin.stat:
+        path: "{{ item }}"
+      loop: [/usr/share/dsbulk-1.11.2, /usr/share/dsbulk-1.11.1.new, /usr/share/dsbulk-1.11.1.tar.gz]
+      register: _dsbulk_gone
+
+    - name: Check the link moved, the previous version and the leftovers went
+      ansible.builtin.assert:
+        that:
+          - "'v1.11.1' in _dsbulk_version.stdout"
+          - _dsbulk_gone.results | map(attribute='stat.exists') | select | list == []
+
+    - name: A dsbulk installed by other means is refused
+      block:
+        - name: Remove the dsbulk link
+          ansible.builtin.file:
+            path: /usr/bin/dsbulk
+            state: absent
+
+        - name: Put a dsbulk script in /usr/bin
+          ansible.builtin.copy:
+            content: "#!/bin/sh\n# installed by hand\n"
+            dest: /usr/bin/dsbulk
+            mode: "0755"
+
+        - name: Run the role with dsbulk 1.11.2
+          ansible.builtin.include_role:
+            name: community.cassandra.cassandra_install
+
+        - name: Should not be reached
+          ansible.builtin.fail:
+            msg: a dsbulk installed by other means was not detected
+      rescue:
+        - name: Check the refusal came from the links check
+          ansible.builtin.assert:
+            that:
+              - "'/usr/bin/dsbulk: not a link' in ansible_failed_result.msg"
+
+    - name: Look for a download started anyway
+      ansible.builtin.stat:
+        path: /usr/share/dsbulk-1.11.2
+      register: _dsbulk_refused
+
+    - name: Check nothing was downloaded
+      ansible.builtin.assert:
+        that: not _dsbulk_refused.stat.exists
+
+    - name: Remove the dsbulk script
+      ansible.builtin.file:
+        path: /usr/bin/dsbulk
+        state: absent
+
     - name: Run the role again
       ansible.builtin.include_role:
         name: community.cassandra.cassandra_install
+
+    # dsbulk on Java 11 too (what 4.x nodes run), then back to Java 17 only
+    - name: Run dsbulk with Java 11
+      vars:
+        # as cassandra_java_package in defaults/main.yml
+        _java11_package: >-
+          {{ 'openjdk-11-jre-headless' if ansible_facts['os_family'] == 'Debian'
+          else 'java-11-amazon-corretto-headless' if ansible_facts['distribution'] == 'Amazon'
+          else 'java-11-openjdk-headless' }}
+      block:
+        - name: Install Java 11
+          ansible.builtin.package:
+            name: "{{ _java11_package }}"
+            state: present
+          register: _java11_install
+          until: _java11_install is succeeded
+          retries: 3
+
+        - name: Find the Java 11 binary
+          ansible.builtin.shell: set -o pipefail; find /usr/lib/jvm -path '/usr/lib/jvm/java-11*/bin/java' | head -1
+          args:
+            executable: /bin/bash
+          register: _java11
+          changed_when: false
+
+        # -XshowSettings prints the java.version dsbulk runs with
+        - name: Run dsbulk --version and count with Java 11
+          ansible.builtin.command: "{{ item }}"
+          args:
+            chdir: /tmp
+          environment:
+            JAVA: "{{ _java11.stdout }}"
+            DSBULK_JAVA_OPTS: -XshowSettings:properties
+          loop:
+            - dsbulk --version
+            - dsbulk count -k ks -t t -h 127.0.0.1 -port 1
+          register: _dsbulk_java11
+          changed_when: false
+          failed_when: false
+
+        - name: Check dsbulk ran on Java 11
+          ansible.builtin.assert:
+            that:
+              - _java11.stdout != ''
+              - _dsbulk_java11.results[0].rc == 0
+              - "'v1.11.2' in _dsbulk_java11.results[0].stdout"
+              - _dsbulk_java11.results | map(attribute='stderr') | select('search', 'java.version = 11[.]') | list | length == 2
+              - "'Could not reach any contact point' in _dsbulk_java11.results[1].stdout + _dsbulk_java11.results[1].stderr"
+      always:
+        - name: Remove Java 11 (Debian)
+          ansible.builtin.apt:
+            name: "{{ _java11_package }}"
+            state: absent
+            purge: true
+          when: ansible_facts['os_family'] == 'Debian'
+
+        - name: Remove Java 11
+          ansible.builtin.package:
+            name: "{{ _java11_package }}"
+            state: absent
+          when: ansible_facts['os_family'] != 'Debian'
 
     - name: A Java package missing from the repositories is refused early (Debian)
       when: ansible_facts['os_family'] == 'Debian'

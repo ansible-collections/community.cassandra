@@ -29,3 +29,13 @@ cassandra_cqlsh_python_supported:  # [min, max]
 # deadsnakes PPA, added on Ubuntu releases without python3.11 (24.04+), signed
 # by the key shipped with the role; "" to rely on the configured repos
 cassandra_cqlsh_python_repo_uri: https://ppa.launchpadcontent.net/deadsnakes/ppa/ubuntu
+
+# DataStax Bulk Loader (dsbulk), unpacked in /usr/share/dsbulk-<version>
+# with links /usr/share/dsbulk and /usr/bin/dsbulk, like the packaged tools.
+cassandra_dsbulk_install: true
+cassandra_dsbulk_version: "1.11.2"
+# A mirror or a copy on the node (file:///path/to/dsbulk-x.y.z.tar.gz) works too
+cassandra_dsbulk_url: "https://github.com/datastax/dsbulk/releases/download/{{ cassandra_dsbulk_version }}/dsbulk-{{ cassandra_dsbulk_version }}.tar.gz"
+# Checksum of the tarball, for the default version: set it with the version
+# ("" = not checked)
+cassandra_dsbulk_checksum: "sha256:249e494c7820ee8f212c47531f77ddd6664404d78e4addadf16159d78c983e5e"

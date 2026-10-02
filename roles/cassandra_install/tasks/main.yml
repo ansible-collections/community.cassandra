@@ -280,3 +280,175 @@
     state: absent
   loop: "{{ _cassandra_install_cqlsh_pointers.stdout_lines | default([]) }}"
   when: _cassandra_cqlsh_python == ''
+
+# dsbulk is installed like the packaged tools: under /usr/share, owned by
+# root, with a link in /usr/bin.
+- name: Install dsbulk
+  when: cassandra_dsbulk_install | bool
+  vars:
+    _cassandra_install_dsbulk_home: "/usr/share/dsbulk-{{ cassandra_dsbulk_version }}"
+  block:
+    # It names a directory that is replaced or removed: a plain version only
+    - name: Check the dsbulk version
+      ansible.builtin.assert:
+        that:
+          - cassandra_dsbulk_version is string
+          - cassandra_dsbulk_version is match('^[0-9]+(\.[0-9]+)*\Z')
+        fail_msg: cassandra_dsbulk_version must be a release number like "1.11.2" (quoted), not "{{ cassandra_dsbulk_version }}"
+        quiet: true
+
+    - name: Look for this dsbulk version
+      ansible.builtin.stat:
+        path: "{{ _cassandra_install_dsbulk_home }}/bin/dsbulk"
+      register: _cassandra_install_dsbulk
+
+    # Links are taken over; a file or directory there is a dsbulk installed
+    # by other means: stop before downloading anything
+    - name: Look for dsbulk installed by other means
+      ansible.builtin.stat:
+        path: "{{ item }}"
+      loop: [/usr/share/dsbulk, /usr/bin/dsbulk]
+      register: _cassandra_install_dsbulk_links
+
+    - name: Check the dsbulk links can be set
+      ansible.builtin.assert:
+        that: _in_the_way | length == 0
+        fail_msg: >-
+          {{ _in_the_way | join(', ') }}: not a link, a dsbulk installed by other means.
+          Move it away, or set cassandra_dsbulk_install to false.
+        quiet: true
+      vars:
+        _in_the_way: >-
+          {{ _cassandra_install_dsbulk_links.results | selectattr('stat.exists')
+          | rejectattr('stat.islnk') | map(attribute='item') | list }}
+
+    # Unpacked next to its final place, then renamed: an interrupted run
+    # never leaves a partial version that looks installed
+    - name: Download and unpack dsbulk
+      when: not _cassandra_install_dsbulk.stat.exists
+      block:
+        - name: Look for a dsbulk directory in the way
+          ansible.builtin.stat:
+            path: "{{ _cassandra_install_dsbulk_home }}"
+          register: _cassandra_install_dsbulk_dir
+
+        - name: Check the dsbulk directory is free
+          ansible.builtin.assert:
+            that: not _cassandra_install_dsbulk_dir.stat.exists
+            fail_msg: >-
+              {{ _cassandra_install_dsbulk_home }} exists but has no bin/dsbulk:
+              not installed by this role, move it away first.
+            quiet: true
+
+        - name: Install tar and gzip (unarchive needs them)
+          ansible.builtin.package:
+            name: [tar, gzip]
+            state: present
+          retries: 3
+
+        - name: Remove what an interrupted run left
+          ansible.builtin.file:
+            path: "{{ _cassandra_install_dsbulk_home }}.new"
+            state: absent
+
+        - name: Download dsbulk
+          ansible.builtin.get_url:
+            url: "{{ cassandra_dsbulk_url }}"
+            dest: "{{ _cassandra_install_dsbulk_home }}.tar.gz"
+            checksum: "{{ cassandra_dsbulk_checksum }}"
+            mode: "0600"
+          retries: 3
+          register: _cassandra_install_dsbulk_download
+          # a wrong checksum is final
+          until: >-
+            _cassandra_install_dsbulk_download is succeeded
+            or 'did not match' in _cassandra_install_dsbulk_download.msg | default('')
+
+        - name: Create the dsbulk directory
+          ansible.builtin.file:
+            path: "{{ _cassandra_install_dsbulk_home }}.new"
+            state: directory
+            owner: root
+            group: root
+            mode: "0755"
+
+        # In check mode (--check or check_mode: true) they may not be there
+        - name: Look for the dsbulk download and directory
+          ansible.builtin.stat:
+            path: "{{ item }}"
+          loop:
+            - "{{ _cassandra_install_dsbulk_home }}.tar.gz"
+            - "{{ _cassandra_install_dsbulk_home }}.new"
+          register: _cassandra_install_dsbulk_unpack
+
+        - name: Unpack dsbulk
+          when: _cassandra_install_dsbulk_unpack.results | map(attribute='stat.exists') | min
+          block:
+            - name: Unpack dsbulk
+              ansible.builtin.unarchive:
+                src: "{{ _cassandra_install_dsbulk_home }}.tar.gz"
+                dest: "{{ _cassandra_install_dsbulk_home }}.new"
+                remote_src: true
+                extra_opts: [--strip-components=1]
+                owner: root
+                group: root
+                mode: u=rwX,go=rX
+
+            # Only the versions with it are removed on a version change
+            - name: Mark dsbulk as installed by this role
+              ansible.builtin.copy:
+                content: "Managed by Ansible (cassandra_install)\n"
+                dest: "{{ _cassandra_install_dsbulk_home }}.new/.cassandra_install"
+                owner: root
+                group: root
+                mode: "0644"
+
+            # skipped in check mode
+            - name: Put dsbulk in place
+              ansible.builtin.command:
+                argv: [mv, -T, "{{ _cassandra_install_dsbulk_home }}.new", "{{ _cassandra_install_dsbulk_home }}"]
+              register: _cassandra_install_dsbulk_moved
+              changed_when: true
+      always:
+        - name: Remove the dsbulk download
+          ansible.builtin.file:
+            path: "{{ item }}"
+            state: absent
+          loop:
+            - "{{ _cassandra_install_dsbulk_home }}.tar.gz"
+            - "{{ _cassandra_install_dsbulk_home }}.new"
+          changed_when: false
+
+    - name: Link dsbulk
+      ansible.builtin.file:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+        state: link
+      loop:
+        - src: "{{ _cassandra_install_dsbulk_home }}"
+          dest: /usr/share/dsbulk
+        - src: /usr/share/dsbulk/bin/dsbulk
+          dest: /usr/bin/dsbulk
+      loop_control:
+        label: "{{ item.dest }}"
+      # check mode: nothing to link to before the first install
+      when: _cassandra_install_dsbulk.stat.exists or _cassandra_install_dsbulk_moved is changed
+
+    # Like a package upgrade, the versions this role installed before go
+    # (by their marker: a dsbulk unpacked there by hand stays)
+    - name: Find the dsbulk versions installed by this role
+      ansible.builtin.find:
+        paths: /usr/share
+        patterns: [.cassandra_install]
+        hidden: true
+        recurse: true
+        depth: 2
+      register: _cassandra_install_dsbulk_markers
+
+    - name: Remove the other dsbulk versions
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop: >-
+        {{ _cassandra_install_dsbulk_markers.files | map(attribute='path') | map('dirname')
+        | select('match', '^/usr/share/dsbulk-[0-9][0-9.]*(\\.new)?$') | reject('equalto', _cassandra_install_dsbulk_home) | list }}

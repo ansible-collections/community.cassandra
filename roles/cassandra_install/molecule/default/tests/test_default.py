@@ -66,3 +66,29 @@ def test_no_cqlsh_python_override_on_50x(host):
 def test_cqlsh_installed_by_hand_kept(host):
     # side_effect.yml put one in /usr/local/bin, without the role's marker
     assert "installed by hand" in host.file("/usr/local/bin/cqlsh").content_string
+
+
+def test_dsbulk_installed_like_the_tools(host):
+    assert host.run("readlink /usr/bin/dsbulk").stdout.strip() == "/usr/share/dsbulk/bin/dsbulk"
+    assert host.run("readlink /usr/share/dsbulk").stdout.strip() == "/usr/share/dsbulk-1.11.2"
+    # side_effect.yml went to 1.11.1 and back: 1.11.1 went, the one unpacked by hand stays
+    assert host.run("ls -d /usr/share/dsbulk-*").stdout.split() == ["/usr/share/dsbulk-1.0.0", "/usr/share/dsbulk-1.11.2"]
+
+    # root-owned, nothing writable by group or others
+    assert host.run("find /usr/share/dsbulk-1.11.2 ! -user root -o ! -group root -o -perm /022").stdout == ""
+    assert host.file("/usr/share/dsbulk-1.11.2/bin/dsbulk").mode == 0o755
+
+
+def test_dsbulk_runs(host):
+    cmd = host.run("dsbulk --version")
+
+    assert cmd.rc == 0
+    assert "v1.11.2" in cmd.stdout
+
+
+def test_dsbulk_starts_its_driver(host):
+    # Loads the driver and Netty on the installed Java, no Cassandra needed;
+    # dsbulk writes its logs in ./logs
+    cmd = host.run("cd /tmp && dsbulk count -k ks -t t -h 127.0.0.1 -port 1")
+
+    assert "Could not reach any contact point" in cmd.stdout + cmd.stderr
