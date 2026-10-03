@@ -7,11 +7,23 @@
 # Persistent settings (sysctl.conf, fstab, THP unit) are always written;
 # applying them live is skipped in containers, where /proc/sys and /sys
 # belong to the host kernel (read-only, or worse, the host's if privileged).
-# What runs at boot (THP unit enabled) is skipped there too.
+# What runs at boot (THP unit enabled, udev rule) is skipped there too.
 - name: Gather the virtualization facts (not in every gather_subset)
   ansible.builtin.setup:
     gather_subset: ['!all', '!min', 'virtual']
   when: "'virtualization_type' not in ansible_facts"
+
+- name: Check cassandra_data_readahead_kb
+  ansible.builtin.assert:
+    that: cassandra_data_readahead_kb | string is match('^[0-9]+$')
+    fail_msg: "cassandra_data_readahead_kb must be a number of KB, not {{ cassandra_data_readahead_kb | default('') }}"
+    quiet: true
+
+- name: Check cassandra_linux_tune_data_disk
+  ansible.builtin.assert:
+    that: cassandra_linux_tune_data_disk | string | lower in ['true', 'false', 'yes', 'no', 'on', 'off', '1', '0']
+    fail_msg: "cassandra_linux_tune_data_disk must be true or false, not {{ cassandra_linux_tune_data_disk | default('') }}"
+    quiet: true
 
 - name: Check cassandra_linux_apply_live
   ansible.builtin.assert:
@@ -141,3 +153,151 @@
     - _cassandra_linux_live | bool
     - thp_now.rc | default(1) == 0
     - "'[never]' not in thp_now.stdout"
+
+# The data disk, only with cassandra_linux_tune_data_disk (cassandra_data_dir
+# alone doesn't turn it on): cassandra_data_block_device, or else the device
+# backing cassandra_data_dir. A partition resolves to its disk. LVM, md RAID and
+# dm-crypt devices are not guessed: set cassandra_data_block_device to the
+# disk (their own read-ahead is not set). The lookups only read, so they
+# also run in check mode. A data directory that doesn't exist yet resolves
+# to nothing (findmnt fails), not to a parent: its disk may not be mounted yet.
+- name: Tune the Cassandra data disk
+  when: cassandra_linux_tune_data_disk | bool
+  block:
+    - name: Find the device backing cassandra_data_dir
+      ansible.builtin.command:
+        argv: [findmnt, -n, -o, SOURCE, --target, "{{ cassandra_data_dir }}"]
+      register: cassandra_data_findmnt
+      changed_when: false
+      failed_when: false
+      check_mode: false
+      when:
+        - cassandra_data_block_device == ""
+        - cassandra_data_dir | default('') is match('/')
+
+    # findmnt shows a btrfs subvolume as /dev/sda1[/@]
+    - name: Keep the data device
+      ansible.builtin.set_fact:
+        _cassandra_data_source: >-
+          {{ cassandra_data_block_device if cassandra_data_block_device != ''
+             else cassandra_data_findmnt.stdout | default('') | regex_replace('\[.*\]$', '') | trim }}
+
+    - name: Resolve the data device
+      ansible.builtin.command:
+        argv: [lsblk, -J, -nd, -o, "KNAME,PKNAME,TYPE", "{{ _cassandra_data_source }}"]
+      register: cassandra_data_lsblk
+      changed_when: false
+      failed_when: false
+      check_mode: false
+      when: _cassandra_data_source is match('/dev/')
+
+    # An explicit device lsblk can't read (e.g. no udev in a container) is taken
+    # as a disk name as is; the sysfs check below then confirms it.
+    - name: Pick the disk to tune
+      ansible.builtin.set_fact:
+        _cassandra_data_disk: >-
+          {{ _dev.pkname if _dev.type | default('') == 'part'
+             else _dev.kname if _dev.type | default('') == 'disk'
+             else (cassandra_data_block_device | basename) if cassandra_data_block_device != '' and _dev == {}
+             else '' }}
+      vars:
+        _dev: >-
+          {{ (cassandra_data_lsblk.stdout | from_json).blockdevices | first | default({})
+             if cassandra_data_lsblk.rc | default(1) == 0 and cassandra_data_lsblk.stdout | default('') != '' else {} }}
+
+    # The real /sys/block is the host's in a container (unless forced by
+    # cassandra_linux_apply_live); tests point at a fake tree
+    - name: Decide whether the data disk is tuned here
+      ansible.builtin.set_fact:
+        _cassandra_data_tuned_here: "{{ _cassandra_linux_boot or cassandra_sysfs_block_root != '/sys/block' }}"
+
+    - name: Check the disk under sysfs
+      ansible.builtin.stat:
+        path: "{{ cassandra_sysfs_block_root }}/{{ _cassandra_data_disk }}/queue"
+      register: cassandra_data_disk_stat
+      when: _cassandra_data_disk != ""
+
+    - name: Refuse a data disk that can't be tuned
+      ansible.builtin.fail:
+        msg: >-
+          cassandra_data_block_device {{ cassandra_data_block_device }} is not a disk that can be tuned
+          ({{ cassandra_sysfs_block_root }}/{{ _cassandra_data_disk | default('?', true) }}/queue not found): set it to the
+          whole disk (e.g. /dev/sdb, /dev/nvme0n1), or to "" to skip it (the disk of cassandra_data_dir, if set, is then looked up).
+      when:
+        - cassandra_data_block_device != ""
+        - _cassandra_data_tuned_here | bool
+        - not cassandra_data_disk_stat.stat.exists | default(false)
+
+    - name: Say why the data disk is not tuned
+      ansible.builtin.debug:
+        msg: >-
+          WARNING: the disk of {{ cassandra_data_dir }} ({{ _cassandra_data_source | default('not found', true) }}) is not tuned:
+          it is not a plain disk or partition (LVM, RAID, dm-crypt, overlay...), or the directory doesn't exist yet,
+          or it is not an absolute path. Set cassandra_data_block_device to a plain disk
+          to tune it.
+      when:
+        - cassandra_data_block_device == ""
+        - cassandra_data_dir | default('') != ''
+        - _cassandra_data_tuned_here | bool
+        - not cassandra_data_disk_stat.stat.exists | default(false)
+
+    # Read-ahead is one of the worst default settings for Cassandra's read path
+    # (see the role README): applied now through sysfs, and kept across reboots
+    # with a udev rule. The scheduler is only switched to none on SSD/NVMe disks.
+    - name: Disk tuning for the Cassandra data disk
+      when:
+        - _cassandra_data_tuned_here | bool
+        - cassandra_data_disk_stat.stat.exists | default(false)
+      vars:
+        cassandra_data_queue: "{{ cassandra_sysfs_block_root }}/{{ _cassandra_data_disk }}/queue"
+        _rotational: "{{ cassandra_data_disk_now.stdout_lines[2] | default('1') | trim }}"
+        # the kernel keeps whole pages: 4 KB reads back as 0 with 64 KB pages
+        _page_kb: "{{ (cassandra_data_disk_now.stdout_lines[3] | default('4096') | int // 1024) or 1 }}"
+        _readahead_read_back: "{{ cassandra_data_readahead_kb | int // _page_kb | int * _page_kb | int }}"
+        _live_here: "{{ _cassandra_linux_live or cassandra_sysfs_block_root != '/sys/block' }}"
+      block:
+        - name: Read the disk's read-ahead, scheduler and type, and the page size
+          ansible.builtin.shell: >-
+            cat {{ cassandra_data_queue | quote }}/read_ahead_kb {{ cassandra_data_queue | quote }}/scheduler
+            {{ cassandra_data_queue | quote }}/rotational && getconf PAGESIZE
+          register: cassandra_data_disk_now
+          changed_when: false
+          check_mode: false
+
+        - name: Set the read-ahead
+          ansible.builtin.shell: "echo {{ cassandra_data_readahead_kb | int }} > {{ cassandra_data_queue | quote }}/read_ahead_kb"
+          changed_when: true
+          when:
+            - _live_here | bool
+            - cassandra_data_disk_now.stdout_lines[0] | trim | int != _readahead_read_back | int
+
+        - name: Set the IO scheduler to none (SSD/NVMe)
+          ansible.builtin.shell: "echo none > {{ cassandra_data_queue | quote }}/scheduler"
+          register: cassandra_data_scheduler_set
+          changed_when: cassandra_data_scheduler_set.rc == 0
+          when:
+            - _live_here | bool
+            - _rotational == '0'
+            - "'[none]' not in cassandra_data_disk_now.stdout_lines[1]"
+            - cassandra_data_disk_now.stdout_lines[1] | trim != 'none'
+          failed_when: false  # some virtual disks reject the switch
+
+        - name: Read the disk's serial number (stable across reboots, unlike its name)
+          ansible.builtin.command:
+            argv: [udevadm, info, --query=property, "--name=/dev/{{ _cassandra_data_disk }}"]
+          register: cassandra_data_udev
+          changed_when: false
+          failed_when: false
+          check_mode: false
+
+        - name: Ensure the udev rules dir exists (absent on minimal images without udev)
+          ansible.builtin.file:
+            path: /etc/udev/rules.d
+            state: directory
+            mode: "0755"
+
+        - name: Keep the settings across reboots (udev rule)
+          ansible.builtin.template:
+            src: 61-cassandra-data-disk.rules.j2
+            dest: /etc/udev/rules.d/61-cassandra-data-disk.rules
+            mode: "0644"

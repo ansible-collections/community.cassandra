@@ -84,3 +84,36 @@ def test_limit_file(host):
 def test_thp_service_installed_not_enabled_in_container(host):
     assert host.file("/etc/systemd/system/disable-thp.service").exists
     assert not host.service("disable-thp").is_enabled
+
+
+def test_data_disk_readahead(host):
+    f = host.file("/tmp/fake-sys/block/sdz/queue/read_ahead_kb")
+
+    assert f.content_string.strip() == "4"
+
+
+def test_data_disk_scheduler(host):
+    f = host.file("/tmp/fake-sys/block/sdz/queue/scheduler")
+
+    assert f.content_string.strip() == "none"
+
+
+def test_spinning_disk_keeps_its_scheduler(host):
+    assert host.file("/tmp/fake-sys/block/sdy/queue/read_ahead_kb").content_string.strip() == "4"
+    assert host.file("/tmp/fake-sys/block/sdy/queue/scheduler").content_string.strip() == "[mq-deadline] none"
+
+
+def test_data_disk_udev_rule(host):
+    f = host.file("/etc/udev/rules.d/61-cassandra-data-disk.rules")
+
+    assert f.exists
+    assert f.mode == 0o644
+    # no udev id for the fake disk: matched by name
+    assert f.content_string == (
+        "# Managed by Ansible (community.cassandra.cassandra_linux): change the role variables, not this file.\n"
+        "# After 60-persistent-storage.rules, which sets the ID_* properties.\n"
+        'ACTION=="add|change", SUBSYSTEM=="block", ENV{DEVTYPE}=="disk", KERNEL=="sdz", '
+        'ATTR{queue/read_ahead_kb}="4"\n'
+        'ACTION=="add|change", SUBSYSTEM=="block", ENV{DEVTYPE}=="disk", KERNEL=="sdz", '
+        'ATTR{queue/rotational}=="0", ATTR{queue/scheduler}="none"\n'
+    )

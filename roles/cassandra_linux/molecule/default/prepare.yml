@@ -21,6 +21,29 @@
     ansible.builtin.shell: apt-get update && apt-get clean
     when: ansible_facts['os_family'] == 'Debian'
 
+  # Fake sysfs tree for the disk tuning tests: the container is privileged,
+  # so the real /sys/block is the host's and must never be written to.
+  # sdz: an SSD, sdy: a spinning disk (keeps its scheduler)
+  - name: Create fake sysfs queue dirs
+    ansible.builtin.file:
+      path: "/tmp/fake-sys/block/{{ item }}/queue"
+      state: directory
+    loop: [sdz, sdy]
+
+  - name: Seed fake sysfs queue attributes with stock-like values
+    ansible.builtin.copy:
+      content: "{{ item.1.value }}"
+      dest: "/tmp/fake-sys/block/{{ item.0.disk }}/queue/{{ item.1.name }}"
+    loop: "{{ _seed }}"
+    vars:
+      _seed:
+        - [{disk: sdz}, {name: read_ahead_kb, value: "128\n"}]
+        - [{disk: sdz}, {name: scheduler, value: "[mq-deadline] none\n"}]
+        - [{disk: sdz}, {name: rotational, value: "0\n"}]
+        - [{disk: sdy}, {name: read_ahead_kb, value: "128\n"}]
+        - [{disk: sdy}, {name: scheduler, value: "[mq-deadline] none\n"}]
+        - [{disk: sdy}, {name: rotational, value: "1\n"}]
+
   # UBI repos don't carry chrony (real RHEL does, via subscription): pull it
   # from the matching Rocky BaseOS instead. Test scaffolding only.
   - name: Add Rocky BaseOS repo for chrony on UBI

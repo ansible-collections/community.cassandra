@@ -1,10 +1,28 @@
 ---
-# Apply kernel settings (sysctl, swapoff, THP) live, not just persist them.
-# "auto": live everywhere except containers (Ansible's virtualization facts,
-# or a virtualization_type listed below), where /proc/sys and /sys are the
-# host's. true/false forces it (e.g. true on a dedicated privileged
-# container host that should be tuned from inside; false persists only,
-# and in containers only the files).
+# Tune the Cassandra data disk (read-ahead, IO scheduler, udev rule). Off by
+# default: cassandra_data_dir alone doesn't turn it on. See the README.
+cassandra_linux_tune_data_disk: false
+
+# Disk of the Cassandra data, e.g. "/dev/sdb" or "/dev/nvme0n1" (a partition
+# is taken as its disk). "" (default): found from cassandra_data_dir with
+# findmnt + lsblk; LVM/RAID/dm-crypt are not guessed. See the README.
+cassandra_data_block_device: ""
+
+# Read-ahead in KB for that disk (queue/read_ahead_kb, not blockdev --setra
+# sectors). 4, the practical minimum: read-ahead brings nothing to
+# Cassandra's random reads and fills the page cache with unneeded data.
+cassandra_data_readahead_kb: 4
+
+# sysfs block root the disk tuning reads and writes. Only meant to be
+# overridden by tests, to point at a fake tree instead of the real disks.
+cassandra_sysfs_block_root: /sys/block
+
+# Apply kernel settings (sysctl, swapoff, THP, disk tuning) live, not just
+# persist them. "auto": live everywhere except containers (Ansible's
+# virtualization facts, or a virtualization_type listed below), where
+# /proc/sys and /sys are the host's. true/false forces it (e.g. true on a
+# dedicated privileged container host that should be tuned from inside;
+# false persists only, and in containers only the files).
 cassandra_linux_apply_live: auto
 cassandra_linux_container_types:
   - docker
