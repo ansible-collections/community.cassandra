@@ -12,7 +12,7 @@
           - _cassandra_linux_container is true
           - _cassandra_linux_live is false
           - _cassandra_linux_boot is false
-          - cassandra_data_findmnt is skipped
+          - _cassandra_data_findmnt is skipped
           - _cassandra_data_disk is undefined
 
     # e.g. cassandra_data_dir set by cassandra_config in the same play. The
@@ -27,7 +27,7 @@
     - name: Check the disk of cassandra_data_dir was not looked up
       ansible.builtin.assert:
         that:
-          - cassandra_data_findmnt is skipped
+          - _cassandra_data_findmnt is skipped
           - _cassandra_data_disk is undefined
 
     - name: Read the SSD's read-ahead and the udev rule before
@@ -53,8 +53,8 @@
     - name: Check nothing about the data disk ran
       ansible.builtin.assert:
         that:
-          - cassandra_data_lsblk is skipped
-          - cassandra_data_disk_stat is skipped
+          - _cassandra_data_lsblk is skipped
+          - _cassandra_data_disk_stat is skipped
           - _cassandra_data_disk is undefined
           - _off_after.stdout == _off_before.stdout
 
@@ -98,10 +98,10 @@
     - name: Check the disk was looked up (also under --check) and not tuned
       ansible.builtin.assert:
         that:
-          - cassandra_data_findmnt is not skipped
-          - cassandra_data_findmnt.stdout == ''
+          - _cassandra_data_findmnt is not skipped
+          - _cassandra_data_findmnt.stdout == ''
           - _cassandra_data_disk == ''
-          - cassandra_data_disk_stat is skipped
+          - _cassandra_data_disk_stat is skipped
 
     # The data directory exists, on the container's overlay: not a disk
     # (not /tmp: a volume on the host's disk in some images)
@@ -116,10 +116,10 @@
     - name: Check the filesystem was found and not tuned
       ansible.builtin.assert:
         that:
-          - cassandra_data_findmnt.stdout != ''
-          - cassandra_data_findmnt.stdout is not match('/dev/')
+          - _cassandra_data_findmnt.stdout != ''
+          - _cassandra_data_findmnt.stdout is not match('/dev/')
           - _cassandra_data_disk == ''
-          - cassandra_data_disk_stat is skipped
+          - _cassandra_data_disk_stat is skipped
 
     - name: Run cassandra_linux with a relative data directory
       ansible.builtin.include_role:
@@ -132,7 +132,7 @@
     - name: Check it was not looked up
       ansible.builtin.assert:
         that:
-          - cassandra_data_findmnt is skipped
+          - _cassandra_data_findmnt is skipped
           - _cassandra_data_disk == ''
 
     - name: A read-ahead that is not a number is refused
@@ -197,8 +197,8 @@
       ansible.builtin.assert:
         that:
           - _cassandra_data_tuned_here is false
-          - cassandra_data_disk_stat is not skipped
-          - not cassandra_data_disk_stat.stat.exists
+          - _cassandra_data_disk_stat is not skipped
+          - not _cassandra_data_disk_stat.stat.exists
 
     - name: Run cassandra_linux on a spinning disk (keeps its scheduler)
       ansible.builtin.include_role:
@@ -218,7 +218,7 @@
         cassandra_linux_tune_data_disk: true
         cassandra_data_block_device: /dev/sdz
         cassandra_sysfs_block_root: /tmp/fake-sys/block
-        cassandra_data_udev:
+        _cassandra_data_udev:
           stdout_lines:
             - ID_PATH=pci-0000:00:10.0-scsi-0:0:0:1
             - ID_SERIAL=3600a098038303053453f463045727a6b

@@ -1,0 +1,2 @@
+trivial:
+  - cassandra_linux - the internal variables of the data disk tuning start with an underscore, like the role's other internal names.
