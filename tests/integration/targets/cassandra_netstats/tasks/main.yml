@@ -1,0 +1,60 @@
+# test code for the cassandra_netstats module
+# (c) 2026,  Alain Rodriguez <alain@casterix.fr>
+
+# This file is part of Ansible
+#
+# Ansible is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Ansible is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
+
+# ===========================================================
+- name: Get netstats
+  community.cassandra.cassandra_netstats:
+    debug: true
+  register: netstats
+
+- name: Assert the node is joined and idle
+  ansible.builtin.assert:
+    that:
+      - netstats.mode == 'NORMAL'
+      - not netstats.streaming
+      - netstats.streams == []
+      - "'Mode: NORMAL' in netstats.stdout"
+      - netstats.changed == False
+
+- name: Get netstats in check mode
+  community.cassandra.cassandra_netstats:
+  check_mode: true
+  register: netstats_check
+
+- name: Assert check mode returns the same
+  ansible.builtin.assert:
+    that:
+      - netstats_check.mode == 'NORMAL'
+      - netstats_check.changed == False
+
+# cassandra_version is given so that the version detection does not fail
+# first: the failure must come from nodetool netstats itself.
+- name: Get netstats from a port nothing listens on
+  community.cassandra.cassandra_netstats:
+    port: 7299
+    cassandra_version: "5.0"
+    debug: true
+  register: netstats_fail
+  ignore_errors: true
+
+- name: Assert it failed
+  ansible.builtin.assert:
+    that:
+      - netstats_fail.failed
+      - netstats_fail.msg == 'netstats command failed'
+      - "'Failed to connect' in netstats_fail.stderr | default('')"

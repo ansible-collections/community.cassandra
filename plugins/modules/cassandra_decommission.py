@@ -70,14 +70,7 @@ __metaclass__ = type
 
 from ansible_collections.community.cassandra.plugins.module_utils.nodetool_cmd_objects import NodeToolCommandSimple
 from ansible_collections.community.cassandra.plugins.module_utils.cassandra_common_options import cassandra_common_argument_spec
-
-
-def node_mode(netstats_out):
-    """Return the mode from the "Mode: X" line of nodetool netstats, None if absent."""
-    for line in netstats_out.splitlines():
-        if line.startswith("Mode:"):
-            return line.split(":", 1)[1].strip()
-    return None
+from ansible_collections.community.cassandra.plugins.module_utils.nodetool_netstats import node_mode
 
 
 def main():
