@@ -111,6 +111,26 @@ def test_40x_overrides(host):
     assert conf["auto_bootstrap"] is False
 
 
+@pytest.mark.parametrize("series, period, window, value", [
+    ("40x", "commitlog_sync_period_in_ms", "commitlog_sync_group_window_in_ms", 15),
+    ("41x", "commitlog_sync_period", "commitlog_sync_group_window", "15ms"),
+    ("50x", "commitlog_sync_period", "commitlog_sync_group_window", "15ms"),
+])
+def test_commitlog_group_mode(host, series, period, window, value):
+    # Cassandra refuses to start in group mode with a sync period: only the window is set
+    content = host.file(f"/tmp/cassandra-{series}-group/cassandra.yaml").content_string
+    conf = yaml.safe_load(content)
+
+    assert conf["commitlog_sync"] == "group"
+    assert conf[window] == value
+    assert period not in conf
+    assert f"\n# {period}: " in content
+
+
+def test_commitlog_group_mode_without_window_refused(host):
+    assert not host.file("/tmp/cassandra-group-no-window").exists
+
+
 @pytest.mark.parametrize("name", FILES)
 def test_defaults_file_mode(host, name):
     f = host.file(f"{conf_dir(host)}/{name}")

@@ -193,13 +193,25 @@ argument_specs:
       cassandra_commitlog_sync:
         type: str
         default: periodic
+        choices: [periodic, group, batch]
         description:
         - C(commitlog_sync) in C(cassandra.yaml).
+        - Cassandra accepts the sync period in periodic mode only and needs the group window in group mode, so
+          the role writes C(commitlog_sync_period) in periodic mode only and C(commitlog_sync_group_window) in
+          group mode only (C(_in_ms) names on 4.0). Batch mode writes neither.
       cassandra_commitlog_sync_period:
         type: str
         default: 10000ms
         description:
-        - C(commitlog_sync_period) in C(cassandra.yaml).
+        - C(commitlog_sync_period) in C(cassandra.yaml), written when O(cassandra_commitlog_sync=periodic).
+      cassandra_commitlog_sync_group_window:
+        type: str
+        default: ''
+        description:
+        - C(commitlog_sync_group_window) in C(cassandra.yaml), written when O(cassandra_commitlog_sync=group), which
+          needs it (no default, as in Cassandra). A duration in ms or a larger unit, above zero.
+        - The longest a write waits for the grouped fsync before it is acked. Small values (10-15ms) are typical;
+          the stock example, 1000ms, would hold each write up to 1s.
       cassandra_commitlog_segment_size:
         type: str
         default: 32MiB
@@ -765,7 +777,15 @@ argument_specs:
         type: int
         default: 10000
         description:
-        - C(commitlog_sync_period_in_ms) in C(cassandra.yaml) (4.0 only).
+        - C(commitlog_sync_period_in_ms) in C(cassandra.yaml) (4.0 only), written when
+          O(cassandra_commitlog_sync=periodic).
+      cassandra_commitlog_sync_group_window_in_ms:
+        type: raw
+        default: ''
+        description:
+        - C(commitlog_sync_group_window_in_ms) in C(cassandra.yaml) (4.0 only), written when
+          O(cassandra_commitlog_sync=group), which needs it (no default). Milliseconds above zero (4.0 reads a
+          float), e.g. V(15). See O(cassandra_commitlog_sync_group_window).
       cassandra_commitlog_segment_size_in_mb:
         type: int
         default: 32

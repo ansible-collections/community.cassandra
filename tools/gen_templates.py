@@ -183,6 +183,33 @@ RULES = {
 }
 
 
+def sync_mode(mode, key, var, example=None):
+    # A commitlog setting Cassandra accepts in one commitlog_sync mode only:
+    # active in that mode, commented out (as in stock) in the others, with the
+    # stock example value when the variable has no default
+    value = var if example is None else "%s if cassandra_commitlog_sync == '%s' else '%s'" % (var, mode, example)
+    return "{{ '' if cassandra_commitlog_sync == '%s' else '# ' }}%s: {{ %s }}" % (mode, key, value)
+
+
+# cassandra.yaml lines the derivation from 5.0 cannot map (4.0 keys carry the
+# unit in their name): applied to the derived template, same as RULES
+YAML_RULES = {
+    "4.0": [
+        ("commitlog_sync_period_in_ms: {{ cassandra_commitlog_sync_period_in_ms }}",
+         sync_mode("periodic", "commitlog_sync_period_in_ms", "cassandra_commitlog_sync_period_in_ms")),
+        ("# commitlog_sync_group_window_in_ms: 1000",
+         sync_mode("group", "commitlog_sync_group_window_in_ms", "cassandra_commitlog_sync_group_window_in_ms", "1000")),
+    ],
+}
+
+
+def replace_lines(name, lines, rules):
+    for old, new in rules:
+        hits = [i for i, line in enumerate(lines) if line == old]
+        assert len(hits) == 1, "%s: %r found %d times" % (name, old, len(hits))
+        lines[hits[0]] = new
+
+
 def yaml_paths(lines):
     # One key per line: raw text for comments/blank, YAML path for settings.
     stack, out = [], []  # stack: [indent, key, child item count]
@@ -279,10 +306,7 @@ def main(series, stock_dir, out_dir):
     for name, rules in RULES[series].items():
         with open(os.path.join(stock_dir, name)) as f:
             lines = f.read().split("\n")
-        for old, new in rules:
-            hits = [i for i, line in enumerate(lines) if line == old]
-            assert len(hits) == 1, "%s: %r found %d times" % (name, old, len(hits))
-            lines[hits[0]] = new
+        replace_lines(name, lines, rules)
         with open(os.path.join(out_dir, name + ".j2"), "w") as f:
             f.write("\n".join([header(name)] + lines))
 
@@ -295,6 +319,7 @@ def main(series, stock_dir, out_dir):
             ref_tpl = ref_tpl[:-len(EXTRA)].split("\n")
             assert ref_tpl[0] == header("cassandra.yaml"), "reference template must start with the header"
             lines, new_vars, conflicts = derive_yaml(a.read().split("\n"), ref_tpl[1:], c.read().split("\n"))
+        replace_lines("cassandra.yaml", lines, YAML_RULES.get(series, []))
         with open(os.path.join(out_dir, "cassandra.yaml.j2"), "w") as f:
             f.write("\n".join([header("cassandra.yaml")] + lines) + EXTRA)
         print("# %s: new variables" % series)

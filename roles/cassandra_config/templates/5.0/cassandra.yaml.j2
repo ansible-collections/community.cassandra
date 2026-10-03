@@ -627,14 +627,14 @@ saved_caches_directory: {{ cassandra_saved_caches_dir }}
 # mode will wait up to commitlog_sync_group_window between flushes.
 #
 # Min unit: ms
-# commitlog_sync_group_window: 1000ms
+{{ '' if cassandra_commitlog_sync == 'group' else '# ' }}commitlog_sync_group_window: {{ cassandra_commitlog_sync_group_window if cassandra_commitlog_sync == 'group' else '1000ms' }}
 #
 # the default option is "periodic" where writes may be acked immediately
 # and the CommitLog is simply synced every commitlog_sync_period
 # milliseconds.
 commitlog_sync: {{ cassandra_commitlog_sync }}
 # Min unit: ms
-commitlog_sync_period: {{ cassandra_commitlog_sync_period }}
+{{ '' if cassandra_commitlog_sync == 'periodic' else '# ' }}commitlog_sync_period: {{ cassandra_commitlog_sync_period }}
 
 # When in periodic commitlog mode, the number of milliseconds to block writes
 # while waiting for a slow disk flush to complete.

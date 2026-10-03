@@ -49,6 +49,9 @@
         - /tmp/cassandra-40x-G1
         - /tmp/cassandra-41x-G1
         - /tmp/cassandra-50x-CMS
+        - /tmp/cassandra-40x-group
+        - /tmp/cassandra-41x-group
+        - /tmp/cassandra-50x-group
         - /tmp/cassandra-secret
         - /tmp/cassandra-access
         - /tmp/cassandra-no-account

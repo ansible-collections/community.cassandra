@@ -179,3 +179,82 @@ def test_accounts_checked_before_any_write():
     assert all("ansible.builtin.command" in t or "ansible.builtin.assert" in t or "ansible.builtin.stat" in t
                for t in configure[:[t["name"] for t in configure].index("Assert the accounts exist")])
     assert names.index("JMX users") > names.index("Configure")
+
+
+with open(os.path.join(TASKS, "..", "defaults", "main.yml"), encoding="utf-8") as f:
+    ROLE_DEFAULTS = yaml.safe_load(f)
+
+
+def render_commitlog_lines(series, **overrides):
+    # the commitlog_sync lines of the series' cassandra.yaml template, active or commented, rendered
+    with open(os.path.join(TEMPLATES, series, "cassandra.yaml.j2"), encoding="utf-8") as f:
+        lines = [line for line in f.read().split("\n") if re.match(r"^(# |\{\{[^}]*\}\})?commitlog_sync\w*:", line)]
+    variables = dict(ROLE_DEFAULTS, cassandra_version=series.replace(".", "") + "x", **overrides)
+    return "\n".join(render(line, escape_backslashes=False, **variables) for line in lines) + "\n"
+
+
+# Cassandra (DatabaseDescriptor.applySimpleConfig) refuses a sync period outside periodic
+# mode and needs a group window in group mode; 4.0 names carry the unit
+@pytest.mark.parametrize("series, period, window, overrides", [
+    ("5.0", "commitlog_sync_period", "commitlog_sync_group_window", {"cassandra_commitlog_sync_group_window": "15ms"}),
+    ("4.1", "commitlog_sync_period", "commitlog_sync_group_window", {"cassandra_commitlog_sync_group_window": "15ms"}),
+    ("4.0", "commitlog_sync_period_in_ms", "commitlog_sync_group_window_in_ms",
+     {"cassandra_commitlog_sync_group_window_in_ms": 15}),
+])
+@pytest.mark.parametrize("mode", ["periodic", "group", "batch"])
+def test_commitlog_sync_modes(series, period, window, overrides, mode):
+    rendered = render_commitlog_lines(series, cassandra_commitlog_sync=mode, **overrides)
+    commitlog = yaml.safe_load(rendered)
+    expected = {"commitlog_sync": mode}
+    if mode == "periodic":
+        expected[period] = "10000ms" if series != "4.0" else 10000
+    elif mode == "group":
+        expected[window] = "15ms" if series != "4.0" else 15
+    assert commitlog == expected
+    # the line left out stays as the stock comment
+    if mode != "periodic":
+        assert ("# %s: " % period) in rendered
+    if mode != "group":  # with the stock example, the window having no default
+        assert ("# %s: %s\n" % (window, "1000" if series == "4.0" else "1000ms")) in rendered
+
+
+def commitlog_assert(**variables):
+    # both commit log asserts, the group window one in group mode only (its `when`)
+    variables = dict(dict((k, ROLE_DEFAULTS[k]) for k in ROLE_DEFAULTS if k.startswith("cassandra_commitlog_sync")),
+                     _cassandra_config_duration_ms=ROLE_VARS["_cassandra_config_duration_ms"], **variables)
+    that = task_that("Assert the commit log sync settings")
+    window = task("Assert the commit log group window is set")
+    if render("{{ %s }}" % window["when"], **variables):
+        that = that + [window["ansible.builtin.assert"]["that"]]
+    return all(render("{{ %s }}" % cond, **variables) for cond in that)
+
+
+@pytest.mark.parametrize("version, mode, settings, ok", [
+    ("50x", "periodic", {}, True),
+    ("40x", "periodic", {}, True),
+    ("50x", "batch", {"cassandra_commitlog_sync_group_window": "0ms", "cassandra_commitlog_sync_period": "0ms"}, True),
+    ("50x", "group", {"cassandra_commitlog_sync_group_window": "15ms"}, True),
+    ("41x", "group", {"cassandra_commitlog_sync_group_window": "1s"}, True),
+    ("50x", "group", {"cassandra_commitlog_sync_group_window": "15ms", "cassandra_commitlog_sync_period": "0ms"},
+     True),  # the period is not written in group mode
+    ("50x", "group", {}, False),  # no default window, as in Cassandra
+    ("41x", "group", {}, False),
+    ("40x", "group", {}, False),
+    ("50x", "group", {"cassandra_commitlog_sync_group_window": "0ms"}, False),  # Missing value for ..._group_window
+    ("41x", "group", {"cassandra_commitlog_sync_group_window": "000ms"}, False),
+    ("50x", "group", {"cassandra_commitlog_sync_group_window": "15"}, False),  # a duration needs its unit
+    ("50x", "group", {"cassandra_commitlog_sync_group_window": "500us"}, False),  # below the ms min unit
+    ("50x", "group", {"cassandra_commitlog_sync_group_window": "15MS"}, False),  # units are lower case
+    ("50x", "group", {"cassandra_commitlog_sync_group_window": ""}, False),
+    ("50x", "periodic", {"cassandra_commitlog_sync_period": "0ms"}, False),  # Missing value for commitlog_sync_period
+    ("41x", "periodic", {"cassandra_commitlog_sync_period": "10000"}, False),
+    ("40x", "periodic", {"cassandra_commitlog_sync_period_in_ms": 0}, False),
+    ("40x", "group", {"cassandra_commitlog_sync_group_window": "0ms", "cassandra_commitlog_sync_group_window_in_ms": 15}, True),
+    ("40x", "group", {"cassandra_commitlog_sync_group_window_in_ms": 0.5}, True),  # 4.0 reads a double
+    ("40x", "group", {"cassandra_commitlog_sync_group_window_in_ms": 0}, False),
+    ("40x", "group", {"cassandra_commitlog_sync_group_window_in_ms": "15ms"}, False),
+    ("50x", "Group", {"cassandra_commitlog_sync_group_window": "15ms"}, False),
+    ("50x", "async", {"cassandra_commitlog_sync_group_window": "15ms"}, False),
+])
+def test_commitlog_sync_assert(version, mode, settings, ok):
+    assert commitlog_assert(cassandra_version=version, cassandra_commitlog_sync=mode, **settings) is ok

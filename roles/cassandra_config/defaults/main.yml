@@ -48,8 +48,13 @@ cassandra_row_cache_size: "0MiB"
 cassandra_row_cache_save_period: "{{ '0' if cassandra_version == '40x' else '0s' }}"  # 4.0: seconds, no unit
 cassandra_counter_cache_size: ""
 cassandra_counter_cache_save_period: "{{ '7200' if cassandra_version == '40x' else '7200s' }}"  # 4.0: seconds, no unit
+# periodic, group or batch. Cassandra refuses commitlog_sync_period outside
+# periodic mode: the role writes it in periodic mode only, and the group
+# window in group mode only. The window has no default, as in Cassandra:
+# group mode needs it set (e.g. 15ms)
 cassandra_commitlog_sync: "periodic"
 cassandra_commitlog_sync_period: "10000ms"
+cassandra_commitlog_sync_group_window: ""
 cassandra_commitlog_segment_size: "32MiB"
 cassandra_commitlog_disk_access_mode: "legacy"
 cassandra_seed_provider_class_name: "org.apache.cassandra.locator.SimpleSeedProvider"
@@ -176,6 +181,7 @@ cassandra_permissions_validity_in_ms: 2000
 cassandra_credentials_validity_in_ms: 2000
 cassandra_row_cache_size_in_mb: 0
 cassandra_commitlog_sync_period_in_ms: 10000
+cassandra_commitlog_sync_group_window_in_ms: ""
 cassandra_commitlog_segment_size_in_mb: 32
 cassandra_index_summary_resize_interval_in_minutes: 60
 cassandra_trickle_fsync_interval_in_kb: 10240

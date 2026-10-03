@@ -9,6 +9,34 @@
       cassandra_conf_dir and cassandra_data_file_directories must not be empty, and cassandra_jvm<N>_gc one of
       G1, CMS, custom
 
+# Cassandra refuses to start without a period above zero in periodic mode
+# (4.1+: a duration in ms or a larger unit)
+- name: Assert the commit log sync settings
+  ansible.builtin.assert:
+    that:
+      - cassandra_commitlog_sync in ['periodic', 'group', 'batch']
+      - >-
+        cassandra_commitlog_sync != 'periodic'
+        or (cassandra_commitlog_sync_period_in_ms | int > 0 if cassandra_version == '40x'
+            else (cassandra_commitlog_sync_period | string) is match(_cassandra_config_duration_ms))
+    fail_msg: >-
+      cassandra_commitlog_sync must be periodic, group or batch, and in periodic mode
+      {{ 'cassandra_commitlog_sync_period_in_ms above zero (milliseconds)' if cassandra_version == '40x'
+         else 'cassandra_commitlog_sync_period above zero, in ms or a larger unit (e.g. 10000ms)' }}
+
+# Group mode has no default window, as in Cassandra, which refuses to start without one
+- name: Assert the commit log group window is set
+  ansible.builtin.assert:
+    that: >-
+      cassandra_commitlog_sync_group_window_in_ms | float > 0 if cassandra_version == '40x'
+      else (cassandra_commitlog_sync_group_window | string) is match(_cassandra_config_duration_ms)
+    fail_msg: >-
+      cassandra_commitlog_sync is group: set
+      {{ 'cassandra_commitlog_sync_group_window_in_ms (e.g. 15' if cassandra_version == '40x'
+         else 'cassandra_commitlog_sync_group_window (e.g. 15ms' }}; the time a write may wait for the group fsync),
+      above zero
+  when: cassandra_commitlog_sync == 'group'
+
 - name: Refuse extra settings the template already has
   ansible.builtin.assert:
     that: _taken | length == 0

@@ -70,6 +70,54 @@
         cassandra_jvm8_extra_options: ["-Dmolecule.jvm8=1"]
         cassandra_extra_settings: {auto_bootstrap: false}
 
+    - name: Render the group commit log mode
+      ansible.builtin.include_role:
+        name: community.cassandra.cassandra_config
+      vars:
+        cassandra_version: "{{ series }}"
+        cassandra_conf_dir: "/tmp/cassandra-{{ series }}-group"
+        cassandra_commitlog_sync: group
+        cassandra_commitlog_sync_group_window: 15ms
+        cassandra_commitlog_sync_group_window_in_ms: 15
+      loop: [40x, 41x, 50x]
+      loop_control:
+        loop_var: series
+
+    - name: Render the group commit log mode without a window
+      block:
+        - name: Run the role, expecting its assert to fail
+          ansible.builtin.include_role:
+            name: community.cassandra.cassandra_config
+          vars:
+            cassandra_conf_dir: /tmp/cassandra-group-no-window
+            cassandra_commitlog_sync: group
+
+        - name: Fail if the role accepted group mode without a window
+          ansible.builtin.fail:
+            msg: cassandra_config accepted commitlog_sync group without a window
+      rescue:
+        - name: Assert the failure came from the role's own assert
+          ansible.builtin.assert:
+            that: ansible_failed_task.name == "Assert the commit log group window is set"
+
+    - name: Render the group commit log mode with a zero window
+      block:
+        - name: Run the role, expecting its assert to fail
+          ansible.builtin.include_role:
+            name: community.cassandra.cassandra_config
+          vars:
+            cassandra_conf_dir: /tmp/cassandra-group-no-window
+            cassandra_commitlog_sync: group
+            cassandra_commitlog_sync_group_window: 0ms
+
+        - name: Fail if the role accepted a zero group window
+          ansible.builtin.fail:
+            msg: cassandra_config accepted commitlog_sync group with a 0ms window
+      rescue:
+        - name: Assert the failure came from the role's own assert
+          ansible.builtin.assert:
+            that: ansible_failed_task.name == "Assert the commit log group window is set"
+
     - name: Render 4.x CMS with a heap size but no newsize
       block:
         - name: Run the role, expecting its heap assert to fail

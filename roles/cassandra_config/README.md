@@ -74,6 +74,18 @@ Role Variables
   defaults to `NONE` (5.0 formats and features, right for a new cluster).
   A cluster upgraded from 4.x must set `CASSANDRA_4`, then move through
   `UPGRADING` to `NONE` with rolling restarts.
+* Commit log sync: `cassandra_commitlog_sync` is `periodic` (default),
+  `group` or `batch`. Cassandra refuses to start with a sync period outside
+  periodic mode, or in group mode without a group window, so the role writes
+  `cassandra_commitlog_sync_period` (default `10000ms`) in periodic mode only,
+  and `cassandra_commitlog_sync_group_window` in group mode only. Group mode
+  needs the window set (no default, as in Cassandra): the longest a write
+  waits for the grouped fsync before it is acked. Small values (10-15ms) are
+  typical; the stock example, 1000ms, would hold each write up to 1s. Batch
+  mode writes neither. 4.0 uses `cassandra_commitlog_sync_period_in_ms` and
+  `cassandra_commitlog_sync_group_window_in_ms` (milliseconds, e.g. `15`).
+  `commitlog_sync_batch_window_in_ms` has no variable: 4.x does nothing with
+  it (and refuses it in periodic mode), 5.0 refuses it.
 * `cassandra_jmx_users`: remote JMX users (with `cassandra_local_jmx: false`),
   as `{name, password, access}` (`readwrite`, the default, or
   `readonly`; a `readwrite` user also gets the `create` and `unregister`
