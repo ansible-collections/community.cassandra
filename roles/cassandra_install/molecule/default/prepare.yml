@@ -7,7 +7,15 @@
     - name: Clean package manager cache
       ansible.builtin.shell: dnf clean all || yum clean all
       when: ansible_facts['os_family'] == 'RedHat'
-      
+
     - name: Clean package manager cache
       ansible.builtin.shell: apt-get update && apt-get clean
+      when: ansible_facts['os_family'] == 'Debian'
+
+    # Behave like a real VM: base images ship a policy-rc.d that already
+    # blocks service starts, which would hide the postinst autostart.
+    - name: Remove the image's policy-rc.d
+      ansible.builtin.file:
+        path: /usr/sbin/policy-rc.d
+        state: absent
       when: ansible_facts['os_family'] == 'Debian'

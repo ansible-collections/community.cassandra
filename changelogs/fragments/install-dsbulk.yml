@@ -1,0 +1,4 @@
+minor_changes:
+  - cassandra_install - installs the DataStax Bulk Loader by default, like the packaged tools, in ``/usr/share/dsbulk-<version>`` with a ``/usr/bin/dsbulk`` link; the tarball is checked against ``cassandra_dsbulk_checksum`` and ``cassandra_dsbulk_url`` can point to a mirror or a file on the node. Set ``cassandra_dsbulk_install`` to ``false`` to skip it (for example on nodes that cannot reach GitHub).
+breaking_changes:
+  - cassandra_install - dsbulk is now installed by default, downloaded from GitHub; on nodes that cannot reach it, set ``cassandra_dsbulk_url`` to a mirror or a local copy, or ``cassandra_dsbulk_install`` to ``false``. A file or directory at ``/usr/bin/dsbulk`` or ``/usr/share/dsbulk`` (a dsbulk installed by other means) stops the role.
