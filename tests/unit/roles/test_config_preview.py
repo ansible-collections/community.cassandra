@@ -4,10 +4,12 @@ __metaclass__ = type
 # cassandra_config shows what it would change (secrets masked), asks before
 # changing an initialized node and refuses to change the identity of a joined node.
 
+import base64
 import json
 import os
 import subprocess
 import sys
+import time
 
 import pytest
 import yaml
@@ -139,108 +141,223 @@ def test_yaml_validation(tmp_path, text, error):
         assert out.stderr.strip() == error and "Secret-Value" not in out.stdout + out.stderr
 
 
-SYSTEM = task("Look for the system keyspace of an initialized node")["ansible.builtin.command"]["argv"][2]
+def task_vars(t, **variables):
+    """The variables of a task, its own vars rendered in order on top."""
+    templated = {k: v for k, v in t.get("vars", {}).items() if isinstance(v, str) and "{{" in v}
+    variables.update({k: v for k, v in t.get("vars", {}).items() if k not in templated})
+    for name, value in templated.items():  # in the order they use each other
+        variables[name] = render(value, **variables)
+    return variables
 
 
-def system_dirs(tmp_path, live, inventory_dirs, system_in, pyyaml=True):
+def live_paths(text):
+    """_cassandra_config_live_paths for a live cassandra.yaml (text or bytes; None: none)."""
+    t = task("List the absolute paths of the live cassandra.yaml")
+    live = {} if text is None else {"content": base64.b64encode(text if isinstance(text, bytes) else text.encode()).decode()}
+    v = task_vars(t, cassandra_config_live=live)
+    return render(t["ansible.builtin.set_fact"]["_cassandra_config_live_paths"], **v)
+
+
+INVENTORY = dict(inventory_hostname="node1", cassandra_data_file_directories=["/var/lib/cassandra/data"],
+                 cassandra_extra_settings={}, cassandra_conf_dir="/etc/cassandra",
+                 _cassandra_config_default_data_dir="/var/lib/cassandra/data",
+                 cassandra_commitlog_dir="/var/lib/cassandra/commitlog", cassandra_saved_caches_dir="/var/lib/cassandra/saved_caches",
+                 cassandra_hints_dir="/var/lib/cassandra/hints")
+
+
+def stat_result(d, isdir):
+    """What the stat loop registers for a candidate (failed_when: false: an error leaves no stat)."""
+    try:
+        exists = isdir(d + "/system")
+    except OSError as e:
+        return {"item": d, "failed": False, "msg": e.strerror}  # what stat returns, in English (LC_ALL=C)
+    return {"item": d, "stat": {"exists": exists, "isdir": exists}}
+
+
+def initialized_facts(live=None, readable=True, isdir=os.path.isdir, services=None, **inventory):
+    """The facts of "Tell whether this node was already initialized": the role's templates, the modules simulated."""
+    v = dict(INVENTORY, **inventory)
+    v["cassandra_config_live_stat"] = {"stat": {"exists": live is not None}}
+    v["cassandra_config_live"] = {"content": base64.b64encode(live.encode()).decode()} if live is not None and readable else {}
+    v["_cassandra_config_live_paths"] = live_paths(live if readable else None)
+    items = render(task("Look for the system keyspace of an initialized node")["loop"], **v)
+    v["cassandra_config_system"] = {"results": [stat_result(d, isdir) for d in items]}
+    v["ansible_facts"] = {"services": services or {}}
+    t = task("Tell whether this node was already initialized")
+    v = task_vars(t, **v)
+    return {k: render(val, **v) for k, val in t["ansible.builtin.set_fact"].items()}
+
+
+def found_in(tmp_path, live, inventory_dirs, system_in):
+    """Where the node was found initialized, dirs relative to tmp_path."""
     for d in system_in:
         (tmp_path / d / "system").mkdir(parents=True)
-    if live is not None:
-        (tmp_path / "cassandra.yaml").write_text(live.replace("@", str(tmp_path) + "/"))
-    # -S: no site-packages, so no PyYAML: the script's own parser
-    args = [str(tmp_path / "cassandra.yaml"), json.dumps([str(tmp_path / d) for d in inventory_dirs]), str(tmp_path / "default")]
-    argv = [sys.executable] + ([] if pyyaml else ["-S"]) + ["-c", SYSTEM] + args
-    out = subprocess.run(argv, stdout=subprocess.PIPE, universal_newlines=True, check=True).stdout
-    # the dirs found (a "(key in the live cassandra.yaml)" line: see test_initialized_when_live_dirs_not_read)
-    return [line[len(str(tmp_path)) + 1:] for line in out.split("\n") if line.startswith(str(tmp_path))]
+    (tmp_path / "conf").mkdir()
+    root = str(tmp_path) + "/"
+    facts = initialized_facts(None if live is None else live.replace("@", root),
+                              cassandra_data_file_directories=[root + d for d in inventory_dirs],
+                              _cassandra_config_default_data_dir=root + "default", cassandra_conf_dir=root + "conf")
+    return [w.replace(root, "").replace("/system", "") for w in facts["_cassandra_config_initialized_why"].split(", ") if w]
 
 
 @pytest.mark.parametrize("live, inventory_dirs, system_in, found", [
-    (None, ["d1", "d2"], [], []),
+    (None, ["d1", "d2"], [], []),  # no live cassandra.yaml
     (None, ["d1", "d2"], ["d2"], ["d2"]),  # JBOD reordered in the inventory
+    (None, ["d1"], ["default"], ["default"]),  # the package's default data dir
+    (None, ["d1"], ["data/data"], ["data/data"]),  # a tarball's
     # the inventory does not match the node yet: its live cassandra.yaml does
     ("data_file_directories:\n    - @old1  # disk 1\n    - '@old2'\ncommitlog_directory: x\n", ["d1"], ["old2"], ["old2"]),
     ("data_file_directories: # JBOD\n    - @old1\n", ["d1"], ["old1"], ["old1"]),
     ("local_system_data_file_directory: \"@sys\"\n", ["d1"], ["sys"], ["sys"]),
-    ("# local_system_data_file_directory: @sys\n", ["d1"], ["sys"], []),
-    # other layouts YAML reads the same: items at column 0, a flow list, blank and comment lines between items
     ("data_file_directories:\n- @old1\n", ["d1"], ["old1"], ["old1"]),
     ("data_file_directories: [@old0, '@old1']\n", ["d1"], ["old1"], ["old1"]),
-    ("data_file_directories:\n    - @old0\n\n#    - @old9\n    - @old1\nnum_tokens: 16\n", ["d1"], ["old1"], ["old1"]),
     ("data_file_directories: [\n  @old0,\n  @old1 ]\nnum_tokens: 16\n", ["d1"], ["old1"], ["old1"]),
     ('"data_file_directories" :\n  - &a @old1\n', ["d1"], ["old1"], ["old1"]),
     ("\ufeffdata_file_directories:\n  -\n    @old1\n", ["d1"], ["old1"], ["old1"]),
-    ("cluster_name: 'caf\xe9'\ndata_file_directories:\n  - @old1\n", ["d1"], ["old1"], ["old1"]),
-    ("data_file_directories:\n  - @h#1\n", ["d1"], ["h#1"], ["h#1"]),  # a comment starts after a space only
-    ("data_file_directories: [@old0]\nnum_tokens: 16\ndata_file_directories: [@old0,\n@old1]\n", ["d1"], ["old0", "old1"],
-     ["old0", "old1"]),  # set twice: the last one
-    # none set: Cassandra's default data dir
-    ("cluster_name: x\n# data_file_directories:\n#     - @old1\n", ["d1"], ["default"], ["default"]),
-    ("data_file_directories:\nnum_tokens: 16\n", ["d1"], ["default"], ["default"]),
-    ("data_file_directories:\n  - @old1\n", ["d1"], ["default"], []),  # set: not the default
+    ("data_file_directories:\n  - @h#1\n", ["d1"], ["h#1"], ["h#1"]),
+    ("data_file_directories:\n  - '@sp ace'\n", ["d1"], ["sp ace"], ["sp ace"]),
+    ('data_file_directories:\n  - "@sp ace # x"\n', ["d1"], ["sp ace # x"], ["sp ace # x"]),
+    ("data_file_directories:\n  - @caf\xe9\n", ["d1"], ["caf\xe9"], ["caf\xe9"]),
+    ("data_file_directories:\n  - @d1/\n", [], ["d1"], ["d1"]),  # a trailing slash
+    ("data_file_directories:\n  - @d1\r\n  - @d2\r\n", [], ["d2"], ["d2"]),  # CRLF
+    ("hints_directory: @old1  # any key\n", ["d1"], ["old1"], ["old1"]),
+    ("cluster_name: 'x'  # see @old1\n", ["d1"], ["old1"], ["old1"]),  # an inline comment
+    # comment lines are not read by Cassandra
+    ("# data_file_directories:\n#     - @old1\n", ["d1"], ["old1"], []),
+    ("cluster_name: 'x'\n", ["d1"], ["old1"], []),
+    # the package's file of a new node: its data dir not created yet
+    ("data_file_directories:\n    - @var/lib/cassandra/data\n", ["d1"], [], []),
 ])
-@pytest.mark.parametrize("pyyaml", [True, False])
-def test_initialized_node_found(tmp_path, live, inventory_dirs, system_in, found, pyyaml):
-    assert system_dirs(tmp_path, live, inventory_dirs, system_in, pyyaml) == found
+def test_initialized_node_found(tmp_path, live, inventory_dirs, system_in, found):
+    assert found_in(tmp_path, live, inventory_dirs, system_in) == found
 
 
-@pytest.mark.parametrize("live, key", [
-    ("data_file_directories:\n  - !!str data\n", "data_file_directories"),
-    ("data_file_directories:\n  - @sp ace\n", "data_file_directories"),  # cut at the space: not a dir
-    ("local_system_data_file_directory: '@x y'\n", "local_system_data_file_directory"),
+def test_stock_package_files_list_their_dirs():
+    stock = "# data_file_directories:\n#   - /x\ndata_file_directories:\n    - /var/lib/cassandra/data\n" \
+            "commitlog_directory: /var/lib/cassandra/commitlog\n# see https://cassandra.apache.org/doc/ and 1/4 of heap\n"
+    assert live_paths(stock) == ["/var/lib/cassandra/data", "/var/lib/cassandra/commitlog"]
+
+
+@pytest.mark.parametrize("text", ["data_file_directories: ['/x{{ 7 * 6 }}', /old]\n", "data_file_directories: [/x{%raw%}, /old]\n"])
+def test_live_path_with_a_brace_never_kept(text):
+    assert live_paths(text) == ["/old", "{"]
+    facts = initialized_facts(text, isdir=lambda d: d == "/old/system")
+    assert facts["_cassandra_config_initialized"] is True
+    assert facts["_cassandra_config_initialized_why"] == '/old/system, a path with "{" in the live cassandra.yaml'
+
+
+@pytest.mark.parametrize("name", ["Read the live cassandra.yaml", "List the absolute paths of the live cassandra.yaml",
+                                  "Look for the system keyspace of an initialized node"])
+def test_live_file_never_shown(name):
+    # a secret, or a PEM key line, may start with "/"
+    assert task(name)["no_log"] is True
+
+
+def test_long_lines_are_fast_and_skipped():
+    start = time.time()
+    paths = live_paths("k: /" + " " * 100000 + "x\nk: /" + "a " * 200 + "\n- /" + "b" * 300 + "\n- /ok\n")
+    assert time.time() - start < 5
+    assert "/ok" in paths and not [p for p in paths if max(len(c) for c in p.split("/")) > 255]
+
+
+@pytest.mark.parametrize("text, path", [
+    ("data_file_directories:\n  - /data/my disk  # disk 1\n", "/data/my disk"),  # a plain path with a space
+    ("local_system_data_file_directory: /data/my sys\n", "/data/my sys"),
 ])
-def test_initialized_when_live_dirs_not_read(tmp_path, live, key):
-    # without PyYAML, a value it cannot read for sure counts as initialized: one prompt too many at worst
-    (tmp_path / "cassandra.yaml").write_text(live.replace("@", str(tmp_path) + "/"))
-    out = subprocess.run([sys.executable, "-S", "-c", SYSTEM, str(tmp_path / "cassandra.yaml"), "[]", "/nonexistent"],
-                         stdout=subprocess.PIPE, universal_newlines=True, check=True).stdout
-    assert out.split("\n")[0] == "(%s in the live cassandra.yaml)" % key
+def test_plain_path_with_spaces(text, path):
+    assert path in live_paths(text)
 
 
-@pytest.mark.parametrize("live, key", [
-    ("data_file_directories:\n  - data\n", "data_file_directories"),  # relative: to a cwd not known here
-    ("data_file_directories:\n  - @d\n  - data\n", "data_file_directories"),
-    ("data_file_directories: @d\n", "data_file_directories"),  # a single value, not a list
-    ("data_file_directories: '/'\n", "data_file_directories"),
-    ("local_system_data_file_directory: sys\n", "local_system_data_file_directory"),
+def test_live_file_not_readable():
+    facts = initialized_facts("data_file_directories: [/x]\n", readable=False, isdir=lambda d: False)
+    assert facts["_cassandra_config_initialized"] is True
+    assert facts["_cassandra_config_initialized_why"] == "the live cassandra.yaml not readable"
+    assert facts["_cassandra_config_reset"] == ""  # nothing found to empty
+
+
+@pytest.mark.parametrize("extra, local", [({"local_system_data_file_directory": "/sys"}, ["/sys"]), ({}, []),
+                                          ({"local_system_data_file_directory": None}, [])])
+def test_candidate_dirs(extra, local):
+    items = render(task("Look for the system keyspace of an initialized node")["loop"], cassandra_data_file_directories=["/d1/"],
+                   cassandra_extra_settings=extra, cassandra_conf_dir="/opt/c/conf", _cassandra_config_default_data_dir="/var/lib/cassandra/data",
+                   _cassandra_config_live_paths=["/d1", "{"])
+    assert items == ["/d1"] + local + ["/var/lib/cassandra/data", "/opt/c/data/data"]
+
+
+@pytest.mark.parametrize("found, name, service, initialized, why", [
+    (["/data"], "cassandra.service", "stopped", True, "/data/system"),
+    ([], "cassandra.service", "running", True, "Cassandra is running"),
+    ([], "cassandra", "running", True, "Cassandra is running"),  # a sysv init script, no systemd
+    (["/d1", "/d2"], "cassandra.service", "running", True, "/d1/system, /d2/system, Cassandra is running"),
+    ([], "cassandra.service", "stopped", False, ""), ([], None, None, False, ""),
 ])
-@pytest.mark.parametrize("pyyaml", [True, False])
-def test_initialized_when_live_dirs_relative_or_single(tmp_path, live, key, pyyaml):
-    (tmp_path / "d").mkdir()  # exists, without a system keyspace
-    (tmp_path / "cassandra.yaml").write_text(live.replace("@", str(tmp_path) + "/"))
-    argv = [sys.executable] + ([] if pyyaml else ["-S"]) + ["-c", SYSTEM, str(tmp_path / "cassandra.yaml"), "[]", "/nonexistent"]
-    out = subprocess.run(argv, stdout=subprocess.PIPE, universal_newlines=True, check=True, cwd=str(tmp_path)).stdout
-    assert "(%s in the live cassandra.yaml)" % key in out.split("\n")
+def test_initialized_when_system_found_or_running(found, name, service, initialized, why):
+    facts = initialized_facts(None, isdir=lambda d: d[:-len("/system")] in found, services={name: {"state": service}} if name else {},
+                              cassandra_data_file_directories=["/d1", "/d2", "/data"])
+    assert facts["_cassandra_config_initialized"] is initialized
+    assert facts["_cassandra_config_initialized_why"] == why
 
 
-def test_new_node_not_initialized_without_pyyaml(tmp_path):
-    # the packaged cassandra.yaml of a new node: existing data dir, no system keyspace, comments
-    (tmp_path / "data").mkdir()
-    (tmp_path / "cassandra.yaml").write_text("data_file_directories:  # JBOD\n    - %s/data\n# local_system_data_file_directory: /x\n"
-                                             "commitlog_directory: /c\n" % tmp_path)
-    out = subprocess.run([sys.executable, "-S", "-c", SYSTEM, str(tmp_path / "cassandra.yaml"), "[]", "/nonexistent"],
-                         stdout=subprocess.PIPE, universal_newlines=True, check=True).stdout
-    assert out.strip() == ""
+def raising(errno_, path):
+    def isdir(d):
+        if d == path + "/system":
+            raise OSError(errno_, os.strerror(errno_), d)
+        return False
+    return isdir
 
 
-def test_live_file_not_utf8(tmp_path):
-    (tmp_path / "cassandra.yaml").write_bytes(b"# caf\xe9\ndata_file_directories:\n  - " + str(tmp_path).encode() + b"/d\n")
-    (tmp_path / "d" / "system").mkdir(parents=True)
-    for argv in ([sys.executable], [sys.executable, "-S"]):
-        out = subprocess.run(argv + ["-c", SYSTEM, str(tmp_path / "cassandra.yaml"), "[]", "/nonexistent"], stdout=subprocess.PIPE,
-                             universal_newlines=True, check=True, env=dict(os.environ, LC_ALL="C", PYTHONUTF8="0")).stdout
-        assert out.split() == [str(tmp_path / "d")]
-
-
-@pytest.mark.parametrize("system, name, service, initialized", [
-    (["/data/system"], "cassandra.service", "stopped", True), ([], "cassandra.service", "running", True),
-    ([], "cassandra", "running", True),  # a sysv init script, no systemd
-    ([], "cassandra.service", "stopped", False), ([], None, None, False),
+@pytest.mark.parametrize("errno_, initialized", [
+    (20, False),  # a file (a keystore path): not a data dir
+    (36, False),  # a name too long to exist
+    (13, True),  # permission denied: not checked
+    (40, True),  # too many symlinks: not checked
 ])
-def test_initialized_when_system_found_or_running(system, name, service, initialized):
-    template = task("Tell whether this node was already initialized")["ansible.builtin.set_fact"]["_cassandra_config_initialized"]
-    services = {name: {"state": service}} if name else {}
-    assert render(template, cassandra_config_system={"stdout_lines": system}, ansible_facts={"services": services}) is initialized
+def test_stat_errors(errno_, initialized):
+    assert task("Look for the system keyspace of an initialized node")["environment"] == {"LC_ALL": "C"}
+    facts = initialized_facts("data_file_directories: [/x]\n", isdir=raising(errno_, "/x"))
+    assert facts["_cassandra_config_initialized"] is initialized
+    assert facts["_cassandra_config_initialized_why"] == ("a data dir that could not be checked" if initialized else "")
+
+
+def test_reset_hint_lists_the_dirs():
+    facts = initialized_facts("data_file_directories: [/old/data]\n", isdir=lambda d: d == "/old/data/system",
+                              cassandra_data_file_directories=["/new/data"], cassandra_commitlog_dir="/cl",
+                              cassandra_saved_caches_dir="/sc", cassandra_hints_dir="/h")
+    assert facts["_cassandra_config_reset"] == (
+        "ONLY if this node never joined the real cluster (e.g. started once with the stock config), it can start over, "
+        "which DELETES its data: stop Cassandra, check these are this node's dirs (not another instance's) and empty "
+        "them: /old/data, /new/data, /cl, /sc, /h, then run again.")
+
+
+def test_no_reset_hint_when_only_running():
+    facts = initialized_facts(None, isdir=lambda d: False, services={"cassandra.service": {"state": "running"}})
+    assert facts["_cassandra_config_initialized"] is True and facts["_cassandra_config_reset"] == ""
+
+
+def refusal(task_name, **variables):
+    t = task(task_name)
+    return render(t["ansible.builtin.assert"]["fail_msg"], **task_vars(t, **variables))
+
+
+def test_identity_refusal_says_where_and_how_to_reset():
+    msg = refusal("Refuse to change the identity of a joined node", inventory_hostname="node1",
+                  cassandra_config_identity={"stdout": '["cluster_name: Test Cluster -> Prod"]'},
+                  _cassandra_config_initialized_why="/var/lib/cassandra/data/system", _cassandra_config_reset="RESET-HINT.")
+    assert msg.startswith("node1 was already initialized (/var/lib/cassandra/data/system) and these settings would change: "
+                          "cluster_name: Test Cluster -> Prod. A node keeps them for life: ")
+    assert msg.endswith("set cassandra_config_force_identity_change: true. RESET-HINT.")
+
+
+@pytest.mark.parametrize("initialized, expected", [
+    (True, "Config changes not confirmed on node1 (already initialized: Cassandra is running). Run interactively"
+           " and answer 'yes', or set cassandra_config_confirm: false to apply without asking."),
+    (False, "Config changes not confirmed on node1. Run interactively"
+            " and answer 'yes', or set cassandra_config_confirm: false to apply without asking."),
+])
+def test_confirmation_refusal_says_where(initialized, expected):
+    # no reset hint there: a node whose change was only declined
+    assert refusal("Stop unless the changes were confirmed", inventory_hostname="node1", _cassandra_config_initialized=initialized,
+                   _cassandra_config_initialized_why="Cassandra is running", _cassandra_config_reset="RESET-HINT.") == expected
 
 
 IDENTITY = task("Compare the settings a joined node must keep")["ansible.builtin.command"]["argv"][2]

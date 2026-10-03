@@ -250,6 +250,12 @@ def test_identity_change_only_when_forced(host):
     assert "rack=rack2" in rackdc  # forced
 
 
+def test_new_node_without_pyyaml_rendered(host):
+    conf = yaml.safe_load(host.file("/tmp/cassandra-new-node/cassandra.yaml").content_string)
+
+    assert conf["cluster_name"] == "Molecule Cluster"  # not refused as a joined node
+
+
 def test_preview_leaves_no_temp_dir(host):
     assert host.run("ls -d /tmp/*.cassandra_config").rc != 0
 

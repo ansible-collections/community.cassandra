@@ -55,8 +55,10 @@ argument_specs:
         description:
         - Show the diff and ask for confirmation before changing the files.
         - V(auto) asks only on a node that was already initialized (a C(system) keyspace in
-          O(cassandra_data_file_directories), in the data directories or C(local_system_data_file_directory) of the live
-          C(cassandra.yaml), or Cassandra running). V(true) asks whenever a file changes, V(false) never does. Any other
+          O(cassandra_data_file_directories), its C(local_system_data_file_directory), C(/var/lib/cassandra/data), a tarball's
+          C(data/data), or any absolute path written in the live C(cassandra.yaml) outside comment lines; a live file it
+          cannot read; or Cassandra running). A refusal says where, and how to start over a node that never
+          held real data. V(true) asks whenever a file changes, V(false) never does. Any other
           value is refused. Without a terminal to answer, a required confirmation fails the run.
       cassandra_data_dir:
         type: path

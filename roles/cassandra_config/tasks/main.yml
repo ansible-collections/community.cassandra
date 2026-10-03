@@ -185,69 +185,105 @@
           {{ out }}
 
     # A node that holds a system keyspace has been initialized: in one of the
-    # data directories of the inventory or of the live cassandra.yaml (an
-    # inventory that does not match the node yet; none set there: Cassandra's
-    # default), or in its local_system_data_file_directory. A running
-    # Cassandra counts too.
+    # data directories of the inventory, its local_system_data_file_directory
+    # (cassandra_extra_settings), the package's or a tarball's default one, or
+    # any absolute path written in the live cassandra.yaml outside comment
+    # lines (an inventory that does not match the node yet). Paths are picked
+    # from the text, no YAML parsing: no PyYAML needed on the node. A live
+    # cassandra.yaml that cannot be read counts as initialized, a running
+    # Cassandra too.
+    - name: Look for the live cassandra.yaml
+      ansible.builtin.stat:
+        path: "{{ cassandra_conf_dir }}/cassandra.yaml"
+        get_checksum: false
+        get_mime: false
+        get_attributes: false
+      register: cassandra_config_live_stat
+
+    - name: Read the live cassandra.yaml
+      ansible.builtin.slurp:
+        src: "{{ cassandra_conf_dir }}/cassandra.yaml"
+      register: cassandra_config_live
+      failed_when: false
+      no_log: true  # it may hold passwords
+      when: cassandra_config_live_stat.stat.exists
+
+    - name: List the absolute paths of the live cassandra.yaml
+      ansible.builtin.set_fact:
+        # one expression, so the node's text is never in a var that could be templated; a path with a "{"
+        # is never kept in the fact either: a "{" item stands for it, and the node counts as initialized.
+        # Paths too long to exist are left out.
+        _cassandra_config_live_paths: >-
+          {%- set text = (cassandra_config_live.content | b64decode if cassandra_config_live.content is defined else '')
+                         | regex_replace(_comment_line, '') -%}
+          {%- set paths = (text | regex_findall(_plain) + text | regex_findall(_single_quoted)
+                           + text | regex_findall(_double_quoted) + text | regex_findall(_line_value) | map('trim') | list)
+                          | map('regex_replace', _trailing_slash, '') | reject('search', '[^/]{256}') | select('match', '.{1,4095}$')
+                          | unique | list -%}
+          {{ paths | reject('search', '{') | list + (['{'] if paths | select('search', '{') | list else []) }}
+      vars:
+        _comment_line: '(?m)^[ \t]*#.*$'
+        _plain: '(?<![^\s\[,''"])/[^\s''",\]}]*'
+        _single_quoted: '''(/[^''\n]*)'''
+        _double_quoted: '"(/[^"\n]*)"'
+        # the rest of a "- /path" or "key: /path" line (trimmed): a path with spaces
+        _line_value: '(?m)^[ \t]*(?:-|[\w"'']+[ \t]*:)[ \t]+(/[^#\n]*)'
+        _trailing_slash: '(?<=.)/+$'
+      no_log: true  # it may hold secrets
+
     - name: Look for the system keyspace of an initialized node
-      ansible.builtin.command:
-        argv:
-          - "{{ _cassandra_config_python }}"
-          - -c
-          - |
-            import json, os, re, sys
-            dirs = json.loads(sys.argv[2])
-            if os.path.exists(sys.argv[1]):
-                text = open(sys.argv[1], "rb").read().decode("utf-8", "replace")
-                try:  # as Cassandra reads it, when PyYAML is there
-                    import yaml
-                    conf = yaml.safe_load(text) or {}
-                    local = conf.get("local_system_data_file_directory")
-                    for key, value in (("data_file_directories", conf.get("data_file_directories") or [sys.argv[3]]),
-                                       ("local_system_data_file_directory", [local] if local else [])):
-                        # a single value, or a relative dir: not read here for sure, count the node as initialized
-                        if not isinstance(value, list) or not all(str(d).startswith("/") for d in value):
-                            print("(%s in the live cassandra.yaml)" % key)
-                        else:
-                            dirs += [str(d) for d in value]
-                except Exception:  # no PyYAML, or a file Cassandra can't read either
-                    # the text of each top-level key, up to the next one (the last one wins, as in YAML)
-                    values, key = {}, None
-                    for line in text.lstrip(u"\ufeff").splitlines():
-                        m = re.match(r"""["']?(\w+)["']?[ \t]*:(?=[ \t]|$)(.*)$""", line)
-                        if m:
-                            key = m.group(1)
-                            values[key] = m.group(2) + "\n"
-                        elif key:
-                            values[key] += line + "\n"
-                    for key in ("data_file_directories", "local_system_data_file_directory"):
-                        value = re.sub(r"(?m)(^|\s)#.*$", "", values.get(key, ""))
-                        found = re.findall(r"/[^\s,\]'\"]*", value)
-                        dirs += found
-                        if key == "data_file_directories" and not value.strip():  # none set: Cassandra's default
-                            dirs.append(sys.argv[3])
-                        # set, but not read here for sure (a single value, a relative dir...): count the node as initialized
-                        single = key == "data_file_directories" and value.strip()[:1] not in ("", "-", "[")
-                        rest = re.sub(r"[\s\-\[\],'\"]", "", re.sub(r"/[^\s,\]'\"]*", "", value))
-                        if single or rest or value.strip() and not (found and all(os.path.isdir(d) for d in found)):
-                            print("(%s in the live cassandra.yaml)" % key)
-            print("\n".join(d for d in dirs if d and os.path.isdir(os.path.join(d, "system"))))
-          - "{{ cassandra_conf_dir }}/cassandra.yaml"
-          - "{{ cassandra_data_file_directories | to_json }}"
-          - "{{ _cassandra_config_default_data_dir }}"
+      ansible.builtin.stat:
+        path: "{{ item }}/system"
+        follow: true
+        get_checksum: false
+        get_mime: false
+        get_attributes: false
+      loop: >-
+        {{ (cassandra_data_file_directories
+            + [cassandra_extra_settings.local_system_data_file_directory | default('', true) | string,
+               _cassandra_config_default_data_dir, (cassandra_conf_dir | regex_replace('(?<=.)/+$', '') | dirname) ~ '/data/data']
+            + _cassandra_config_live_paths | select('match', '/') | list)
+           | select | map('regex_replace', '(?<=.)/+$', '') | unique }}
       register: cassandra_config_system
-      changed_when: false
-      check_mode: false
+      no_log: true  # the paths may hold secrets
+      failed_when: false  # a file (a keystore path), checked below
+      environment:
+        LC_ALL: C  # errors in English, as checked below
 
     - name: Look for a running Cassandra
       ansible.builtin.service_facts:
 
+    # Where it was found and, for a node started once by mistake (another
+    # config) that never joined the real cluster, the dirs to empty to start it over
     - name: Tell whether this node was already initialized
       ansible.builtin.set_fact:
-        _cassandra_config_initialized: >-
-          {{ cassandra_config_system.stdout_lines | length > 0
-             or (ansible_facts.services['cassandra.service'] | default(ansible_facts.services['cassandra'] | default({}))).state
+        _cassandra_config_initialized: "{{ _why | length > 0 }}"
+        _cassandra_config_initialized_why: "{{ _why | join(', ') }}"
+        _cassandra_config_reset: >-
+          {{ '' if not _found else "ONLY if this node never joined the real cluster (e.g. started once with the stock config),
+          it can start over, which DELETES its data: stop Cassandra, check these are this node's dirs (not another
+          instance's) and empty them: " ~ (_found + cassandra_data_file_directories
+          + [cassandra_commitlog_dir, cassandra_saved_caches_dir, cassandra_hints_dir]) | select
+          | map('regex_replace', '(?<=.)/+$', '') | unique | join(', ')
+          ~ ", then run again." }}
+      vars:
+        _found: >-
+          {{ cassandra_config_system.results | selectattr('stat.isdir', 'defined') | selectattr('stat.isdir')
+             | map(attribute='item') | list }}
+        _running: >-
+          {{ (ansible_facts.services['cassandra.service'] | default(ansible_facts.services['cassandra'] | default({}))).state
              | default('') == 'running' }}
+        # a stat that failed for another reason than "a file, not a dir" or "cannot exist": not checked
+        _unchecked: >-
+          {{ cassandra_config_system.results | rejectattr('stat', 'defined') | map(attribute='msg', default='')
+             | reject('search', 'Not a directory|too long') | list | length > 0 }}
+        _why: >-
+          {{ _found | map('regex_replace', '$', '/system') | list
+             + (['a data dir that could not be checked'] if _unchecked | bool else [])
+             + (['the live cassandra.yaml not readable'] if cassandra_config_live_stat.stat.exists
+                and cassandra_config_live.content is not defined else [])
+             + (['a path with "{" in the live cassandra.yaml'] if '{' in _cassandra_config_live_paths else [])
+             + (['Cassandra is running'] if _running | bool else []) }}
 
     # PyYAML is not an Ansible requirement on the nodes: validate when it is there
     - name: Look for PyYAML on the node
@@ -392,13 +428,13 @@
       ansible.builtin.assert:
         that: _changes | length == 0 or cassandra_config_force_identity_change | bool
         fail_msg: >-
-          {{ inventory_hostname }} has already joined a cluster (a system keyspace in {{ cassandra_config_system.stdout_lines
-          | default([]) | join(', ') or '?' }}, or Cassandra running) and these settings would change: {{ _changes | join('; ') }}.
-          A node keeps them for life: a new cluster_name, partitioner or num_tokens stops it from starting, a new dc
-          or rack too (unless forced), a new snitch or forced dc/rack moves data ownership without streaming, a
-          new initial_token is ignored, and storage_compatibility_mode (5.0) only moves one step at a time, CASSANDRA_4 (also when
-          absent, write it first), UPGRADING, NONE, never back. Fix the inventory to match the node, or follow the
-          documented procedure and set cassandra_config_force_identity_change: true.
+          {{ inventory_hostname }} was already initialized ({{ _cassandra_config_initialized_why }}) and these settings
+          would change: {{ _changes | join('; ') }}. A node keeps them for life: a new cluster_name, partitioner or
+          num_tokens stops it from starting, a new dc or rack too (unless forced), a new snitch or forced dc/rack moves
+          data ownership without streaming, a new initial_token is ignored, and storage_compatibility_mode (5.0) only
+          moves one step at a time, CASSANDRA_4 (also when absent, write it first), UPGRADING, NONE, never back. Fix the
+          inventory to match the node, or follow the documented procedure and set cassandra_config_force_identity_change:
+          true. {{ _cassandra_config_reset }}
         quiet: true
       vars:
         _changes: "{{ cassandra_config_identity.stdout | default('[]') | from_json }}"
@@ -436,7 +472,8 @@
       ansible.builtin.assert:
         that: (cassandra_config_answer.user_input | default('')) == 'yes'
         fail_msg: >-
-          Config changes not confirmed on {{ inventory_hostname }}. Run interactively and answer 'yes',
+          Config changes not confirmed on {{ inventory_hostname }}{{ (' (already initialized: ' ~ _cassandra_config_initialized_why ~ ')')
+          if _cassandra_config_initialized | bool else '' }}. Run interactively and answer 'yes',
           or set cassandra_config_confirm: false to apply without asking.
       when:
         - not ansible_check_mode

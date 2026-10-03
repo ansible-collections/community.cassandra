@@ -181,9 +181,33 @@
           ansible.builtin.fail:
             msg: cassandra_config changed a node initialized per its live cassandra.yaml without confirmation
       rescue:
-        - name: Assert the failure came from the confirmation
+        - name: Assert the failure came from the confirmation and says where the node was found initialized
           ansible.builtin.assert:
-            that: ansible_failed_task.name == "Stop unless the changes were confirmed"
+            that:
+              - ansible_failed_task.name == "Stop unless the changes were confirmed"
+              - "'(already initialized: /tmp/initialized-node/system)' in ansible_failed_result.msg"
+
+    # No PyYAML needed on the node, and a data dir not created yet does not
+    # make a node initialized
+    - name: Check the Python of the next case does not see PyYAML
+      ansible.builtin.command: /usr/local/bin/python-no-pyyaml -c "import yaml"
+      register: no_pyyaml
+      changed_when: false
+      failed_when: no_pyyaml.rc == 0
+
+    - name: First render of a new node, no PyYAML, its data dir not there yet
+      ansible.builtin.include_role:
+        name: community.cassandra.cassandra_config
+      vars:
+        cassandra_conf_dir: /tmp/cassandra-new-node
+        cassandra_data_dir: /tmp/new-node
+        cassandra_rpm_conf_alternative: ""
+        cassandra_cluster_name: Molecule Cluster
+        _cassandra_config_python: /usr/local/bin/python-no-pyyaml
+
+    - name: Check the new node was not seen as initialized
+      ansible.builtin.assert:
+        that: not _cassandra_config_initialized | bool
 
     # Not idempotent by design (they change a joined node): first converge only
     - name: Secrets and identity of a joined node
@@ -244,6 +268,9 @@
                   - ansible_failed_task.name == "Refuse to change the identity of a joined node"
                   - "'num_tokens: 16 -> 8' in ansible_failed_result.msg"
                   - "'rack: rack1 -> rack2' in ansible_failed_result.msg"
+                  - "'already initialized (/tmp/initialized-node/system)' in ansible_failed_result.msg"
+                  - "'empty them: /tmp/initialized-node, /var/lib/cassandra/commitlog' in ansible_failed_result.msg"
+                  - "'which DELETES its data' in ansible_failed_result.msg"
 
         - name: Change the rack of a joined node, forced
           ansible.builtin.include_role:

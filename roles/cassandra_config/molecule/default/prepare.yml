@@ -58,6 +58,7 @@
         - /tmp/cassandra-access
         - /tmp/cassandra-no-account
         - /tmp/initialized-node/system
+        - /tmp/cassandra-new-node
 
     # What the rpm's %post does: /etc/cassandra/conf -> alternatives -> default.conf
     - name: Seed default.conf with a file the templates don't manage (RedHat)
@@ -94,3 +95,25 @@
         - name: Select it
           ansible.builtin.command: alternatives --install /etc/cassandra/conf cassandra /etc/cassandra/prod.conf 10
           changed_when: true
+
+    # A keystore the overrides case points at: a file where the role looks
+    # for <path>/system (a path written in the live cassandra.yaml)
+    - name: Write the outbound keystore
+      ansible.builtin.copy:
+        content: "keystore\n"
+        dest: /etc/cassandra/outbound.keystore
+        mode: "0600"
+
+    # A new node from the package, on a host without PyYAML: its cassandra.yaml
+    # lists a data dir not created yet
+    - name: Write the package's cassandra.yaml of the new node
+      ansible.builtin.copy:
+        content: "cluster_name: 'Test Cluster'\ndata_file_directories:\n    - /tmp/new-node/data\n"
+        dest: /tmp/cassandra-new-node/cassandra.yaml
+        mode: "0644"
+
+    - name: Write a Python that does not see PyYAML
+      ansible.builtin.copy:
+        content: "#!/bin/sh\nexec {{ ansible_facts['python']['executable'] }} -S \"$@\"\n"
+        dest: /usr/local/bin/python-no-pyyaml
+        mode: "0755"
