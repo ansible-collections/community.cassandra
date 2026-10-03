@@ -165,6 +165,20 @@
   until: result is not failed
   retries: 3
 
+# The cqlsh of Cassandra 4.0 and 4.1 fails on Python 3.12+ (CASSANDRA-19206),
+# the default python3 of the newer test images: run it with the test Python
+- name: Run cqlsh with the test Python
+  ansible.builtin.copy:
+    dest: /usr/local/bin/cqlsh
+    mode: "0755"
+    content: |
+      #!/bin/sh
+      export CQLSH_PYTHON="${CQLSH_PYTHON:-{{ ansible_facts.python.executable }}}"
+      exec /usr/bin/cqlsh "$@"
+  when:
+    - ansible_os_family == 'Debian'
+    - cassandra_version in ['40x', '41x']
+
 - name: Set Snitch to PropertyFileSnitch
   lineinfile:
     path: /etc/cassandra/conf/cassandra.yaml

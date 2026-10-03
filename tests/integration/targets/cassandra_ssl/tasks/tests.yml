@@ -29,7 +29,9 @@
   when: ansible_os_family == "RedHat"
 
 - name: Upgrade pip
-  ansible.builtin.shell: pip3 install -U pip  
+  ansible.builtin.pip:
+    name: pip
+    state: latest
 
 - name: Install cassandra-driver
   ansible.builtin.pip:

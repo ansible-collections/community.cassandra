@@ -128,7 +128,6 @@
   ansible.builtin.pip:
     name: /opt/cassandra-ccm
     state: present
-    executable: pip3.8
   become: true
 
 - ansible.builtin.set_fact:
