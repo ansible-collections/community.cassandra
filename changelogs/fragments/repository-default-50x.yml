@@ -1,0 +1,4 @@
+breaking_changes:
+  - cassandra_repository, cassandra_install - the default cassandra_version is now 50x (Cassandra 5.0), it was 41x. Nodes that relied on the old default must now set cassandra_version (for both roles, e.g. in group_vars), or they get the 5.0 repository and Java 17.
+minor_changes:
+  - cassandra_repository - the apt cache is updated after the repository is added.

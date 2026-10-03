@@ -18,3 +18,5 @@ repository: https://github.com/ansible-collections/community.cassandra
 documentation: https://ansible-collections.github.io/community.cassandra/
 homepage: https://github.com/ansible-collections/community.cassandra
 issues: https://github.com/ansible-collections/community.cassandra/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc
+build_ignore:
+  - tools

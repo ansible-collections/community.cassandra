@@ -3,3 +3,36 @@
   hosts: all
   roles:
     - role: community.cassandra.cassandra_repository
+
+- name: Signing keys from a local copy
+  hosts: all
+  tasks:
+    - name: Put a copy of the downloaded keys on the node
+      ansible.builtin.copy:
+        src: "{{ '/etc/apt/keyrings/apache-cassandra.asc' if ansible_facts['os_family'] == 'Debian' else '/etc/pki/rpm-gpg/apache-cassandra.asc' }}"
+        dest: /tmp/KEYS
+        remote_src: true
+        mode: "0644"
+
+    - name: Known keys are accepted
+      ansible.builtin.include_role:
+        name: community.cassandra.cassandra_repository
+      vars:
+        cassandra_repository_key_url: file:///tmp/KEYS
+
+    - name: Unknown keys are refused
+      block:
+        - name: Run the role with an empty fingerprint list
+          ansible.builtin.include_role:
+            name: community.cassandra.cassandra_repository
+          vars:
+            cassandra_repository_key_url: file:///tmp/KEYS
+            cassandra_repository_key_fingerprints: []
+
+        - name: Should not be reached
+          ansible.builtin.fail:
+            msg: unknown keys were accepted
+      rescue:
+        - name: Check the refusal came from the fingerprint check
+          ansible.builtin.assert:
+            that: "'unknown keys' in ansible_failed_result.msg"

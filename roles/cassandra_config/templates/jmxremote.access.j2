@@ -1,0 +1,11 @@
+{% for user in cassandra_jmx_users %}
+{% if user.access | default('readwrite') == 'readwrite' and user.create_unregister | default(true) | bool %}
+{{ user.name }} readwrite \
+    create javax.management.monitor.*,javax.management.timer.* \
+    unregister
+{% elif user.access | default('readwrite') == 'readwrite' %}
+{{ user.name }} readwrite
+{% else %}
+{{ user.name }} readonly
+{% endif %}
+{% endfor %}
