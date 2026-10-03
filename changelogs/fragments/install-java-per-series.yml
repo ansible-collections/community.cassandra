@@ -1,0 +1,8 @@
+breaking_changes:
+  - cassandra_repository, cassandra_install - EL7 (RHEL/CentOS 7) and Amazon Linux 2 are no longer supported. cassandra_install no longer copies cqlshlib into the Python 2.7 site-packages, and cassandra_repository checks the signing keys with ``gpg --show-keys`` (GnuPG 2.2.8 or later).
+minor_changes:
+  - cassandra_install - installs the Java the series needs (11 for 4.0/4.1, 17 for 5.0; cassandra_java_version), and python3.11 for cqlsh where the system python3 is outside the range cqlsh supports (then a /usr/local/bin/cqlsh wrapper, /etc/profile.d/cqlsh.sh and /etc/sudoers.d/cqlsh point cqlsh at it).
+  - cassandra_install - on Debian/Ubuntu, fails early with a clear message when the Java package is not in the apt repositories (Java 11 for Cassandra 4.x on Debian 12 and later), pointing to cassandra_java_package.
+  - cassandra_install - on Debian/Ubuntu, the package no longer starts Cassandra with the stock configuration before the node is configured.
+  - cassandra_install - cassandra-tools is installed on the RHEL family too, and jemalloc where a repository has it.
+  - cassandra_install - on the RHEL family, the rpm's cqlshlib is linked into the site-packages of the Pythons cqlsh may use (it only ships for python3.6).

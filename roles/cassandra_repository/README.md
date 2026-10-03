@@ -6,18 +6,34 @@ Configures a repository for Cassandra on Debian and RedHat based platforms.
 Requirements
 ------------
 
-Any pre-requisites that may not be covered by Ansible itself or the role should
-be mentioned here. For instance, if the role uses the EC2 module, it may be a
-good idea to mention in this section that the boto package is required.
+ansible-core 2.15 or later (the apt repository is written with
+`ansible.builtin.deb822_repository`), and GnuPG 2.2.8 or later on the node
+(`gpg --show-keys`, to check the signing keys): EL7 and Amazon Linux 2 are
+not supported.
 
 Role Variables
 --------------
 
 cassandra_version:
   - Which version of Cassandra to install, e.g. "50x", "41x", "40x".
+  - Default "50x". cassandra_install reads it too: set it for both (e.g. in
+    group_vars), not as a parameter of this role only.
   - See the distribution names available at:
       - https://debian.cassandra.apache.org (Debian & Ubuntu)
       - https://redhat.cassandra.apache.org/ (RedHat)
+
+cassandra_repository_key_url:
+  - Where the release signing keys are downloaded from. Default
+    https://downloads.apache.org/cassandra/KEYS.
+  - Every key the file holds must be listed in
+    `cassandra_repository_key_fingerprints` (primary key fingerprints; the
+    default lists the keys in the Apache file), or the role fails: when Apache
+    adds a release manager's key, check it, then add it to the list.
+  - Offline nodes: a local mirror URL, or a copy of the file on the node
+    (`file:///path/to/KEYS`).
+
+cassandra_apt_keyring_path / cassandra_rpm_key_path:
+  - Where the keys are installed (Debian & Ubuntu / RedHat).
 
 Dependencies
 ------------

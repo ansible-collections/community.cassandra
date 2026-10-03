@@ -40,5 +40,22 @@ platforms:
     user: root
 provisioner:
   name: ansible
+  playbooks:
+    side_effect: side_effect.yml
 verifier:
   name: testinfra
+scenario:
+  test_sequence:
+    - dependency
+    - cleanup
+    - destroy
+    - syntax
+    - create
+    - prepare
+    - converge
+    - idempotence
+    - check
+    - side_effect
+    - verify
+    - cleanup
+    - destroy

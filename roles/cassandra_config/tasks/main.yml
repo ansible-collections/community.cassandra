@@ -1,0 +1,129 @@
+---
+- name: Assert required cassandra_config variables are set
+  ansible.builtin.assert:
+    that:
+      - cassandra_conf_dir is defined and cassandra_conf_dir != ""
+      - cassandra_data_file_directories | length > 0
+      - _cassandra_config_gcs | reject('in', ['G1', 'CMS', 'custom']) | list | length == 0
+    fail_msg: >-
+      cassandra_conf_dir and cassandra_data_file_directories must not be empty, and cassandra_jvm<N>_gc one of
+      G1, CMS, custom
+
+- name: Refuse extra settings the template already has
+  ansible.builtin.assert:
+    that: _taken | length == 0
+    fail_msg: "cassandra_extra_settings: {{ _taken | join(', ') }} already in cassandra.yaml, set them with their variable"
+  vars:
+    _keys: >-
+      {{ lookup('ansible.builtin.file', role_path ~ '/templates/' ~ _cassandra_config_series ~ '/cassandra.yaml.j2')
+         | regex_findall('(?m)^(?:\{\{[^}]*\}\})?([a-z0-9_]+):') }}
+    _taken: "{{ cassandra_extra_settings | list | intersect(_keys) }}"
+  when: cassandra_extra_settings | length > 0
+
+# Unless G1 is in use, cassandra-env.sh exits when only one of MAX_HEAP_SIZE
+# and HEAP_NEWSIZE is set; 5.0's leaves HEAP_NEWSIZE commented out
+- name: Assert heap settings are consistent
+  ansible.builtin.assert:
+    that: >-
+      _cassandra_config_gcs | reject('equalto', 'G1') | list | length == 0
+      or (cassandra_heap_size == '' and cassandra_heap_newsize == '')
+      or (cassandra_heap_size != '' and cassandra_heap_newsize != '' and cassandra_version != '50x')
+    fail_msg: >-
+      Without G1 (cassandra_jvm_gc, cassandra_jvm<N>_gc), set cassandra_heap_size and cassandra_heap_newsize
+      together on 4.x, and neither on 5.0 (its cassandra-env.sh has no HEAP_NEWSIZE)
+
+- name: Check that the Cassandra package's config is there
+  ansible.builtin.stat:
+    path: "{{ _cassandra_config_pkg_conf_dir }}"
+  register: cassandra_config_pkg_conf
+
+- name: Stop if Cassandra is not installed
+  ansible.builtin.fail:
+    msg: "{{ _cassandra_config_pkg_conf_dir }} not found: install Cassandra first (cassandra_install)"
+  when:
+    - not cassandra_config_pkg_conf.stat.exists
+    - not ansible_check_mode
+
+- name: Configure
+  when: cassandra_config_pkg_conf.stat.exists
+  block:
+    # Before any file is written: an owner or group that does not exist would
+    # stop the run halfway (a new file left with default permissions), and a
+    # service account outside cassandra_group could not read the config files
+    # (with the default cassandra_config_group)
+    - name: Look up the service account
+      ansible.builtin.command:
+        argv: [id, -Gn, --, "{{ cassandra_user }}"]
+      register: cassandra_config_user_groups
+      changed_when: false
+      failed_when: false
+      check_mode: false
+
+    - name: Look up the config files' owner and group
+      ansible.builtin.command:
+        argv: [sh, -c, 'id -u -- "$1" && getent group "$2"', sh, "{{ cassandra_config_owner }}", "{{ cassandra_config_group }}"]
+      register: cassandra_config_file_account
+      changed_when: false
+      failed_when: false
+      check_mode: false
+
+    - name: Assert the accounts exist
+      ansible.builtin.assert:
+        that:
+          - cassandra_config_user_groups.rc == 0
+          - cassandra_group in cassandra_config_user_groups.stdout.split()
+          - cassandra_config_file_account.rc == 0
+        fail_msg: >-
+          cassandra_user ({{ cassandra_user }}) must exist and be in cassandra_group ({{ cassandra_group }}, a group
+          name): the account the Cassandra service runs as. cassandra_config_owner ({{ cassandra_config_owner }}) and
+          cassandra_config_group ({{ cassandra_config_group }}) must exist.
+          {{ cassandra_config_user_groups.stderr }} {{ cassandra_config_file_account.stderr }}
+
+    # The package creates the stock directories only: others (a data disk, a
+    # log dir) must exist, owned by the service user, before the node first
+    # starts. Existing ones are left as they are; missing parents are made
+    # root-owned, 0755.
+    - name: Look for the Cassandra directories
+      ansible.builtin.stat:
+        path: "{{ item }}"
+      loop: >-
+        {{ (cassandra_data_file_directories + [cassandra_commitlog_dir, cassandra_saved_caches_dir,
+            cassandra_hints_dir, cassandra_log_dir]) | select | unique | list }}
+      register: cassandra_config_dirs
+
+    - name: Template Cassandra config files
+      ansible.builtin.template:
+        src: "{{ _cassandra_config_series }}/{{ cassandra_config_file }}.j2"
+        dest: "{{ cassandra_conf_dir }}/{{ cassandra_config_file }}"
+        owner: "{{ cassandra_config_owner }}"
+        group: "{{ cassandra_config_group }}"
+        mode: "{{ cassandra_config_mode }}"
+        backup: "{{ cassandra_config_backup }}"
+      diff: false  # cassandra.yaml may hold passwords
+      loop: "{{ _cassandra_config_files[_cassandra_config_series] }}"
+      loop_control:
+        loop_var: cassandra_config_file
+
+    # Missing directories (looked for above): created once the files are written
+    - name: Create the parents of the missing ones
+      ansible.builtin.command:
+        argv: [sh, -c, 'umask 022 && mkdir -p "$1"', sh, "{{ item.item | dirname }}"]  # 0755 whatever the umask
+        creates: "{{ item.item | dirname }}"
+      loop: "{{ cassandra_config_dirs.results | rejectattr('stat.exists') | list }}"
+      loop_control:
+        label: "{{ item.item | dirname }}"
+
+    - name: Create the missing ones
+      ansible.builtin.file:
+        path: "{{ item.item }}"
+        state: directory
+        owner: "{{ cassandra_user }}"
+        group: "{{ cassandra_group }}"
+        mode: "0750"
+      loop: "{{ cassandra_config_dirs.results | rejectattr('stat.exists') | list }}"
+      loop_control:
+        label: "{{ item.item }}"
+
+- name: JMX users
+  ansible.builtin.include_tasks: access.yml
+  when: cassandra_config_pkg_conf.stat.exists

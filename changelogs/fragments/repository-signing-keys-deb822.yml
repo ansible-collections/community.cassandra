@@ -1,0 +1,2 @@
+minor_changes:
+  - cassandra_repository - the Apache Cassandra signing keys are checked against a list of known fingerprints (cassandra_repository_key_fingerprints) before being installed, and can be downloaded from a mirror or a local copy (cassandra_repository_key_url); on the RHEL family they are now downloaded by the role too, not by yum. Apt sources are written in the deb822 format (the old one-line .list file is removed).
