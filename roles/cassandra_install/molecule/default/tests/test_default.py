@@ -1,10 +1,23 @@
 import os
 
+import pytest
+
 import testinfra.utils.ansible_runner
 
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ['MOLECULE_INVENTORY_FILE']
 ).get_hosts('all')
+
+
+@pytest.fixture(scope="module")
+def os_family(host):
+    return host.ansible("setup", "filter=ansible_os_family")["ansible_facts"]["ansible_os_family"]
+
+
+@pytest.fixture
+def debian_only(os_family):
+    if os_family != "Debian":
+        pytest.skip("Debian family only")
 
 
 def test_cassandra_available(host):
@@ -16,9 +29,51 @@ def test_nodetool_available(host):
     cmd = host.run("nodetool help")
     assert cmd.rc == 0
 
-# TODO Fix me
-# https://issues.apache.org/jira/browse/CASSANDRA-19206
-# def test_cqlsh_available(host):
-#    cmd = host.run("cqlsh --version")
-#    assert cmd.rc == 0
-#    assert "cqlsh" in cmd.stdout
+
+def test_cqlsh_available(host):
+    cmd = host.run("cqlsh --version")
+
+    assert cmd.rc == 0
+    assert "cqlsh" in cmd.stdout
+
+
+@pytest.mark.parametrize("tool", ["sstablemetadata", "sstabledump", "sstablesplit", "sstableofflinerelevel"])
+def test_cassandra_tools_available(host, tool):
+    assert host.exists(tool)
+
+
+def test_jemalloc_found_by_ldconfig(host, os_family):
+    # Optional on RedHat-likes: only there when a repo (EPEL, Amazon) has it
+    if os_family == "RedHat" and not host.run("dnf -q repoquery jemalloc").stdout:
+        pytest.skip("jemalloc not in any enabled repo")
+
+    assert "libjemalloc.so" in host.run("ldconfig -p").stdout
+
+
+def test_java_17_only(host):
+    cmd = host.run("java -version")
+
+    assert cmd.rc == 0
+    assert 'version "17.' in cmd.stderr
+    assert host.run("ls -d /usr/lib/jvm/*11*").rc != 0
+
+
+@pytest.mark.usefixtures("debian_only")
+def test_policy_rc_d_removed(host):
+    # side_effect.yml left one from an interrupted run before running the role again
+    assert not host.file("/usr/sbin/policy-rc.d").exists
+
+
+def test_cassandra_not_started_by_package(host):
+    assert host.run("pgrep -f [C]assandraDaemon").rc != 0
+
+
+def test_no_cqlsh_python_override_on_50x(host):
+    # 5.0's cqlsh supports the system python3: no pointers written
+    assert not host.file("/etc/profile.d/cqlsh.sh").exists
+    assert not host.file("/etc/sudoers.d/cqlsh").exists
+
+
+def test_cqlsh_installed_by_hand_kept(host):
+    # side_effect.yml put one in /usr/local/bin, without the role's marker
+    assert "installed by hand" in host.file("/usr/local/bin/cqlsh").content_string

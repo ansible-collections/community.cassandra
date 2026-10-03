@@ -1,49 +1,131 @@
 ---
 # tasks file for cassandra_repository
-- name: Ensure Cassandra yum repository exists (RedHat)
-  ansible.builtin.yum_repository:
-      name: "cassandra-{{ cassandra_version }}"
-      description: "Official Cassandra {{ cassandra_version }} yum repo"
-      baseurl: "https://redhat.cassandra.apache.org/{{ cassandra_version }}/"
-      gpgcheck: 1
-      gpgkey: "https://downloads.apache.org/cassandra/KEYS"
-  retries: 3
-  when: ansible_facts['os_family'] == "RedHat"
-
-
 - name: Install debian packages (Debian & Ubuntu)
   ansible.builtin.apt:
     name: "{{ debian_packages }}"
     state: present
+    update_cache: true
+    cache_valid_time: 3600
   retries: 3
   when: ansible_facts['os_family'] == "Debian"
 
-- set_fact:
-    validate_certs: true
-  when:
-    - "ansible_facts['distribution'] == 'Ubuntu'"
-    - "ansible_facts['distribution_version'] == '16.04'"
+- name: Set the signing key path
+  ansible.builtin.set_fact:
+    _cassandra_repository_key_path: "{{ cassandra_apt_keyring_path if ansible_facts['os_family'] == 'Debian' else cassandra_rpm_key_path }}"
 
-
-- name: Ensure /etc/apt/keyrings exists (Debian & Ubuntu)
+- name: Ensure the key directory exists
   ansible.builtin.file:
-    path: /etc/apt/keyrings
+    path: "{{ _cassandra_repository_key_path | dirname }}"
     state: directory
     mode: "0755"
+
+# --check on a blank host: gnupg, installed above, is not really there yet
+- name: Look for gpg (--check)
+  ansible.builtin.command: gpg --version
+  register: _cassandra_repository_gpg
+  changed_when: false
+  failed_when: false
+  check_mode: false
+  when: ansible_check_mode
+
+- name: Download the Cassandra signing keys and check their fingerprints
+  block:
+    - name: Download the signing keys
+      ansible.builtin.get_url:
+        url: "{{ cassandra_repository_key_url }}"
+        dest: "{{ _cassandra_repository_key_path }}.new"
+        mode: "0644"
+      retries: 3
+      register: _cassandra_repository_key_download
+      until: _cassandra_repository_key_download is succeeded
+      changed_when: false  # a temp file: the install below reports the change
+      check_mode: false  # read-only for the host's config: the check below needs the file
+
+    - name: Read the fingerprints of the downloaded keys
+      ansible.builtin.shell: >-
+        set -o pipefail;
+        home=$(mktemp -d); trap 'rm -rf "$home"' EXIT;
+        GNUPGHOME=$home gpg --batch --show-keys --with-colons {{ _cassandra_repository_key_path }}.new
+        | awk -F: '/^pub/ { primary = 1; next } primary && /^fpr/ { print $10; primary = 0 }'
+      args:
+        executable: /bin/bash
+      register: _cassandra_repository_key_list
+      changed_when: false
+      check_mode: false
+      when: _cassandra_repository_gpg.rc | default(0) == 0
+
+    - name: Check the downloaded keys are known ones
+      ansible.builtin.assert:
+        that:
+          - _cassandra_repository_key_list.stdout_lines | length > 0
+          - _unknown | length == 0
+        fail_msg: >-
+          {{ cassandra_repository_key_url }} holds no key or unknown keys ({{ _unknown | join(', ') }}).
+          Check them, then add them to cassandra_repository_key_fingerprints.
+        quiet: true
+      when: _cassandra_repository_gpg.rc | default(0) == 0
+      vars:
+        _unknown: "{{ _cassandra_repository_key_list.stdout_lines | difference(cassandra_repository_key_fingerprints) }}"
+
+    - name: Install the downloaded keys
+      ansible.builtin.copy:
+        src: "{{ _cassandra_repository_key_path }}.new"
+        dest: "{{ _cassandra_repository_key_path }}"
+        remote_src: true
+        mode: "0644"
+  always:
+    - name: Remove the downloaded file
+      ansible.builtin.file:
+        path: "{{ _cassandra_repository_key_path }}.new"
+        state: absent
+      changed_when: false
+      check_mode: false
+
+- name: Ensure Cassandra yum repository exists (RedHat)
+  ansible.builtin.yum_repository:
+    name: "cassandra-{{ cassandra_version }}"
+    description: "Official Cassandra {{ cassandra_version }} yum repo"
+    baseurl: "https://redhat.cassandra.apache.org/{{ cassandra_version }}/"
+    gpgcheck: true
+    gpgkey: "file://{{ cassandra_rpm_key_path }}"
+  when: ansible_facts['os_family'] == "RedHat"
+
+# Earlier versions of the role wrote a one-line .list file
+- name: Remove the one-line Cassandra apt source (Debian & Ubuntu)
+  ansible.builtin.file:
+    path: "/etc/apt/sources.list.d/cassandra-{{ cassandra_version }}.list"
+    state: absent
   when: ansible_facts['os_family'] == "Debian"
 
-- name: Fetch Cassandra apt signing key (Debian & Ubuntu)
-  ansible.builtin.get_url:
-    url: https://downloads.apache.org/cassandra/KEYS
-    dest: "{{ cassandra_apt_keyring_path }}"
-    mode: "0644"
-  retries: 3
-  when: ansible_facts['os_family'] == "Debian"
+# --check on a blank host: python3-debian, which deb822_repository needs even
+# to compare, is not really installed yet
+- name: Look for python3-debian (--check)
+  ansible.builtin.command: python3 -c "import debian"
+  register: _cassandra_repository_python_debian
+  changed_when: false
+  failed_when: false
+  check_mode: false
+  when:
+    - ansible_check_mode
+    - ansible_facts['os_family'] == "Debian"
 
 - name: Ensure Cassandra apt repository exists (Debian & Ubuntu)
-  ansible.builtin.apt_repository:
-    repo: "deb [signed-by={{ cassandra_apt_keyring_path }}] https://debian.cassandra.apache.org {{ cassandra_version }} main"
-    state: present
-    filename: "cassandra-{{ cassandra_version }}"
+  ansible.builtin.deb822_repository:
+    name: "cassandra-{{ cassandra_version }}"
+    types: deb
+    uris: https://debian.cassandra.apache.org
+    suites: "{{ cassandra_version }}"
+    components: main
+    signed_by: "{{ cassandra_apt_keyring_path }}"
+  register: _cassandra_repository_apt
+  when:
+    - ansible_facts['os_family'] == "Debian"
+    - _cassandra_repository_python_debian.rc | default(0) == 0
+
+- name: Update the apt cache (Debian & Ubuntu)
+  ansible.builtin.apt:
+    update_cache: true
   retries: 3
-  when: ansible_facts['os_family'] == "Debian"
+  when:
+    - ansible_facts['os_family'] == "Debian"
+    - _cassandra_repository_apt is changed

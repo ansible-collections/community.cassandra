@@ -5,28 +5,278 @@
     file: "{{ ansible_facts['os_family'] }}.yml"
 
 # tasks file for cassandra_install
-- name: Ensure man1 directory exists (fix Ubuntu 24.04 Java bug)
+# Minimal images drop man pages; the JDK postinst then fails on its man1 alternatives
+- name: Ensure man1 directory exists (Debian JDK postinst)
   ansible.builtin.file:
     path: /usr/share/man/man1
     state: directory
     mode: "0755"
-  when:
-    - ansible_facts['os_family'] == 'Debian'
-    - ansible_facts['distribution'] == 'Ubuntu'
-    - ansible_facts['distribution_major_version'] | int == 24
+  when: ansible_facts['os_family'] == 'Debian'
 
-- name: Install Cassandra Packages
+# Debian 12 and later have no Java 11, which Cassandra 4.x needs: say so
+# rather than let apt fail with "No package matching"
+- name: Java package availability (Debian)
+  when: ansible_facts['os_family'] == 'Debian'
+  vars:
+    # the names without a version (pkg=1.2) or a range
+    _cassandra_install_java_names: "{{ [cassandra_java_package] | flatten | map('regex_replace', '[=<>].*$', '') | list }}"
+  block:
+    - name: Look up the Java package in the apt repositories (Debian)
+      ansible.builtin.command: >-
+        apt-cache policy {{ _cassandra_install_java_names | map('quote') | join(' ') }}
+      environment:
+        LC_ALL: C
+      register: _cassandra_install_java_policy
+      changed_when: false
+      check_mode: false
+
+    - name: Check the Java package is installed or available (Debian)
+      ansible.builtin.assert:
+        that:
+          - _missing | length == 0
+        fail_msg: >-
+          {{ _missing | join(', ') }}: not in the apt repositories of this
+          {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}.
+          Add a repository with a Java {{ cassandra_java_version }} and set cassandra_java_package
+          to its package (e.g. temurin-{{ cassandra_java_version }}-jdk from Adoptium).
+        quiet: true
+      vars:
+        # a package block of apt-cache policy, installed or with a candidate
+        _available_re: '(?m)^(\S+):\n\s+Installed: (?:(?!\(none\))|\(none\)\n\s+Candidate: (?!\(none\)))'
+        _missing: >-
+          {{ _cassandra_install_java_names
+          | difference(_cassandra_install_java_policy.stdout | regex_findall(_available_re)) }}
+
+- name: Install Java
   ansible.builtin.package:
-    name: "{{ cassandra_packages }}"
+    name: "{{ cassandra_java_package }}"
     state: present
   retries: 3
 
-# https://issues.apache.org/jira/browse/CASSANDRA-16822?orderby=created+DESC%2C+priority+DESC%2C+updated+DESC
-- name: Install clqshlib - bug - ImportError - No module named cqlshlib
-  ansible.builtin.shell: cp -r /usr/lib/python3.6/site-packages/cqlshlib /usr/lib/python2.7/site-packages/cqlshlib
-  args:
-    creates: /usr/lib/python2.7/site-packages/cqlshlib
+# The Debian package starts Cassandra from its postinst, with stock config,
+# before the node is configured: it would initialise as "Test Cluster" and
+# later refuse the real cluster_name. policy-rc.d (exit 101) tells
+# invoke-rc.d not to start or restart services during package operations.
+# A policy-rc.d holding the marker below is ours, left by an interrupted run:
+# it is rewritten and removed like a missing one. Anyone else's is left alone.
+- name: Look for a policy-rc.d not written by this role (Debian)
+  ansible.builtin.command: grep -qF "Managed by Ansible (cassandra_install)" /usr/sbin/policy-rc.d
+  register: _cassandra_install_policy_rc_d
+  changed_when: false
+  failed_when: false
+  check_mode: false
+  when: ansible_facts['os_family'] == 'Debian'
+
+- name: Install Cassandra Packages
+  block:
+    - name: Block service starts during package install (Debian)
+      ansible.builtin.copy:
+        content: "#!/bin/sh\n# Managed by Ansible (cassandra_install), removed after the install\nexit 101\n"
+        dest: /usr/sbin/policy-rc.d
+        mode: "0755"
+      when:
+        - ansible_facts['os_family'] == 'Debian'
+        - _cassandra_install_policy_rc_d.rc != 1
+      changed_when: false
+
+    - name: Install Cassandra Packages
+      ansible.builtin.package:
+        name: "{{ cassandra_packages }}"
+        state: present
+      retries: 3
+  always:
+    - name: Remove the temporary policy-rc.d (Debian)
+      ansible.builtin.file:
+        path: /usr/sbin/policy-rc.d
+        state: absent
+      when:
+        - ansible_facts['os_family'] == 'Debian'
+        - _cassandra_install_policy_rc_d.rc != 1
+      changed_when: false
+
+# jemalloc is preloaded by the cassandra script when found; RedHat-likes
+# only have it in EPEL (or Amazon's base repos), so it is optional there.
+- name: Look up jemalloc in the enabled repos (RedHat)
+  ansible.builtin.command: dnf -q repoquery jemalloc
+  register: _cassandra_install_jemalloc_query
+  changed_when: false
+  failed_when: false  # no repoquery: no jemalloc
+  check_mode: false
+  when: ansible_facts['os_family'] == 'RedHat'
+
+- name: Install jemalloc
+  ansible.builtin.package:
+    name: "{{ 'libjemalloc2' if ansible_facts['os_family'] == 'Debian' else 'jemalloc' }}"
+    state: present
+  retries: 3
+  when: ansible_facts['os_family'] == 'Debian' or _cassandra_install_jemalloc_query.stdout != ''
+
+# cqlsh only runs on some Python versions (4.x: 3.6-3.11, 5.0: 3.8-3.13):
+# when python3 is outside that range, install python3.11 next to it for cqlsh.
+- name: Get the system python3 version
+  ansible.builtin.command: python3 -c "import sys; print('%d.%d' % sys.version_info[:2])"
+  register: _cassandra_install_python3_version
+  changed_when: false
+  failed_when: false
+  check_mode: false
+
+- name: Pick the Python cqlsh runs with
+  ansible.builtin.set_fact:
+    _cassandra_cqlsh_python: >-
+      {{ cassandra_cqlsh_python if cassandra_cqlsh_python != ''
+      else '' if cassandra_version not in cassandra_cqlsh_python_supported
+      else '' if (_cassandra_install_python3_version.rc == 0
+                  and _cassandra_install_python3_version.stdout is version(cassandra_cqlsh_python_supported[cassandra_version][0], '>=')
+                  and _cassandra_install_python3_version.stdout is version(cassandra_cqlsh_python_supported[cassandra_version][1], '<='))
+      else '/usr/bin/python3.11' }}
+
+- name: Install python3.11 for cqlsh
+  when: _cassandra_cqlsh_python == '/usr/bin/python3.11'
+  block:
+    - name: Check whether the distro repos have python3.11 (Ubuntu)
+      ansible.builtin.command: apt-cache policy python3.11
+      register: _cassandra_install_python311_policy
+      changed_when: false
+      check_mode: false
+      when: ansible_facts['distribution'] == 'Ubuntu'
+
+    - name: Add the deadsnakes PPA (Ubuntu without python3.11)
+      when:
+        - not ansible_check_mode  # deb822_repository needs python3-debian even to compare
+        - ansible_facts['distribution'] == 'Ubuntu'
+        - cassandra_cqlsh_python_repo_uri != ''
+        - "'Candidate: (none)' in _cassandra_install_python311_policy.stdout or _cassandra_install_python311_policy.stdout == ''"
+      block:
+        - name: Install the deadsnakes signing key
+          ansible.builtin.copy:
+            src: deadsnakes.asc
+            dest: /etc/apt/keyrings/deadsnakes.asc
+            mode: "0644"
+
+        - name: Install python3-debian (deb822_repository needs it)
+          ansible.builtin.apt:
+            name: python3-debian
+            state: present
+          retries: 3
+
+        - name: Add the deadsnakes repository
+          ansible.builtin.deb822_repository:
+            name: deadsnakes
+            types: deb
+            uris: "{{ cassandra_cqlsh_python_repo_uri }}"
+            suites: "{{ ansible_facts['distribution_release'] }}"
+            components: main
+            signed_by: /etc/apt/keyrings/deadsnakes.asc
+
+        - name: Update the apt cache
+          ansible.builtin.apt:
+            update_cache: true
+          retries: 3
+
+    - name: Install python3.11
+      ansible.builtin.package:
+        name: python3.11
+        state: present
+      retries: 3
+
+# The rpm installs cqlshlib for python3.6 only: link it into the Pythons
+# cqlsh may run with (CASSANDRA-19206).
+- name: Look for the rpm's cqlshlib (RedHat)
+  ansible.builtin.stat:
+    path: /usr/lib/python3.6/site-packages/cqlshlib
+  register: _cassandra_install_cqlshlib
+  when: ansible_facts['os_family'] == 'RedHat'
+
+- name: Find the site-packages of the Pythons cqlsh may use (RedHat)
+  ansible.builtin.command: "{{ item }} -c \"import sysconfig; print(sysconfig.get_paths()['purelib'])\""
+  register: _cassandra_install_cqlsh_purelibs
+  changed_when: false
+  failed_when: false
+  check_mode: false
+  loop: "{{ (['python3', _cassandra_cqlsh_python] | select | unique) }}"
   when:
     - ansible_facts['os_family'] == 'RedHat'
-    - ansible_facts['distribution_major_version'] == "7"
-    - "cassandra_version.startswith('4') or cassandra_version.startswith('3')"
+    - _cassandra_install_cqlshlib.stat.exists
+
+- name: Ensure those site-packages exist (RedHat)
+  ansible.builtin.file:
+    path: "{{ item.stdout }}"
+    state: directory
+    mode: "0755"
+  loop: "{{ _cassandra_install_cqlsh_purelibs.results | default([]) }}"
+  loop_control:
+    label: "{{ item.stdout | default('') }}"
+  when:
+    - ansible_facts['os_family'] == 'RedHat'
+    - _cassandra_install_cqlshlib.stat.exists
+    - item.rc == 0
+    - item.stdout != '/usr/lib/python3.6/site-packages'
+
+- name: Link cqlshlib into them (RedHat)
+  ansible.builtin.file:
+    src: /usr/lib/python3.6/site-packages/cqlshlib
+    dest: "{{ item.stdout }}/cqlshlib"
+    state: link
+  loop: "{{ _cassandra_install_cqlsh_purelibs.results | default([]) }}"
+  loop_control:
+    label: "{{ item.stdout | default('') }}"
+  when:
+    - ansible_facts['os_family'] == 'RedHat'
+    - _cassandra_install_cqlshlib.stat.exists
+    - item.rc == 0
+    - item.stdout != '/usr/lib/python3.6/site-packages'
+
+- name: Check for visudo (sudo installed)
+  ansible.builtin.stat:
+    path: /usr/sbin/visudo
+  register: _cassandra_install_visudo
+
+# cqlsh honours CQLSH_PYTHON: a wrapper in /usr/local/bin (ahead of /usr/bin
+# in the usual PATH; not cron's), profile.d for login shells, env_keep for sudo.
+- name: Point cqlsh at its Python
+  ansible.builtin.copy:
+    dest: "{{ item.dest }}"
+    content: "{{ item.content }}"
+    mode: "{{ item.mode }}"
+    validate: "{{ item.validate | default(omit) }}"
+  loop:
+    - dest: /usr/local/bin/cqlsh
+      mode: "0755"
+      content: |
+        #!/bin/sh
+        # Managed by Ansible (cassandra_install): run the package's cqlsh with a Python it supports
+        CQLSH_PYTHON="${CQLSH_PYTHON:-{{ _cassandra_cqlsh_python }}}" exec /usr/bin/cqlsh "$@"
+    - dest: /etc/profile.d/cqlsh.sh
+      mode: "0644"
+      content: |
+        # Managed by Ansible (cassandra_install)
+        export CQLSH_PYTHON={{ _cassandra_cqlsh_python }}
+    - dest: /etc/sudoers.d/cqlsh
+      mode: "0440"
+      validate: /usr/sbin/visudo -cf %s
+      content: |
+        # Managed by Ansible (cassandra_install)
+        Defaults env_keep += "CQLSH_PYTHON"
+  loop_control:
+    label: "{{ item.dest }}"
+  when:
+    - _cassandra_cqlsh_python != ''
+    - item.dest != '/etc/sudoers.d/cqlsh' or _cassandra_install_visudo.stat.exists
+
+# Only the files written by this role (marker), e.g. not a pip-installed cqlsh
+- name: Find the cqlsh Python pointers written by this role
+  ansible.builtin.command: >-
+    grep -lF "Managed by Ansible (cassandra_install)"
+    /usr/local/bin/cqlsh /etc/profile.d/cqlsh.sh /etc/sudoers.d/cqlsh
+  register: _cassandra_install_cqlsh_pointers
+  changed_when: false
+  failed_when: false
+  check_mode: false
+  when: _cassandra_cqlsh_python == ''
+
+- name: Remove the cqlsh Python pointers when not needed
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop: "{{ _cassandra_install_cqlsh_pointers.stdout_lines | default([]) }}"
+  when: _cassandra_cqlsh_python == ''

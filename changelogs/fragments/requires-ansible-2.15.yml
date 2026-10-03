@@ -1,0 +1,2 @@
+breaking_changes:
+  - The collection now requires ansible-core 2.15 or later (cassandra_repository writes the apt source with ansible.builtin.deb822_repository).
