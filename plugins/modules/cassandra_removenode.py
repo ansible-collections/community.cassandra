@@ -79,6 +79,7 @@ __metaclass__ = type
 
 from ansible_collections.community.cassandra.plugins.module_utils.nodetool_cmd_objects import NodeToolCommandSimple
 from ansible_collections.community.cassandra.plugins.module_utils.cassandra_common_options import cassandra_common_argument_spec
+from ansible_collections.community.cassandra.plugins.module_utils.nodetool_status import NODE_RE, node_state
 
 
 # TODO add to common and unit test
@@ -86,18 +87,6 @@ def valid_uuid(uuid):
     regex = re.compile(r'[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}\Z', re.I)
     match = regex.match(uuid)
     return bool(match)
-
-
-NODE_RE = re.compile(r'^[UD?][NLJM]\s+')
-
-
-def node_state(status_out, host_id):
-    """Return the status and state (UN, DL...) of host_id in nodetool status
-    output, or None when host_id is not in the ring."""
-    for line in status_out.splitlines():
-        if NODE_RE.match(line) and host_id in line.split():
-            return line[:2]
-    return None
 
 
 def leaving_nodes(status_out):

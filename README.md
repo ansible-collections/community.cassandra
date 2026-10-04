@@ -45,6 +45,7 @@ These roles prepare servers with Debian-based and RHEL-based distributions to ru
 - `cassandra_invalidatecache`- Invalidates the various caches on the Cassandra node.
 - `cassandra_keyspace`- Manage keyspaces on your Cassandra cluster.
 - `cassandra_maxhintwindow`- Set the specified max hint window in ms.
+- `cassandra_netstats`- Returns the mode of the node and whether it is streaming.
 - `cassandra_reload`-  Reloads various objects into the local node.
 - `cassandra_removenode`- Removes a node by the given host id from the cluster.
 - `cassandra_role`- Manage roles on your Cassandra Cluster.

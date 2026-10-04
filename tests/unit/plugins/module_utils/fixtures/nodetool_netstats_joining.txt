@@ -1,0 +1,11 @@
+Mode: JOINING
+Bootstrap 9a3f2c10-6b1e-11ef-8b1a-3d7c1c0a1b2c
+    /10.0.0.1
+        Receiving 12 files, 104857600 bytes total. Already received 3 files (25.00%), 26214400 bytes total (25.00%)
+            /var/lib/cassandra/data/ks/t-1/nb-1-big-Data.db 8738133/8738133 bytes (100%) received from idx:0/10.0.0.1
+Read Repair Statistics:
+Attempted: 0
+Mismatch (Blocking): 0
+Mismatch (Background): 0
+Pool Name                    Active   Pending      Completed   Dropped
+Large messages                  n/a         0              0         0

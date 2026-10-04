@@ -4,7 +4,7 @@ __metaclass__ = type
 import pytest
 
 from ansible_collections.community.cassandra.plugins.modules import cassandra_assassinate
-from ansible_collections.community.cassandra.plugins.modules.cassandra_assassinate import (
+from ansible_collections.community.cassandra.plugins.module_utils.nodetool_status import (
     address_part,
     gossip_status,
     ring_state,
@@ -15,18 +15,18 @@ try:
 except ImportError:
     from mock import patch
 
-IP = "10.118.154.139"
+IP = "10.100.100.139"
 
 STATUS = """Datacenter: datacenter1
 =======================
 Status=Up/Down
 |/ State=Normal/Leaving/Joining/Moving
 --  Address         Load        Tokens  Owns (effective)  Host ID                               Rack
-UN  10.118.154.136  287.59 KiB  16      43.2%             ddf13452-4c9d-47af-a7ed-94f78acd1c6d  rack1
+UN  10.100.100.136  287.59 KiB  16      43.2%             ddf13452-4c9d-47af-a7ed-94f78acd1c6d  rack1
 {state}  {ip}  222.39 KiB  16      38.1%             2d29b2bc-faa5-4837-935c-41c3945119e2  rack1
 """
 
-GOSSIPINFO = """/10.118.154.136
+GOSSIPINFO = """/10.100.100.136
   generation:1727500000
   heartbeat:5321
   STATUS:21:NORMAL,-9223372036854775808
@@ -34,7 +34,7 @@ GOSSIPINFO = """/10.118.154.136
   DC:9:datacenter1
   RACK:11:rack1
   HOST_ID:3:ddf13452-4c9d-47af-a7ed-94f78acd1c6d
-  NATIVE_ADDRESS_AND_PORT:4:10.118.154.136:9042
+  NATIVE_ADDRESS_AND_PORT:4:10.100.100.136:9042
   STATUS_WITH_PORT:20:NORMAL,-9223372036854775808
   TOKENS:19:<hidden>
 {header}
@@ -134,10 +134,10 @@ class TestRingState:
         assert ring_state(status(state), IP) == state
 
     def test_absent(self):
-        assert ring_state(status("DN", ip="10.118.154.13"), IP) is None
+        assert ring_state(status("DN", ip="10.100.100.13"), IP) is None
 
     def test_address_prefix_does_not_match(self):
-        assert ring_state(status("DN"), "10.118.154.13") is None
+        assert ring_state(status("DN"), "10.100.100.13") is None
 
     def test_ipv6(self):
         assert ring_state(status("DN", ip="0:0:0:0:0:0:0:2"), "0:0:0:0:0:0:0:2") == "DN"
@@ -181,7 +181,7 @@ class TestGossipStatus:
         assert gossip_status(gossipinfo(""), IP) == ""
 
     def test_endpoint_listed_after_is_not_used(self):
-        out = gossipinfo("LEFT") + "/10.118.154.140\n  STATUS:5:NORMAL,1\n"
+        out = gossipinfo("LEFT") + "/10.100.100.140\n  STATUS:5:NORMAL,1\n"
         assert gossip_status(out, IP) == "LEFT"
 
     def test_status_with_port_wins(self):
@@ -224,7 +224,7 @@ class TestMain:
         assert commands == ["status"]
 
     def test_unknown_endpoint_is_unchanged(self):
-        res, commands = run_main(status("UN", ip="10.118.154.140"))
+        res, commands = run_main(status("UN", ip="10.100.100.140"))
         assert isinstance(res, ExitJson)
         assert res.args[0]['changed'] is False
         assert res.args[0]['msg'] == ABSENT
@@ -232,7 +232,7 @@ class TestMain:
 
     @pytest.mark.parametrize("gossip_state", ["LEFT", "removed"])
     def test_gone_from_gossip_is_unchanged(self, gossip_state):
-        res, commands = run_main(status("UN", ip="10.118.154.140"), gossipinfo(gossip_state))
+        res, commands = run_main(status("UN", ip="10.100.100.140"), gossipinfo(gossip_state))
         assert isinstance(res, ExitJson)
         assert res.args[0]['changed'] is False
         assert res.args[0]['msg'] == ABSENT
@@ -240,13 +240,13 @@ class TestMain:
 
     @pytest.mark.parametrize("gossip_state", ["NORMAL", "shutdown", ""])
     def test_gossip_only_endpoint_is_assassinated(self, gossip_state):
-        res, commands = run_main(status("UN", ip="10.118.154.140"), gossipinfo(gossip_state))
+        res, commands = run_main(status("UN", ip="10.100.100.140"), gossipinfo(gossip_state))
         assert isinstance(res, ExitJson)
         assert res.args[0]['changed'] is True
         assert commands == ["status", "gossipinfo", ASSASSINATE]
 
     def test_gossip_only_endpoint_check_mode(self):
-        res, commands = run_main(status("UN", ip="10.118.154.140"), gossipinfo("shutdown"),
+        res, commands = run_main(status("UN", ip="10.100.100.140"), gossipinfo("shutdown"),
                                  check_mode=True)
         assert isinstance(res, ExitJson)
         assert res.args[0]['changed'] is True
@@ -289,7 +289,7 @@ class TestMain:
 
     def test_print_port_gossip_only_endpoint(self):
         # nodetool_flags: -pp
-        res, commands = run_main(status("UN", ip="10.118.154.140:7000"),
+        res, commands = run_main(status("UN", ip="10.100.100.140:7000"),
                                  gossipinfo("shutdown", header="/" + IP + ":7000"))
         assert isinstance(res, ExitJson)
         assert res.args[0]['changed'] is True
@@ -304,7 +304,7 @@ class TestMain:
 
     @pytest.mark.parametrize("what, out, commands", [
         ("status", status("DN"), ["status"]),
-        ("gossipinfo", status("UN", ip="10.118.154.140"), ["status", "gossipinfo"]),
+        ("gossipinfo", status("UN", ip="10.100.100.140"), ["status", "gossipinfo"]),
         ("assassinate", status("DN"), ["status", ASSASSINATE]),
     ])
     def test_nodetool_failure(self, what, out, commands):

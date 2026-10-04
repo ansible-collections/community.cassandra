@@ -4,7 +4,6 @@ __metaclass__ = type
 import pytest
 
 from ansible_collections.community.cassandra.plugins.modules import cassandra_decommission
-from ansible_collections.community.cassandra.plugins.modules.cassandra_decommission import node_mode
 
 try:
     from unittest.mock import patch
@@ -95,23 +94,6 @@ def run_main(netstats_out, check_mode=False, debug=False, netstats_rc=0,
         with pytest.raises((ExitJson, FailJson)) as exc:
             cassandra_decommission.main()
     return exc.value, commands
-
-
-class TestNodeMode:
-
-    @pytest.mark.parametrize("mode", ["NORMAL", "LEAVING", "DECOMMISSIONED",
-                                      "DECOMMISSION_FAILED", "JOINING"])
-    def test_mode(self, mode):
-        assert node_mode(netstats(mode)) == mode
-
-    def test_leaving_with_streams(self):
-        assert node_mode(NETSTATS_LEAVING) == "LEAVING"
-
-    def test_no_mode_line(self):
-        assert node_mode("Not sending any streams.\n") is None
-
-    def test_empty(self):
-        assert node_mode("") is None
 
 
 class TestMain:
