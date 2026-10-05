@@ -99,7 +99,8 @@ jobs:
       - name: Rename the build artifact
         run: mv community-cassandra-*.tar.gz community-cassandra-latest.tar.gz
 
-      # Its dependencies come from Galaxy: 10 attempts, a minute apart
+      # Its dependencies and community.docker (molecule's docker driver) come from Galaxy: 10 attempts, a minute apart.
+      # --no-cache: else ansible-galaxy's own retry of a failed Galaxy request fails on the blank cache entry it left
       - name: Install collection
         uses: nick-invision/retry@v3
         with:
@@ -107,7 +108,7 @@ jobs:
           max_attempts: 10
           retry_wait_seconds: 60
           # uses: steps don't get the job's working-directory
-          command: cd ansible_collections/community/cassandra && ansible-galaxy collection install community-cassandra-*.tar.gz
+          command: cd ansible_collections/community/cassandra && ansible-galaxy collection install --no-cache community-cassandra-*.tar.gz 'community.docker:>=3.0.2'
 
       - name: Run molecule test for ${{ matrix.cassandra_role }}
         run: molecule test
