@@ -1,0 +1,393 @@
+---
+- name: Converge
+  hosts: all
+  serial: 2  # the confirmation logic must cope with batches
+  tasks:
+    - name: Render with stock defaults
+      ansible.builtin.include_role:
+        name: community.cassandra.cassandra_config
+
+    - name: Render with overrides
+      ansible.builtin.include_role:
+        name: community.cassandra.cassandra_config
+      vars:
+        cassandra_conf_dir: /tmp/cassandra-override
+        cassandra_data_dir: /data/cassandra/data
+        cassandra_cluster_name: "Molecule Cluster"
+        cassandra_num_tokens: 4
+        cassandra_seeds: "10.0.0.1:7000,10.0.0.2:7000"
+        cassandra_endpoint_snitch: GossipingPropertyFileSnitch
+        cassandra_heap_size: 512M
+        cassandra_jvm_max_gc_pause_millis: 500
+        cassandra_jvm17_max_gc_pause_millis: 200
+        cassandra_jvm_parallel_gc_threads: 8
+        cassandra_jvm_extra_options: ["-Dmolecule.a=1", "-Dmolecule.b=2"]
+        cassandra_local_jmx: false
+        cassandra_dc: DC_A
+        cassandra_rack: RACK_1
+        cassandra_prefer_local: true
+        cassandra_log_level: WARN
+        cassandra_debug_log_enabled: false
+        cassandra_internode_encryption: all
+        cassandra_server_keystore_password: s3cret
+        cassandra_truststore_password: tru5t
+        cassandra_server_require_client_auth: true
+        cassandra_server_outbound_keystore: /etc/cassandra/outbound.keystore
+        cassandra_server_outbound_keystore_password: 0utb0und
+        cassandra_client_encryption_enabled: true
+        cassandra_client_encryption_optional: false
+        cassandra_client_truststore: /etc/cassandra/client.truststore
+        cassandra_extra_settings: {commitlog_total_space: 8192MiB, auto_bootstrap: false}
+
+    - name: Render 4.x series with defaults
+      ansible.builtin.include_role:
+        name: community.cassandra.cassandra_config
+      vars:
+        cassandra_version: "{{ series }}"
+        cassandra_conf_dir: "/tmp/cassandra-{{ series }}"
+      loop: [40x, 41x]
+      loop_control:
+        loop_var: series
+
+    - name: Render with the other GC (G1 on 4.x, CMS on 5.0)
+      ansible.builtin.include_role:
+        name: community.cassandra.cassandra_config
+      vars:
+        cassandra_version: "{{ item.0 }}"
+        cassandra_jvm_gc: "{{ item.1 }}"
+        cassandra_conf_dir: "/tmp/cassandra-{{ item.0 }}-{{ item.1 }}"
+      loop: [[40x, G1], [41x, G1], [50x, CMS]]
+
+    - name: Render 4.0 with overrides
+      ansible.builtin.include_role:
+        name: community.cassandra.cassandra_config
+      vars:
+        cassandra_version: 40x
+        cassandra_conf_dir: /tmp/cassandra-40x-override
+        cassandra_key_cache_save_period: 3600
+        cassandra_read_request_timeout_in_ms: 7000
+        cassandra_heap_size: 512M
+        cassandra_heap_newsize: 128M
+        cassandra_jvm8_extra_options: ["-Dmolecule.jvm8=1"]
+        cassandra_extra_settings: {auto_bootstrap: false}
+
+    - name: Render the group commit log mode
+      ansible.builtin.include_role:
+        name: community.cassandra.cassandra_config
+      vars:
+        cassandra_version: "{{ series }}"
+        cassandra_conf_dir: "/tmp/cassandra-{{ series }}-group"
+        cassandra_commitlog_sync: group
+        cassandra_commitlog_sync_group_window: 15ms
+        cassandra_commitlog_sync_group_window_in_ms: 15
+      loop: [40x, 41x, 50x]
+      loop_control:
+        loop_var: series
+
+    - name: Render the group commit log mode without a window
+      block:
+        - name: Run the role, expecting its assert to fail
+          ansible.builtin.include_role:
+            name: community.cassandra.cassandra_config
+          vars:
+            cassandra_conf_dir: /tmp/cassandra-group-no-window
+            cassandra_commitlog_sync: group
+
+        - name: Fail if the role accepted group mode without a window
+          ansible.builtin.fail:
+            msg: cassandra_config accepted commitlog_sync group without a window
+      rescue:
+        - name: Assert the failure came from the role's own assert
+          ansible.builtin.assert:
+            that: ansible_failed_task.name == "Assert the commit log group window is set"
+
+    - name: Render the group commit log mode with a zero window
+      block:
+        - name: Run the role, expecting its assert to fail
+          ansible.builtin.include_role:
+            name: community.cassandra.cassandra_config
+          vars:
+            cassandra_conf_dir: /tmp/cassandra-group-no-window
+            cassandra_commitlog_sync: group
+            cassandra_commitlog_sync_group_window: 0ms
+
+        - name: Fail if the role accepted a zero group window
+          ansible.builtin.fail:
+            msg: cassandra_config accepted commitlog_sync group with a 0ms window
+      rescue:
+        - name: Assert the failure came from the role's own assert
+          ansible.builtin.assert:
+            that: ansible_failed_task.name == "Assert the commit log group window is set"
+
+    - name: Render 4.x CMS with a heap size but no newsize
+      block:
+        - name: Run the role, expecting its heap assert to fail
+          ansible.builtin.include_role:
+            name: community.cassandra.cassandra_config
+          vars:
+            cassandra_version: 41x
+            cassandra_conf_dir: /tmp/cassandra-41x
+            cassandra_jvm_gc: CMS
+            cassandra_heap_size: 512M
+
+        - name: Fail if the role accepted a heap size without newsize on 4.x
+          ansible.builtin.fail:
+            msg: cassandra_config accepted cassandra_heap_size without cassandra_heap_newsize on 4.x CMS
+      rescue:
+        - name: Assert the failure came from the role's heap assert
+          ansible.builtin.assert:
+            that: ansible_failed_task.name == "Assert heap settings are consistent"
+
+    - name: First render on an initialized node (confirmation disabled)
+      ansible.builtin.include_role:
+        name: community.cassandra.cassandra_config
+      vars:
+        cassandra_conf_dir: /tmp/cassandra-confirm
+        cassandra_data_dir: /tmp/initialized-node
+        cassandra_rpm_conf_alternative: ""
+        cassandra_config_confirm: false
+
+    - name: Change a setting on the initialized node, no terminal to confirm
+      block:
+        - name: Run the role, expecting the confirmation to fail
+          ansible.builtin.include_role:
+            name: community.cassandra.cassandra_config
+          vars:
+            cassandra_conf_dir: /tmp/cassandra-confirm
+            cassandra_data_dir: /tmp/initialized-node
+            cassandra_rpm_conf_alternative: ""
+            cassandra_extra_settings: {commitlog_total_space: 4096MiB}
+
+        - name: Fail if the change went through unconfirmed
+          ansible.builtin.fail:
+            msg: cassandra_config changed an initialized node without confirmation
+      rescue:
+        - name: Assert the failure came from the confirmation
+          ansible.builtin.assert:
+            that: ansible_failed_task.name == "Stop unless the changes were confirmed"
+
+    # The inventory does not point at its data yet: the live cassandra.yaml does
+    - name: Change the data dir of the initialized node, no terminal to confirm
+      block:
+        - name: Run the role, expecting the confirmation to fail
+          ansible.builtin.include_role:
+            name: community.cassandra.cassandra_config
+          vars:
+            cassandra_conf_dir: /tmp/cassandra-confirm
+            cassandra_data_dir: /tmp/not-initialized
+            cassandra_rpm_conf_alternative: ""
+
+        - name: Fail if the change went through unconfirmed
+          ansible.builtin.fail:
+            msg: cassandra_config changed a node initialized per its live cassandra.yaml without confirmation
+      rescue:
+        - name: Assert the failure came from the confirmation and says where the node was found initialized
+          ansible.builtin.assert:
+            that:
+              - ansible_failed_task.name == "Stop unless the changes were confirmed"
+              - "'(already initialized: /tmp/initialized-node/system)' in ansible_failed_result.msg"
+
+    # No PyYAML needed on the node, and a data dir not created yet does not
+    # make a node initialized
+    - name: Check the Python of the next case does not see PyYAML
+      ansible.builtin.command: /usr/local/bin/python-no-pyyaml -c "import yaml"
+      register: no_pyyaml
+      changed_when: false
+      failed_when: no_pyyaml.rc == 0
+
+    - name: First render of a new node, no PyYAML, its data dir not there yet
+      ansible.builtin.include_role:
+        name: community.cassandra.cassandra_config
+      vars:
+        cassandra_conf_dir: /tmp/cassandra-new-node
+        cassandra_data_dir: /tmp/new-node
+        cassandra_rpm_conf_alternative: ""
+        cassandra_cluster_name: Molecule Cluster
+        _cassandra_config_python: /usr/local/bin/python-no-pyyaml
+
+    - name: Check the new node was not seen as initialized
+      ansible.builtin.assert:
+        that: not _cassandra_config_initialized | bool
+
+    # Not idempotent by design (they change a joined node): first converge only
+    - name: Secrets and identity of a joined node
+      tags: molecule-idempotence-notest
+      block:
+        - name: First render of a joined node
+          ansible.builtin.include_role:
+            name: community.cassandra.cassandra_config
+          vars:
+            cassandra_conf_dir: "{{ conf_dir }}"
+            cassandra_data_dir: /tmp/initialized-node
+            cassandra_rpm_conf_alternative: ""
+            cassandra_config_confirm: false
+          loop: [/tmp/cassandra-secret, /tmp/cassandra-identity]
+          loop_control:
+            loop_var: conf_dir
+
+        - name: Change a password on the joined node
+          ansible.builtin.include_role:
+            name: community.cassandra.cassandra_config
+          vars:
+            cassandra_conf_dir: /tmp/cassandra-secret
+            cassandra_data_dir: /tmp/initialized-node
+            cassandra_rpm_conf_alternative: ""
+            cassandra_config_confirm: false
+            cassandra_internode_encryption: all
+            cassandra_server_keystore_password: Molecule-K3ystore-Secret
+
+        - name: Check the password never reached the diff
+          ansible.builtin.assert:
+            that:
+              - _diff is search('keystore_password. \*\*\*\*')
+              - "'Molecule-K3ystore-Secret' not in _diff"
+              - "'Molecule-K3ystore-Secret' not in (cassandra_config_applied | to_json)"
+          vars:
+            _diff: "{{ cassandra_config_preview.results | map(attribute='stdout') | join }}"
+
+        - name: Change num_tokens and the rack of a joined node
+          block:
+            - name: Run the role, expecting the identity check to fail
+              ansible.builtin.include_role:
+                name: community.cassandra.cassandra_config
+              vars:
+                cassandra_conf_dir: /tmp/cassandra-identity
+                cassandra_data_dir: /tmp/initialized-node
+                cassandra_rpm_conf_alternative: ""
+                cassandra_config_confirm: false
+                cassandra_num_tokens: 8
+                cassandra_rack: rack2
+
+            - name: Fail if the identity change went through
+              ansible.builtin.fail:
+                msg: cassandra_config changed num_tokens and rack of a joined node
+          rescue:
+            - name: Assert the failure came from the identity check and names both settings
+              ansible.builtin.assert:
+                that:
+                  - ansible_failed_task.name == "Refuse to change the identity of a joined node"
+                  - "'num_tokens: 16 -> 8' in ansible_failed_result.msg"
+                  - "'rack: rack1 -> rack2' in ansible_failed_result.msg"
+                  - "'already initialized (/tmp/initialized-node/system)' in ansible_failed_result.msg"
+                  - "'empty them: /tmp/initialized-node, /var/lib/cassandra/commitlog' in ansible_failed_result.msg"
+                  - "'which DELETES its data' in ansible_failed_result.msg"
+
+        - name: Change the rack of a joined node, forced
+          ansible.builtin.include_role:
+            name: community.cassandra.cassandra_config
+          vars:
+            cassandra_conf_dir: /tmp/cassandra-identity
+            cassandra_data_dir: /tmp/initialized-node
+            cassandra_rpm_conf_alternative: ""
+            cassandra_config_confirm: false
+            cassandra_config_force_identity_change: true
+            cassandra_rack: rack2
+
+    # The service runs as another account: the files and missing dirs follow it
+    - name: JMX users, with another service account
+      ansible.builtin.include_role:
+        name: community.cassandra.cassandra_config
+      vars:
+        cassandra_conf_dir: /tmp/cassandra-access
+        cassandra_user: dbsvc
+        cassandra_group: dbgrp
+        cassandra_data_dir: /data/account/data
+        cassandra_log_dir: /data/account/log
+        cassandra_commitlog_dir: /data/account/commitlog
+        cassandra_rpm_conf_alternative: ""
+        cassandra_local_jmx: false
+        cassandra_jmx_users:
+          - {name: monitor, password: Mon1tor-Secret, access: readonly}
+          - {name: admin, password: Adm1n-Secret}
+
+    - name: Render with an extra setting that has a variable
+      block:
+        - name: Run the role, expecting its assert to fail
+          ansible.builtin.include_role:
+            name: community.cassandra.cassandra_config
+          vars:
+            cassandra_conf_dir: /tmp/cassandra-extra-taken
+            cassandra_extra_settings: {num_tokens: 4}
+
+        - name: Fail if the role accepted num_tokens as an extra setting
+          ansible.builtin.fail:
+            msg: cassandra_config accepted num_tokens in cassandra_extra_settings
+      rescue:
+        - name: Assert the failure came from the role's own assert
+          ansible.builtin.assert:
+            that: ansible_failed_task.name == "Refuse extra settings the template already has"
+
+    - name: Render with an empty cassandra_conf_dir
+      block:
+        - name: Run the role, expecting its assert to fail
+          ansible.builtin.include_role:
+            name: community.cassandra.cassandra_config
+          vars:
+            cassandra_conf_dir: ""
+
+        - name: Fail if the role did not stop on the empty cassandra_conf_dir
+          ansible.builtin.fail:
+            msg: cassandra_config accepted an empty cassandra_conf_dir
+      rescue:
+        - name: Assert the failure came from the role's own assert
+          ansible.builtin.assert:
+            that: ansible_failed_task.name == "Assert required cassandra_config variables are set"
+
+    - name: Render with an unsupported cassandra_version
+      block:
+        - name: Run the role, expecting its assert to fail
+          ansible.builtin.include_role:
+            name: community.cassandra.cassandra_config
+          vars:
+            cassandra_version: "30x"
+
+        - name: Fail if the role accepted an unsupported cassandra_version
+          ansible.builtin.fail:
+            msg: cassandra_config accepted cassandra_version 30x
+      rescue:
+        - name: Assert the failure came from the role's own assert
+          ansible.builtin.assert:
+            that: ansible_failed_task.name is search('Validating arguments against arg spec')  # rejected by argument_specs
+
+    - name: Render with a service account that does not exist
+      block:
+        - name: Run the role, expecting its assert to fail
+          ansible.builtin.include_role:
+            name: community.cassandra.cassandra_config
+          vars:
+            cassandra_conf_dir: /tmp/cassandra-no-account
+            cassandra_user: nosuchuser
+            cassandra_data_dir: /data/no-account/data
+            cassandra_log_dir: /data/no-account/log
+            cassandra_local_jmx: false
+            cassandra_jmx_users: [{name: intruder, password: Intruder-Secret}]
+
+        - name: Fail if the role accepted a missing cassandra_user
+          ansible.builtin.fail:
+            msg: cassandra_config accepted a cassandra_user that does not exist
+      rescue:
+        - name: Assert the failure came from the role's own assert
+          ansible.builtin.assert:
+            that: ansible_failed_task.name == "Assert the accounts exist"
+
+    - name: Render with a service account outside cassandra_group
+      block:
+        - name: Run the role, expecting its assert to fail
+          ansible.builtin.include_role:
+            name: community.cassandra.cassandra_config
+          vars:
+            cassandra_conf_dir: /tmp/cassandra-no-account
+            cassandra_user: dbsvc
+            cassandra_group: cassandra
+            cassandra_data_dir: /data/no-account/data
+            cassandra_log_dir: /data/no-account/log
+            cassandra_local_jmx: false
+            cassandra_jmx_users: [{name: intruder, password: Intruder-Secret}]
+
+        - name: Fail if the role accepted a cassandra_user outside cassandra_group
+          ansible.builtin.fail:
+            msg: cassandra_config accepted a cassandra_user that is not in cassandra_group
+      rescue:
+        - name: Assert the failure came from the role's own assert
+          ansible.builtin.assert:
+            that: ansible_failed_task.name == "Assert the accounts exist"

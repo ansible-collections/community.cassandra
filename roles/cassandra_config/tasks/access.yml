@@ -1,0 +1,23 @@
+---
+# Remote JMX with authentication (cassandra_local_jmx: false): its users. The
+# JVM refuses a password file others can read.
+- name: Write the JMX users
+  when: cassandra_jmx_users | length > 0
+  block:
+    - name: Write jmxremote.password
+      ansible.builtin.template:
+        src: jmxremote.password.j2
+        dest: /etc/cassandra/jmxremote.password
+        owner: "{{ cassandra_user }}"
+        group: "{{ cassandra_group }}"
+        mode: "0400"
+      no_log: true
+      diff: false
+
+    - name: Write jmxremote.access
+      ansible.builtin.template:
+        src: jmxremote.access.j2
+        dest: /etc/cassandra/jmxremote.access
+        owner: "{{ cassandra_user }}"
+        group: "{{ cassandra_group }}"
+        mode: "0400"

@@ -1,0 +1,119 @@
+---
+# UBI 8 only ships platform-python 3.6, below ansible-core's target minimum
+- name: Bootstrap Python on RHEL 8
+  hosts: rhel810
+  gather_facts: false
+  tasks:
+    - name: Install python3.12
+      ansible.builtin.raw: test -x /usr/bin/python3.12 || dnf -y install python3.12
+      changed_when: false
+
+- name: Prepare
+  hosts: all
+  tasks:
+    - name: Create the cassandra group (normally created by the Cassandra package)
+      ansible.builtin.group:
+        name: cassandra
+        system: true
+
+    - name: Create the cassandra user (normally created by the Cassandra package)
+      ansible.builtin.user:
+        name: cassandra
+        group: cassandra
+        system: true
+        create_home: false
+
+    - name: Create another service group (cassandra_group), for the JMX users case
+      ansible.builtin.group:
+        name: dbgrp
+        system: true
+
+    - name: Create another service user (cassandra_user), for the JMX users case
+      ansible.builtin.user:
+        name: dbsvc
+        group: dbgrp
+        system: true
+        create_home: false
+
+    - name: Create config dirs (normally created by the Cassandra package)
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        mode: "0755"
+      loop:
+        - "{{ '/etc/cassandra/default.conf' if ansible_facts['os_family'] == 'RedHat' else '/etc/cassandra' }}"
+        - /tmp/cassandra-override
+        - /tmp/cassandra-40x
+        - /tmp/cassandra-41x
+        - /tmp/cassandra-40x-override
+        - /tmp/cassandra-40x-G1
+        - /tmp/cassandra-41x-G1
+        - /tmp/cassandra-50x-CMS
+        - /tmp/cassandra-40x-group
+        - /tmp/cassandra-41x-group
+        - /tmp/cassandra-50x-group
+        - /tmp/cassandra-confirm
+        - /tmp/cassandra-identity
+        - /tmp/cassandra-secret
+        - /tmp/cassandra-access
+        - /tmp/cassandra-no-account
+        - /tmp/initialized-node/system
+        - /tmp/cassandra-new-node
+
+    # What the rpm's %post does: /etc/cassandra/conf -> alternatives -> default.conf
+    - name: Seed default.conf with a file the templates don't manage (RedHat)
+      ansible.builtin.copy:
+        content: "package file\n"
+        dest: /etc/cassandra/default.conf/cqlshrc.sample
+        mode: "0644"
+      when: ansible_facts['os_family'] == 'RedHat'
+
+    - name: Register default.conf as the cassandra alternative (RedHat)
+      ansible.builtin.command: alternatives --install /etc/cassandra/conf cassandra /etc/cassandra/default.conf/ 0
+      changed_when: true
+      when: ansible_facts['os_family'] == 'RedHat'
+
+    # A node already run from another conf dir, with a keystore only Cassandra reads:
+    # the role's dir must be seeded from it, not from default.conf (Rocky; the
+    # other RedHat platforms keep the new install case, seeded from default.conf)
+    - name: Run from another conf dir (Rocky)
+      when: ansible_facts['distribution'] == 'Rocky'
+      block:
+        - name: Copy default.conf to that dir
+          ansible.builtin.command: cp -a /etc/cassandra/default.conf /etc/cassandra/prod.conf
+          args:
+            creates: /etc/cassandra/prod.conf
+
+        - name: Add its keystore
+          ansible.builtin.copy:
+            content: "keystore\n"
+            dest: /etc/cassandra/prod.conf/.keystore
+            owner: cassandra
+            group: cassandra
+            mode: "0400"
+
+        - name: Select it
+          ansible.builtin.command: alternatives --install /etc/cassandra/conf cassandra /etc/cassandra/prod.conf 10
+          changed_when: true
+
+    # A keystore the overrides case points at: a file where the role looks
+    # for <path>/system (a path written in the live cassandra.yaml)
+    - name: Write the outbound keystore
+      ansible.builtin.copy:
+        content: "keystore\n"
+        dest: /etc/cassandra/outbound.keystore
+        mode: "0600"
+
+    # A new node from the package, on a host without PyYAML: its cassandra.yaml
+    # lists a data dir not created yet
+    - name: Write the package's cassandra.yaml of the new node
+      ansible.builtin.copy:
+        content: "cluster_name: 'Test Cluster'\ndata_file_directories:\n    - /tmp/new-node/data\n"
+        dest: /tmp/cassandra-new-node/cassandra.yaml
+        mode: "0644"
+
+    - name: Write a Python that does not see PyYAML
+      ansible.builtin.copy:
+        content: "#!/bin/sh\nexec {{ ansible_facts['python']['executable'] }} -S \"$@\"\n"
+        dest: /usr/local/bin/python-no-pyyaml
+        mode: "0755"
