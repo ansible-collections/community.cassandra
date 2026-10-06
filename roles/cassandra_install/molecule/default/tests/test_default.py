@@ -9,6 +9,17 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
 ).get_hosts('all')
 
 
+@pytest.fixture(scope="module")
+def os_family(host):
+    return host.ansible("setup", "filter=ansible_os_family")["ansible_facts"]["ansible_os_family"]
+
+
+@pytest.fixture
+def debian_only(os_family):
+    if os_family != "Debian":
+        pytest.skip("Debian family only")
+
+
 def test_cassandra_available(host):
     cmd = host.run("cassandra -h")
     assert cmd.rc == 0
@@ -31,9 +42,9 @@ def test_cassandra_tools_available(host, tool):
     assert host.exists(tool)
 
 
-def test_jemalloc_found_by_ldconfig(host):
+def test_jemalloc_found_by_ldconfig(host, os_family):
     # Optional on RedHat-likes: only there when a repo (EPEL, Amazon) has it
-    if host.system_info.distribution not in ("ubuntu", "debian") and not host.run("dnf -q repoquery jemalloc").stdout:
+    if os_family == "RedHat" and not host.run("dnf -q repoquery jemalloc").stdout:
         pytest.skip("jemalloc not in any enabled repo")
 
     assert "libjemalloc.so" in host.run("ldconfig -p").stdout
@@ -47,10 +58,10 @@ def test_java_17_only(host):
     assert host.run("ls -d /usr/lib/jvm/*11*").rc != 0
 
 
+@pytest.mark.usefixtures("debian_only")
 def test_policy_rc_d_removed(host):
     # side_effect.yml left one from an interrupted run before running the role again
-    if host.system_info.distribution in ("ubuntu", "debian"):
-        assert not host.file("/usr/sbin/policy-rc.d").exists
+    assert not host.file("/usr/sbin/policy-rc.d").exists
 
 
 def test_cassandra_not_started_by_package(host):
