@@ -74,3 +74,9 @@ def test_descriptions_are_text(role):
             if not isinstance(line, str):
                 bad.append(name)
     assert bad == []
+
+
+@pytest.mark.parametrize("role", ROLES)
+def test_accounts_named_like_cassandra_user(role):
+    # accounts are *_user / *_group, like cassandra_user / cassandra_group
+    assert sorted(k for k in spec_options(role) if k.endswith(("_owner", "_uid", "_gid"))) == []

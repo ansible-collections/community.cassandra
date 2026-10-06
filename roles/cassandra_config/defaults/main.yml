@@ -281,7 +281,7 @@ cassandra_log_console: false
 
 # Config files may hold keystore passwords: owned by root, readable by
 # cassandra_group; the service reads them but cannot rewrite them
-cassandra_config_owner: root
+cassandra_config_user: root
 cassandra_config_group: "{{ cassandra_group }}"
 cassandra_config_mode: "0640"
 # Keep a timestamped copy of each file the role replaces, next to it (to roll back)

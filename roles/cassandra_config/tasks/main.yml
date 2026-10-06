@@ -83,14 +83,14 @@
     - name: Look up the service account
       ansible.builtin.command:
         argv: [id, -Gn, --, "{{ cassandra_user }}"]
-      register: cassandra_config_user_groups
+      register: cassandra_config_service_groups
       changed_when: false
       failed_when: false
       check_mode: false
 
     - name: Look up the config files' owner and group
       ansible.builtin.command:
-        argv: [sh, -c, 'id -u -- "$1" && getent group "$2"', sh, "{{ cassandra_config_owner }}", "{{ cassandra_config_group }}"]
+        argv: [sh, -c, 'id -u -- "$1" && getent group "$2"', sh, "{{ cassandra_config_user }}", "{{ cassandra_config_group }}"]
       register: cassandra_config_file_account
       changed_when: false
       failed_when: false
@@ -99,14 +99,14 @@
     - name: Assert the accounts exist
       ansible.builtin.assert:
         that:
-          - cassandra_config_user_groups.rc == 0
-          - cassandra_group in cassandra_config_user_groups.stdout.split()
+          - cassandra_config_service_groups.rc == 0
+          - cassandra_group in cassandra_config_service_groups.stdout.split()
           - cassandra_config_file_account.rc == 0
         fail_msg: >-
           cassandra_user ({{ cassandra_user }}) must exist and be in cassandra_group ({{ cassandra_group }}, a group
-          name): the account the Cassandra service runs as. cassandra_config_owner ({{ cassandra_config_owner }}) and
+          name): the account the Cassandra service runs as. cassandra_config_user ({{ cassandra_config_user }}) and
           cassandra_config_group ({{ cassandra_config_group }}) must exist.
-          {{ cassandra_config_user_groups.stderr }} {{ cassandra_config_file_account.stderr }}
+          {{ cassandra_config_service_groups.stderr }} {{ cassandra_config_file_account.stderr }}
 
     # Templates come from the stock files of one release per series: a later
     # release may accept settings they don't have (cassandra_extra_settings)
@@ -529,7 +529,7 @@
       ansible.builtin.template:
         src: "{{ _cassandra_config_series }}/{{ cassandra_config_file }}.j2"
         dest: "{{ cassandra_conf_dir }}/{{ cassandra_config_file }}"
-        owner: "{{ cassandra_config_owner }}"
+        owner: "{{ cassandra_config_user }}"
         group: "{{ cassandra_config_group }}"
         mode: "{{ cassandra_config_mode }}"
         backup: "{{ cassandra_config_backup }}"

@@ -1,0 +1,2 @@
+trivial:
+  - cassandra_config - rename the unreleased ``cassandra_config_owner`` to ``cassandra_config_user``, like ``cassandra_user`` and ``cassandra_config_group``.

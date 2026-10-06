@@ -44,7 +44,7 @@ Cassandra: when it changed files of a running node, it says so.
 Values of keys named like `*password*` or `*secret*` are shown as `****` in
 that diff, and Ansible's own `--diff` is off for these files. The files are
 written owned by root, group `cassandra_group`, mode `0640`
-(`cassandra_config_owner`, `cassandra_config_group`, `cassandra_config_mode`):
+(`cassandra_config_user`, `cassandra_config_group`, `cassandra_config_mode`):
 Cassandra reads them but cannot rewrite them, and `cassandra.yaml` may hold
 keystore passwords.
 
@@ -97,7 +97,7 @@ Role Variables
   directories are left as they are), and `cassandra_group` is the group of
   the config files. The role stops before writing anything when the account
   does not exist or is not in that group (a group name, not a gid), or when
-  `cassandra_config_owner` or `cassandra_config_group` does not exist.
+  `cassandra_config_user` or `cassandra_config_group` does not exist.
   Other roles of the collection are meant to use the same names.
 * `cassandra_data_file_directories`: `data_file_directories`, one per disk
   (JBOD). Defaults to `cassandra_data_dir` alone, which should stay first.

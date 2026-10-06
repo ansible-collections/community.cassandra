@@ -120,7 +120,7 @@ def owners(tasks):
             yield from owners(t.get(section, []))
 
 
-ALLOWED = {"owner": {"{{ cassandra_user }}", "{{ cassandra_config_owner }}"},
+ALLOWED = {"owner": {"{{ cassandra_user }}", "{{ cassandra_config_user }}"},
            "group": {"{{ cassandra_group }}", "{{ cassandra_config_group }}"}}
 
 
@@ -160,7 +160,7 @@ def test_owners_follow_the_service_account():
 def test_account_assert(user_rc, groups, file_rc, ok):
     that = task("Assert the accounts exist")["ansible.builtin.assert"]["that"]
     variables = dict(cassandra_group="cassandra",
-                     cassandra_config_user_groups={"rc": user_rc, "stdout": groups},
+                     cassandra_config_service_groups={"rc": user_rc, "stdout": groups},
                      cassandra_config_file_account={"rc": file_rc})
     assert all(render("{{ %s }}" % cond, **variables) for cond in that) is ok
 
