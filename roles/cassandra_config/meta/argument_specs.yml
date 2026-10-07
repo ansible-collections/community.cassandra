@@ -1119,7 +1119,7 @@ argument_specs:
         - Also send the logs to stdout (the C(STDOUT) appender of C(logback.xml)).
           Under systemd that is a second copy of C(system.log) in journald; JVM
           errors before logback starts go to stdout either way.
-      cassandra_config_owner:
+      cassandra_config_user:
         type: str
         default: root
         description:
